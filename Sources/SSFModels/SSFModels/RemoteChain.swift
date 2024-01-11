@@ -28,10 +28,16 @@ public struct XcmChain: Codable, Equatable {
 
 public struct XcmAvailableDestination: Codable, Hashable {
     public let chainId: ChainModel.Id
+    public let bridgeParachainId: String?
     public let assets: [XcmAvailableAsset]
     
-    public init(chainId: ChainModel.Id, assets: [XcmAvailableAsset]) {
+    public init(
+        chainId: ChainModel.Id,
+        bridgeParachainId: String?,
+        assets: [XcmAvailableAsset]
+    ) {
         self.chainId = chainId
+        self.bridgeParachainId = bridgeParachainId
         self.assets = assets
     }
 }

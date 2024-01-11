@@ -5,13 +5,6 @@ import SSFModels
 import SSFUtils
 
 public protocol AccountRepositoryFactoryProtocol {
-    // TODO: remove
-    @available(*, deprecated, message: "Use createMetaAccountRepository(for filter:, sortDescriptors:) instead")
-    func createRepository() -> AnyDataProviderRepository<MetaAccountModel>
-
-    // TODO: remove
-    func createAccountRepository(for networkType: SNAddressType) -> AnyDataProviderRepository<MetaAccountModel>
-
     func createMetaAccountRepository(
         for filter: NSPredicate?,
         sortDescriptors: [NSSortDescriptor]
@@ -28,17 +21,6 @@ public final class AccountRepositoryFactory: AccountRepositoryFactoryProtocol {
 
     public init(storageFacade: StorageFacadeProtocol) {
         self.storageFacade = storageFacade
-    }
-
-    public func createRepository() -> AnyDataProviderRepository<MetaAccountModel> {
-        Self.createRepository(for: storageFacade)
-    }
-
-    // TODO: remove
-    public func createAccountRepository(
-        for _: SNAddressType
-    ) -> AnyDataProviderRepository<MetaAccountModel> {
-        Self.createRepository(for: storageFacade)
     }
 
     public func createMetaAccountRepository(

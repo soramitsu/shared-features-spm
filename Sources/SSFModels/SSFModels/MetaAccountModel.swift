@@ -23,28 +23,32 @@ public struct MetaAccountModel: Equatable, Codable, Identifiable {
     public let canExportEthereumMnemonic: Bool
     public let unusedChainIds: [String]?
     public let selectedCurrency: Currency
-    public let chainIdForFilter: ChainModel.Id?
+    public let networkManagmentFilter: String?
     public let assetsVisibility: [AssetVisibility]
     public let zeroBalanceAssetsHidden: Bool
     public let hasBackup: Bool
+    public let favouriteChainIds: [ChainModel.Id]
     
-    public init(metaId: MetaAccountId, 
-         name: String,
-         substrateAccountId: Data, 
-         substrateCryptoType: UInt8,
-         substratePublicKey: Data,
-         ethereumAddress: Data?,
-         ethereumPublicKey: Data?,
-         chainAccounts: Set<ChainAccountModel>,
-         assetKeysOrder: [String]?,
-         assetFilterOptions: [FilterOption],
-         canExportEthereumMnemonic: Bool,
-         unusedChainIds: [String]?,
-         selectedCurrency: Currency,
-         chainIdForFilter: ChainModel.Id?,
-         assetsVisibility: [AssetVisibility],
-         zeroBalanceAssetsHidden: Bool,
-         hasBackup: Bool) {
+    public init(
+        metaId: MetaAccountId,
+        name: String,
+        substrateAccountId: Data,
+        substrateCryptoType: UInt8,
+        substratePublicKey: Data,
+        ethereumAddress: Data?,
+        ethereumPublicKey: Data?,
+        chainAccounts: Set<ChainAccountModel>,
+        assetKeysOrder: [String]?,
+        assetFilterOptions: [FilterOption],
+        canExportEthereumMnemonic: Bool,
+        unusedChainIds: [String]?,
+        selectedCurrency: Currency,
+        networkManagmentFilter: ChainModel.Id?,
+        assetsVisibility: [AssetVisibility],
+        zeroBalanceAssetsHidden: Bool,
+        hasBackup: Bool,
+        favouriteChainIds: [ChainModel.Id]
+    ) {
         self.metaId = metaId
         self.name = name
         self.substrateAccountId = substrateAccountId
@@ -58,10 +62,11 @@ public struct MetaAccountModel: Equatable, Codable, Identifiable {
         self.canExportEthereumMnemonic = canExportEthereumMnemonic
         self.unusedChainIds = unusedChainIds
         self.selectedCurrency = selectedCurrency
-        self.chainIdForFilter = chainIdForFilter
+        self.networkManagmentFilter = networkManagmentFilter
         self.assetsVisibility = assetsVisibility
         self.zeroBalanceAssetsHidden = zeroBalanceAssetsHidden
         self.hasBackup = hasBackup
+        self.favouriteChainIds = favouriteChainIds
     }
 }
 
@@ -93,14 +98,15 @@ extension MetaAccountModel {
             canExportEthereumMnemonic: canExportEthereumMnemonic,
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
-            chainIdForFilter: chainIdForFilter,
+            networkManagmentFilter: networkManagmentFilter,
             assetsVisibility: assetsVisibility,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
-            hasBackup: hasBackup
+            hasBackup: hasBackup,
+            favouriteChainIds: favouriteChainIds
         )
     }
 
-    func replacingEthereumAddress(_ newEthereumAddress: Data?) -> MetaAccountModel {
+    public func replacingEthereumAddress(_ newEthereumAddress: Data?) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -115,14 +121,15 @@ extension MetaAccountModel {
             canExportEthereumMnemonic: canExportEthereumMnemonic,
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
-            chainIdForFilter: chainIdForFilter,
+            networkManagmentFilter: networkManagmentFilter,
             assetsVisibility: assetsVisibility,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
-            hasBackup: hasBackup
+            hasBackup: hasBackup,
+            favouriteChainIds: favouriteChainIds
         )
     }
 
-    func replacingEthereumPublicKey(_ newEthereumPublicKey: Data?) -> MetaAccountModel {
+    public func replacingEthereumPublicKey(_ newEthereumPublicKey: Data?) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -137,14 +144,15 @@ extension MetaAccountModel {
             canExportEthereumMnemonic: canExportEthereumMnemonic,
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
-            chainIdForFilter: chainIdForFilter,
+            networkManagmentFilter: networkManagmentFilter,
             assetsVisibility: assetsVisibility,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
-            hasBackup: hasBackup
+            hasBackup: hasBackup,
+            favouriteChainIds: favouriteChainIds
         )
     }
 
-    func replacingName(_ walletName: String) -> MetaAccountModel {
+    public func replacingName(_ walletName: String) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: walletName,
@@ -159,14 +167,15 @@ extension MetaAccountModel {
             canExportEthereumMnemonic: canExportEthereumMnemonic,
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
-            chainIdForFilter: chainIdForFilter,
+            networkManagmentFilter: networkManagmentFilter,
             assetsVisibility: assetsVisibility,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
-            hasBackup: hasBackup
+            hasBackup: hasBackup,
+            favouriteChainIds: favouriteChainIds
         )
     }
 
-    func replacingAssetKeysOrder(_ newAssetKeysOrder: [String]) -> MetaAccountModel {
+    public func replacingAssetKeysOrder(_ newAssetKeysOrder: [String]) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -181,14 +190,15 @@ extension MetaAccountModel {
             canExportEthereumMnemonic: canExportEthereumMnemonic,
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
-            chainIdForFilter: chainIdForFilter,
+            networkManagmentFilter: networkManagmentFilter,
             assetsVisibility: assetsVisibility,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
-            hasBackup: hasBackup
+            hasBackup: hasBackup,
+            favouriteChainIds: favouriteChainIds
         )
     }
 
-    func replacingUnusedChainIds(_ newUnusedChainIds: [String]) -> MetaAccountModel {
+    public func replacingUnusedChainIds(_ newUnusedChainIds: [String]) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -203,14 +213,15 @@ extension MetaAccountModel {
             canExportEthereumMnemonic: canExportEthereumMnemonic,
             unusedChainIds: newUnusedChainIds,
             selectedCurrency: selectedCurrency,
-            chainIdForFilter: chainIdForFilter,
+            networkManagmentFilter: networkManagmentFilter,
             assetsVisibility: assetsVisibility,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
-            hasBackup: hasBackup
+            hasBackup: hasBackup,
+            favouriteChainIds: favouriteChainIds
         )
     }
 
-    func replacingCurrency(_ currency: Currency) -> MetaAccountModel {
+    public func replacingCurrency(_ currency: Currency) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -225,14 +236,15 @@ extension MetaAccountModel {
             canExportEthereumMnemonic: canExportEthereumMnemonic,
             unusedChainIds: unusedChainIds,
             selectedCurrency: currency,
-            chainIdForFilter: chainIdForFilter,
+            networkManagmentFilter: networkManagmentFilter,
             assetsVisibility: assetsVisibility,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
-            hasBackup: hasBackup
+            hasBackup: hasBackup,
+            favouriteChainIds: favouriteChainIds
         )
     }
 
-    func replacingAssetsFilterOptions(_ options: [FilterOption]) -> MetaAccountModel {
+    public func replacingAssetsFilterOptions(_ options: [FilterOption]) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -247,14 +259,15 @@ extension MetaAccountModel {
             canExportEthereumMnemonic: canExportEthereumMnemonic,
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
-            chainIdForFilter: chainIdForFilter,
+            networkManagmentFilter: networkManagmentFilter,
             assetsVisibility: assetsVisibility,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
-            hasBackup: hasBackup
+            hasBackup: hasBackup,
+            favouriteChainIds: favouriteChainIds
         )
     }
 
-    func replacingChainIdForFilter(_ chainId: ChainModel.Id?) -> MetaAccountModel {
+    public func replacingNetworkManagmentFilter(_ identifire: String) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -269,10 +282,11 @@ extension MetaAccountModel {
             canExportEthereumMnemonic: canExportEthereumMnemonic,
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
-            chainIdForFilter: chainId,
+            networkManagmentFilter: identifire,
             assetsVisibility: assetsVisibility,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
-            hasBackup: hasBackup
+            hasBackup: hasBackup,
+            favouriteChainIds: favouriteChainIds
         )
     }
 
@@ -291,14 +305,15 @@ extension MetaAccountModel {
             canExportEthereumMnemonic: canExportEthereumMnemonic,
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
-            chainIdForFilter: chainIdForFilter,
+            networkManagmentFilter: networkManagmentFilter,
             assetsVisibility: newAssetsVisibility,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
-            hasBackup: hasBackup
+            hasBackup: hasBackup,
+            favouriteChainIds: favouriteChainIds
         )
     }
 
-    func replacingZeroBalanceAssetsHidden(_ newZeroBalanceAssetsHidden: Bool) -> MetaAccountModel {
+    public func replacingZeroBalanceAssetsHidden(_ newZeroBalanceAssetsHidden: Bool) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -313,14 +328,15 @@ extension MetaAccountModel {
             canExportEthereumMnemonic: canExportEthereumMnemonic,
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
-            chainIdForFilter: chainIdForFilter,
+            networkManagmentFilter: networkManagmentFilter,
             assetsVisibility: assetsVisibility,
             zeroBalanceAssetsHidden: newZeroBalanceAssetsHidden,
-            hasBackup: hasBackup
+            hasBackup: hasBackup,
+            favouriteChainIds: favouriteChainIds
         )
     }
 
-    func replacingIsBackuped(_ isBackuped: Bool) -> MetaAccountModel {
+    public func replacingIsBackuped(_ isBackuped: Bool) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -335,10 +351,34 @@ extension MetaAccountModel {
             canExportEthereumMnemonic: canExportEthereumMnemonic,
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
-            chainIdForFilter: chainIdForFilter,
+            networkManagmentFilter: networkManagmentFilter,
             assetsVisibility: assetsVisibility,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
-            hasBackup: isBackuped
+            hasBackup: isBackuped,
+            favouriteChainIds: favouriteChainIds
+        )
+    }
+
+    public func replacingFavoutites(_ favouriteChainIds: [ChainModel.Id]) -> MetaAccountModel {
+        MetaAccountModel(
+            metaId: metaId,
+            name: name,
+            substrateAccountId: substrateAccountId,
+            substrateCryptoType: substrateCryptoType,
+            substratePublicKey: substratePublicKey,
+            ethereumAddress: ethereumAddress,
+            ethereumPublicKey: ethereumPublicKey,
+            chainAccounts: chainAccounts,
+            assetKeysOrder: assetKeysOrder,
+            assetFilterOptions: assetFilterOptions,
+            canExportEthereumMnemonic: canExportEthereumMnemonic,
+            unusedChainIds: unusedChainIds,
+            selectedCurrency: selectedCurrency,
+            networkManagmentFilter: networkManagmentFilter,
+            assetsVisibility: assetsVisibility,
+            zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
+            hasBackup: hasBackup,
+            favouriteChainIds: favouriteChainIds
         )
     }
 }

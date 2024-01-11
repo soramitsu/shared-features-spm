@@ -11,6 +11,7 @@ enum MnemonicExportServiceError: Error {
     case missingMnemomic
 }
 
+//sourcery: AutoMockable
 protocol MnemonicExportServiceProtocol: AnyObject {
     func fetchExportDataFor(wallet: MetaAccountModel, accounts: [ChainAccountInfo]) -> [MnemonicExportData]
     func fetchExportDataFor(address: String, chain: ChainModel, wallet: MetaAccountModel) throws -> MnemonicExportData

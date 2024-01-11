@@ -2,6 +2,7 @@ import Foundation
 import SSFModels
 import SoraKeystore
 
+//sourcery: AutoMockable
 protocol SeedExportDataFactoryProtocol {
     func createSeedExportData(metaId: MetaAccountId, accountId: AccountId?, cryptoType: CryptoType, chain: ChainModel) throws -> SeedExportData
 }

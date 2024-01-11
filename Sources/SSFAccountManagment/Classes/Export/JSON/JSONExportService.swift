@@ -13,7 +13,8 @@ enum JSONExportServiceError: Error {
     case missingJson
 }
 
-protocol JSONExportServiceProtocol: AnyObject {
+//sourcery: AutoMockable
+protocol JSONExportServiceProtocol: Actor {
     func export(
         wallet: MetaAccountModel,
         accounts: [ChainAccountInfo],
@@ -28,7 +29,7 @@ protocol JSONExportServiceProtocol: AnyObject {
     ) async throws -> JSONExportData 
 }
 
-final class JSONExportService {
+actor JSONExportService {
 
     private let genesisService: GenesisBlockHashWorkerProtocol
     private let factory: JSONExportDataFactoryProtocol

@@ -3,7 +3,8 @@ import Foundation
 import SSFUtils
 import SSFModels
 
-public protocol ChainAssetFetchingServiceProtocol {
+//sourcery: AutoMockable
+public protocol ChainAssetFetchingServiceProtocol: Actor {
     func fetch(filters: [AssetFilter], sorts: [AssetSort], forceUpdate: Bool) async -> [ChainAsset]
 }
 
@@ -32,14 +33,12 @@ public enum AssetSortOrder {
     case descending
 }
 
-public final class ChainAssetsFetchingService {
+public actor ChainAssetsFetchingService {
 
-    private let meta: MetaAccountModel
     private var allChainAssets: [ChainAsset] = []
     private let chainAssetsFetcher: ChainAssetsFetchWorkerProtocol
 
-    init(meta: MetaAccountModel, chainAssetsFetcher: ChainAssetsFetchWorkerProtocol) {
-        self.meta = meta
+    init(chainAssetsFetcher: ChainAssetsFetchWorkerProtocol) {
         self.chainAssetsFetcher = chainAssetsFetcher
     }
 }

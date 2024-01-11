@@ -1,10 +1,11 @@
 import Foundation
 import GoogleSignIn
+import GoogleAPIClientForRESTCore
+import GoogleAPIClientForREST_Drive
 import TweetNacl
 import IrohaCrypto
 import SSFModels
 import SSFUtils
-import GoogleAPIClientForREST_Drive
 
 public struct KeystoreConstants {
     public static let nonceLength = 24
@@ -190,16 +191,18 @@ extension CloudStorageService: CloudStorageServiceProtocol {
             return
         }
 
-        singInProvider.signIn(withPresenting: uiDelegate, hint: nil, additionalScopes: [kGTLRAuthScopeDriveAppdata])  { result, error in
-            if error != nil {
-                completion?(.notAuthorized)
-                return
-            }
+        DispatchQueue.main.async { [weak self] in
+            self?.singInProvider.signIn(withPresenting: uiDelegate, hint: nil, additionalScopes: [kGTLRAuthScopeDriveAppdata])  { result, error in
+                if error != nil {
+                    completion?(.notAuthorized)
+                    return
+                }
 
-            let service = GTLRDriveService()
-            service.authorizer = result?.user.fetcherAuthorizer
-            self.googleDriveService = service
-            completion?(.authorized)
+                let service = GTLRDriveService()
+                service.authorizer = result?.user.fetcherAuthorizer
+                self?.googleDriveService = service
+                completion?(.authorized)
+            }
         }
     }
     

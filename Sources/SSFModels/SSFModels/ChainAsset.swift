@@ -12,7 +12,7 @@ public struct ChainAsset: Equatable, Hashable {
         self.asset = asset
     }
 
-    public var chainAssetType: ChainAssetType {
+    public var chainAssetType: SubstrateAssetType? {
         asset.type
     }
 
@@ -90,6 +90,13 @@ public struct ChainAsset: Equatable, Hashable {
                 return nil
             }
             return CurrencyId.token2(id: id)
+        case .xcm:
+            guard let id = asset.currencyId else {
+                return nil
+            }
+            return CurrencyId.xcm(id: id)
+        case .none:
+            return nil
         }
     }
 

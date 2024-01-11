@@ -13,18 +13,22 @@ public final class ChainConnectionAutoBalance: ChainConnectionProtocol {
 
     public var isActive: Bool = true
     
+    private let chainId: ChainModel.Id
     private let nodes: [URL]
     private let selectedNode: URL?
     private lazy var connectionFactory: ConnectionFactoryProtocol = {
         ConnectionFactory()
     }()
     
+    private lazy var connectionIssuesCenter = NetworkIssuesCenterImpl.shared
+    
     private weak var currentConnection: ChainConnection?
     private var failedUrls: Set<URL?> = []
     
-    public init(nodes: [URL], selectedNode: URL? = nil) {
+    public init(nodes: [URL], selectedNode: URL? = nil, chainId: ChainModel.Id) {
         self.nodes = nodes
         self.selectedNode = selectedNode
+        self.chainId = chainId
     }
     
     // MARK: - Public methods
@@ -99,5 +103,7 @@ extension ChainConnectionAutoBalance: WebSocketEngineDelegate {
         default:
             isActive = true
         }
+        
+        connectionIssuesCenter.handle(chain: chainId, state: newState)
     }
 }

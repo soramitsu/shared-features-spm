@@ -1,7 +1,6 @@
 import Foundation
 
 public struct AssetModel: Equatable, Codable, Hashable {
-    // swiftlint:disable:next type_name
     public typealias Id = String
     public typealias PriceId = String
 
@@ -10,7 +9,6 @@ public struct AssetModel: Equatable, Codable, Hashable {
     public let symbol: String
     public let precision: UInt16
     public let icon: URL?
-    public let priceId: PriceId?
     public let price: Decimal?
     public let fiatDayChange: Decimal?
     public let currencyId: String?
@@ -20,8 +18,20 @@ public struct AssetModel: Equatable, Codable, Hashable {
     public let isNative: Bool
     public let staking: RawStakingType?
     public let purchaseProviders: [PurchaseProvider]?
-    public let type: ChainAssetType
-    public let smartContract: String?
+    public let type: SubstrateAssetType?
+    public let ethereumType: EthereumAssetType?
+    public let priceProvider: PriceProvider?
+    
+    public let coingeckoPriceId: PriceId?
+    public var priceId: PriceId? {
+        get {
+            if priceProvider?.type == .chainlink {
+                return priceProvider?.id
+            } else {
+                return coingeckoPriceId
+            }
+        }
+    }
 
     public var symbolUppercased: String {
         symbol.uppercased()
@@ -33,7 +43,6 @@ public struct AssetModel: Equatable, Codable, Hashable {
         symbol: String,
         precision: UInt16,
         icon: URL?,
-        priceId: AssetModel.PriceId?,
         price: Decimal?,
         fiatDayChange: Decimal?,
         currencyId: String?,
@@ -43,15 +52,16 @@ public struct AssetModel: Equatable, Codable, Hashable {
         isNative: Bool,
         staking: RawStakingType?,
         purchaseProviders: [PurchaseProvider]?,
-        type: ChainAssetType,
-        smartContract: String?
+        type: SubstrateAssetType?,
+        ethereumType: EthereumAssetType?,
+        priceProvider: PriceProvider?,
+        coingeckoPriceId: PriceId?
     ) {
         self.id = id
         self.symbol = symbol
         self.name = name
         self.precision = precision
         self.icon = icon
-        self.priceId = priceId
         self.price = price
         self.fiatDayChange = fiatDayChange
         self.currencyId = currencyId
@@ -62,7 +72,9 @@ public struct AssetModel: Equatable, Codable, Hashable {
         self.staking = staking
         self.purchaseProviders = purchaseProviders
         self.type = type
-        self.smartContract = smartContract
+        self.ethereumType = ethereumType
+        self.priceProvider = priceProvider
+        self.coingeckoPriceId = coingeckoPriceId
     }
 
     public init(from decoder: Decoder) throws {
@@ -73,7 +85,6 @@ public struct AssetModel: Equatable, Codable, Hashable {
         symbol = try container.decode(String.self, forKey: .symbol)
         precision = try container.decode(UInt16.self, forKey: .precision)
         icon = try? container.decode(URL?.self, forKey: .icon)
-        priceId = try? container.decode(String?.self, forKey: .priceId)
         currencyId = try? container.decode(String?.self, forKey: .currencyId)
         existentialDeposit = try? container.decode(String?.self, forKey: .existentialDeposit)
         color = try? container.decode(String.self, forKey: .color)
@@ -81,12 +92,17 @@ public struct AssetModel: Equatable, Codable, Hashable {
         isNative = (try? container.decode(Bool?.self, forKey: .isNative)) ?? false
         staking = try? container.decode(RawStakingType.self, forKey: .staking)
         purchaseProviders = try? container.decode([PurchaseProvider]?.self, forKey: .purchaseProviders)
-        type = try container.decode(ChainAssetType.self, forKey: .type)
-        smartContract = try? container.decode(String?.self, forKey: .smartContract)
+        type = try? container.decode(SubstrateAssetType?.self, forKey: .type)
+        ethereumType = try? container.decode(EthereumAssetType?.self, forKey: .ethereumType)
+
+        coingeckoPriceId = try? container.decode(String?.self, forKey: .priceId)
+        priceProvider = try container.decodeIfPresent(PriceProvider.self, forKey: .priceProvider)
 
         price = nil
         fiatDayChange = nil
     }
+    
+    public func encode(to encoder: Encoder) throws {}
 
     public func replacingPrice(_ priceData: PriceData) -> AssetModel {
         AssetModel(
@@ -95,7 +111,6 @@ public struct AssetModel: Equatable, Codable, Hashable {
             symbol: symbol,
             precision: precision,
             icon: icon,
-            priceId: priceId,
             price: Decimal(string: priceData.price),
             fiatDayChange: priceData.fiatDayChange,
             currencyId: currencyId,
@@ -106,7 +121,9 @@ public struct AssetModel: Equatable, Codable, Hashable {
             staking: staking,
             purchaseProviders: purchaseProviders,
             type: type,
-            smartContract: smartContract
+            ethereumType: ethereumType,
+            priceProvider: priceProvider,
+            coingeckoPriceId: coingeckoPriceId
         )
     }
 
@@ -115,7 +132,6 @@ public struct AssetModel: Equatable, Codable, Hashable {
             lhs.name == rhs.name &&
             lhs.precision == rhs.precision &&
             lhs.icon == rhs.icon &&
-            lhs.priceId == rhs.priceId &&
             lhs.symbol == rhs.symbol &&
             lhs.currencyId == rhs.currencyId &&
             lhs.existentialDeposit == rhs.existentialDeposit &&
@@ -125,52 +141,32 @@ public struct AssetModel: Equatable, Codable, Hashable {
             lhs.staking == rhs.staking &&
             lhs.purchaseProviders == rhs.purchaseProviders &&
             lhs.type == rhs.type &&
-            lhs.smartContract == rhs.smartContract
+            lhs.ethereumType == rhs.ethereumType &&
+        lhs.priceProvider == rhs.priceProvider
     }
     
     public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
-    
-    public var displayInfo: AssetBalanceDisplayInfo {
-        AssetBalanceDisplayInfo(
-            displayPrecision: 5,
-            assetPrecision: Int16(bitPattern: precision),
-            symbol: symbolUppercased,
-            symbolValueSeparator: " ",
-            symbolPosition: .suffix,
-            icon: icon
-        )
+}
+
+extension AssetModel {
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case symbol
+        case icon
+        case priceId
+        case currencyId
+        case existentialDeposit
+        case color
+        case isUtility
+        case isNative
+        case staking
+        case purchaseProviders
+        case type
+        case ethereumType
+        case priceProvider
+        case precision
     }
 }
-
-public enum TokenSymbolPosition {
-    case prefix
-    case suffix
-}
-
-public struct AssetBalanceDisplayInfo: Equatable {
-    public let displayPrecision: UInt16
-    public let assetPrecision: Int16
-    public let symbol: String
-    public let symbolValueSeparator: String
-    public let symbolPosition: TokenSymbolPosition
-    public let icon: URL?
-
-    public init(
-        displayPrecision: UInt16,
-        assetPrecision: Int16,
-        symbol: String,
-        symbolValueSeparator: String,
-        symbolPosition: TokenSymbolPosition,
-        icon: URL?
-    ) {
-        self.displayPrecision = displayPrecision
-        self.assetPrecision = assetPrecision
-        self.symbol = symbol
-        self.symbolValueSeparator = symbolValueSeparator
-        self.symbolPosition = symbolPosition
-        self.icon = icon
-    }
-}
-

@@ -3,6 +3,7 @@ import RobinHood
 import SSFModels
 import SSFUtils
 
+//sourcery: AutoMockable
 protocol ChainAssetsFetchWorkerProtocol {
     func getChainAssetsModels() async -> [ChainAsset]
 }

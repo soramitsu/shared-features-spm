@@ -1,6 +1,7 @@
 import Foundation
 import IrohaCrypto
 
+//sourcery: AutoMockable
 public protocol MnemonicCreator {
     func randomMnemonic(strength: IRMnemonicStrength) throws -> IRMnemonicProtocol
     func mnemonic(fromList mnemonicPhrase: String) throws -> IRMnemonicProtocol

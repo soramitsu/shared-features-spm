@@ -1,7 +1,7 @@
 import Foundation
 import RobinHood
 
-public enum ChainBaseType {
+public enum ChainBaseType: String {
     case substrate
     case ethereum
 }
@@ -13,11 +13,16 @@ public enum BlockExplorerType: String, Codable {
     case sora
     case alchemy
     case etherscan
+    case reef
+    case oklink
+    case zeta
 }
 
 public final class ChainModel: Codable, Identifiable {
     public typealias Id = String
-
+    
+    public var identifier: String { chainId }
+    public let rank: UInt16?
     public let disabled: Bool
     public let chainId: Id
     public let parentId: Id?
@@ -34,8 +39,9 @@ public final class ChainModel: Codable, Identifiable {
     public var selectedNode: ChainNodeModel?
     public let customNodes: Set<ChainNodeModel>?
     public let iosMinAppVersion: String?
-
+    
     public init(
+        rank: UInt16?,
         disabled: Bool,
         chainId: Id,
         parentId: Id? = nil,
@@ -53,6 +59,7 @@ public final class ChainModel: Codable, Identifiable {
         customNodes: Set<ChainNodeModel>? = nil,
         iosMinAppVersion: String?
     ) {
+        self.rank = rank
         self.disabled = disabled
         self.chainId = chainId
         self.parentId = parentId
@@ -71,17 +78,19 @@ public final class ChainModel: Codable, Identifiable {
         self.iosMinAppVersion = iosMinAppVersion
     }
     
-    public var identifier: String { chainId }
-    
     public var isRelaychain: Bool {
         parentId == nil
     }
-
+    
     public var isEthereumBased: Bool {
         options?.contains(.ethereumBased) == true || options?.contains(.ethereum) == true
     }
     public var isEthereum: Bool {
-       options?.contains(.ethereum) == true
+        options?.contains(.ethereum) == true
+    }
+    
+    public var supportsNft: Bool {
+        options?.contains(.nft) == true
     }
     
     public var chainFormat: SFChainFormat {
@@ -91,35 +100,39 @@ public final class ChainModel: Codable, Identifiable {
             return .sfSubstrate(addressPrefix)
         }
     }
-
+    
     public var isTestnet: Bool {
         options?.contains(.testnet) ?? false
     }
-
+    
     public var isTipRequired: Bool {
         options?.contains(.tipRequired) ?? false
     }
-
+    
     public var isPolkadot: Bool {
         knownChainEquivalent == .polkadot
     }
-
+    
     public var isKusama: Bool {
         knownChainEquivalent == .kusama
     }
-
+    
     public var isPolkadotOrKusama: Bool {
         isPolkadot || isKusama
     }
-
+    
     public var isWestend: Bool {
         knownChainEquivalent == .westend
+    }
+    
+    public var isRococo: Bool {
+        knownChainEquivalent == .rococo
     }
 
     public var isSora: Bool {
         name.lowercased() == "sora mainnet" || name.lowercased() == "sora test"
     }
-
+    
     public var isEquilibrium: Bool {
         knownChainEquivalent == .equilibrium
     }
@@ -127,15 +140,19 @@ public final class ChainModel: Codable, Identifiable {
     public var isTernoa: Bool {
         knownChainEquivalent == .ternoa
     }
-
-    public var isUtilityFeePayment: Bool {
-        isSora || isEquilibrium
+    
+    public var isReef: Bool {
+        knownChainEquivalent == .reef || knownChainEquivalent == .scuba
     }
-
+    
+    public var isUtilityFeePayment: Bool {
+        options?.contains(where: { $0 == .utilityFeePayment }) == true
+    }
+    
     public var hasStakingRewardHistory: Bool {
         isPolkadotOrKusama || isWestend
     }
-
+    
     public var hasCrowdloans: Bool {
         options?.contains(.crowdloans) ?? false
     }
@@ -148,11 +165,11 @@ public final class ChainModel: Codable, Identifiable {
         if isEthereum { return .ethereum }
         return .substrate
     }
-
+    
     public func utilityAssets() -> Set<AssetModel> {
         assets.filter { $0.isUtility }
     }
-
+    
     public var erasPerDay: UInt32 {
         let oldChainModel = Chain(rawValue: name)
         switch oldChainModel {
@@ -160,18 +177,19 @@ public final class ChainModel: Codable, Identifiable {
         case .moonriver, .moonbaseAlpha: return 12
         case .polkadot: return 1
         case .kusama, .westend, .rococo: return 4
+        case .soraMain, .soraTest: return 4
         default: return 1 // We have staking only for above chains
         }
     }
-
+    
     public var emptyURL: URL {
         URL(string: "")!
     }
-
+    
     public var accountIdLenght: Int {
         isEthereumBased ? EthereumConstants.accountIdLength : SubstrateConstants.accountIdLength
     }
-
+    
     public var chainAssets: [ChainAsset] {
         assets.map {
             ChainAsset(chain: self, asset: $0)
@@ -191,7 +209,7 @@ public final class ChainModel: Codable, Identifiable {
             return false
         }
     }
-
+    
     public func utilityChainAssets() -> [ChainAsset] {
         assets.filter { $0.isUtility }.map {
             ChainAsset(chain: self, asset: $0)
@@ -199,13 +217,13 @@ public final class ChainModel: Codable, Identifiable {
     }
     
     public func seedTag(metaId: MetaAccountId, accountId: AccountId? =  nil) -> String {
-        isEthereumBased 
+        isEthereumBased
         ? KeystoreTagV2.ethereumSecretKeyTagForMetaId(metaId, accountId: accountId)
         : KeystoreTagV2.substrateSeedTagForMetaId(metaId, accountId: accountId)
     }
     
     public func keystoreTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
-        isEthereumBased 
+        isEthereumBased
         ? KeystoreTagV2.ethereumSecretKeyTagForMetaId(metaId, accountId: accountId)
         : KeystoreTagV2.substrateSecretKeyTagForMetaId(metaId, accountId: accountId)
     }
@@ -216,8 +234,10 @@ public final class ChainModel: Codable, Identifiable {
         : KeystoreTagV2.substrateDerivationTagForMetaId(metaId, accountId: accountId)
     }
 
+    
     public func replacingSelectedNode(_ node: ChainNodeModel?) -> ChainModel {
         ChainModel(
+            rank: rank,
             disabled: disabled,
             chainId: chainId,
             parentId: parentId,
@@ -236,9 +256,10 @@ public final class ChainModel: Codable, Identifiable {
             iosMinAppVersion: iosMinAppVersion
         )
     }
-
+    
     public func replacingCustomNodes(_ newCustomNodes: [ChainNodeModel]) -> ChainModel {
         ChainModel(
+            rank: rank,
             disabled: disabled,
             chainId: chainId,
             parentId: parentId,
@@ -261,21 +282,22 @@ public final class ChainModel: Codable, Identifiable {
 
 extension ChainModel: Hashable {
     public static func == (lhs: ChainModel, rhs: ChainModel) -> Bool {
-        lhs.chainId == rhs.chainId
-            && lhs.externalApi == rhs.externalApi
-            && lhs.assets == rhs.assets
-            && lhs.options == rhs.options
-            && lhs.types == rhs.types
-            && lhs.icon == rhs.icon
-            && lhs.name == rhs.name
-            && lhs.addressPrefix == rhs.addressPrefix
-            && lhs.nodes == rhs.nodes
-            && lhs.iosMinAppVersion == rhs.iosMinAppVersion
-            && lhs.selectedNode == rhs.selectedNode
-            && lhs.xcm == rhs.xcm
-            && lhs.disabled == rhs.disabled
+        lhs.rank == rhs.rank
+        && lhs.chainId == rhs.chainId
+        && lhs.externalApi == rhs.externalApi
+        && lhs.assets == rhs.assets
+        && lhs.options == rhs.options
+        && lhs.types == rhs.types
+        && lhs.icon == rhs.icon
+        && lhs.name == rhs.name
+        && lhs.addressPrefix == rhs.addressPrefix
+        && lhs.nodes == rhs.nodes
+        && lhs.iosMinAppVersion == rhs.iosMinAppVersion
+        && lhs.selectedNode == rhs.selectedNode
+        && lhs.xcm == rhs.xcm
+        && lhs.disabled == rhs.disabled
     }
-
+    
     public func hash(into hasher: inout Hasher) {
         hasher.combine(chainId)
     }
@@ -290,9 +312,12 @@ public enum ChainOptions: String, Codable {
     case poolStaking
     case polkaswap
     case ethereum
-
+    case nft
+    case utilityFeePayment
+    case chainlinkProvider
+    
     case unsupported
-
+    
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let rawValue = try container.decode(String.self)
@@ -314,7 +339,7 @@ extension ChainModel {
             self.overridesCommon = overridesCommon
         }
     }
-
+    
     public struct ExternalResource: Codable, Hashable {
         public let type: String
         public let url: URL
@@ -324,21 +349,21 @@ extension ChainModel {
             self.url = url
         }
     }
-
+    
     public struct BlockExplorer: Codable, Hashable {
         public let type: BlockExplorerType
         public let url: URL
-
+        
         public init?(type: String, url: URL) {
             guard let externalApiType = BlockExplorerType(rawValue: type) else {
                 return nil
             }
-
+            
             self.type = externalApiType
             self.url = url
         }
     }
-
+    
     public enum SubscanType: String, Codable, Hashable {
         case extrinsic
         case account
@@ -346,25 +371,26 @@ extension ChainModel {
         case tx
         case address
         case unknown
-
+        
         public init(from decoder: Decoder) throws {
             self = try SubscanType(rawValue: decoder.singleValueContainer().decode(RawValue.self)) ?? .unknown
         }
     }
-
+    
     public enum ExternalApiExplorerType: String, Codable {
         case subscan
         case polkascan
         case etherscan
+        case reef
         case unknown
-
+        
         public init(from decoder: Decoder) throws {
             self = try ExternalApiExplorerType(
                 rawValue: decoder.singleValueContainer().decode(RawValue.self)
             ) ?? .unknown
         }
     }
-
+    
     public struct ExternalApiExplorer: Codable, Hashable {
         public let type: ExternalApiExplorerType
         public let types: [SubscanType]
@@ -380,7 +406,7 @@ extension ChainModel {
             self.url = url
         }
     }
-
+    
     public struct ExternalApiSet: Codable, Equatable {
         public let staking: BlockExplorer?
         public let history: BlockExplorer?
@@ -405,31 +431,63 @@ extension ChainModel {
             lhs.crowdloans == rhs.crowdloans &&
             Set(lhs.explorers ?? []) == Set(rhs.explorers ?? [])
         }
-
+        
     }
-
+    
     public func polkascanAddressURL(_ address: String) -> URL? {
         guard let explorer = externalApi?.explorers?.first(where: { $0.type == .polkascan }) else {
             return nil
         }
-
+        
         return explorer.explorerUrl(for: address, type: .account)
     }
-
+    
     public func subscanAddressURL(_ address: String) -> URL? {
-        URL(string: "https://\(name.lowercased()).subscan.io/account/\(address)")
+        guard externalApi?.explorers?.contains(where: { $0.type == .subscan }) == true else {
+            return nil
+        }
+        
+        return URL(string: "https://\(name.lowercased()).subscan.io/account/\(address)")
     }
-
+    
     public func subscanExtrinsicUrl(_ extrinsicHash: String) -> URL? {
-        URL(string: "https://\(name.lowercased()).subscan.io/extrinsic/\(extrinsicHash)")
+        guard externalApi?.explorers?.contains(where: { $0.type == .subscan }) == true else {
+            return nil
+        }
+        
+        return URL(string: "https://\(name.lowercased()).subscan.io/extrinsic/\(extrinsicHash)")
     }
     
     public func etherscanAddressURL(_ address: String) -> URL? {
-        URL(string: "https://etherscan.io/address/\(address)")
+        guard externalApi?.explorers?.contains(where: { $0.type == .etherscan }) == true else {
+            return nil
+        }
+        
+        return URL(string: "https://etherscan.io/address/\(address)")
     }
     
     public func etherscanTransactionURL(_ hash: String) -> URL? {
-        URL(string: "https://etherscan.io/tx/\(hash)")
+        guard externalApi?.explorers?.contains(where: { $0.type == .etherscan }) == true else {
+            return nil
+        }
+        
+        return URL(string: "https://etherscan.io/tx/\(hash)")
+    }
+    
+    public func reefscanAddressURL(_ address: String) -> URL? {
+        guard externalApi?.explorers?.contains(where: { $0.type == .reef }) == true else {
+            return nil
+        }
+        
+        return URL(string: "https://reefscan.com/account/\(address)")
+    }
+    
+    public func reefscanTransactionURL(_ hash: String) -> URL? {
+        guard externalApi?.explorers?.contains(where: { $0.type == .reef }) == true else {
+            return nil
+        }
+        
+        return URL(string: "https://reefscan.com/extrinsic/\(hash)")
     }
 }
 
@@ -438,5 +496,14 @@ extension ChainModel.ExternalApiExplorer {
         let replaceType = url.replacingOccurrences(of: "{type}", with: type.rawValue)
         let replaceValue = replaceType.replacingOccurrences(of: "{value}", with: value)
         return URL(string: replaceValue)
+    }
+    
+    public var transactionType: ChainModel.SubscanType {
+        switch type {
+        case .etherscan:
+            return .tx
+        default:
+            return .extrinsic
+        }
     }
 }

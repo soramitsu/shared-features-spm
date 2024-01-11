@@ -6,6 +6,7 @@ import SSFModels
 
 public typealias SeedCreatorResult = (seed: Data, mnemonic: IRMnemonicProtocol)
 
+//sourcery: AutoMockable
 public protocol SeedCreator {
     func createSeed(
         derivationPath: String,

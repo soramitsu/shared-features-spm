@@ -1,5 +1,4 @@
 import Foundation
-import SSFLogger
 
 protocol Migrating {
     func migrate() throws
@@ -12,7 +11,5 @@ extension SubstrateStorageMigrator: Migrating {
         }
 
         performMigration()
-
-        Logger.shared.info("Db migration completed")
     }
 }

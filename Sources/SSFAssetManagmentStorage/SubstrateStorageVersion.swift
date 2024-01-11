@@ -1,6 +1,6 @@
 import Foundation
 
-enum SubstrateStorageVersion: String, CaseIterable {
+public enum SubstrateStorageVersion: String, CaseIterable {
     case version1 = "SubstrateDataModel"
     case version2 = "SubstrateDataModel_v2"
     case version3 = "SubstrateDataModel_v3"

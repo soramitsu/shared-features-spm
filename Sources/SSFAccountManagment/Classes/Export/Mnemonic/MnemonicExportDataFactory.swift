@@ -3,6 +3,7 @@ import SSFModels
 import SoraKeystore
 import SSFKeyPair
 
+//sourcery: AutoMockable
 protocol MnemonicExportDataFactoryProtocol {
     func createMnemonicExportData(
         metaId: MetaAccountId,

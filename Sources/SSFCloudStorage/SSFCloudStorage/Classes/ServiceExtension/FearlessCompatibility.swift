@@ -1,4 +1,6 @@
 import Foundation
+import GoogleAPIClientForRESTCore
+import GoogleAPIClientForREST_Drive
 import SSFUtils
 
 public enum FearlessCompatibilityError: Error {
@@ -141,7 +143,7 @@ extension CloudStorageService: FearlessCompatibilityProtocol {
             name: info.meta?.name,
             address: address,
             passphrase: password,
-            cryptoType: info.cryptoType.rawValue,
+            cryptoType: String(info.cryptoType.rawValue),
             backupAccountType: [.json],
             json: json
         )

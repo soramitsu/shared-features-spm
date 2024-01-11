@@ -8,6 +8,7 @@ enum SeedExportServiceError: Error {
     case missingAccount
 }
 
+//sourcery: AutoMockable
 protocol SeedExportServiceProtocol {
     func fetchExportDataFor(wallet: MetaAccountModel, accounts: [ChainAccountInfo]) -> [SeedExportData]
     func fetchExportDataFor(address: String, chain: ChainModel, wallet: MetaAccountModel) async throws -> SeedExportData

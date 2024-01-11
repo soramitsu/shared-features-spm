@@ -3,6 +3,7 @@ import RobinHood
 import SSFUtils
 import SSFExtrinsicKit
 
+//sourcery: AutoMockable
 protocol GenesisBlockHashWorkerProtocol {
     func getGenesisHash() async -> String?
 }

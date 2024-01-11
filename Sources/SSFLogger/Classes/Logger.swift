@@ -32,7 +32,7 @@ public extension LoggerProtocol {
 }
 
 public final class Logger {
-    public static let shared = Logger()
+    static let shared = Logger()
 
     let log = SwiftyBeaver.self
 

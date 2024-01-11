@@ -60,12 +60,12 @@ extension ChainRegistry: ChainRegistryProtocol {
         runtimeItem: RuntimeMetadataItemProtocol?
     ) async throws -> RuntimeProviderProtocol {
         let chainModel = try await chainSyncService.getChainModel(for: chainId)
-        let connection = try connectionPool.setupConnection(for: chainModel)
         
         let runtimeMetadataItem: RuntimeMetadataItemProtocol
         if let runtimeItem = runtimeItem {
             runtimeMetadataItem = runtimeItem
         } else {
+            let connection = try connectionPool.setupConnection(for: chainModel)
             runtimeMetadataItem = try await runtimeSyncService.register(chain: chainModel, with: connection)
         }
         let chainTypes = try await chainsTypesSyncService.getTypes(for: chainId)
@@ -83,12 +83,12 @@ extension ChainRegistry: ChainRegistryProtocol {
         runtimeItem: RuntimeMetadataItemProtocol?
     ) async throws -> RuntimeSnapshot {
         let chainModel = try await chainSyncService.getChainModel(for: chainId)
-        let connection = try connectionPool.setupConnection(for: chainModel)
         
         let runtimeMetadataItem: RuntimeMetadataItemProtocol
         if let runtimeItem = runtimeItem {
             runtimeMetadataItem = runtimeItem
         } else {
+            let connection = try connectionPool.setupConnection(for: chainModel)
             runtimeMetadataItem = try await runtimeSyncService.register(chain: chainModel, with: connection)
         }
         let chainTypes = try await chainsTypesSyncService.getTypes(for: chainId)

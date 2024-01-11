@@ -15,6 +15,7 @@ enum CreateAccountError: Error {
     case duplicated
 }
 
+//sourcery: AutoMockable
 public protocol AccountImportable {
     func importMetaAccount(request: MetaAccountImportRequest) async throws -> MetaAccountModel
 }
@@ -28,12 +29,16 @@ public final class AccountImportService {
     
     public init(
         accountOperationFactory: MetaAccountOperationFactoryProtocol = MetaAccountOperationFactory(keystore: Keychain()),
-        accountRepositoryFactory: AccountRepositoryFactoryProtocol = AccountRepositoryFactory(storageFacade: UserDataStorageFacade.shared),
+        storageFacade: StorageFacadeProtocol,
         mnemonicCreator: MnemonicCreator = MnemonicCreatorImpl(),
         operationManager: OperationManagerProtocol = OperationManager(),
         selectedWallet: PersistentValueSettings<MetaAccountModel>
     ) {
-        self.accountRepository = accountRepositoryFactory.createMetaAccountRepository(for: nil, sortDescriptors: [])
+        self.accountRepository = AccountRepositoryFactory(storageFacade: storageFacade).createMetaAccountRepository(
+            for: nil,
+            sortDescriptors: []
+        )
+
         self.accountOperationFactory = accountOperationFactory
         self.operationManager = operationManager
         self.mnemonicCreator = mnemonicCreator
@@ -58,7 +63,7 @@ extension AccountImportService: AccountImportable {
                 cryptoType: request.cryptoType,
                 defaultChainId: request.defaultChainId
             )
-            operation = accountOperationFactory.newMetaAccountOperation(request: request, isBackuped: true)
+            operation = accountOperationFactory.newMetaAccountOperation(mnemonicRequest: request, isBackuped: true)
         case let .seed(data):
             let request = MetaAccountImportSeedRequest(
                 substrateSeed: data.substrateSeed,
@@ -68,7 +73,7 @@ extension AccountImportService: AccountImportable {
                 ethereumDerivationPath: data.ethereumDerivationPath,
                 cryptoType: request.cryptoType
             )
-            operation = accountOperationFactory.newMetaAccountOperation(request: request, isBackuped: true)
+            operation = accountOperationFactory.newMetaAccountOperation(seedRequest: request, isBackuped: true)
         case let .keystore(data):
             let request = MetaAccountImportKeystoreRequest(
                 substrateKeystore: data.substrateKeystore,
@@ -78,7 +83,7 @@ extension AccountImportService: AccountImportable {
                 username: request.username,
                 cryptoType: request.cryptoType
             )
-            operation = accountOperationFactory.newMetaAccountOperation(request: request, isBackuped: true)
+            operation = accountOperationFactory.newMetaAccountOperation(keystoreRequest: request, isBackuped: true)
         }
         operationManager.enqueue(operations: [operation], in: .transient)
         

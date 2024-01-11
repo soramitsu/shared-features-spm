@@ -6,7 +6,12 @@ public protocol NetworkOperationFactoryProtocol {
 }
 
 public final class NetworkOperationFactory: NetworkOperationFactoryProtocol {
-    public init() {}
+    private let jsonDecoder: JSONDecoder
+    
+    public init(jsonDecoder: JSONDecoder = JSONDecoder()) {
+        self.jsonDecoder = jsonDecoder
+    }
+    
     public func fetchData<T: Decodable>(from url: URL) -> BaseOperation<T> {
         let requestFactory = BlockNetworkRequestFactory {
             var request = URLRequest(url: url)
@@ -16,7 +21,7 @@ public final class NetworkOperationFactory: NetworkOperationFactoryProtocol {
         }
 
         let resultFactory = AnyNetworkResultFactory<T> { data in
-            let result = try JSONDecoder().decode(T.self, from: data)
+            let result = try self.jsonDecoder.decode(T.self, from: data)
             return result
         }
 

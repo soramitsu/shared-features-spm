@@ -13,6 +13,7 @@ public enum CurrencyId: Equatable {
     case assets(id: String)
     case assetId(id: String)
     case token2(id: String)
+    case xcm(id: String)
 
     enum CodingKeys: String, CodingKey {
         case code
@@ -67,6 +68,10 @@ extension CurrencyId: Encodable {
         case let .token2(id):
             var container = encoder.unkeyedContainer()
             try container.encode("Token2")
+            try container.encode(id)
+        case let .xcm(id):
+            var container = encoder.unkeyedContainer()
+            try container.encode("XCM")
             try container.encode(id)
         }
     }

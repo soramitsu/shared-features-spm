@@ -38,21 +38,17 @@ public enum RuntimeSpecVersion: UInt32 {
 }
 
 public protocol RuntimeProviderProtocol: AnyObject, RuntimeCodingServiceProtocol {
-    var snapshot: RuntimeSnapshot? { get }
     var runtimeSpecVersion: RuntimeSpecVersion { get }
 
     func setup()
     func readySnapshot() async throws -> RuntimeSnapshot
     func cleanup()
-    func fetchCoderFactoryOperation(
-        with timeout: TimeInterval,
-        closure: RuntimeMetadataClosure?
-    ) -> BaseOperation<RuntimeCoderFactoryProtocol>
 }
 
 public enum RuntimeProviderError: Error {
     case providerUnavailable
     case buildSnapshotError
+    case fetchCoderFactoryTimeout
 }
 
 public final class RuntimeProvider {
@@ -246,13 +242,22 @@ extension RuntimeProvider: RuntimeProviderProtocol {
         resolveRequests()
     }
     
-    public func fetchCoderFactoryOperation(
-        with _: TimeInterval,
-        closure _: RuntimeMetadataClosure?
-    ) -> BaseOperation<RuntimeCoderFactoryProtocol> {
+    public func fetchCoderFactoryOperation() -> BaseOperation<RuntimeCoderFactoryProtocol> {
         AwaitOperation { [weak self] in
             try await withCheckedThrowingContinuation { continuation in
-                self?.fetchCoderFactory(runCompletionIn: nil) { factory in
+                guard let self = self else {
+                    continuation.resume(throwing: RuntimeProviderError.providerUnavailable)
+                    return
+                }
+                
+                let timeoutTask = Task {
+                    let duration = UInt64(20 * 1_000_000_000)
+                    try await Task.sleep(nanoseconds: duration)
+                    continuation.resume(throwing: RuntimeProviderError.fetchCoderFactoryTimeout)
+                }
+
+                self.fetchCoderFactory(runCompletionIn: nil) { factory in
+                    timeoutTask.cancel()
                     guard let factory = factory else {
                         continuation.resume(with: .failure(RuntimeProviderError.providerUnavailable))
                         return

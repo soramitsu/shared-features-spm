@@ -4,7 +4,6 @@ import SSFModels
 import SSFUtils
 import RobinHood
 
-// от этого можно избавиться
 public final class SelectedWalletSettings: PersistentValueSettings<MetaAccountModel> {
 
     private let operationQueue: OperationQueue

@@ -68,4 +68,9 @@ public struct ChainAccountResponse: Equatable {
 public struct ChainAccountInfo {
     public let chain: ChainModel
     public let account: ChainAccountResponse
+    
+    public init(chain: ChainModel, account: ChainAccountResponse) {
+        self.chain = chain
+        self.account = account
+    }
 }

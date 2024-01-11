@@ -38,7 +38,8 @@ public final class ConnectionPool: ConnectionPoolProtocol {
         let nodes = chain.nodes.map { $0.url }
         let autoBalance = ChainConnectionAutoBalance(
             nodes: nodes,
-            selectedNode: chain.selectedNode?.url
+            selectedNode: chain.selectedNode?.url,
+            chainId: chain.chainId
         )
 
         autoBalancesByChainIds[chain.chainId] = autoBalance

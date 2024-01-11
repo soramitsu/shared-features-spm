@@ -6,12 +6,18 @@ import SSFAccountManagmentStorage
 
 public enum AccountManagerServiceError: Error {
     case unexpected
+    case logoutNotCompleted
 }
 
+//sourcery: AutoMockable
 public protocol AccountManageble {
     func getCurrentAccount() -> MetaAccountModel?
-    func update(visible: Bool, for chainAsset: ChainAsset) async -> Result<MetaAccountModel, Error>
-    func logout() async -> Result<Void, Error>
+    func setCurrentAccount(
+        account: MetaAccountModel,
+        completionClosure: @escaping (Result<MetaAccountModel, Error>) -> Void
+    )
+    func update(visible: Bool, for chainAsset: ChainAsset, completion: @escaping () -> Void) throws
+    func logout() async throws
 }
 
 public final class AccountManagementService {
@@ -20,10 +26,11 @@ public final class AccountManagementService {
     private let accountManagementWorker: AccountManagementWorkerProtocol
     
     public init(
-        accountManagementWorker: AccountManagementWorkerProtocol = AccountManagementWorker(),
+        accountManagementWorker: AccountManagementWorkerProtocol,
         selectedWallet: PersistentValueSettings<MetaAccountModel>
     ) {
         self.selectedWallet = selectedWallet
+        self.selectedWallet.setup()
         self.accountManagementWorker = accountManagementWorker
     }
 }
@@ -32,27 +39,35 @@ extension AccountManagementService: AccountManageble {
     public func getCurrentAccount() -> MetaAccountModel? {
         return selectedWallet.value
     }
-    
-    public func update(visible: Bool, for chainAsset: ChainAsset) async -> Result<MetaAccountModel, Error> {
+
+    public func setCurrentAccount(
+        account: MetaAccountModel,
+        completionClosure: @escaping (Result<MetaAccountModel, Error>) -> Void
+    ) {
+        selectedWallet.performSave(value: account, completionClosure: completionClosure)
+    }
+
+    public func update(visible: Bool, for chainAsset: ChainAsset, completion: @escaping () -> Void) throws {
         let accountRequest = chainAsset.chain.accountRequest()
         
         guard let wallet = selectedWallet.value, let accountId = wallet.fetch(for: accountRequest)?.accountId else {
-            return .failure(AccountManagerServiceError.unexpected)
+            throw AccountManagerServiceError.unexpected
         }
         
         let chainAssetKey = chainAsset.uniqueKey(accountId: accountId)
 
         var assetsVisibility = wallet.assetsVisibility.filter { $0.assetId != chainAssetKey }
 
-        let assetVisibility = AssetVisibility(assetId: chainAssetKey, visible: visible)
+        let assetVisibility = AssetVisibility(assetId: chainAssetKey, hidden: !visible)
         assetsVisibility.append(assetVisibility)
 
         let updatedAccount = wallet.replacingAssetsVisibility(assetsVisibility)
+        let managedAccount = ManagedMetaAccountModel(info: updatedAccount)
         
-        return await accountManagementWorker.save(account: updatedAccount, selectedWallet: selectedWallet)
+        accountManagementWorker.save(account: managedAccount, completion: completion)
     }
     
-    public func logout() async -> Result<Void, Error> {
-        return await accountManagementWorker.deleteAll()
+    public func logout() async throws {
+        await accountManagementWorker.deleteAll(completion: {})
     }
 }

@@ -4,16 +4,15 @@ import CoreData
 import SSFModels
 
 public final class MetaAccountMapper {
-
     public var entityIdentifierFieldName: String { #keyPath(CDMetaAccount.metaId) }
+
     public typealias DataProviderModel = MetaAccountModel
     public typealias CoreDataEntity = CDMetaAccount
-
-    public init() { }
+    
+    public init() {}
 }
 
 extension MetaAccountMapper: CoreDataMapperProtocol {
-
     public func transform(entity: CoreDataEntity) throws -> DataProviderModel {
         let chainAccounts: [ChainAccountModel] = try entity.chainAccounts?.compactMap { entity in
             guard let chainAccontEntity = entity as? CDChainAccount else {
@@ -33,26 +32,33 @@ extension MetaAccountMapper: CoreDataMapperProtocol {
         } ?? []
 
         var selectedCurrency: Currency?
-        if let currency = entity.selectedCurrency,
-           let id = currency.id,
-           let symbol = currency.symbol,
-           let name = currency.name,
-           let icon = currency.icon {
-            selectedCurrency = Currency(
-                id: id,
-                symbol: symbol,
-                name: name,
-                icon: icon,
-                isSelected: currency.isSelected
-            )
-        }
+//        if let currency = entity.selectedCurrency,
+//           let id = currency.id,
+//           let symbol = currency.symbol,
+//           let name = currency.name,
+//           let icon = currency.icon {
+//            selectedCurrency = Currency(
+//                id: id,
+//                symbol: symbol,
+//                name: name,
+//                icon: icon,
+//                isSelected: currency.isSelected
+//            )
+//        }
 
         let substrateAccountId = try Data(hexStringSSF: entity.substrateAccountId!)
         let ethereumAddress = try entity.ethereumAddress.map { try Data(hexStringSSF: $0) }
         let assetFilterOptions = entity.assetFilterOptions as? [String]
-        let assetsVisibility: [AssetVisibility]? = (entity.assetsVisibility?.allObjects as? [CDAssetVisibility])?.compactMap { asset -> AssetVisibility? in
-            guard let assetId = asset.assetId else { return nil }
-            return AssetVisibility(assetId: assetId, visible: asset.hidden)
+        let assetsVisibility: [AssetVisibility]? = (entity.assetsVisibility?.allObjects as? [CDAssetVisibility])?.compactMap {
+            guard let assetId = $0.assetId else {
+                return nil
+            }
+
+            return AssetVisibility(assetId: assetId, hidden: $0.hidden)
+        }
+        var favouriteChainIds: [String] = []
+        if let entityFavouriteChainIds = entity.favouriteChainIds {
+            favouriteChainIds = (entityFavouriteChainIds as? [String]) ?? []
         }
 
         return DataProviderModel(
@@ -69,10 +75,11 @@ extension MetaAccountMapper: CoreDataMapperProtocol {
             canExportEthereumMnemonic: entity.canExportEthereumMnemonic,
             unusedChainIds: entity.unusedChainIds as? [String],
             selectedCurrency: selectedCurrency ?? Currency.defaultCurrency(),
-            chainIdForFilter: entity.chainIdForFilter,
+            networkManagmentFilter: entity.networkManagmentFilter,
             assetsVisibility: assetsVisibility ?? [],
             zeroBalanceAssetsHidden: entity.zeroBalanceAssetsHidden,
-            hasBackup: entity.hasBackup
+            hasBackup: entity.hasBackup,
+            favouriteChainIds: favouriteChainIds
         )
     }
 
@@ -93,9 +100,10 @@ extension MetaAccountMapper: CoreDataMapperProtocol {
         entity.canExportEthereumMnemonic = model.canExportEthereumMnemonic
         entity.unusedChainIds = model.unusedChainIds as? NSArray
         entity.assetFilterOptions = assetFilterOptions
-        entity.chainIdForFilter = model.chainIdForFilter
+        entity.networkManagmentFilter = model.networkManagmentFilter
         entity.zeroBalanceAssetsHidden = model.zeroBalanceAssetsHidden
         entity.hasBackup = model.hasBackup
+        entity.favouriteChainIds = model.favouriteChainIds as? NSArray
 
         for assetVisibility in model.assetsVisibility {
             var assetVisibilityEntity = entity.assetsVisibility?.first { entity in
@@ -109,7 +117,7 @@ extension MetaAccountMapper: CoreDataMapperProtocol {
             }
 
             assetVisibilityEntity?.assetId = assetVisibility.assetId
-            assetVisibilityEntity?.hidden = !assetVisibility.visible
+            assetVisibilityEntity?.hidden = assetVisibility.hidden
         }
 
         for chainAccount in model.chainAccounts {
@@ -150,6 +158,6 @@ extension MetaAccountMapper: CoreDataMapperProtocol {
         currencyEntity.icon = model.selectedCurrency.icon
         currencyEntity.isSelected = model.selectedCurrency.isSelected ?? false
 
-        entity.selectedCurrency = currencyEntity
+//        entity.selectedCurrency = currencyEntity
     }
 }

@@ -7,6 +7,7 @@ enum JSONExportDataFactoryError: Error {
     case invalidData
 }
 
+//sourcery: AutoMockable
 protocol JSONExportDataFactoryProtocol {
     func createJSONExportData(
         metaId: MetaAccountId,
