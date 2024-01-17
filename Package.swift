@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 5.8
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -34,13 +34,13 @@ let package = Package(
         .library(name: "SoraKeystore", targets: ["SoraKeystore"]), //TODO: get from github
     ],
     dependencies: [
-        .package(name: "secp256k1", url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
-        .package(name: "scrypt", url: "https://github.com/v57/scrypt.c.git", from: "0.1.0"),
-        .package(name: "TweetNacl",  url: "https://github.com/bitmark-inc/tweetnacl-swiftwrap", from: "1.1.0"),
-        .package(name: "Reachability", url: "https://github.com/ashleymills/Reachability.swift", from: "5.0.0"),
-        .package(name: "Starscream", url: "https://github.com/soramitsu/fearless-starscream", from: "4.0.8"),
-        .package(name: "GoogleSignIn", url: "https://github.com/google/GoogleSignIn-iOS", from: "7.0.0"),
-        .package(name: "GoogleAPIClientForREST_Drive", url: "https://github.com/google/google-api-objectivec-client-for-rest.git", from: "3.3.0"),
+        .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
+        .package(url: "https://github.com/v57/scrypt.c.git", from: "0.1.0"),
+        .package(url: "https://github.com/bitmark-inc/tweetnacl-swiftwrap", from: "1.1.0"),
+        .package(url: "https://github.com/ashleymills/Reachability.swift", from: "5.0.0"),
+        .package(url: "https://github.com/soramitsu/fearless-starscream", from: "4.0.8"),
+        .package(url: "https://github.com/google/GoogleSignIn-iOS", from: "7.0.0"),
+        .package(url: "https://github.com/google/google-api-objectivec-client-for-rest.git", from: "3.3.0"),
         .package(url: "https://github.com/attaswift/BigInt.git", from: "5.3.0"),
         .package(url: "https://github.com/daisuke-t-jp/xxHash-Swift", from: "1.1.1"),
         .package(url: "https://github.com/SwiftyBeaver/SwiftyBeaver.git", .upToNextMajor(from: "2.0.0")),
@@ -50,12 +50,6 @@ let package = Package(
         .binaryTarget(name: "libed25519", path: "Binaries/libed25519.xcframework"),
         .binaryTarget(name: "sr25519lib", path: "Binaries/sr25519lib.xcframework"),
         
-        .target(
-            name: "IrohaCrypto",
-            dependencies: [ "libed25519", "sr25519lib", "secp256k1", "blake2lib", "scrypt" ],
-            publicHeadersPath: "include",
-            cSettings: [ .headerSearchPath(".") ]
-        ),
         .target(name: "SSFHelpers", dependencies: [ "SSFModels", "SSFUtils" ]),
         .target(name: "RobinHood"),
         .target(name: "keccak"),
@@ -66,14 +60,26 @@ let package = Package(
         .target(name: "SSFChainConnection", dependencies: [ "SSFUtils" ]),
         .target(name: "SSFSigner", dependencies: [ "IrohaCrypto", "SSFCrypto" ]),
         .target(
+            name: "IrohaCrypto",
+            dependencies: [
+                .byName(name: "libed25519"),
+                .byName(name: "sr25519lib"),
+                .byName(name: "blake2lib"),
+                .product(name: "secp256k1", package: "secp256k1.swift"),
+                .product(name: "scrypt", package: "scrypt.c")
+            ],
+            publicHeadersPath: "include",
+            cSettings: [ .headerSearchPath(".") ]
+        ),
+        .target(
             name: "SSFCloudStorage",
             dependencies: [
+                .product(name: "TweetNacl", package: "tweetnacl-swiftwrap"),
+                .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),
+                .product(name: "GoogleAPIClientForREST_Drive", package: "google-api-objectivec-client-for-rest"),
                 "SSFUtils",
                 "SSFModels",
-                "IrohaCrypto",
-                "TweetNacl",
-                "GoogleSignIn",
-                "GoogleAPIClientForREST_Drive"
+                "IrohaCrypto"
             ]
         ),
         .target(
@@ -160,14 +166,14 @@ let package = Package(
         .target(
             name: "SSFUtils",
             dependencies: [
+                .product(name: "xxHash-Swift", package: "xxHash-Swift"),
+                .product(name: "TweetNacl", package: "tweetnacl-swiftwrap"),
+                .product(name: "Reachability", package: "Reachability.swift"),
+                .product(name: "Starscream", package: "fearless-starscream"),
                 "SSFModels",
                 "IrohaCrypto",
                 "RobinHood",
-                "BigInt",
-                "xxHash-Swift",
-                "TweetNacl",
-                "Reachability",
-                "Starscream"
+                "BigInt"
             ]
         ),
         .target(
