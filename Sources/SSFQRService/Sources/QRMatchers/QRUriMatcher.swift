@@ -12,6 +12,6 @@ final class QRUriMatcherImpl: QRMatcher {
             return nil
         }
 
-        return .uri(code)
+        return .walletConnect(code)
     }
 }
