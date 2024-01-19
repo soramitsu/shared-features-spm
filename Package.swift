@@ -28,6 +28,8 @@ let package = Package(
         .library(name: "SSFAccountManagmentStorage", targets: ["SSFAccountManagmentStorage"]),
         .library(name: "SSFAssetManagment", targets: ["SSFAssetManagment"]),
         .library(name: "SSFAssetManagmentStorage", targets: ["SSFAssetManagmentStorage"]),
+        .library(name: "SSFSubstrate", targets: ["SSFSubstrate"]),
+        .library(name: "SSFTransferService", targets: ["SSFTransferService"]),
         .library(name: "IrohaCrypto", targets: ["IrohaCrypto"]),
         .library(name: "keccak", targets: ["keccak"]), //TODO: generate xcframework
         .library(name: "RobinHood", targets: ["RobinHood"]), //TODO: get from github
@@ -198,6 +200,35 @@ let package = Package(
                 "SSFExtrinsicKit",
                 "SSFNetwork",
                 "SSFChainRegistry"
+            ]
+        ),
+
+        .target(
+            name: "SSFSubstrate",
+            dependencies: [
+//                "RobinHood",
+                "IrohaCrypto",
+                "SSFUtils",
+                "SSFXCM",
+//                "SSFCrypto",
+//                "SSFKeyPair",
+//                "SSFAccountManagmentStorage",
+//                "SSFExtrinsicKit"
+            ]
+        ),
+        .target(
+            name: "SSFTransferService",
+            dependencies: [
+//                "RobinHood",
+                "IrohaCrypto",
+                "SSFUtils",
+                "SSFXCM",
+                "SSFSubstrate",
+
+//                "SSFCrypto",
+//                "SSFKeyPair",
+//                "SSFAccountManagmentStorage",
+//                "SSFExtrinsicKit"
             ]
         ),
 
