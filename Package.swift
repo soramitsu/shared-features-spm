@@ -32,6 +32,7 @@ let package = Package(
         .library(name: "keccak", targets: ["keccak"]), //TODO: generate xcframework
         .library(name: "RobinHood", targets: ["RobinHood"]), //TODO: get from github
         .library(name: "SoraKeystore", targets: ["SoraKeystore"]), //TODO: get from github
+        .library(name: "SSFQRService", targets: ["SSFQRService"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
@@ -49,16 +50,22 @@ let package = Package(
         .binaryTarget(name: "blake2lib", path: "Binaries/blake2lib.xcframework"),
         .binaryTarget(name: "libed25519", path: "Binaries/libed25519.xcframework"),
         .binaryTarget(name: "sr25519lib", path: "Binaries/sr25519lib.xcframework"),
+        .binaryTarget(name: "MPQRCoreSDK", path: "Binaries/MPQRCoreSDK.xcframework"),
         
-        .target(name: "SSFHelpers", dependencies: [ "SSFModels", "SSFUtils" ]),
         .target(name: "RobinHood"),
         .target(name: "keccak"),
         .target(name: "SoraKeystore"),
+        .target(name: "SSFHelpers", dependencies: [ "SSFModels", "SSFUtils" ]),
         .target(name: "SSFKeyPair", dependencies: [ "IrohaCrypto", "SSFCrypto" ]),
         .target(name: "SSFModels", dependencies: [ "IrohaCrypto" ]),
         .target(name: "SSFCrypto", dependencies: [ "IrohaCrypto", "SSFUtils", "SSFModels", "keccak" ]),
         .target(name: "SSFChainConnection", dependencies: [ "SSFUtils" ]),
         .target(name: "SSFSigner", dependencies: [ "IrohaCrypto", "SSFCrypto" ]),
+        .target(name: "SSFQRService", dependencies: [
+            .byName(name: "MPQRCoreSDK"),
+            "SSFCrypto",
+            "SSFModels"
+        ]),
         .target(
             name: "IrohaCrypto",
             dependencies: [

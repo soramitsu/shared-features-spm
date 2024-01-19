@@ -30,6 +30,15 @@ public extension AccountAddress {
             return try SS58AddressFactory().accountId(fromAddress: self, type: prefix)
         }
     }
+    
+    func toAccountIdWithTryExtractPrefix() throws -> AccountId {
+        if hasPrefix("0x") {
+            return try AccountId(hexStringSSF: self)
+        } else {
+            let prefix = try SS58AddressFactory().type(fromAddress: self)
+            return try SS58AddressFactory().accountId(fromAddress: self, type: prefix.uint16Value)
+        }
+    }
 }
 
 extension ChainAccountModel {
