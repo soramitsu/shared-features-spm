@@ -225,6 +225,13 @@ let package = Package(
                 "SoraKeystore",
             ]
         ),
+        .testTarget(
+            name: "SSFKeyPairTests",
+            dependencies: [
+                "SSFKeyPair",
+                "IrohaCrypto"
+            ]
+        ),
     ]
 )
 
