@@ -4,7 +4,7 @@ import SSFUtils
 import SSFModels
 
 //sourcery: AutoMockable
-public protocol ChainAssetFetchingServiceProtocol: Actor {
+public protocol ChainAssetFetchingServiceProtocol {
     func fetch(filters: [AssetFilter], sorts: [AssetSort], forceUpdate: Bool) async -> [ChainAsset]
 }
 

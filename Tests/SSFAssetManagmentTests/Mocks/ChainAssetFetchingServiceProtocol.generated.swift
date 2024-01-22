@@ -6,7 +6,7 @@ import UIKit
 @testable import SSFAssetManagment
 @testable import SSFModels
 
-actor ChainAssetFetchingServiceProtocolMock: ChainAssetFetchingServiceProtocol {
+class ChainAssetFetchingServiceProtocolMock: ChainAssetFetchingServiceProtocol {
 
     //MARK: - fetch
 

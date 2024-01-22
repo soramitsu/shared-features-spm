@@ -14,7 +14,7 @@ enum JSONExportServiceError: Error {
 }
 
 //sourcery: AutoMockable
-protocol JSONExportServiceProtocol: Actor {
+protocol JSONExportServiceProtocol {
     func export(
         wallet: MetaAccountModel,
         accounts: [ChainAccountInfo],
@@ -40,6 +40,7 @@ actor JSONExportService {
     }
 }
 
+@MainActor
 extension JSONExportService: JSONExportServiceProtocol {
     func export(
         wallet: MetaAccountModel,

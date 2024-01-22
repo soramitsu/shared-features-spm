@@ -238,6 +238,12 @@ let package = Package(
                 "SoraKeystore",
             ]
         ),
+        .testTarget(
+            name: "SSFQRServiceTests",
+            dependencies: [
+                "SSFQRService"
+            ]
+        )
     ]
 )
 
