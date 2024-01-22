@@ -2,7 +2,7 @@ import XCTest
 
 @testable import SSFQRService
 
-final class ExtractQrCodeTests: XCTestCase {
+final class QRServiceTests: XCTestCase {
 
     var qrService: QRService?
 
@@ -73,36 +73,57 @@ final class ExtractQrCodeTests: XCTestCase {
         case .sora(let qrInfoResult):
             XCTAssertEqual(qrInfoResult, qrInfo)
         case .none, .some :
-            XCTAssert(true)
+            XCTExpectFailure()
         }
     }
 
-    // TODO: add mock
-//    func testGenerate() async throws {
-//
-//        // arrange
-//        let qrSize = CGSize(width: 500, height: 500)
-//        let qrInfo = BokoloCashQRInfo(
-//            address: "cnVkoGs3rEMqLqY27c2nfVXJRGdzNJk2ns78DcqtppaSRe8qm",
-//            assetId: "0x0200000000000000000000000000000000000000000000000000000000000000",
-//            transactionAmount: "123"
-//        )
-//
-//        // act
-//        let image = try await qrService?.generate(with: .addressInfo(qrInfo), qrSize: qrSize)
-//
-//        // assert
-//        XCTAssertNotNil(image)
-//        XCTAssertEqual(image?.size, qrSize)
-//        let qrMatcher = try qrService?.extractQrCode(from: image!)
-//        XCTAssertNotNil(qrMatcher)
-//        XCTAssertEqual(qrMatcher?.address, qrInfo.address)
-//
-//        switch qrMatcher!.qrInfo {
-//        case .bokoloCash(let qrInfoResult):
-//            XCTAssertEqual(qrInfoResult, qrInfo)
-//        case .none, .some :
-//            XCTAssert(true)
-//        }
-//    }
+    func testExtractBokoloCash() async throws {
+
+        // arrange
+        let qrService = QRServiceMock()
+        let qrInfo = BokoloCashQRInfo(
+            address: "cnVkoGs3rEMqLqY27c2nfVXJRGdzNJk2ns78DcqtppaSRe8qm",
+            assetId: "0x0200000000000000000000000000000000000000000000000000000000000000",
+            transactionAmount: "123"
+        )
+        qrService.extractQrCodeFromReturnValue = .qrInfo(.bokoloCash(qrInfo))
+
+        // act
+        let qrMatcher = try qrService.extractQrCode(from: .init())
+
+        // assert
+        XCTAssertEqual(qrService.extractQrCodeFromCallsCount, 1)
+        XCTAssertNotNil(qrMatcher)
+        XCTAssertEqual(qrMatcher.address, qrInfo.address)
+
+        switch qrMatcher.qrInfo {
+        case .bokoloCash(let qrInfoResult):
+            XCTAssertEqual(qrInfoResult, qrInfo)
+        case .none, .some :
+            XCTExpectFailure()
+        }
+    }
+
+    func testExtractCex() async throws {
+
+        // arrange
+        let qrService = QRServiceMock()
+        let qrInfo = CexQRInfo(address: "cnVkoGs3rEMqLqY27c2nfVXJRGdzNJk2ns78DcqtppaSRe8qm")
+        qrService.extractQrCodeFromReturnValue = .qrInfo(.cex(qrInfo))
+
+        // act
+        let qrMatcher = try qrService.extractQrCode(from: .init())
+
+        // assert
+        XCTAssertEqual(qrService.extractQrCodeFromCallsCount, 1)
+        XCTAssertNotNil(qrMatcher)
+        XCTAssertEqual(qrMatcher.address, qrInfo.address)
+
+        switch qrMatcher.qrInfo {
+        case .cex(let qrInfoResult):
+            XCTAssertEqual(qrInfoResult, qrInfo)
+        case .none, .some :
+            XCTExpectFailure()
+        }
+    }
 }

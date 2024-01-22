@@ -1,5 +1,6 @@
 import Foundation
 
+//sourcery: AutoMockable
 public protocol QREncoder {
     func encode(with type: QRType) throws -> Data
 }

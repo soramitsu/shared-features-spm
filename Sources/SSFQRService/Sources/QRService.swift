@@ -1,6 +1,7 @@
 import Foundation
 import UIKit
 
+//sourcery: AutoMockable
 public protocol QRService: AnyObject {
     func extractQrCode(from image: UIImage) throws -> QRMatcherType
     func generate(with qrType: QRType, qrSize: CGSize) async throws -> UIImage
