@@ -1,6 +1,5 @@
 import Foundation
 
-//sourcery: AutoMockable
 public protocol QRDecoder {
     func decode(data: Data) throws -> QRInfoType
 }

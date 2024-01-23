@@ -76,6 +76,21 @@ final class QRServiceTests: XCTestCase {
         }
     }
 
+    func testGenerateMock() async throws {
+
+        // arrange
+        let qrService = QRServiceMock()
+        qrService.generateWithQrSizeReturnValue = .init()
+
+        // act
+        let image = try qrService.generate(with: .address(""), qrSize: .init())
+
+        // assert
+        XCTAssertNotNil(image)
+        XCTAssertEqual(qrService.generateWithQrSizeCallsCount, 1)
+        XCTAssertTrue(qrService.generateWithQrSizeCalled)
+    }
+
     func testExtractBokoloCash() async throws {
 
         // arrange
@@ -92,6 +107,7 @@ final class QRServiceTests: XCTestCase {
 
         // assert
         XCTAssertEqual(qrService.extractQrCodeFromCallsCount, 1)
+        XCTAssertTrue(qrService.extractQrCodeFromCalled)
         XCTAssertNotNil(qrMatcher)
         XCTAssertEqual(qrMatcher.address, qrInfo.address)
 
