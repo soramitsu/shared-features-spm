@@ -26,7 +26,6 @@ final class QRServiceTests: XCTestCase {
         // assert
         XCTAssertNotNil(image)
         XCTAssertEqual(image?.size, qrSize)
-        // TODO: ?
     }
 
     func testGenerateAddress() async throws {
