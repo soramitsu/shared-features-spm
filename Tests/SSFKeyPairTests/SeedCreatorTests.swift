@@ -9,9 +9,18 @@ import SSFCrypto
 
 final class SeedCreatorTests: XCTestCase {
     
-    private lazy var seedCreator: SeedCreator = {
-        SeedCreatorImpl()
-    }()
+    var seedCreator: SeedCreator?
+    
+    override func setUp() {
+        super.setUp()
+        let seedCreator = SeedCreatorImpl()
+        self.seedCreator = seedCreator
+    }
+    
+    override func tearDown() {
+        super.tearDown()
+        seedCreator = nil
+    }
     
     func testGeneratedSeedMatchesDerived() throws {
         try performSeedCreatorTest(ethereumBased: false, cryptoTypes: [.sr25519, .ed25519, .ecdsa])
@@ -101,23 +110,26 @@ extension SeedCreatorTests {
         for derivationPath in derivationPaths {
             for cryptoType in cryptoTypes {
                 for strength in strengths {
-                    let expectedResult = try seedCreator.createSeed(
+                    let expectedResult = try seedCreator?.createSeed(
                         derivationPath: derivationPath,
                         strength: strength,
                         ethereumBased: ethereumBased,
                         cryptoType: cryptoType
                     )
                     
-                    let derivedResult = try seedCreator.deriveSeed(
-                        mnemonicWords: expectedResult.mnemonic.toString(),
+                    let derivedResult = try seedCreator?.deriveSeed(
+                        mnemonicWords: expectedResult?.mnemonic.toString() ?? "",
                         derivationPath: derivationPath,
                         ethereumBased: ethereumBased,
                         cryptoType: cryptoType
                     )
                     
-                    XCTAssertEqual(expectedResult.seed, derivedResult.seed)
-                    XCTAssertEqual(expectedResult.mnemonic.toString(), derivedResult.mnemonic.toString())
-                    XCTAssertEqual(expectedResult.mnemonic.entropy(), derivedResult.mnemonic.entropy())
+                    XCTAssertNotNil(expectedResult)
+                    XCTAssertNotNil(derivedResult)
+                    
+                    XCTAssertEqual(expectedResult?.seed, derivedResult?.seed)
+                    XCTAssertEqual(expectedResult?.mnemonic.toString(), derivedResult?.mnemonic.toString())
+                    XCTAssertEqual(expectedResult?.mnemonic.entropy(), derivedResult?.mnemonic.entropy())
                 }
             }
         }

@@ -6,7 +6,6 @@ import UIKit
 @testable import IrohaCrypto
 @testable import SSFKeyPair
 @testable import SSFModels
-@testable import SSFCrypto
 
 class SeedCreatorMock: SeedCreator {
 

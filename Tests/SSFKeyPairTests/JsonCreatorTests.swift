@@ -9,16 +9,29 @@ import SSFCrypto
 
 final class JsonCreatorTests: XCTestCase {
     
-    private lazy var jsonCreator: JsonCreator = {
-        JsonCreatorImpl()
-    }()
+    var jsonCreator: JsonCreator?
+    var keystoreExtractor: KeystoreExtractor?
     
-    private lazy var keystoreExtractor = KeystoreExtractor()
+    override func setUp() {
+        super.setUp()
+        
+        let jsonCreator = JsonCreatorImpl()
+        let keystoreExtractor = KeystoreExtractor()
+        
+        self.jsonCreator = jsonCreator
+        self.keystoreExtractor = keystoreExtractor
+    }
+    
+    override func tearDown() {
+        super.tearDown()
+        jsonCreator = nil
+        keystoreExtractor = nil
+    }
     
     func testCreateJson() {
         // Act
         do {
-            let result = try jsonCreator.createJson(strength: .entropy128,
+            let result = try jsonCreator?.createJson(strength: .entropy128,
                                                     walletName: "wallet",
                                                     password: "password",
                                                     cryptoType: .sr25519,
@@ -26,8 +39,9 @@ final class JsonCreatorTests: XCTestCase {
                                                     isEthereumBased: false)
             
             // Assert
-            XCTAssertNotNil(result.json)
-            XCTAssertEqual(result.mnemonic.numberOfWords(), 12)
+            XCTAssertNotNil(result)
+            XCTAssertNotNil(result?.json)
+            XCTAssertEqual(result?.mnemonic.numberOfWords(), 12)
         } catch {
             XCTFail("Create json test failed with error - \(error)")
         }
@@ -80,7 +94,7 @@ extension JsonCreatorTests {
             for password in passwords {
                 for cryptoType in cryptoTypes {
                     for derivationPath in derivationPaths {
-                        let expectedResult = try jsonCreator.createJson(
+                        let expectedResult = try jsonCreator?.createJson(
                             strength: strength,
                             walletName: "wallet",
                             password: password,
@@ -89,8 +103,8 @@ extension JsonCreatorTests {
                             isEthereumBased: ethereumBased
                         )
                         
-                        let derivedResult = try jsonCreator.deriveJson(
-                            mnemonicWords: expectedResult.mnemonic.toString(),
+                        let derivedResult = try jsonCreator?.deriveJson(
+                            mnemonicWords: expectedResult?.mnemonic.toString() ?? "",
                             walletName: "wallet",
                             password: password,
                             cryptoType: cryptoType,
@@ -98,20 +112,28 @@ extension JsonCreatorTests {
                             isEthereumBased: ethereumBased
                         )
                         
-                        let expectedMnemonic = expectedResult.mnemonic
-                        let derivedMnemonic = derivedResult.mnemonic
+                        XCTAssertNotNil(expectedResult)
+                        XCTAssertNotNil(derivedResult)
                         
-                        let expectedDefinition = try JSONDecoder().decode(KeystoreDefinition.self, from: expectedResult.json)
-                        let derivedDefinition = try JSONDecoder().decode(KeystoreDefinition.self, from: derivedResult.json)
+                        let expectedMnemonic = expectedResult?.mnemonic
+                        let derivedMnemonic = derivedResult?.mnemonic
                         
-                        let expectedKeystoreData = try keystoreExtractor.extractFromDefinition(expectedDefinition, password: password)
-                        let derivedKeystoreData = try keystoreExtractor.extractFromDefinition(derivedDefinition, password: password)
+                        XCTAssertNotNil(expectedMnemonic)
+                        XCTAssertNotNil(derivedMnemonic)
                         
-                        XCTAssertEqual(expectedKeystoreData.publicKeyData.toHex(), derivedKeystoreData.publicKeyData.toHex())
-                        XCTAssertEqual(expectedKeystoreData.secretKeyData.toHex(), derivedKeystoreData.secretKeyData.toHex())
+                        let expectedDefinition = try JSONDecoder().decode(KeystoreDefinition.self, from: expectedResult?.json ?? Data())
+                        let derivedDefinition = try JSONDecoder().decode(KeystoreDefinition.self, from: derivedResult?.json ?? Data())
                         
-                        XCTAssertEqual(expectedMnemonic.toString(), derivedMnemonic.toString())
-                        XCTAssertEqual(expectedMnemonic.entropy(), derivedMnemonic.entropy())
+                        let expectedKeystoreData = try keystoreExtractor?.extractFromDefinition(expectedDefinition, password: password)
+                        let derivedKeystoreData = try keystoreExtractor?.extractFromDefinition(derivedDefinition, password: password)
+                        
+                        XCTAssertNotNil(expectedKeystoreData)
+                        XCTAssertNotNil(derivedKeystoreData)
+                        
+                        XCTAssertEqual(expectedKeystoreData?.publicKeyData.toHex(), derivedKeystoreData?.publicKeyData.toHex())
+                        XCTAssertEqual(expectedKeystoreData?.secretKeyData.toHex(), derivedKeystoreData?.secretKeyData.toHex())
+                        XCTAssertEqual(expectedMnemonic?.toString(), derivedMnemonic?.toString())
+                        XCTAssertEqual(expectedMnemonic?.entropy(), derivedMnemonic?.entropy())
                     }
                 }
             }
