@@ -232,13 +232,6 @@ let package = Package(
                 "IrohaCrypto"
             ]
         ),
-        .testTarget(
-            name: "SSFKeyPairTests",
-            dependencies: [
-                "SSFKeyPair",
-                "IrohaCrypto"
-            ]
-        )
     ]
 )
 
