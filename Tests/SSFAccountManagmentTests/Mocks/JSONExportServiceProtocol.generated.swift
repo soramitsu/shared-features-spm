@@ -8,7 +8,7 @@ import UIKit
 @testable import SSFUtils
 @testable import RobinHood
 
-class JSONExportServiceProtocolMock: JSONExportServiceProtocol {
+actor JSONExportServiceProtocolMock: JSONExportServiceProtocol {
 
     //MARK: - export
 

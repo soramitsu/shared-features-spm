@@ -37,4 +37,16 @@ final class QRMatcherTests: XCTestCase {
         XCTAssertNil(qrType?.qrInfo)
         XCTAssertEqual(qrType?.uri, bokoloQRCodeString)
     }
+
+    func testQRUriMatcherEmpty() async throws {
+
+        // arrange
+        let matcher = QRUriMatcherImpl(scheme: "https")
+
+        // act
+        let qrType = matcher.match(code: "")
+
+        // assert
+        XCTAssertNil(qrType)
+    }
 }

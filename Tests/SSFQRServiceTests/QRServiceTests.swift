@@ -7,11 +7,13 @@ final class QRServiceTests: XCTestCase {
     var qrService: QRService?
 
     override func setUpWithError() throws {
+        try super.setUpWithError()
         qrService = QRServiceDefault()
     }
 
     override func tearDownWithError() throws {
         qrService = nil
+        try super.tearDownWithError()
     }
 
     func testQRImage() async throws {
@@ -140,5 +142,87 @@ final class QRServiceTests: XCTestCase {
         case .none, .some :
             XCTExpectFailure()
         }
+    }
+
+    func testExtractError() async throws {
+
+        // arrange
+        let qrService = QRServiceMock()
+        let error = QRExtractionError.invalidImage
+        qrService.extractQrCodeFromThrowableError = error
+
+        // act
+        XCTAssertThrowsError(try qrService.extractQrCode(from: .init()))
+
+        // assert
+        XCTAssertEqual(qrService.extractQrCodeFromCallsCount, 0)
+
+    }
+
+    func testGenerateError() async throws {
+
+        // arrange
+        let qrService = QRServiceMock()
+        let error = QRExtractionError.invalidQrCode
+        qrService.generateWithQrSizeThrowableError = error
+
+        // act
+        XCTAssertThrowsError(try qrService.generate(with: .address(""), qrSize: .zero))
+
+        // assert
+        XCTAssertEqual(qrService.extractQrCodeFromCallsCount, 0)
+    }
+
+    func testExtractionErrorError() async throws {
+
+        // arrange
+        let rawPublicKey = "0xbcc5ecf679ebd776866a04c212a4ec5dc45cefab57d7aa858c389844e212693f"
+        let qrInfo = SoraQRInfo(
+            address: "cnVkoGs3rEMqLqY27c2nfVXJRGdzNJk2ns78DcqtppaSRe8qm",
+            rawPublicKey: try Data(hexStringSSF: rawPublicKey),
+            username: "UserName",
+            assetId: "0x0200000000000000000000000000000000000000000000000000000000000000",
+            amount: "123"
+        )
+        let expectation = expectation(description: "expect call to throw QRExtractionError error")
+        let error = QRExtractionError.noFeatures
+        let decoder = QRDecoderMock()
+        decoder.decodeDataThrowableError = error
+        let qrService = QRServiceDefault(matchers: [QRInfoMatcher(decoder: decoder)])
+        let image = try await qrService.generate(with: .addressInfo(qrInfo), qrSize: .init(width: 50, height: 50))
+
+        // act
+        do {
+            _ = try qrService.extractQrCode(from: image)
+        } catch (let caughtError) {
+            XCTAssertTrue(caughtError is QRExtractionError)
+            XCTAssertEqual(error, caughtError as! QRExtractionError)
+            expectation.fulfill()
+        }
+
+        // assert
+        await fulfillment(of: [expectation], timeout: 1)
+        XCTAssertFalse(decoder.decodeDataCalled)
+        XCTAssertEqual(decoder.decodeDataCallsCount, 0)
+    }
+
+    func testQRCreationOperationError() async throws {
+
+        // arrange
+        let error = QRCreationOperationError.bitmapImageCreationFailed
+        let expectation = expectation(description: "expect call to throw QRCreationOperationError error")
+        let qrService = QRServiceDefault()
+
+        // act
+        do {
+            _ = try await qrService.generate(with: .address(""), qrSize: .zero)
+        } catch (let caughtError) {
+            XCTAssertTrue(caughtError is QRCreationOperationError)
+            XCTAssertEqual(error, caughtError as! QRCreationOperationError)
+            expectation.fulfill()
+        }
+
+        // assert
+        await fulfillment(of: [expectation], timeout: 3)
     }
 }

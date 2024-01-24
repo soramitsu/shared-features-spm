@@ -10,7 +10,6 @@ final class QRDecoderTests: XCTestCase {
         let address = "ivan_ivan@auki"
         let assetId = "090"
         let bokoloQRCodeString = "https://bokolodemo.page.link/data?qr=00020101021129180014\(address)520459995303\(assetId)5802LA5909Ivan%20Ivan6010Phnom%20Penh6304DCAF"
-        let url = URL(string: bokoloQRCodeString)!
         let data = bokoloQRCodeString.data(using: .utf8)!
         let decoder = BokoloCashDecoder()
 
@@ -121,5 +120,19 @@ final class QRDecoderTests: XCTestCase {
         case .bokoloCash, .cex:
             XCTExpectFailure()
         }
+    }
+
+    func testQRDecoderMock() async throws {
+
+        // arrange
+        let decoder = QRDecoderMock()
+        decoder.decodeDataReturnValue = .cex(.init(address: ""))
+
+        // act
+        _ = try decoder.decode(data: Data())
+
+        // assert
+        XCTAssertTrue(decoder.decodeDataCalled)
+        XCTAssertEqual(decoder.decodeDataCallsCount, 1)
     }
 }
