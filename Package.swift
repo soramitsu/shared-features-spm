@@ -243,7 +243,14 @@ let package = Package(
             dependencies: [
                 "SSFQRService"
             ]
-        )
+        ),
+        .testTarget(
+            name: "SSFKeyPairTests",
+            dependencies: [
+                "SSFKeyPair",
+                "IrohaCrypto"
+            ]
+        ),
     ]
 )
 

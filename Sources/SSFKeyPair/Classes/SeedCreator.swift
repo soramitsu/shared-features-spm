@@ -39,6 +39,11 @@ final public class SeedCreatorImpl: SeedCreator {
     
     public init() {}
     
+    convenience init(commonCrypto: CommonCrypto) {
+        self.init()
+        self.commonCrypto = commonCrypto
+    }
+    
     // MARK: - Public methods
     
     public func createSeed(
