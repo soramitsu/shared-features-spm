@@ -250,7 +250,7 @@ let package = Package(
                 "SSFKeyPair",
                 "IrohaCrypto"
             ]
-        ),
+        )
     ]
 )
 
