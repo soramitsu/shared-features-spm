@@ -159,6 +159,33 @@ final class QRServiceTests: XCTestCase {
 
     }
 
+    func testExtractionErrorInvalidImage() async throws {
+
+        // arrange
+        let address = "5GLDeyxgNzsnm4NeSHZd9imbSMaV2RUPGRSkchxsUqSbfBpu"
+        let qrSize = CGSize(width: 100.0, height: 120.0)
+        let qrService = QRServiceDefault(matchers: [])
+        let error = QRExtractionError.invalidImage
+        let image = try await qrService.generate(with: .address(address), qrSize: qrSize)
+
+        // act assert
+        XCTAssertThrowsError(try qrService.extractQrCode(from: image))
+    }
+
+    func testExtractionErrorSeveralCoincidences() async throws {
+
+        // arrange
+        let address = "5GLDeyxgNzsnm4NeSHZd9imbSMaV2RUPGRSkchxsUqSbfBpu"
+        let qrSize = CGSize(width: 100.0, height: 120.0)
+        let matchers = [QRInfoMatcher(decoder: QRDecoderDefault()), QRInfoMatcher(decoder: QRDecoderDefault())]
+        let qrService = QRServiceDefault(matchers: matchers)
+        let error = QRExtractionError.invalidImage
+        let image = try await qrService.generate(with: .address(address), qrSize: qrSize)
+
+        // act assert
+        XCTAssertThrowsError(try qrService.extractQrCode(from: image))
+    }
+
     func testGenerateError() async throws {
 
         // arrange
