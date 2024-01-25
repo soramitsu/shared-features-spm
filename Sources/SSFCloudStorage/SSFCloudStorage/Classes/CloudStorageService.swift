@@ -41,12 +41,10 @@ public class CloudStorageService: NSObject, GoogleDriveServiceProtocol {
 
     public init(uiDelegate: UIViewController, 
                 signInProvider: GIDSignIn = GIDSignIn.sharedInstance,
-                queue: DispatchQueueType = DispatchQueue.main,
-                service: GTLRDriveService? = nil) {
+                queue: DispatchQueueType = DispatchQueue.main) {
         self.uiDelegate = uiDelegate
         self.singInProvider = signInProvider
         self.queue = queue
-        self.googleDriveService = service
     }
     
     private func createFile(from account: OpenBackupAccount, password: String) throws -> URL {

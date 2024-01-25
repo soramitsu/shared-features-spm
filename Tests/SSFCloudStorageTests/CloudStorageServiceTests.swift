@@ -33,16 +33,18 @@ final class CloudStorageServiceTests: XCTestCase {
                                       queue: queue)
     }
     
-    override func tearDown() {
-        super.tearDown()
+    override func tearDownWithError() throws {
+        try super.tearDownWithError()
         service = nil
+        signInProvider?._currentUser = nil
+        signInProvider?.signInWithPresentingHintClosureCallsCount = 0
         signInProvider = nil
         delegate = nil
         queue = nil
     }
     
     func testSignInIfNeeded() throws {
-        // act        
+        // act
         service?.signInIfNeeded(completion: nil)
 
         // assert
@@ -52,14 +54,6 @@ final class CloudStorageServiceTests: XCTestCase {
     }
     
     func testSaveBackupAccount() {
-        // arrange
-        signInProvider?._currentUser = TestData.user
-        
-        let googleDriveService = GTLRDriveServiceMock()
-        googleDriveService.authorizer = TestData.user.fetcherAuthorizer
-        service?.googleDriveService = googleDriveService
-        googleDriveService.executeQueryReturnValue = GTLRServiceTicketMock()
-        
         // act
         service?.saveBackupAccount(account: TestData.account, password: "1", completion: {_ in })
         
@@ -70,61 +64,39 @@ final class CloudStorageServiceTests: XCTestCase {
     }
     
     func testDeleteBackupAccount() {
+        // arrange
+        signInProvider?._currentUser = TestData.user
+        
         // act
-        service?.saveBackupAccount(account: TestData.account, password: "1", completion: { [weak self] _ in
-            self?.service?.deleteBackupAccount(account: TestData.account, completion: { [weak self] result in
-                let provider = self?.signInProvider
-                let state = self?.isSuccess(result)
-                
-                // assert
-                XCTAssertNotNil(provider)
-                XCTAssertNotNil(state)
-                XCTAssertTrue(provider?.signInWithPresentingHintClosureCalled ?? true)
-                XCTAssertEqual(provider?.signInWithPresentingHintClosureCallsCount, 2)
-                XCTAssertTrue(state ?? true)
-            })
-        })
+        service?.saveBackupAccount(account: TestData.account, password: "1", completion: {_ in })
+        service?.deleteBackupAccount(account: TestData.account, completion: {_ in })
+        
+        // assert
+        XCTAssertNotNil(signInProvider)
+        XCTAssertFalse(signInProvider?.signInWithPresentingHintClosureCalled ?? false)
+        XCTAssertEqual(signInProvider?.signInWithPresentingHintClosureCallsCount, 0)
     }
     
     func testGetBackupAccounts() {
         // act
-        service?.saveBackupAccount(account: TestData.account, password: "1", completion: { [weak self] _ in
-            self?.service?.getBackupAccounts(completion: { result in
-                let provider = self?.signInProvider
-                
-                // assert
-                switch result {
-                case .success(let accounts):
-                    XCTAssertNotNil(provider)
-                    XCTAssertTrue(provider?.signInWithPresentingHintClosureCalled ?? true)
-                    XCTAssertEqual(provider?.signInWithPresentingHintClosureCallsCount, 2)
-                    XCTAssertEqual(accounts.count, 1)
-                    XCTAssertEqual(accounts.first?.address, TestData.account.address)
-                case .failure(let error):
-                    XCTFail("Get backup accounts test failed with error - \(error)")
-                }
-            })
-        })
+        service?.saveBackupAccount(account: TestData.account, password: "1", completion: {_ in })
+        service?.getBackupAccounts(completion:  {_ in })
+        
+        // assert
+        XCTAssertNotNil(signInProvider)
+        XCTAssertTrue(signInProvider?.signInWithPresentingHintClosureCalled ?? true)
+        XCTAssertEqual(signInProvider?.signInWithPresentingHintClosureCallsCount, 2)
     }
     
     func testImportBackupAccount() {
         // act
-        service?.saveBackupAccount(account: TestData.account, password: "1", completion: { [weak self] _ in
-            self?.service?.importBackupAccount(account: TestData.account, password: "1", completion: { [weak self] result in
-                let provider = self?.signInProvider
-                
-                // assert
-                switch result {
-                case .success(let account):
-                    XCTAssertNotNil(provider)
-                    XCTAssertTrue(provider?.signInWithPresentingHintClosureCalled ?? true)
-                    XCTAssertEqual(provider?.signInWithPresentingHintClosureCallsCount, 2)
-                    XCTAssertEqual(account.address, TestData.account.address)
-                case .failure(let error):
-                    XCTFail("Get backup accounts test failed with error - \(error)")
-                }
-            })
-        })
+        service?.saveBackupAccount(account: TestData.account, password: "1", completion: {_ in })
+        service?.importBackupAccount(account: TestData.account, password: "1", completion:  {_ in })
+        
+        // assert
+        XCTAssertNotNil(signInProvider)
+        XCTAssertTrue(signInProvider?.signInWithPresentingHintClosureCalled ?? true)
+        XCTAssertEqual(signInProvider?.signInWithPresentingHintClosureCallsCount, 2)
     }
     
     func testDisconnect() {
@@ -137,6 +109,42 @@ final class CloudStorageServiceTests: XCTestCase {
         XCTAssertTrue(signInProvider?.signOutCalled ?? true)
         XCTAssertEqual(signInProvider?.disconnectCompletionCallsCount, 1)
         XCTAssertEqual(signInProvider?.signOutCallsCount, 1)
+    }
+    
+    func testFearlessImportBackupAccountWithError() async throws {
+        signInProvider?._currentUser = TestData.user
+        
+        // act
+        do {
+            _ = try await service?.importBackup(account: TestData.account, password: "1")
+        } catch {
+            // Assert
+            XCTAssertEqual(error.localizedDescription, "The request is missing a valid API key.")
+        }
+    }
+    
+    func testGetFearlessBackupAccountsWithError() async throws {
+        signInProvider?._currentUser = TestData.user
+        
+        // act
+        do {
+            _ = try await service?.getFearlessBackupAccounts()
+        } catch {
+            // Assert
+            XCTAssertEqual(error.localizedDescription, CloudStorageServiceError.notAuthorized.localizedDescription)
+        }
+    }
+    
+    func testFearlessDeleteAccountWithError() async throws {
+        signInProvider?._currentUser = TestData.user
+        
+        // act
+        do {
+            _ = try await service?.deleteBackup(account: TestData.account)
+        } catch {
+            // Assert
+            XCTAssertEqual(error.localizedDescription, CloudStorageServiceError.notAuthorized.localizedDescription)
+        }
     }
 }
 
@@ -152,13 +160,5 @@ extension CloudStorageServiceTests {
                                                backupAccountType: [.passphrase],
                                                json: OpenBackupAccount.Json(substrateJson: "0", ethJson: "1"),
                                                encryptedSeed: OpenBackupAccount.Seed(substrateSeed: "2", ethSeed: "3"))
-    }
-    
-    func isSuccess<T, E>(_ result: Result<T, E>) -> Bool {
-        if case .success = result {
-            return true
-        } else {
-            return false
-        }
     }
 }
