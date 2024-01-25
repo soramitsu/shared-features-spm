@@ -3,7 +3,6 @@ import SSFCrypto
 import SSFUtils
 import SSFModels
 
-//sourcery: AutoMockable
 protocol CommonCrypto {
     func getQuery(
         seed: Data,
