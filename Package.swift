@@ -232,6 +232,12 @@ let package = Package(
                 "IrohaCrypto"
             ]
         ),
+        .testTarget(
+            name: "SSFCloudStorageTests",
+            dependencies: [
+                "SSFCloudStorage"
+            ]
+        ),
     ]
 )
 

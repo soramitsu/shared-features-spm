@@ -35,12 +35,18 @@ public class CloudStorageService: NSObject, GoogleDriveServiceProtocol {
     public var isUserAuthorized: Bool { singInProvider.currentUser != nil }
     internal var googleDriveService: GTLRDriveService?
 
-    private let singInProvider = GIDSignIn.sharedInstance
+    private let singInProvider: GIDSignIn
+    private let queue: DispatchQueueType
     private weak var uiDelegate: UIViewController?
 
-    public init(uiDelegate: UIViewController) {
+    public init(uiDelegate: UIViewController, 
+                signInProvider: GIDSignIn = GIDSignIn.sharedInstance,
+                queue: DispatchQueueType = DispatchQueue.main,
+                service: GTLRDriveService? = nil) {
         self.uiDelegate = uiDelegate
-        super.init()
+        self.singInProvider = signInProvider
+        self.queue = queue
+        self.googleDriveService = service
     }
     
     private func createFile(from account: OpenBackupAccount, password: String) throws -> URL {
@@ -182,7 +188,7 @@ extension CloudStorageService: CloudStorageServiceProtocol {
             completion?(.notAuthorized)
             return
         }
-
+        
         if let user = singInProvider.currentUser {
             let service = GTLRDriveService()
             service.authorizer = user.fetcherAuthorizer
@@ -190,14 +196,14 @@ extension CloudStorageService: CloudStorageServiceProtocol {
             completion?(.authorized)
             return
         }
-
-        DispatchQueue.main.async { [weak self] in
+        
+        queue.async { [weak self] in
             self?.singInProvider.signIn(withPresenting: uiDelegate, hint: nil, additionalScopes: [kGTLRAuthScopeDriveAppdata])  { result, error in
                 if error != nil {
                     completion?(.notAuthorized)
                     return
                 }
-
+                
                 let service = GTLRDriveService()
                 service.authorizer = result?.user.fetcherAuthorizer
                 self?.googleDriveService = service
