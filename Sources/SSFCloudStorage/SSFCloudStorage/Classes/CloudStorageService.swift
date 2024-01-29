@@ -28,12 +28,12 @@ public enum CloudStorageAccountState {
 }
 
 protocol GoogleDriveServiceProtocol: AnyObject {
-    var googleDriveService: GTLRDriveService? { get }
+    var googleDriveService: GoogleService? { get }
 }
 
 public class CloudStorageService: NSObject, GoogleDriveServiceProtocol {
     public var isUserAuthorized: Bool { singInProvider.currentUser != nil }
-    internal var googleDriveService: GTLRDriveService?
+    public var googleDriveService: GoogleService?
 
     private let singInProvider: GIDSignIn
     private let queue: DispatchQueueType
@@ -41,7 +41,8 @@ public class CloudStorageService: NSObject, GoogleDriveServiceProtocol {
 
     public init(uiDelegate: UIViewController, 
                 signInProvider: GIDSignIn = GIDSignIn.sharedInstance,
-                queue: DispatchQueueType = DispatchQueue.main) {
+                queue: DispatchQueueType = DispatchQueue.main,
+                googleDriveService: GoogleService? = BaseGoogleService(googleService: GTLRDriveService())) {
         self.uiDelegate = uiDelegate
         self.singInProvider = signInProvider
         self.queue = queue
@@ -188,9 +189,10 @@ extension CloudStorageService: CloudStorageServiceProtocol {
         }
         
         if let user = singInProvider.currentUser {
-            let service = GTLRDriveService()
-            service.authorizer = user.fetcherAuthorizer
-            self.googleDriveService = service
+//            let service = GTLRDriveService()
+//            service.authorizer = user.fetcherAuthorizer
+//            self.googleDriveService = service
+            googleDriveService?.set(authorizer: user.fetcherAuthorizer)
             completion?(.authorized)
             return
         }
@@ -202,9 +204,10 @@ extension CloudStorageService: CloudStorageServiceProtocol {
                     return
                 }
                 
-                let service = GTLRDriveService()
-                service.authorizer = result?.user.fetcherAuthorizer
-                self?.googleDriveService = service
+//                let service = GTLRDriveService()
+//                service.authorizer = result?.user.fetcherAuthorizer
+//                self?.googleDriveService = service
+                self?.googleDriveService?.set(authorizer: result?.user.fetcherAuthorizer)
                 completion?(.authorized)
             }
         }
