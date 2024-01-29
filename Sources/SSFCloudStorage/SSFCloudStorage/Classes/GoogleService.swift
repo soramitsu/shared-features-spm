@@ -6,7 +6,7 @@ public protocol GoogleService {
     func set(authorizer: GTMFetcherAuthorizationProtocol?)
 }
 
-final class BaseGoogleService: GoogleService {
+public class BaseGoogleService: GoogleService {
     private let googleService: GTLRDriveService
 
     public init(googleService: GTLRDriveService) {
