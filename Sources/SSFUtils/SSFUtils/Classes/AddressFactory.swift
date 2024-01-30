@@ -2,7 +2,7 @@ import Foundation
 import IrohaCrypto
 import SSFModels
 
-public enum AddressFactory {
+enum AddressFactory {
     private static let substrateFactory = SS58AddressFactory()
 
     public static func address(for accountId: AccountId, chainFormat: SFChainFormat) throws -> AccountAddress {

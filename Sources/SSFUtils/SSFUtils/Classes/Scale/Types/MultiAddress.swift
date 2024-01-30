@@ -14,6 +14,8 @@ public enum MultiAddress: Equatable {
     case raw(_ value: Data)
     case address32(_ value: Data)
     case address20(_ value: Data)
+    case indexedString(_ value: Data)
+    case rawString(_ value: Data)
 }
 
 extension MultiAddress: Codable {
@@ -49,7 +51,6 @@ extension MultiAddress: Codable {
     }
 
     public func encode(to encoder: Encoder) throws {
-
         switch self {
         case .accoundId(let value):
             var container = encoder.unkeyedContainer()
@@ -74,6 +75,14 @@ extension MultiAddress: Codable {
         case .accountTo(let value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
+        case .indexedString(let value):
+            var container = encoder.singleValueContainer()
+            let null = Data([0])
+            let full = null + value
+            try container.encode(full.toHex(includePrefix: true))
+        case .rawString(let value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value.toHex(includePrefix: true))
         }
     }
 }

@@ -76,6 +76,74 @@ extension MetaAccountModel {
     }
 }
 
+// MARK: - Account request
+
+public struct ChainAccountRequest {
+    public let chainId: ChainModel.Id
+    public let addressPrefix: UInt16
+    public let isEthereumBased: Bool
+    public let accountId: AccountId?
+}
+
+extension MetaAccountModel {
+    public func fetch(for request: ChainAccountRequest) -> ChainAccountResponse? {
+        if let chainAccount = chainAccounts.first(where: { $0.chainId == request.chainId }) {
+            guard let cryptoType = CryptoType(rawValue: chainAccount.cryptoType) else {
+                return nil
+            }
+
+            return ChainAccountResponse(
+                chainId: request.chainId,
+                accountId: chainAccount.accountId,
+                publicKey: chainAccount.publicKey,
+                name: name,
+                cryptoType: cryptoType,
+                addressPrefix: request.addressPrefix,
+                isEthereumBased: request.isEthereumBased,
+                isChainAccount: true,
+                walletId: metaId
+            )
+        }
+
+        if request.isEthereumBased {
+            guard let publicKey = ethereumPublicKey, let accountId = ethereumAddress else {
+                return nil
+            }
+
+            return ChainAccountResponse(
+                chainId: request.chainId,
+                accountId: accountId,
+                publicKey: publicKey,
+                name: name,
+                cryptoType: .ecdsa,
+                addressPrefix: request.addressPrefix,
+                isEthereumBased: request.isEthereumBased,
+                isChainAccount: false,
+                walletId: metaId
+            )
+        }
+
+        guard let cryptoType = CryptoType(rawValue: substrateCryptoType) else {
+            return nil
+        }
+
+        return ChainAccountResponse(
+            chainId: request.chainId,
+            accountId: substrateAccountId,
+            publicKey: substratePublicKey,
+            name: name,
+            cryptoType: cryptoType,
+            addressPrefix: request.addressPrefix,
+            isEthereumBased: false,
+            isChainAccount: false,
+            walletId: metaId
+        )
+    }
+    
+}
+
+// MARK: - Replacing
+
 extension MetaAccountModel {
     public func insertingChainAccount(_ newChainAccount: ChainAccountModel) -> MetaAccountModel {
         var newChainAccounts = chainAccounts.filter {

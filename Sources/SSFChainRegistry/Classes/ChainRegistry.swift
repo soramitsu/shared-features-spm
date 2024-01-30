@@ -1,4 +1,5 @@
 import Foundation
+import Web3
 import RobinHood
 import SSFUtils
 import SSFModels
@@ -11,7 +12,8 @@ public protocol ChainRegistryProtocol: AnyObject {
         usedRuntimePaths: [String : [String]],
         runtimeItem: RuntimeMetadataItemProtocol?
     ) async throws -> RuntimeProviderProtocol
-    func getConnection(for chain: ChainModel) throws -> ChainConnection
+    func getConnection(for chain: ChainModel) throws -> SubstrateConnection
+    func getEthereumConnection(for chain: ChainModel) throws -> Web3EthConnection
     func getChain(for chainId: ChainModel.Id) async throws -> ChainModel
     func getChains() async throws -> [ChainModel]
     func getReadySnapshot(
@@ -65,7 +67,7 @@ extension ChainRegistry: ChainRegistryProtocol {
         if let runtimeItem = runtimeItem {
             runtimeMetadataItem = runtimeItem
         } else {
-            let connection = try connectionPool.setupConnection(for: chainModel)
+            let connection = try connectionPool.setupSubstrateConnection(for: chainModel)
             runtimeMetadataItem = try await runtimeSyncService.register(chain: chainModel, with: connection)
         }
         let chainTypes = try await chainsTypesSyncService.getTypes(for: chainId)
@@ -88,7 +90,7 @@ extension ChainRegistry: ChainRegistryProtocol {
         if let runtimeItem = runtimeItem {
             runtimeMetadataItem = runtimeItem
         } else {
-            let connection = try connectionPool.setupConnection(for: chainModel)
+            let connection = try connectionPool.setupSubstrateConnection(for: chainModel)
             runtimeMetadataItem = try await runtimeSyncService.register(chain: chainModel, with: connection)
         }
         let chainTypes = try await chainsTypesSyncService.getTypes(for: chainId)
@@ -99,8 +101,14 @@ extension ChainRegistry: ChainRegistryProtocol {
         return readySnaphot
     }
     
-    public func getConnection(for chain: ChainModel) throws -> ChainConnection {
-        try connectionPool.setupConnection(for: chain)
+    public func getConnection(for chain: ChainModel) throws -> SubstrateConnection {
+        try connectionPool.setupSubstrateConnection(for: chain)
+    }
+    
+    public func getEthereumConnection(
+        for chain: SSFModels.ChainModel
+    ) throws -> Web3EthConnection {
+        try connectionPool.setupWeb3EthereumConnection(for: chain)
     }
     
     public func getChain(for chainId: ChainModel.Id) async throws -> ChainModel {

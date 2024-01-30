@@ -124,6 +124,10 @@ public struct ChainAssetId: Equatable, Codable, Hashable {
         self.chainId = chainId
         self.assetId = assetId
     }
+    
+    public var id: String {
+        [chainId,assetId].joined(separator: ":")
+    }
 }
 
 public extension ChainAsset {

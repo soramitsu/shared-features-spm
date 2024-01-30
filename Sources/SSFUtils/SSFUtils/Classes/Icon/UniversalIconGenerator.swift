@@ -78,7 +78,6 @@ public class UniversalIconGenerator: IconGenerating {
 
         let typeValue = (try? addressFactory.type(fromAddress: address)) ?? 0
 
-        let chainType = typeValue.uint16Value
         let isEthereum = address.contains("0x")
         let chainFormat: SFChainFormat = isEthereum ? .sfEthereum : .sfSubstrate(typeValue.uint16Value)
         let accountId = try AddressFactory.accountId(from: address, chainFormat: chainFormat)

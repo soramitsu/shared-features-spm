@@ -18,7 +18,7 @@ final class XcmDependencyContainer {
     private let chainRegistry: ChainRegistryProtocol
     private let fromChainData: XcmAssembly.FromChainData
     
-    private var connection: ChainConnection?
+    private var connection: SubstrateConnection?
     
     init(
         chainRegistry: ChainRegistryProtocol,

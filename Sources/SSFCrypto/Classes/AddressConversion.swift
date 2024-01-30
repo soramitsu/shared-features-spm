@@ -6,9 +6,17 @@ import SSFModels
 
 public enum AddressFactory {
     private static let substrateFactory = SS58AddressFactory()
+    
+    private static func chainFormat(of chain: ChainModel) -> SFChainFormat {
+        chain.isEthereumBased ? .sfEthereum : .sfSubstrate(chain.addressPrefix)
+    }
 
     public static func accountId(from address: AccountAddress, chainFormat: SFChainFormat) throws -> AccountId {
         try address.toAccountId(using: chainFormat)
+    }
+    
+    public static func accountId(from address: AccountAddress, chain: ChainModel) throws -> AccountId {
+        try address.toAccountId(using: chainFormat(of: chain))
     }
 
     public static func randomAccountId(for chainFormat: SFChainFormat) -> AccountId {
