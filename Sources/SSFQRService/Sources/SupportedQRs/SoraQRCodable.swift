@@ -34,6 +34,10 @@ final class SoraQRDecoder: QRDecoder {
 
         let fields = decodedString.components(separatedBy: SubstrateQRConstants.fieldsSeparator)
 
+        guard fields.count == 6 else {
+            throw QRDecoderError.brokenFormat
+        }
+
         let prefix = fields[0]
         let address = fields[1]
         let publicKey = try Data(hexStringSSF: fields[2])

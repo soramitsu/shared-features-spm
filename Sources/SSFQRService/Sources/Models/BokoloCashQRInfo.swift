@@ -1,7 +1,7 @@
 import Foundation
 import MPQRCoreSDK
 
-public struct BokoloCashQRInfo: QRInfo {
+public struct BokoloCashQRInfo: QRInfo, Equatable {
     public let address: String
     public let assetId: String?
     public let transactionAmount: String?

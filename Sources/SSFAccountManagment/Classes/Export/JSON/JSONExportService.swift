@@ -13,7 +13,12 @@ enum JSONExportServiceError: Error {
     case missingJson
 }
 
-//sourcery: AutoMockable
+// To regenerate mock object
+// Change '_AutoMockable' to 'AutoMockable'
+// Run build to generate the mock
+// Replace 'class' to 'actor' in genereated mock file
+// Change 'AutoMockable' to '_AutoMockable' to avoid future generations
+//sourcery: _AutoMockable
 protocol JSONExportServiceProtocol: Actor {
     func export(
         wallet: MetaAccountModel,
