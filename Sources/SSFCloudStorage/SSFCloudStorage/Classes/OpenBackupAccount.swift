@@ -1,14 +1,13 @@
 import Foundation
 
 public struct OpenBackupAccount: Codable {
-    
     public enum BackupAccountType: String, Codable {
         case passphrase
         case json
         case seed
     }
     
-    public struct Json: Codable {
+    public struct Json: Codable, Hashable {
         public var substrateJson: String?
         public var ethJson: String?
         
@@ -18,7 +17,7 @@ public struct OpenBackupAccount: Codable {
         }
     }
     
-    public struct Seed: Codable {
+    public struct Seed: Codable, Hashable {
         public var substrateSeed: String?
         public var ethSeed: String?
         
