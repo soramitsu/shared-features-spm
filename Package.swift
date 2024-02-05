@@ -250,6 +250,12 @@ let package = Package(
                 "SSFKeyPair",
                 "IrohaCrypto"
             ]
+        ),
+        .testTarget(
+            name: "SSFCloudStorageTests",
+            dependencies: [
+                "SSFCloudStorage"
+            ]
         )
     ]
 )

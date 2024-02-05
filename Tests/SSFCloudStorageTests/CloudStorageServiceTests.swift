@@ -15,6 +15,8 @@ final class CloudStorageServiceTests: XCTestCase {
     var signInProvider: GIDSignInMock?
     var delegate: UIViewController?
     var queue: DispatchQueueType?
+    var factory: BackupFileFactoryMock?
+    var encryptionService: EncryptionServiceMock?
     var googleService: GoogleServiceMock?
     
     override func setUpWithError() throws {
@@ -24,6 +26,8 @@ final class CloudStorageServiceTests: XCTestCase {
         let signInProvider = GIDSignInMock.sharedInstance as? GIDSignInMock
         let queue = DispatchQueueMock()
         let googleService = GoogleServiceMock()
+        let factory = BackupFileFactoryMock()
+        let encryptionService = EncryptionServiceMock()
         
         guard let signInProvider else { throw CloudStorageServiceTestsError.noSignInProviderExists }
         
@@ -31,11 +35,15 @@ final class CloudStorageServiceTests: XCTestCase {
         self.delegate = delegate
         self.queue = queue
         self.googleService = googleService
+        self.encryptionService = encryptionService
+        self.factory = factory
         
         service = CloudStorageService(uiDelegate: delegate,
                                       signInProvider: signInProvider,
+                                      googleDriveService: googleService,
                                       queue: queue,
-                                      googleDriveService: googleService)
+                                      encryptionService: encryptionService,
+                                      fileFactory: factory)
     }
     
     override func tearDownWithError() throws {
@@ -48,6 +56,8 @@ final class CloudStorageServiceTests: XCTestCase {
         delegate = nil
         queue = nil
         googleService = nil
+        encryptionService = nil
+        factory = nil
     }
     
     func testUserAuthorized() {
@@ -107,16 +117,18 @@ final class CloudStorageServiceTests: XCTestCase {
         // arrange
         signInProvider?._currentUser = TestData.user
         googleService?.executeQueryReturnValue = (ticket: GoogleServiceTicketMock(), file: nil)
-        
+        factory?.createFileReturnValue = try getURL()
         // act
         try await service?.saveBackup(account: TestData.account, password: "1")
         
         // assert
         XCTAssertEqual(googleService?.setAuthorizerCallsCount, 1)
         XCTAssertEqual(googleService?.executeQueryCallsCount, 3)
+        XCTAssertEqual(factory?.createFileCallsCount, 1)
         
         XCTAssertTrue(googleService?.setAuthorizerCalled ?? false)
         XCTAssertTrue(googleService?.executeQueryCalled ?? false)
+        XCTAssertTrue(factory?.createFileCalled ?? false)
     }
     
     func testImportBackupAccount() async throws {
@@ -227,5 +239,14 @@ extension CloudStorageServiceTests {
         )
         
         static let emptyAccount = OpenBackupAccount(address: "")
+    }
+    
+    func getURL() throws -> URL {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(TestData.encryptedAccount.address)")
+            .appendingPathExtension("json")
+        let data = try JSONEncoder().encode(TestData.encryptedAccount)
+        try data.write(to: url)
+        return url
     }
 }
