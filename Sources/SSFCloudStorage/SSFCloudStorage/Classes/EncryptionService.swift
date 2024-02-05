@@ -1,6 +1,7 @@
 import Foundation
 import TweetNacl
 import IrohaCrypto
+import SSFUtils
 
 public protocol EncryptionServiceProtocol {
     func getDecrypted(from message: String?, password: String) throws -> String?
