@@ -1,4 +1,5 @@
 import Foundation
+import SSFUtils
 
 public struct OpenBackupAccount: Codable {
     public enum BackupAccountType: String, Codable {
@@ -59,5 +60,29 @@ public struct OpenBackupAccount: Codable {
         self.backupAccountType = backupAccountType
         self.json = json
         self.encryptedSeed = encryptedSeed
+    }
+}
+
+extension OpenBackupAccount {
+    static func create(address: String,
+                       password: String,
+                       substrateData: Data,
+                       ethereumData: Data) throws -> OpenBackupAccount {
+        let definition = try JSONDecoder().decode(KeystoreDefinition.self, from: substrateData)
+        let info = try KeystoreInfoFactory().createInfo(from: definition)
+        
+        let substrateJson = String(data: substrateData, encoding: .utf8)
+        let ethereumJson = String(data: ethereumData, encoding: .utf8)
+        let json = OpenBackupAccount.Json(substrateJson: substrateJson,
+                                          ethJson: ethereumJson
+        )
+        
+        return OpenBackupAccount(name: info.meta?.name,
+                                 address: address,
+                                 passphrase: password,
+                                 cryptoType: String(info.cryptoType.rawValue),
+                                 backupAccountType: [.json],
+                                 json: json
+        )
     }
 }

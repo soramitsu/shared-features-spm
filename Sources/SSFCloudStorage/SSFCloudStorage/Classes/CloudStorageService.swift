@@ -28,184 +28,80 @@ public protocol CloudStorageServiceProtocol: AnyObject {
 }
 
 protocol GoogleDriveServiceProtocol: AnyObject {
-    var googleDriveService: GoogleService? { get }
+    var googleDriveService: GoogleService { get }
 }
 
 public class CloudStorageService: NSObject, GoogleDriveServiceProtocol {
     public var isUserAuthorized: Bool { singInProvider.currentUser != nil }
-    public var googleDriveService: GoogleService?
+    public var googleDriveService: GoogleService
     
+    private weak var uiDelegate: UIViewController?
     private let singInProvider: GIDSignIn
     private let queue: DispatchQueueType
-    private weak var uiDelegate: UIViewController?
+    private let encryptionService: EncryptionServiceProtocol
+    private let fileFactory: BackupFileFactoryProtocol
     
     public init(uiDelegate: UIViewController,
                 signInProvider: GIDSignIn = GIDSignIn.sharedInstance,
+                googleDriveService: GoogleService = BaseGoogleService(googleService: GTLRDriveService()),
                 queue: DispatchQueueType = DispatchQueue.main,
-                googleDriveService: GoogleService = BaseGoogleService(googleService: GTLRDriveService())) {
+                encryptionService: EncryptionServiceProtocol = EncryptionService(),
+                fileFactory: BackupFileFactoryProtocol? = nil) {
         self.uiDelegate = uiDelegate
         self.singInProvider = signInProvider
-        self.queue = queue
         self.googleDriveService = googleDriveService
+        self.queue = queue
+        self.encryptionService = encryptionService
+        self.fileFactory = fileFactory ?? BackupFileFactory(service: encryptionService)
     }
-    
-    private func createFile(from account: OpenBackupAccount, password: String) throws -> URL {
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("\(account.address)")
-            .appendingPathExtension("json")
-        
-        let encodedPassphrase = try createEncriptedData(with: password, message: account.passphrase)
-        let encodedSubstrateDerivationPath = try createEncriptedData(with: password, message: account.substrateDerivationPath)
-        let encodedEthDerivationPath = try createEncriptedData(with: password, message: account.ethDerivationPath)
-        let encodedSubstrateSeed = try createEncriptedData(with: password, message: account.encryptedSeed?.substrateSeed)
-        let encodedEthSeed = try createEncriptedData(with: password, message: account.encryptedSeed?.ethSeed)
-        
-        let encryptedSeed = OpenBackupAccount.Seed(
-            substrateSeed: encodedSubstrateSeed?.toHex(),
-            ethSeed: encodedEthSeed?.toHex()
-        )
-        
-        let ecryptedBackupAccount = EcryptedBackupAccount(
-            name: account.name ?? "",
-            address: account.address,
-            encryptedMnemonicPhrase: encodedPassphrase?.toHex(),
-            encryptedSubstrateDerivationPath: encodedSubstrateDerivationPath?.toHex(),
-            encryptedEthDerivationPath: encodedEthDerivationPath?.toHex(),
-            cryptoType: account.cryptoType,
-            backupAccountType: account.backupAccountType.map { $0.map { $0.rawValue }},
-            json: account.json,
-            encryptedSeed: encryptedSeed
-        )
-        
-        let data = try JSONEncoder().encode(ecryptedBackupAccount)
-        try data.write(to: url)
-        
-        return url
-    }
-    
-    private func getDecrypted(from message: String?, password: String) throws -> String? {
-        guard let message = message else {
-            return nil
-        }
-        guard let passwordData = password.data(using: .utf8) else {
-            throw CloudStorageServiceError.incorectPassword
-        }
-        
-        let data = try Data(hexStringSSF: message)
-        
-        let scryptParameters = try ScryptParameters(data: data)
-        
-        let encryptionKey = try IRScryptKeyDeriviation()
-            .deriveKey(from: passwordData,
-                       salt: scryptParameters.salt,
-                       scryptN: UInt(scryptParameters.scryptN),
-                       scryptP: UInt(scryptParameters.scryptP),
-                       scryptR: UInt(scryptParameters.scryptR),
-                       length: UInt(KeystoreConstants.encryptionKeyLength))
-        
-        let nonceStart = ScryptParameters.encodedLength
-        let nonceEnd = ScryptParameters.encodedLength + KeystoreConstants.nonceLength
-        let encnonce = Data(data[nonceStart..<nonceEnd])
-        let encryptedData = Data(data[nonceEnd...])
-        
-        let dencodedData = try NaclSecretBox.open(box: encryptedData, nonce: encnonce, key: encryptionKey)
-        return String(decoding: dencodedData, as: UTF8.self)
-    }
-    
-    private func createEncriptedData(with password: String, message: String?) throws -> Data? {
-        guard let message = message else {
-            return nil
-        }
-        guard let passwordData = password.data(using: .utf8) else {
-            throw CloudStorageServiceError.incorectPassword
-        }
-        
-        let scryptParameters = try ScryptParameters()
-        
-        let encryptionKey = try IRScryptKeyDeriviation()
-            .deriveKey(from: passwordData,
-                       salt: scryptParameters.salt,
-                       scryptN: UInt(scryptParameters.scryptN),
-                       scryptP: UInt(scryptParameters.scryptP),
-                       scryptR: UInt(scryptParameters.scryptR),
-                       length: UInt(KeystoreConstants.encryptionKeyLength))
-        
-        let messageUtf8 = Data(message.utf8)
-        let nonce = try Data.generateRandomBytes(of: KeystoreConstants.nonceLength)
-        let encrypted = try NaclSecretBox.secretBox(message: messageUtf8, nonce: nonce, key: encryptionKey)
-        return scryptParameters.encode() + nonce + encrypted
-    }
-    
-    private func getParentFolder() async throws -> String {
-        let q = "name = 'backupFolder'"
-        let files = try await getAppFolderFiles(from: q)
-        
-        if files.isEmpty {
-            let fileId = try await createBackupFolder()
-            return fileId
-        }
-        
-        let folderId = files.first?.identifier ?? ""
-        return folderId
-    }
-    
-    private func createBackupFolder() async throws -> String {
-        let file = GTLRDrive_File()
-        file.name = "backupFolder"
-        file.parents = ["appDataFolder"]
-        file.mimeType = "application/vnd.google-apps.folder"
-        
-        let query = GTLRDriveQuery_FilesCreate.query(withObject: file, uploadParameters: nil)
-        query.fields = "id"
-        
-        let results = try await googleDriveService?.executeQuery(query)
-        let fileId = (results?.file as? GTLRDrive_File)?.identifier ?? ""
-        return fileId
-    }
-    
-    private func executeQueryForMedia(withFileId: String) async throws -> Data {
-        let query = GTLRDriveQuery_FilesGet.queryForMedia(withFileId: withFileId)
-        let results = try await googleDriveService?.executeQuery(query)
-        
-        guard let data = (results?.file as? GTLRDataObject)?.data else {
-            throw CloudStorageServiceError.notFound
-        }
-        
-        return data
-    }
-    
+
     private func getAppFolderFiles(from q: String? = nil, withField: Bool = false) async throws -> [GTLRDrive_File] {
         let query = GTLRDriveQuery_FilesList.query()
         query.spaces = "appDataFolder"
         query.fields = withField ? "files(id, name, description)" : nil
         query.q = q
-        
-        let results = try await googleDriveService?.executeQuery(query)
-        let files = (results?.file as? GTLRDrive_FileList)?.files ?? []
+
+        let results = try await googleDriveService.executeQuery(query)
+        let files = (results.file as? GTLRDrive_FileList)?.files ?? []
         return files
     }
-    
-    private func createOpenBackupAccount(address: String,
-                                         password: String,
-                                         substrateData: Data,
-                                         ethereumData: Data) throws -> OpenBackupAccount {
-        let definition = try JSONDecoder().decode(KeystoreDefinition.self, from: substrateData)
-        let info = try KeystoreInfoFactory().createInfo(from: definition)
-        
-        let substrateJson = String(data: substrateData, encoding: .utf8)
-        let ethereumJson = String(data: ethereumData, encoding: .utf8)
-        let json = OpenBackupAccount.Json(
-            substrateJson: substrateJson,
-            ethJson: ethereumJson
-        )
-        
-        return OpenBackupAccount(name: info.meta?.name,
-                                 address: address,
-                                 passphrase: password,
-                                 cryptoType: String(info.cryptoType.rawValue),
-                                 backupAccountType: [.json],
-                                 json: json
-        )
+
+    private func getParentFolder() async throws -> String {
+        let q = "name = 'backupFolder'"
+        let files = try await getAppFolderFiles(from: q)
+
+        if files.isEmpty {
+            let fileId = try await createBackupFolder()
+            return fileId
+        }
+
+        let folderId = files.first?.identifier ?? ""
+        return folderId
+    }
+
+    private func createBackupFolder() async throws -> String {
+        let file = GTLRDrive_File()
+        file.name = "backupFolder"
+        file.parents = ["appDataFolder"]
+        file.mimeType = "application/vnd.google-apps.folder"
+
+        let query = GTLRDriveQuery_FilesCreate.query(withObject: file, uploadParameters: nil)
+        query.fields = "id"
+
+        let results = try await googleDriveService.executeQuery(query)
+        let fileId = (results.file as? GTLRDrive_File)?.identifier ?? ""
+        return fileId
+    }
+
+    private func executeQueryForMedia(withFileId: String) async throws -> Data {
+        let query = GTLRDriveQuery_FilesGet.queryForMedia(withFileId: withFileId)
+        let results = try await googleDriveService.executeQuery(query)
+
+        guard let data = (results.file as? GTLRDataObject)?.data else {
+            throw CloudStorageServiceError.notFound
+        }
+
+        return data
     }
 }
 
@@ -216,14 +112,14 @@ extension CloudStorageService: CloudStorageServiceProtocol {
         guard let uiDelegate = uiDelegate else {
             return .notAuthorized
         }
-        
+
         if let user = singInProvider.currentUser {
-            googleDriveService?.set(authorizer: user.fetcherAuthorizer)
+            googleDriveService.set(authorizer: user.fetcherAuthorizer)
             return .authorized
         }
         
         let result = try await signIn(uiDelegate: uiDelegate)
-        googleDriveService?.set(authorizer: result?.user.fetcherAuthorizer)
+        googleDriveService.set(authorizer: result?.user.fetcherAuthorizer)
         return .authorized
     }
     
@@ -239,7 +135,7 @@ extension CloudStorageService: CloudStorageServiceProtocol {
     }
     
     public func saveBackup(account: OpenBackupAccount, password: String) async throws {
-        let fileUrl = try createFile(from: account, password: password)
+        let fileUrl = try fileFactory.createFile(from: account, password: password)
         let data = try Data(contentsOf: fileUrl)
         
         let signInState = try await signInIfNeeded()
@@ -261,7 +157,7 @@ extension CloudStorageService: CloudStorageServiceProtocol {
         let query = GTLRDriveQuery_FilesCreate.query(withObject: file, uploadParameters: params)
         query.fields = "id"
         
-        try await googleDriveService?.executeQuery(query)
+        try await googleDriveService.executeQuery(query)
     }
     
     public func importBackup(account: OpenBackupAccount, password: String) async throws -> OpenBackupAccount {
@@ -385,21 +281,21 @@ extension CloudStorageService {
             throw CloudStorageServiceError.incorectJson
         }
         
-        let passphrase = try? getDecrypted(from: account.encryptedMnemonicPhrase, password: password)
-        let substrateDerivationPath = try? getDecrypted(from: account.encryptedSubstrateDerivationPath, password: password)
+        let passphrase = try? encryptionService.getDecrypted(from: account.encryptedMnemonicPhrase, password: password)
+        let substrateDerivationPath = try? encryptionService.getDecrypted(from: account.encryptedSubstrateDerivationPath, password: password)
         
         var ethDerivationPath: String?
         
         if let path = account.encryptedEthDerivationPath, !path.isEmpty {
-            guard let ethPath = try? getDecrypted(from: path, password: password) else {
+            guard let ethPath = try? encryptionService.getDecrypted(from: path, password: password) else {
                 throw CloudStorageServiceError.incorectPassword
             }
             ethDerivationPath = ethPath
         }
         
         let encryptedSeed = account.encryptedSeed
-        let substrateSeed = try? getDecrypted(from: encryptedSeed?.substrateSeed, password: password)
-        let ethereumSeed = try? getDecrypted(from: encryptedSeed?.ethSeed, password: password)
+        let substrateSeed = try? encryptionService.getDecrypted(from: encryptedSeed?.substrateSeed, password: password)
+        let ethereumSeed = try? encryptionService.getDecrypted(from: encryptedSeed?.ethSeed, password: password)
         
         let decodedAccount = OpenBackupAccount(name: account.name,
                                                address: account.address,
@@ -437,11 +333,10 @@ extension CloudStorageService {
         
         let substrateData = try await executeQueryForMedia(withFileId: fileId)
         let ethereumData = try await executeQueryForMedia(withFileId: ethereumFileId)
-        return try createOpenBackupAccount(
-            address: account.address,
-            password: password,
-            substrateData: substrateData,
-            ethereumData: ethereumData
+        return try OpenBackupAccount.create(address: account.address,
+                                            password: password,
+                                            substrateData: substrateData,
+                                            ethereumData: ethereumData
         )
     }
     
@@ -460,6 +355,6 @@ extension CloudStorageService {
             throw CloudStorageServiceError.notFound
         }
         
-        try await googleDriveService?.executeQuery(GTLRDriveQuery_FilesDelete.query(withFileId: fileId))
+        try await googleDriveService.executeQuery(GTLRDriveQuery_FilesDelete.query(withFileId: fileId))
     }
 }
