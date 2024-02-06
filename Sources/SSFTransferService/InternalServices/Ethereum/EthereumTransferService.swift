@@ -68,14 +68,7 @@ final class EthereumTransferServiceDefault: EthereumTransferService {
         }
         
         if let currentSubscription = feeSubscriptionId {
-            do {
-                guard try await ethereumService.unsubscribe(subscriptionId: currentSubscription) else {
-                    throw TransferServiceError.unsubscribeFailed
-                }
-                return subscribeToBlocksAndEstimateFee(for: transfer)
-            } catch {
-                return Fail(error: error).finishedAsyncThrowingStream()
-            }
+            return await replaceCurrent(currentSubscription, for: transfer)
         } else {
             return subscribeToBlocksAndEstimateFee(for: transfer)
         }
@@ -89,6 +82,20 @@ final class EthereumTransferServiceDefault: EthereumTransferService {
     }
     
     // MARK: - Private transfer methods
+    
+    private func replaceCurrent(
+        _ subscriptionId: String,
+        for transfer: EthereumTransfer
+    ) async -> AsyncThrowingStream<BigUInt, Error> {
+        do {
+            guard try await ethereumService.unsubscribe(subscriptionId: subscriptionId) else {
+                throw TransferServiceError.unsubscribeFailed
+            }
+            return subscribeToBlocksAndEstimateFee(for: transfer)
+        } catch {
+            return Fail(error: error).finishedAsyncThrowingStream()
+        }
+    }
     
     private func transferNative(
         transfer: EthereumTransfer
@@ -115,35 +122,49 @@ final class EthereumTransferServiceDefault: EthereumTransferService {
     ) -> AsyncThrowingStream<BigUInt, Error> {
         AsyncThrowingStream { continuation in
             do {
-                try ethereumService.connection.subscribeToNewHeads { [weak self] subscriptionId in
-                    self?.feeSubscriptionId = subscriptionId.result
-                } onEvent: { [weak self] responce in
-                    guard let self else {
-                        continuation.finish(throwing: TransferServiceError.weakSelf)
-                        return
-                    }
-
-                    switch responce.status {
-                    case let .success(blockObject):
-                        let task = Task {
-                            do {
-                                let fee = try await self.estimateFee(for: blockObject, transfer: transfer)
-                                continuation.yield(fee)
-                            } catch {
-                                continuation.finish(throwing: error)
-                            }
-                        }
-                        continuation.onTermination = { _ in
-                            task.cancel()
-                        }
-                    case let .failure(error):
-                        continuation.finish(throwing: error)
-                    }
-                }
-
+                try subscribeAndHandleEvent(with: continuation, for: transfer)
             } catch {
                 continuation.finish(throwing: error)
             }
+        }
+    }
+    
+    private func subscribeAndHandleEvent(
+        with continuation: AsyncThrowingStream<BigUInt, Error>.Continuation,
+        for transfer: EthereumTransfer
+    ) throws {
+        try ethereumService.connection.subscribeToNewHeads { [weak self] subscriptionId in
+            self?.feeSubscriptionId = subscriptionId.result
+        } onEvent: { [weak self] responce in
+            guard let self else {
+                continuation.finish(throwing: TransferServiceError.weakSelf)
+                return
+            }
+
+            switch responce.status {
+            case let .success(blockObject):
+                startTaskForEstimateFee(with: continuation, for: transfer, blockObject: blockObject)
+            case let .failure(error):
+                continuation.finish(throwing: error)
+            }
+        }
+    }
+    
+    private func startTaskForEstimateFee(
+        with continuation: AsyncThrowingStream<BigUInt, Error>.Continuation,
+        for transfer: EthereumTransfer,
+        blockObject: EthereumBlockObject
+    ) {
+        let task = Task {
+            do {
+                let fee = try await self.estimateFee(for: blockObject, transfer: transfer)
+                continuation.yield(fee)
+            } catch {
+                continuation.finish(throwing: error)
+            }
+        }
+        continuation.onTermination = { _ in
+            task.cancel()
         }
     }
     

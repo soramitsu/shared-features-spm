@@ -4,33 +4,40 @@ import SSFModels
 
 protocol EthereumNodeFetching {
     func getNode(for chain: ChainModel) throws -> Web3.Eth
-    func getHttps(for chain: ChainModel) throws -> Web3.Eth
 }
 
 final class EthereumNodeFetchingDefault: EthereumNodeFetching {
+    enum UrlScheme: String {
+        case wss
+        case https
+    }
+    
+    // MARK: - EthereumNodeFetching
+    
     func getNode(for chain: ChainModel) throws -> Web3.Eth {
-        let randomWssNode = chain.nodes.filter { $0.url.absoluteString.contains("wss") }.randomElement()
-        let hasSelectedWssNode = chain.selectedNode?.url.absoluteString.contains("wss") == true
-        let node = hasSelectedWssNode ? chain.selectedNode : randomWssNode
-
-        guard let wssURL = node?.url, let apiKey = node?.apikey?.key else {
+        guard let node = getNodeFor(chain: chain, scheme: .wss), let apikey = node.apikey?.key else {
             return try getHttps(for: chain)
         }
 
-        let finalURL = wssURL.appendingPathComponent(apiKey)
+        let finalURL = node.url.appendingPathComponent(apikey)
 
         return try Web3(wsUrl: finalURL.absoluteString).eth
     }
+    
+    // MARK: - Private methods
 
-    func getHttps(for chain: ChainModel) throws -> Web3.Eth {
-        let randomWssNode = chain.nodes.filter { $0.url.absoluteString.contains("https") }.randomElement()
-        let hasSelectedWssNode = chain.selectedNode?.url.absoluteString.contains("https") == true
-        let node = hasSelectedWssNode ? chain.selectedNode : randomWssNode
-
-        guard let httpsURL = node?.url else {
+    private func getHttps(for chain: ChainModel) throws -> Web3.Eth {
+        guard let httpsURL = getNodeFor(chain: chain, scheme: .https)?.url else {
             throw ConnectionPoolError.connectionFetchingError
         }
 
         return Web3(rpcURL: httpsURL.absoluteString).eth
+    }
+    
+    private func getNodeFor(chain: ChainModel, scheme: UrlScheme) -> ChainNodeModel? {
+        let randomWssNode = chain.nodes.filter { $0.url.absoluteString.contains(scheme.rawValue) }.randomElement()
+        let hasSelectedWssNode = chain.selectedNode?.url.absoluteString.contains(scheme.rawValue) == true
+        let node = hasSelectedWssNode ? chain.selectedNode : randomWssNode
+        return node
     }
 }

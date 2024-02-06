@@ -88,41 +88,55 @@ public struct ChainAccountRequest {
 extension MetaAccountModel {
     public func fetch(for request: ChainAccountRequest) -> ChainAccountResponse? {
         if let chainAccount = chainAccounts.first(where: { $0.chainId == request.chainId }) {
-            guard let cryptoType = CryptoType(rawValue: chainAccount.cryptoType) else {
-                return nil
-            }
-
-            return ChainAccountResponse(
-                chainId: request.chainId,
-                accountId: chainAccount.accountId,
-                publicKey: chainAccount.publicKey,
-                name: name,
-                cryptoType: cryptoType,
-                addressPrefix: request.addressPrefix,
-                isEthereumBased: request.isEthereumBased,
-                isChainAccount: true,
-                walletId: metaId
-            )
+            return response(for: chainAccount, request: request)
         }
 
         if request.isEthereumBased {
-            guard let publicKey = ethereumPublicKey, let accountId = ethereumAddress else {
-                return nil
-            }
-
-            return ChainAccountResponse(
-                chainId: request.chainId,
-                accountId: accountId,
-                publicKey: publicKey,
-                name: name,
-                cryptoType: .ecdsa,
-                addressPrefix: request.addressPrefix,
-                isEthereumBased: request.isEthereumBased,
-                isChainAccount: false,
-                walletId: metaId
-            )
+            return responseForEthereumBased(request)
         }
 
+        return responseForSubstrate(request)
+    }
+    
+    // MARK: - Private methods
+    
+    private func response(for chainAccount: ChainAccountModel, request: ChainAccountRequest) -> ChainAccountResponse? {
+        guard let cryptoType = CryptoType(rawValue: chainAccount.cryptoType) else {
+            return nil
+        }
+
+        return ChainAccountResponse(
+            chainId: request.chainId,
+            accountId: chainAccount.accountId,
+            publicKey: chainAccount.publicKey,
+            name: name,
+            cryptoType: cryptoType,
+            addressPrefix: request.addressPrefix,
+            isEthereumBased: request.isEthereumBased,
+            isChainAccount: true,
+            walletId: metaId
+        )
+    }
+    
+    private func responseForEthereumBased(_ request: ChainAccountRequest) -> ChainAccountResponse? {
+        guard let publicKey = ethereumPublicKey, let accountId = ethereumAddress else {
+            return nil
+        }
+
+        return ChainAccountResponse(
+            chainId: request.chainId,
+            accountId: accountId,
+            publicKey: publicKey,
+            name: name,
+            cryptoType: .ecdsa,
+            addressPrefix: request.addressPrefix,
+            isEthereumBased: request.isEthereumBased,
+            isChainAccount: false,
+            walletId: metaId
+        )
+    }
+    
+    private func responseForSubstrate(_ request: ChainAccountRequest) -> ChainAccountResponse? {
         guard let cryptoType = CryptoType(rawValue: substrateCryptoType) else {
             return nil
         }
@@ -139,7 +153,6 @@ extension MetaAccountModel {
             walletId: metaId
         )
     }
-    
 }
 
 // MARK: - Replacing

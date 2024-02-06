@@ -31,9 +31,9 @@ struct TransferCall: Codable, Equatable {
 
     var dest: MultiAddress
     @StringCodable var value: BigUInt
-    let currencyId: SSFModels.CurrencyId?
+    let currencyId: CurrencyId?
 
-    init(dest: MultiAddress, value: BigUInt, currencyId: SSFModels.CurrencyId?) {
+    init(dest: MultiAddress, value: BigUInt, currencyId: CurrencyId?) {
         self.dest = dest
         self.value = value
         self.currencyId = currencyId

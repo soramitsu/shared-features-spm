@@ -17,7 +17,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         try await setupCallFactory()
     }
 
-    func testSoraNormalTransfer() async throws {
+    func testSoraNormalTransfer() throws {
         let chainAsset = createChainAsset(chain: .soraMain, substrateAssetType: .normal, currencyId: nil)
         let accountId = generateAccountId(for: chainAsset.chain)
         let call = callFactory?.transfer(to: accountId, amount: .zero, chainAsset: chainAsset)
@@ -29,7 +29,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         XCTAssertEqual(call?.moduleName, SubstrateCallPath.assetsTransfer.moduleName)
     }
     
-    func testReefNormalTransfer() async throws {
+    func testReefNormalTransfer() throws {
         let chainAsset = createChainAsset(chain: .reef, substrateAssetType: .normal, currencyId: nil)
         let accountId = generateAccountId(for: chainAsset.chain)
         let call = callFactory?.transfer(to: accountId, amount: .zero, chainAsset: chainAsset)
@@ -41,7 +41,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         XCTAssertEqual(call?.moduleName, SubstrateCallPath.defaultTransfer.moduleName)
     }
     
-    func testDefaultTransfer() async throws {
+    func testDefaultTransfer() throws {
         let chainAsset = createChainAsset(chain: .polkadot, substrateAssetType: .normal, currencyId: nil)
         let accountId = generateAccountId(for: chainAsset.chain)
         let call = callFactory?.transfer(to: accountId, amount: .zero, chainAsset: chainAsset)
@@ -53,7 +53,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         XCTAssertEqual(call?.moduleName, SubstrateCallPath.transferAllowDeath.moduleName)
     }
     
-    func testOrmlChainTransfer() async throws {
+    func testOrmlChainTransfer() throws {
         let chainAsset = createChainAsset(chain: .kusama, substrateAssetType: .ormlChain, currencyId: nil)
         let accountId = generateAccountId(for: chainAsset.chain)
         let call = callFactory?.transfer(to: accountId, amount: .zero, chainAsset: chainAsset)
@@ -65,7 +65,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         XCTAssertEqual(call?.moduleName, SubstrateCallPath.ormlChainTransfer.moduleName)
     }
     
-    func testOrmlAssetTransfer() async throws {
+    func testOrmlAssetTransfer() throws {
         let chainAsset = createChainAsset(chain: .kusama, substrateAssetType: .ormlAsset, currencyId: "1")
         let accountId = generateAccountId(for: chainAsset.chain)
         let call = callFactory?.transfer(to: accountId, amount: .zero, chainAsset: chainAsset)
@@ -77,7 +77,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         XCTAssertEqual(call?.moduleName, SubstrateCallPath.ormlAssetTransfer.moduleName)
     }
     
-    func testForeignAssetTransfer() async throws {
+    func testForeignAssetTransfer() throws {
         let chainAsset = createChainAsset(chain: .kusama, substrateAssetType: .foreignAsset, currencyId: "1")
         let accountId = generateAccountId(for: chainAsset.chain)
         let call = callFactory?.transfer(to: accountId, amount: .zero, chainAsset: chainAsset)
@@ -89,7 +89,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         XCTAssertEqual(call?.moduleName, SubstrateCallPath.ormlAssetTransfer.moduleName)
     }
     
-    func testStableAssetPoolTokenTransfer() async throws {
+    func testStableAssetPoolTokenTransfer() throws {
         let chainAsset = createChainAsset(chain: .kusama, substrateAssetType: .stableAssetPoolToken, currencyId: "1")
         let accountId = generateAccountId(for: chainAsset.chain)
         let call = callFactory?.transfer(to: accountId, amount: .zero, chainAsset: chainAsset)
@@ -101,7 +101,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         XCTAssertEqual(call?.moduleName, SubstrateCallPath.ormlAssetTransfer.moduleName)
     }
     
-    func testLiquidCrowdloanAssetTransfer() async throws {
+    func testLiquidCrowdloanAssetTransfer() throws {
         let chainAsset = createChainAsset(chain: .kusama, substrateAssetType: .liquidCrowdloan, currencyId: "1")
         let accountId = generateAccountId(for: chainAsset.chain)
         let call = callFactory?.transfer(to: accountId, amount: .zero, chainAsset: chainAsset)
@@ -113,7 +113,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         XCTAssertEqual(call?.moduleName, SubstrateCallPath.ormlAssetTransfer.moduleName)
     }
     
-    func testVTokenTransfer() async throws {
+    func testVTokenTransfer() throws {
         let chainAsset = createChainAsset(chain: .kusama, substrateAssetType: .vToken, currencyId: "1")
         let accountId = generateAccountId(for: chainAsset.chain)
         let call = callFactory?.transfer(to: accountId, amount: .zero, chainAsset: chainAsset)
@@ -125,7 +125,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         XCTAssertEqual(call?.moduleName, SubstrateCallPath.ormlAssetTransfer.moduleName)
     }
     
-    func testVsTokenTransfer() async throws {
+    func testVsTokenTransfer() throws {
         let chainAsset = createChainAsset(chain: .kusama, substrateAssetType: .vsToken, currencyId: "1")
         let accountId = generateAccountId(for: chainAsset.chain)
         let call = callFactory?.transfer(to: accountId, amount: .zero, chainAsset: chainAsset)
@@ -137,7 +137,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         XCTAssertEqual(call?.moduleName, SubstrateCallPath.ormlAssetTransfer.moduleName)
     }
     
-    func testStableTokenTransfer() async throws {
+    func testStableTokenTransfer() throws {
         let chainAsset = createChainAsset(chain: .kusama, substrateAssetType: .stable, currencyId: "1")
         let accountId = generateAccountId(for: chainAsset.chain)
         let call = callFactory?.transfer(to: accountId, amount: .zero, chainAsset: chainAsset)
@@ -149,7 +149,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         XCTAssertEqual(call?.moduleName, SubstrateCallPath.ormlAssetTransfer.moduleName)
     }
     
-    func testAssetIdTransfer() async throws {
+    func testAssetIdTransfer() throws {
         let chainAsset = createChainAsset(chain: .kusama, substrateAssetType: .assetId, currencyId: "1")
         let accountId = generateAccountId(for: chainAsset.chain)
         let call = callFactory?.transfer(to: accountId, amount: .zero, chainAsset: chainAsset)
@@ -161,7 +161,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         XCTAssertEqual(call?.moduleName, SubstrateCallPath.ormlAssetTransfer.moduleName)
     }
     
-    func testToken2Transfer() async throws {
+    func testToken2Transfer() throws {
         let chainAsset = createChainAsset(chain: .kusama, substrateAssetType: .xcm, currencyId: "1")
         let accountId = generateAccountId(for: chainAsset.chain)
         let call = callFactory?.transfer(to: accountId, amount: .zero, chainAsset: chainAsset)
@@ -173,7 +173,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         XCTAssertEqual(call?.moduleName, SubstrateCallPath.ormlAssetTransfer.moduleName)
     }
     
-    func testXcmTokenTransfer() async throws {
+    func testXcmTokenTransfer() throws {
         let chainAsset = createChainAsset(chain: .kusama, substrateAssetType: .token2, currencyId: "1")
         let accountId = generateAccountId(for: chainAsset.chain)
         let call = callFactory?.transfer(to: accountId, amount: .zero, chainAsset: chainAsset)
@@ -185,7 +185,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         XCTAssertEqual(call?.moduleName, SubstrateCallPath.ormlAssetTransfer.moduleName)
     }
     
-    func testEquilibriumTokenTransfer() async throws {
+    func testEquilibriumTokenTransfer() throws {
         let chainAsset = createChainAsset(chain: .equilibrium, substrateAssetType: .equilibrium, currencyId: "1")
         let accountId = generateAccountId(for: chainAsset.chain)
         let call = callFactory?.transfer(to: accountId, amount: .zero, chainAsset: chainAsset)
@@ -197,7 +197,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         XCTAssertEqual(call?.moduleName, SubstrateCallPath.equilibriumAssetTransfer.moduleName)
     }
     
-    func testSoraAssetTransfer() async throws {
+    func testSoraAssetTransfer() throws {
         let chainAsset = createChainAsset(chain: .soraMain, substrateAssetType: .soraAsset, currencyId: "1")
         let accountId = generateAccountId(for: chainAsset.chain)
         let call = callFactory?.transfer(to: accountId, amount: .zero, chainAsset: chainAsset)
@@ -209,7 +209,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         XCTAssertEqual(call?.moduleName, SubstrateCallPath.assetsTransfer.moduleName)
     }
     
-    func testAssetsTransfer() async throws {
+    func testAssetsTransfer() throws {
         let chainAsset = createChainAsset(chain: .soraMain, substrateAssetType: .assets, currencyId: "1")
         let accountId = generateAccountId(for: chainAsset.chain)
         let call = callFactory?.transfer(to: accountId, amount: .zero, chainAsset: chainAsset)
@@ -221,7 +221,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         XCTAssertEqual(call?.moduleName, SubstrateCallPath.assetsTransfer.moduleName)
     }
     
-    func testAssetsEthrereumBasedTransfer() async throws {
+    func testAssetsEthrereumBasedTransfer() throws {
         let chainAsset = createChainAsset(chain: .moonbeam, substrateAssetType: .assets, currencyId: "1")
         let accountId = generateAccountId(for: chainAsset.chain)
         let call = callFactory?.transfer(to: accountId, amount: .zero, chainAsset: chainAsset)

@@ -84,9 +84,9 @@ public final class SubstrateConnectionAutoBalance: ChainConnectionProtocol {
 // MARK: - WebSocketEngineDelegate
 extension SubstrateConnectionAutoBalance: WebSocketEngineDelegate {
     public func webSocketDidChangeState(
-        engine: SSFUtils.WebSocketEngine,
-        from oldState: SSFUtils.WebSocketEngine.State,
-        to newState: SSFUtils.WebSocketEngine.State
+        engine: WebSocketEngine,
+        from oldState: WebSocketEngine.State,
+        to newState: WebSocketEngine.State
     ) {
         guard selectedNode == nil,
               let previousUrl = engine.url
