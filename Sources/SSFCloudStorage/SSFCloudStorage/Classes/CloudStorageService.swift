@@ -112,7 +112,7 @@ extension CloudStorageService: CloudStorageServiceProtocol {
         guard let uiDelegate = uiDelegate else {
             return .notAuthorized
         }
-        
+
         if let user = singInProvider.currentUser {
             googleDriveService.set(authorizer: user.fetcherAuthorizer)
             return .authorized
