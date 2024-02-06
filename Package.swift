@@ -268,6 +268,26 @@ let package = Package(
                 "SSFKeyPair",
                 "IrohaCrypto"
             ]
+        ),
+        .testTarget(
+            name: "SSFTransferServiceTests",
+            dependencies: [
+                .product(name: "Web3", package: "Web3.swift"),
+                .product(name: "Web3ContractABI", package: "Web3.swift"),
+                "SSFTransferService",
+                "SSFModels",
+                "BigInt",
+                "SSFUtils",
+                "SSFRuntimeCodingService",
+                "SSFExtrinsicKit",
+                "SSFChainRegistry",
+                "SSFChainConnection",
+                "SSFNetwork",
+                "SSFHelpers"
+            ],
+            resources: [
+                .process("Resources")
+            ]
         )
     ]
 )

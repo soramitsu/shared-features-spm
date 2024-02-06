@@ -16,7 +16,7 @@ extension TokenSymbol: Codable {
     }
 }
 
-struct TransferCall: Codable {
+struct TransferCall: Codable, Equatable {
     enum CodingKeys: String, CodingKey {
         case dest
         case value

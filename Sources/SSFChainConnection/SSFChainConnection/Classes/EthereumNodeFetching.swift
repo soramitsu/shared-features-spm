@@ -13,7 +13,7 @@ final class EthereumNodeFetchingDefault: EthereumNodeFetching {
         let hasSelectedWssNode = chain.selectedNode?.url.absoluteString.contains("wss") == true
         let node = hasSelectedWssNode ? chain.selectedNode : randomWssNode
 
-        guard let wssURL = node?.url, let apiKey = node?.apikey else {
+        guard let wssURL = node?.url, let apiKey = node?.apikey?.key else {
             return try getHttps(for: chain)
         }
 

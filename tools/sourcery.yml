@@ -31,3 +31,11 @@ configurations:
         ../Tests/SSFQRServiceTests/Mocks
       args:
         autoMockableTestableImports: ["SSFQRService"]
+    - sources:
+      - ../Sources/SSFTransferService
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Tests/SSFTransferServiceTests/Mocks
+      args:
+        autoMockableTestableImports: ["SSFTransferService", "SSFModels", "Web3", "Web3ContractABI"]

@@ -2,6 +2,7 @@ import Foundation
 import Web3
 import Web3ContractABI
 
+//sourcery: AutoMockable
 public protocol EthereumService {
     var connection: Web3.Eth { get }
     var hasSubscription: Bool { get }

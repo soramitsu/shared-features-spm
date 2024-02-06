@@ -105,7 +105,7 @@ final class SubstrateCallFactoryDefault: SubstrateCallFactory {
     private func ormlChainTransfer(
         to receiver: AccountId,
         amount: BigUInt,
-        currencyId: SSFModels.CurrencyId?
+        currencyId: CurrencyId?
     ) -> any RuntimeCallable {
         let args = TransferCall(dest: .accoundId(receiver), value: amount, currencyId: currencyId)
         let path: SubstrateCallPath = .ormlChainTransfer
@@ -119,7 +119,7 @@ final class SubstrateCallFactoryDefault: SubstrateCallFactory {
     private func ormlAssetTransfer(
         to receiver: AccountId,
         amount: BigUInt,
-        currencyId: SSFModels.CurrencyId?,
+        currencyId: CurrencyId?,
         path: SubstrateCallPath
     ) -> any RuntimeCallable {
         let args = TransferCall(dest: .accoundId(receiver), value: amount, currencyId: currencyId)
@@ -133,7 +133,7 @@ final class SubstrateCallFactoryDefault: SubstrateCallFactory {
     private func equilibriumAssetTransfer(
         to receiver: AccountId,
         amount: BigUInt,
-        currencyId: SSFModels.CurrencyId?
+        currencyId: CurrencyId?
     ) -> any RuntimeCallable {
         let args = TransferCall(dest: .accountTo(receiver), value: amount, currencyId: currencyId)
         let path: SubstrateCallPath = .equilibriumAssetTransfer
@@ -147,7 +147,7 @@ final class SubstrateCallFactoryDefault: SubstrateCallFactory {
     private func assetsTransfer(
         to receiver: AccountId,
         amount: BigUInt,
-        currencyId: SSFModels.CurrencyId?,
+        currencyId: CurrencyId?,
         isEthereumBased: Bool
     ) -> any RuntimeCallable {
         let dest: MultiAddress = isEthereumBased ? .accountTo(receiver) : .accoundId(receiver)

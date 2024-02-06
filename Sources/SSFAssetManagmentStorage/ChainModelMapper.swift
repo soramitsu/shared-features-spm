@@ -5,12 +5,16 @@ import SSFModels
 import SSFUtils
 
 public final class ChainModelMapper {
+    private let ethereumApiKeySource: (any EthereumChain)?
+    
     public var entityIdentifierFieldName: String { #keyPath(CDChain.chainId) }
 
     public typealias DataProviderModel = ChainModel
     public typealias CoreDataEntity = CDChain
 
-    public init() {}
+    public init(ethereumApiKeySource: (any EthereumChain)?) {
+        self.ethereumApiKeySource = ethereumApiKeySource
+    }
     
     private func createAsset(from entity: CDAsset) -> AssetModel? {
         var symbol: String?
@@ -74,11 +78,11 @@ public final class ChainModelMapper {
         )
     }
 
-    private func createChainNode(from entity: CDChainNode) -> ChainNodeModel {
+    private func createChainNode(from entity: CDChainNode, chainId: String) -> ChainNodeModel {
         let apiKey: ChainNodeModel.ApiKey?
 
-        if let queryName = entity.apiQueryName, let keyName = entity.apiKeyName {
-            apiKey = ChainNodeModel.ApiKey(queryName: queryName, keyName: keyName)
+        if let keyName = entity.apiKeyName, let nodeApiKey = ethereumApiKeySource?.apiKey(for: chainId, apiKeyName: keyName) {
+            apiKey = ChainNodeModel.ApiKey(key: nodeApiKey, keyName: keyName)
         } else {
             apiKey = nil
         }
@@ -150,7 +154,6 @@ public final class ChainModelMapper {
 
             nodeEntity.url = node.url
             nodeEntity.name = node.name
-            nodeEntity.apiQueryName = node.apikey?.queryName
             nodeEntity.apiKeyName = node.apikey?.keyName
 
             return nodeEntity
@@ -192,7 +195,6 @@ public final class ChainModelMapper {
 
             nodeEntity.url = node.url
             nodeEntity.name = node.name
-            nodeEntity.apiQueryName = node.apikey?.queryName
             nodeEntity.apiKeyName = node.apikey?.keyName
 
             return nodeEntity
@@ -243,7 +245,6 @@ public final class ChainModelMapper {
 
         nodeEntity.url = node.url
         nodeEntity.name = node.name
-        nodeEntity.apiQueryName = node.apikey?.queryName
         nodeEntity.apiKeyName = node.apikey?.keyName
 
         entity.selectedNode = nodeEntity
@@ -434,7 +435,7 @@ extension ChainModelMapper: CoreDataMapperProtocol {
                 return nil
             }
 
-            return createChainNode(from: node)
+            return createChainNode(from: node, chainId: entity.chainId!)
         } ?? []
 
         var customNodesSet: Set<ChainNodeModel>?
@@ -444,7 +445,7 @@ extension ChainModelMapper: CoreDataMapperProtocol {
                     return nil
                 }
 
-                return createChainNode(from: node)
+                return createChainNode(from: node, chainId: entity.chainId!)
             }
 
             if let nodes = customNodes {
@@ -455,7 +456,7 @@ extension ChainModelMapper: CoreDataMapperProtocol {
         var selectedNode: ChainNodeModel?
 
         if let selectedNodeEntity = entity.selectedNode {
-            selectedNode = createChainNode(from: selectedNodeEntity)
+            selectedNode = createChainNode(from: selectedNodeEntity, chainId: entity.chainId!)
         }
 
         let types: ChainModel.TypesSettings?
