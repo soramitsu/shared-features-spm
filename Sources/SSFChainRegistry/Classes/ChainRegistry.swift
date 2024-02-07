@@ -4,7 +4,7 @@ import SSFUtils
 import SSFModels
 import SSFChainConnection
 import SSFRuntimeCodingService
-
+//sourcery: AutoMockable
 public protocol ChainRegistryProtocol: AnyObject {
     func getRuntimeProvider(
         chainId: ChainModel.Id,

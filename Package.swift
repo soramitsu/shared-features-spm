@@ -256,6 +256,12 @@ let package = Package(
             dependencies: [
                 "SSFCloudStorage"
             ]
+        ),
+        .testTarget(
+            name: "SSFXCMTests",
+            dependencies: [
+                "SSFXCM"
+            ]
         )
     ]
 )

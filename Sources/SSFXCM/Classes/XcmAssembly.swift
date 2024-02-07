@@ -92,7 +92,7 @@ final public class XcmAssembly {
 }
 
 extension XcmAssembly {
-    public struct SigningWrapperData {
+    public struct SigningWrapperData: Equatable {
         public let publicKeyData: Data
         public let secretKeyData: Data
         
