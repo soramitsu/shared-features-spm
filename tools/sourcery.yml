@@ -55,4 +55,19 @@ configurations:
         ../Tests/SSFXCMTests/Mocks
       args:
         autoMockableTestableImports: ["SSFNetwork", "RobinHood"]
-
+    - sources:
+      - ../Sources/SSFXCM
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Tests/SSFXCMTests/Mocks
+      args:
+        autoMockableTestableImports: ["SSFXCM", "SSFUtils", "SSFNetwork", "SSFModels", "RobinHood", "BigInt", "SSFExtrinsicKit", "SSFChainRegistry", "SSFRuntimeCodingService", "SSFSigner", "SSFChainConnection", "SSFStorageQueryKit"]
+    - sources:
+      - ../Sources/SSFExtrinsicKit
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Tests/SSFXCMTests/Mocks
+      args:
+        autoMockableTestableImports: ["SSFUtils", "SSFCrypto", "SSFModels", "RobinHood", "SSFExtrinsicKit", "IrohaCrypto", "SSFRuntimeCodingService", "SSFSigner"]

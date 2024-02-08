@@ -29,15 +29,15 @@ extension XcmDestinationTests {
             .appendingPathExtension("json")
         
         static let chain = ChainModel(rank: 1,
-                                           disabled: false,
-                                           chainId: "1",
-                                           paraId: "1001",
-                                           name: "test",
-                                           xcm: nil,
-                                           nodes: Set([ChainNodeModel(url: TestData.url, name: "test")]),
-                                           addressPrefix: 1,
-                                           icon: nil,
-                                           iosMinAppVersion: nil)
+                                      disabled: false,
+                                      chainId: "1",
+                                      paraId: "1001",
+                                      name: "test",
+                                      xcm: nil,
+                                      nodes: Set([ChainNodeModel(url: TestData.url, name: "test")]),
+                                      addressPrefix: 1,
+                                      icon: nil,
+                                      iosMinAppVersion: nil)
         
         static let errorChain = ChainModel(rank: 1,
                                            disabled: false,

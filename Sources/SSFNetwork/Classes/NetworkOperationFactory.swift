@@ -1,6 +1,6 @@
 import Foundation
 import RobinHood
-//sourcery: AutoMockable
+
 public protocol NetworkOperationFactoryProtocol {
     func fetchData<T: Decodable>(from url: URL) -> BaseOperation<T>
 }

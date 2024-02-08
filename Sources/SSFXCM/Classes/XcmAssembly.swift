@@ -23,8 +23,6 @@ final public class XcmAssembly {
         fromChainData: FromChainData,
         sourceConfig: XcmConfigProtocol?
     ) -> XcmExtrinsicServices {
-        let operationManager = OperationManager()
-        
         let signingWrapper = TransactionSigner(
             publicKeyData: fromChainData.signingWrapperData.publicKeyData,
             secretKeyData: fromChainData.signingWrapperData.secretKeyData,
@@ -78,7 +76,6 @@ final public class XcmAssembly {
             xcmVersionFetcher: xcmChainsConfigFetcher,
             chainRegistry: chainRegistry,
             depsContainer: depsContainer,
-            operationManager: operationManager,
             callPathDeterminer: callPathDeterminer,
             xcmFeeFetcher: destinationFeeFetcher
         )

@@ -1,12 +1,8 @@
-// Generated using Sourcery 2.1.3 — https://github.com/krzysztofzablocki/Sourcery
-// DO NOT EDIT
-// swiftlint:disable all
-
 import UIKit
 @testable import SSFNetwork
 @testable import RobinHood
 
-class NetworkOperationFactoryProtocolMock<T: Decodable>: NetworkOperationFactoryProtocol {
+class NetworkOperationFactoryProtocolMock<U: Decodable>: NetworkOperationFactoryProtocol {
 
     //MARK: - fetchData<T: Decodable>
 
@@ -16,13 +12,14 @@ class NetworkOperationFactoryProtocolMock<T: Decodable>: NetworkOperationFactory
     }
     var fetchDataFromReceivedUrl: URL?
     var fetchDataFromReceivedInvocations: [URL] = []
-    var fetchDataFromReturnValue: BaseOperation<T>!
-    var fetchDataFromClosure: ((URL) -> BaseOperation<T>)?
+    var fetchDataFromReturnValue: BaseOperation<U>!
+    var fetchDataFromClosure: ((URL) -> BaseOperation<U>)?
 
     func fetchData<T: Decodable>(from url: URL) -> BaseOperation<T> {
         fetchDataFromCallsCount += 1
         fetchDataFromReceivedUrl = url
         fetchDataFromReceivedInvocations.append(url)
-        return fetchDataFromClosure.map({ $0(url) }) ?? fetchDataFromReturnValue
+        return fetchDataFromReturnValue as! BaseOperation<T>
     }
 }
+

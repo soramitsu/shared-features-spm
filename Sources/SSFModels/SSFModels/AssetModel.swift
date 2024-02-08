@@ -42,20 +42,20 @@ public struct AssetModel: Equatable, Codable, Hashable {
         name: String,
         symbol: String,
         precision: UInt16,
-        icon: URL?,
-        price: Decimal?,
-        fiatDayChange: Decimal?,
-        currencyId: String?,
-        existentialDeposit: String?,
-        color: String?,
+        icon: URL? = nil,
+        price: Decimal? = nil,
+        fiatDayChange: Decimal? = nil,
+        currencyId: String? = nil,
+        existentialDeposit: String? = nil,
+        color: String? = nil,
         isUtility: Bool,
         isNative: Bool,
-        staking: RawStakingType?,
-        purchaseProviders: [PurchaseProvider]?,
-        type: SubstrateAssetType?,
-        ethereumType: EthereumAssetType?,
-        priceProvider: PriceProvider?,
-        coingeckoPriceId: PriceId?
+        staking: RawStakingType? = nil,
+        purchaseProviders: [PurchaseProvider]? = nil,
+        type: SubstrateAssetType? = nil,
+        ethereumType: EthereumAssetType? = nil,
+        priceProvider: PriceProvider? = nil,
+        coingeckoPriceId: PriceId? = nil
     ) {
         self.id = id
         self.symbol = symbol

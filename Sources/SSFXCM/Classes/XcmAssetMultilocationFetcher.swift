@@ -3,7 +3,7 @@ import SSFUtils
 import SSFModels
 import SSFNetwork
 import RobinHood
-
+//sourcery: AutoMockable
 protocol XcmAssetMultilocationFetching {
     func versionedMultilocation(
         originAssetId: String,
