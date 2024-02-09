@@ -35,9 +35,9 @@ final class EthereumNodeFetchingDefault: EthereumNodeFetching {
     }
     
     private func getNodeFor(chain: ChainModel, scheme: UrlScheme) -> ChainNodeModel? {
-        let randomWssNode = chain.nodes.filter { $0.url.absoluteString.contains(scheme.rawValue) }.randomElement()
-        let hasSelectedWssNode = chain.selectedNode?.url.absoluteString.contains(scheme.rawValue) == true
-        let node = hasSelectedWssNode ? chain.selectedNode : randomWssNode
+        let randomNode = chain.nodes.filter { $0.url.absoluteString.contains(scheme.rawValue) }.randomElement()
+        let hasSelectedNode = chain.selectedNode?.url.absoluteString.contains(scheme.rawValue) == true
+        let node = hasSelectedNode ? chain.selectedNode : randomNode
         return node
     }
 }

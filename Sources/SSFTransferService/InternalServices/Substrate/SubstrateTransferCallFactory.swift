@@ -4,7 +4,7 @@ import SSFModels
 import BigInt
 import SSFRuntimeCodingService
 
-protocol SubstrateCallFactory {
+protocol SubstrateTransferCallFactory {
     func transfer(
         to receiver: AccountId,
         amount: BigUInt,
@@ -16,7 +16,7 @@ protocol SubstrateCallFactory {
     ) -> any RuntimeCallable
 }
 
-final class SubstrateCallFactoryDefault: SubstrateCallFactory {
+final class SubstrateTransferCallFactoryDefault: SubstrateTransferCallFactory {
     private let runtimeService: RuntimeProviderProtocol
     
     init(runtimeService: RuntimeProviderProtocol) {
@@ -32,19 +32,12 @@ final class SubstrateCallFactoryDefault: SubstrateCallFactory {
     ) -> any RuntimeCallable {
         switch chainAsset.chainAssetType {
         case .normal, .none:
-            if chainAsset.chain.isSora {
-                return ormlAssetTransfer(
-                    to: receiver,
-                    amount: amount,
-                    currencyId: chainAsset.currencyId,
-                    path: .assetsTransfer
-                )
-            }
-            if chainAsset.chain.isReef {
-                return reefTransfer(to: receiver, amount: amount)
-            }
-
-            return defaultTransfer(to: receiver, amount: amount)
+            return transferNormalAssetWith(
+                specific: .init(from: chainAsset.chain),
+                receiver: receiver,
+                amount: amount,
+                chainAsset: chainAsset
+            )
         case .ormlChain:
             return ormlChainTransfer(
                 to: receiver,
@@ -101,6 +94,27 @@ final class SubstrateCallFactoryDefault: SubstrateCallFactory {
     }
     
     // MARK: - Private methods
+    
+    private func transferNormalAssetWith(
+        specific: ChainTransferSpecificParameter,
+        receiver: AccountId,
+        amount: BigUInt,
+        chainAsset: ChainAsset
+    ) -> any RuntimeCallable {
+        switch specific {
+        case .sora:
+            return ormlAssetTransfer(
+                to: receiver,
+                amount: amount,
+                currencyId: chainAsset.currencyId,
+                path: .assetsTransfer
+            )
+        case .reef:
+            return reefTransfer(to: receiver, amount: amount)
+        case .default:
+            return defaultTransfer(to: receiver, amount: amount)
+        }
+    }
 
     private func ormlChainTransfer(
         to receiver: AccountId,
@@ -200,5 +214,22 @@ final class SubstrateCallFactoryDefault: SubstrateCallFactory {
             callName: path.callName,
             args: args
         )
+    }
+}
+
+fileprivate enum ChainTransferSpecificParameter {
+    case sora
+    case reef
+    case `default`
+    
+    init(from chain: ChainModel) {
+        switch chain.knownChainEquivalent {
+        case .soraMain, .soraTest:
+            self = .sora
+        case .reef, .scuba:
+            self = .reef
+        default:
+            self = .default
+        }
     }
 }

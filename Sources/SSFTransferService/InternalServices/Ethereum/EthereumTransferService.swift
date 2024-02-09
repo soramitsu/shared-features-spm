@@ -7,8 +7,8 @@ import SSFUtils
 import BigInt
 
 protocol EthereumTransferService {
-    func submit(transfer: EthereumTransfer) async throws -> String
-    func estimateFee(for transfer: EthereumTransfer) async -> AsyncThrowingStream<BigUInt, Error>
+    func submit(transfer: EthereumTransfer, chainAsset: ChainAsset) async throws -> String
+    func estimateFee(for transfer: EthereumTransfer, chainAsset: ChainAsset) async -> AsyncThrowingStream<BigUInt, Error>
     func unsubscribeFromFee() async throws -> Bool
 }
 
@@ -16,8 +16,7 @@ final class EthereumTransferServiceDefault: EthereumTransferService {
 
     private let privateKey: EthereumPrivateKey
     private let senderAddress: String
-    private let chainAsset: ChainAsset
-    private let callFactory: EthereumCallFactory
+    private let callFactory: EthereumTransferCallFactory
     private let ethereumService: EthereumService
 
     private var feeSubscriptionId: String?
@@ -25,13 +24,11 @@ final class EthereumTransferServiceDefault: EthereumTransferService {
     init(
         privateKey: EthereumPrivateKey,
         senderAddress: String,
-        chainAsset: ChainAsset,
-        callFactory: EthereumCallFactory,
+        callFactory: EthereumTransferCallFactory,
         ethereumService: EthereumService
     ) {
         self.privateKey = privateKey
         self.senderAddress = senderAddress
-        self.chainAsset = chainAsset
         self.callFactory = callFactory
         self.ethereumService = ethereumService
     }
@@ -48,29 +45,31 @@ final class EthereumTransferServiceDefault: EthereumTransferService {
     // MARK: - EthereumTransferService
     
     func submit(
-        transfer: EthereumTransfer
+        transfer: EthereumTransfer,
+        chainAsset: ChainAsset
     ) async throws -> String {
         switch chainAsset.asset.ethereumType {
         case .normal:
-            return try await transferNative(transfer: transfer)
+            return try await transferNative(transfer: transfer, chainAsset: chainAsset)
         case .erc20, .bep20:
-            return try await transferERC20(transfer: transfer)
+            return try await transferERC20(transfer: transfer, chainAsset: chainAsset)
         case .none:
             throw TransferServiceError.transferFailed(reason: "unknown asset")
         }
     }
     
     func estimateFee(
-        for transfer: EthereumTransfer
+        for transfer: EthereumTransfer,
+        chainAsset: ChainAsset
     ) async -> AsyncThrowingStream<BigUInt, Error> {
         guard ethereumService.hasSubscription else {
-            return fetchBlockAndEstimateFee(for: transfer)
+            return fetchBlockAndEstimateFee(for: transfer, chainAsset: chainAsset)
         }
         
         if let currentSubscription = feeSubscriptionId {
-            return await replaceCurrent(currentSubscription, for: transfer)
+            return await replaceCurrent(currentSubscription, for: transfer, chainAsset: chainAsset)
         } else {
-            return subscribeToBlocksAndEstimateFee(for: transfer)
+            return subscribeToBlocksAndEstimateFee(for: transfer, chainAsset: chainAsset)
         }
     }
     
@@ -85,31 +84,40 @@ final class EthereumTransferServiceDefault: EthereumTransferService {
     
     private func replaceCurrent(
         _ subscriptionId: String,
-        for transfer: EthereumTransfer
+        for transfer: EthereumTransfer,
+        chainAsset: ChainAsset
     ) async -> AsyncThrowingStream<BigUInt, Error> {
         do {
             guard try await ethereumService.unsubscribe(subscriptionId: subscriptionId) else {
                 throw TransferServiceError.unsubscribeFailed
             }
-            return subscribeToBlocksAndEstimateFee(for: transfer)
+            return subscribeToBlocksAndEstimateFee(for: transfer, chainAsset: chainAsset)
         } catch {
             return Fail(error: error).finishedAsyncThrowingStream()
         }
     }
     
     private func transferNative(
-        transfer: EthereumTransfer
+        transfer: EthereumTransfer,
+        chainAsset: ChainAsset
     ) async throws -> String {
-        let rawTransaction = try await callFactory.signNative(transfer: transfer)
+        let rawTransaction = try await callFactory.signNative(
+            transfer: transfer,
+            chainAsset: chainAsset
+        )
         let result = try await ethereumService.send(rawTransaction)
 
         return result.hex()
     }
     
     private func transferERC20(
-        transfer: EthereumTransfer
+        transfer: EthereumTransfer,
+        chainAsset: ChainAsset
     ) async throws -> String {
-        let rawTransaction = try await callFactory.signERC20(transfer: transfer)
+        let rawTransaction = try await callFactory.signERC20(
+            transfer: transfer,
+            chainAsset: chainAsset
+        )
         let result = try await ethereumService.send(rawTransaction)
         
         return result.hex()
@@ -118,11 +126,12 @@ final class EthereumTransferServiceDefault: EthereumTransferService {
     // MARK: - Private fee subscription methods
     
     private func subscribeToBlocksAndEstimateFee(
-        for transfer: EthereumTransfer
+        for transfer: EthereumTransfer,
+        chainAsset: ChainAsset
     ) -> AsyncThrowingStream<BigUInt, Error> {
         AsyncThrowingStream { continuation in
             do {
-                try subscribeAndHandleEvent(with: continuation, for: transfer)
+                try subscribeAndHandleEvent(with: continuation, for: transfer, chainAsset: chainAsset)
             } catch {
                 continuation.finish(throwing: error)
             }
@@ -131,7 +140,8 @@ final class EthereumTransferServiceDefault: EthereumTransferService {
     
     private func subscribeAndHandleEvent(
         with continuation: AsyncThrowingStream<BigUInt, Error>.Continuation,
-        for transfer: EthereumTransfer
+        for transfer: EthereumTransfer,
+        chainAsset: ChainAsset
     ) throws {
         try ethereumService.connection.subscribeToNewHeads { [weak self] subscriptionId in
             self?.feeSubscriptionId = subscriptionId.result
@@ -143,7 +153,7 @@ final class EthereumTransferServiceDefault: EthereumTransferService {
 
             switch responce.status {
             case let .success(blockObject):
-                startTaskForEstimateFee(with: continuation, for: transfer, blockObject: blockObject)
+                startTaskForEstimateFee(with: continuation, for: transfer, blockObject: blockObject, chainAsset: chainAsset)
             case let .failure(error):
                 continuation.finish(throwing: error)
             }
@@ -153,11 +163,12 @@ final class EthereumTransferServiceDefault: EthereumTransferService {
     private func startTaskForEstimateFee(
         with continuation: AsyncThrowingStream<BigUInt, Error>.Continuation,
         for transfer: EthereumTransfer,
-        blockObject: EthereumBlockObject
+        blockObject: EthereumBlockObject,
+        chainAsset: ChainAsset
     ) {
         let task = Task {
             do {
-                let fee = try await self.estimateFee(for: blockObject, transfer: transfer)
+                let fee = try await self.estimateFee(for: blockObject, transfer: transfer, chainAsset: chainAsset)
                 continuation.yield(fee)
             } catch {
                 continuation.finish(throwing: error)
@@ -169,7 +180,8 @@ final class EthereumTransferServiceDefault: EthereumTransferService {
     }
     
     private func fetchBlockAndEstimateFee(
-        for transfer: EthereumTransfer
+        for transfer: EthereumTransfer,
+        chainAsset: ChainAsset
     ) -> AsyncThrowingStream<BigUInt, Error> {
         AsyncThrowingStream { continuation in
             let task = Task {
@@ -178,7 +190,7 @@ final class EthereumTransferServiceDefault: EthereumTransferService {
                     guard let blockObject = blockObject else {
                         throw TransferServiceError.cannotEstimateFee(reason: "block is missed")
                     }
-                    let fee = try await self.estimateFee(for: blockObject, transfer: transfer)
+                    let fee = try await self.estimateFee(for: blockObject, transfer: transfer, chainAsset: chainAsset)
                     continuation.yield(fee)
                     continuation.finish()
                 } catch {
@@ -193,19 +205,21 @@ final class EthereumTransferServiceDefault: EthereumTransferService {
     
     private func estimateFee(
         for newHead: EthereumBlockObject,
-        transfer: EthereumTransfer
+        transfer: EthereumTransfer,
+        chainAsset: ChainAsset
     ) async throws -> BigUInt {
         guard let baseFeePerGas = newHead.baseFeePerGas else {
             let error = TransferServiceError.cannotEstimateFee(reason: "unexpected new block head response")
             throw error
         }
 
-        return try await estimateFee(for: transfer, baseFeePerGas: baseFeePerGas)
+        return try await estimateFee(for: transfer, baseFeePerGas: baseFeePerGas, chainAsset: chainAsset)
     }
     
     private func estimateFee(
         for transfer: EthereumTransfer,
-        baseFeePerGas: EthereumQuantity
+        baseFeePerGas: EthereumQuantity,
+        chainAsset: ChainAsset
     ) async throws -> BigUInt {
         switch chainAsset.asset.ethereumType {
         case .normal:

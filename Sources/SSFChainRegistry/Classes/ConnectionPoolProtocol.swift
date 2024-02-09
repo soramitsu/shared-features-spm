@@ -8,33 +8,26 @@ public enum ConnectionPoolError: Error {
 }
 
 public protocol ConnectionPoolProtocol {
-    func setupSubstrateConnection(for chain: ChainModel) throws -> SubstrateConnection
-    func getSubstrateConnection(for chainId: ChainModel.Id) throws -> SubstrateConnection
+    func setupSubstrateConnection(for chain: ChainModel) async throws -> SubstrateConnection
+    func getSubstrateConnection(for chainId: ChainModel.Id) async throws -> SubstrateConnection
     
-    func setupWeb3EthereumConnection(for chain: ChainModel) throws -> Web3EthConnection
-    func getWeb3EthereumConnection(for chainId: ChainModel.Id) throws -> Web3EthConnection
+    func setupWeb3EthereumConnection(for chain: ChainModel) async throws -> Web3EthConnection
+    func getWeb3EthereumConnection(for chainId: ChainModel.Id) async throws -> Web3EthConnection
 }
 
 protocol ConnectionPoolDelegate: AnyObject {
     func webSocketDidChangeState(url: URL, state: WebSocketEngine.State)
 }
 
-public final class ConnectionPool: ConnectionPoolProtocol {
-    private let mutex = NSLock()
+public actor ConnectionPool: ConnectionPoolProtocol {
     private var autoBalancesByChainIds: [ChainModel.Id: any ChainConnectionProtocol] = [:]
     
     public init() {}
     
     // MARK: - Public methods
 
-    public func setupSubstrateConnection(for chain: ChainModel) throws -> SubstrateConnection {
-        mutex.lock()
-
-        defer {
-            mutex.unlock()
-        }
-        
-        if let connection = try? getSubstrateConnection(for: chain.chainId) {
+    public func setupSubstrateConnection(for chain: ChainModel) async throws -> SubstrateConnection {
+        if let connection = try? await getSubstrateConnection(for: chain.chainId) {
             return connection
         }
 
@@ -42,8 +35,8 @@ public final class ConnectionPool: ConnectionPoolProtocol {
 
         let nodes = chain.nodes.map { $0.url }
         let autoBalance = SubstrateConnectionAutoBalance(
-            nodes: nodes,
-            selectedNode: chain.selectedNode?.url,
+            urls: nodes,
+            selectedUrl: chain.selectedNode?.url,
             chainId: chain.chainId
         )
 
@@ -52,21 +45,15 @@ public final class ConnectionPool: ConnectionPoolProtocol {
         return try autoBalance.connection()
     }
 
-    public func getSubstrateConnection(for chainId: ChainModel.Id) throws -> SubstrateConnection {
+    public func getSubstrateConnection(for chainId: ChainModel.Id) async throws -> SubstrateConnection {
         guard let autoBalance = autoBalancesByChainIds[chainId] as? SubstrateConnectionAutoBalance else {
             throw ConnectionPoolError.missingConnection
         }
         return try autoBalance.connection()
     }
     
-    public func setupWeb3EthereumConnection(for chain: ChainModel) throws -> Web3EthConnection {
-        mutex.lock()
-
-        defer {
-            mutex.unlock()
-        }
-        
-        if let connection = try? getWeb3EthereumConnection(for: chain.chainId) {
+    public func setupWeb3EthereumConnection(for chain: ChainModel) async throws -> Web3EthConnection {
+        if let connection = try? await getWeb3EthereumConnection(for: chain.chainId) {
             return connection
         }
 
@@ -79,7 +66,7 @@ public final class ConnectionPool: ConnectionPoolProtocol {
         return try autoBalance.connection()
     }
     
-    public func getWeb3EthereumConnection(for chainId: ChainModel.Id) throws -> Web3EthConnection {
+    public func getWeb3EthereumConnection(for chainId: ChainModel.Id) async throws -> Web3EthConnection {
         guard let autoBalance = autoBalancesByChainIds[chainId] as? Web3EthConnectionAutoBalance else {
             throw ConnectionPoolError.missingConnection
         }

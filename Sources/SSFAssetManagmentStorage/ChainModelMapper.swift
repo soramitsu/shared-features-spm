@@ -4,15 +4,19 @@ import RobinHood
 import SSFModels
 import SSFUtils
 
+public enum ChainModelMapperError: Error {
+    case missingChainId
+}
+
 public final class ChainModelMapper {
-    private let ethereumApiKeySource: (any EthereumChain)?
+    private let ethereumApiKeySource: [(any EthereumChain)]?
     
     public var entityIdentifierFieldName: String { #keyPath(CDChain.chainId) }
 
     public typealias DataProviderModel = ChainModel
     public typealias CoreDataEntity = CDChain
 
-    public init(ethereumApiKeySource: (any EthereumChain)?) {
+    public init(ethereumApiKeySource: [(any EthereumChain)]?) {
         self.ethereumApiKeySource = ethereumApiKeySource
     }
     
@@ -81,7 +85,10 @@ public final class ChainModelMapper {
     private func createChainNode(from entity: CDChainNode, chainId: String) -> ChainNodeModel {
         let apiKey: ChainNodeModel.ApiKey?
 
-        if let keyName = entity.apiKeyName, let nodeApiKey = ethereumApiKeySource?.apiKey(for: chainId, apiKeyName: keyName) {
+        if
+            let keyName = entity.apiKeyName,
+            let nodeApiKeySource = ethereumApiKeySource?.first(where: { $0.apiKey(for: chainId, apiKeyName: keyName) != nil }),
+            let nodeApiKey = nodeApiKeySource.apiKey(for: chainId, apiKeyName: keyName) {
             apiKey = ChainNodeModel.ApiKey(key: nodeApiKey, keyName: keyName)
         } else {
             apiKey = nil
@@ -430,12 +437,16 @@ public final class ChainModelMapper {
 
 extension ChainModelMapper: CoreDataMapperProtocol {
     public func transform(entity: CDChain) throws -> ChainModel {
+        guard let chainId = entity.chainId else {
+            throw ChainModelMapperError.missingChainId
+        }
+
         let nodes: [ChainNodeModel] = entity.nodes?.compactMap { anyNode in
             guard let node = anyNode as? CDChainNode else {
                 return nil
             }
 
-            return createChainNode(from: node, chainId: entity.chainId!)
+            return createChainNode(from: node, chainId: chainId)
         } ?? []
 
         var customNodesSet: Set<ChainNodeModel>?
@@ -445,7 +456,7 @@ extension ChainModelMapper: CoreDataMapperProtocol {
                     return nil
                 }
 
-                return createChainNode(from: node, chainId: entity.chainId!)
+                return createChainNode(from: node, chainId: chainId)
             }
 
             if let nodes = customNodes {
@@ -456,7 +467,7 @@ extension ChainModelMapper: CoreDataMapperProtocol {
         var selectedNode: ChainNodeModel?
 
         if let selectedNodeEntity = entity.selectedNode {
-            selectedNode = createChainNode(from: selectedNodeEntity, chainId: entity.chainId!)
+            selectedNode = createChainNode(from: selectedNodeEntity, chainId: chainId)
         }
 
         let types: ChainModel.TypesSettings?
@@ -479,7 +490,7 @@ extension ChainModelMapper: CoreDataMapperProtocol {
         let chainModel = ChainModel(
             rank: rank,
             disabled: entity.disabled,
-            chainId: entity.chainId!,
+            chainId: chainId,
             parentId: entity.parentId,
             paraId: nil,
             name: entity.name!,

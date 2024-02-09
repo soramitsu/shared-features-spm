@@ -7,7 +7,7 @@ import SSFHelpers
 
 final class EthereumCallFactoryTests: XCTestCase {
     
-    private var callFactory: EthereumCallFactory?
+    private var callFactory: EthereumTransferCallFactory?
 
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -15,14 +15,16 @@ final class EthereumCallFactoryTests: XCTestCase {
     }
 
     func testSignNative() async throws {
+        let chainAsset = createERC20ChainAsset()
         let transfer = EthereumTransfer(amount: "1000000000000", receiver: "0xccb15402c89b730d930e2ec7e3a4acd7edf724d6")
-        let signedTansaction = try await callFactory?.signNative(transfer: transfer)
+        let signedTansaction = try await callFactory?.signNative(transfer: transfer, chainAsset: chainAsset)
         XCTAssertTrue(signedTansaction?.verifySignature() == true)
     }
     
     func testSignERC20() async throws {
+        let chainAsset = createERC20ChainAsset()
         let transfer = EthereumTransfer(amount: "1000000000000", receiver: "0xccb15402c89b730d930e2ec7e3a4acd7edf724d6")
-        let signedTansaction = try await callFactory?.signERC20(transfer: transfer)
+        let signedTansaction = try await callFactory?.signERC20(transfer: transfer, chainAsset: chainAsset)
         XCTAssertTrue(signedTansaction?.verifySignature() == true)
     }
 
@@ -54,12 +56,10 @@ final class EthereumCallFactoryTests: XCTestCase {
     private func setupCallFactory() throws {
         let secret = Data(hex: "0x85dedefd3fa46b486db7460be303aa3baa44ce1249c6e42e2731ffdf68a33068")
         let secretKey = try EthereumPrivateKey(privateKey: secret.bytes)
-        let chainAsset = createERC20ChainAsset()
         let ethereumService = setupEthereumService()
         
-        let callFactory: EthereumCallFactory = EthereumCallFactoryDefault(
+        let callFactory: EthereumTransferCallFactory = EthereumTransferCallFactoryDefault(
             ethereumService: ethereumService,
-            chainAsset: chainAsset,
             senderAddress: "0xccb15402c89b730d930e2ec7e3a4acd7edf724d6",
             privateKey: secretKey
         )

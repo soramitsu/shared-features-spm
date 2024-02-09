@@ -10,7 +10,7 @@ import SSFUtils
 
 final class SubstrateCallFactoryTests: XCTestCase {
 
-    private var callFactory: SubstrateCallFactory?
+    private var callFactory: SubstrateTransferCallFactory?
     
     override func setUp() async throws {
         try await super.setUp()
@@ -268,7 +268,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
         )
         let _ = try await runtimeService.readySnapshot()
 
-        let callFactory = SubstrateCallFactoryDefault(runtimeService: runtimeService)
+        let callFactory = SubstrateTransferCallFactoryDefault(runtimeService: runtimeService)
         self.callFactory = callFactory
     }
 

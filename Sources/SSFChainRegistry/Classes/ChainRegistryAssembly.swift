@@ -3,15 +3,18 @@ import SSFNetwork
 import SSFUtils
 
 final public class ChainRegistryAssembly {
-    public static func createDefaultRegistry() -> ChainRegistryProtocol {
+    public static func createDefaultRegistry(
+        chainsUrl: URL = ApplicationSourcesImpl.shared.chainsSourceUrl,
+        chainTypesUrls: URL = ApplicationSourcesImpl.shared.chainTypesSourceUrl
+    ) -> ChainRegistryProtocol {
         let chainSyncService = ChainSyncService(
-            chainsUrl: ApplicationSourcesImpl.shared.chainsSourceUrl,
+            chainsUrl: chainsUrl,
             operationQueue: OperationQueue(),
             dataFetchFactory: NetworkOperationFactory()
         )
         
         let chainsTypesSyncService = ChainsTypesSyncService(
-            url: ApplicationSourcesImpl.shared.chainTypesSourceUrl,
+            url: chainTypesUrls,
             dataOperationFactory: NetworkOperationFactory(),
             operationQueue: OperationQueue()
         )

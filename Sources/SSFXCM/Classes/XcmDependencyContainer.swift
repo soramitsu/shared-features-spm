@@ -36,7 +36,7 @@ final class XcmDependencyContainer {
             usedRuntimePaths: XcmCallPath.usedRuntimePaths,
             runtimeItem: fromChainData.chainMetadata
         )
-        let engine = try chainRegistry.getConnection(for: fromChainModel)
+        let engine = try await chainRegistry.getSubstrateConnection(for: fromChainModel)
         connection = engine
         
         let extrinsicService = ExtrinsicService(

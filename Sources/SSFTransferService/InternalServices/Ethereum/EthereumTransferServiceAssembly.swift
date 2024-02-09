@@ -7,23 +7,22 @@ import SSFChainRegistry
 final class EthereumTransferServiceAssembly {
     func createEthereumTransferService(
         wallet: MetaAccountModel,
-        chainAsset: ChainAsset,
+        chain: ChainModel,
         secretKeyData: Data
-    ) throws -> EthereumTransferService {
-        guard let accountResponse = wallet.fetch(for: chainAsset.chain.accountRequest()) else {
+    ) async throws -> EthereumTransferService {
+        guard let accountResponse = wallet.fetch(for: chain.accountRequest()) else {
             throw TransferServiceError.accountNotExists
         }
 
         let chainRegistry = ChainRegistryAssembly.createDefaultRegistry()
-        let connection = try chainRegistry.getEthereumConnection(for: chainAsset.chain)
+        let connection = try await chainRegistry.getEthereumConnection(for: chain)
         let privateKey = try EthereumPrivateKey(privateKey: secretKeyData.bytes)
         let address = try accountResponse.accountId.toAddress(using: .sfEthereum)
         
         let ethereumService = EthereumServiceDefault(connection: connection)
         
-        let callFactory = EthereumCallFactoryDefault(
+        let callFactory = EthereumTransferCallFactoryDefault(
             ethereumService: ethereumService,
-            chainAsset: chainAsset,
             senderAddress: address,
             privateKey: privateKey
         )
@@ -31,7 +30,6 @@ final class EthereumTransferServiceAssembly {
         let transferService = EthereumTransferServiceDefault(
             privateKey: privateKey,
             senderAddress: address,
-            chainAsset: chainAsset,
             callFactory: callFactory,
             ethereumService: ethereumService
         )

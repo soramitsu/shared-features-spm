@@ -87,8 +87,8 @@ public struct ChainAccountRequest {
 
 extension MetaAccountModel {
     public func fetch(for request: ChainAccountRequest) -> ChainAccountResponse? {
-        if let chainAccount = chainAccounts.first(where: { $0.chainId == request.chainId }) {
-            return response(for: chainAccount, request: request)
+        if let replacedAccount = chainAccounts.first(where: { $0.chainId == request.chainId }) {
+            return response(for: replacedAccount, request: request)
         }
 
         if request.isEthereumBased {

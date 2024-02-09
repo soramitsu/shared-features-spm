@@ -10,8 +10,8 @@ public final class SubstrateConnectionAutoBalance: ChainConnectionProtocol {
     public var isActive: Bool = true
     
     private let chainId: ChainModel.Id
-    private let nodes: [URL]
-    private let selectedNode: URL?
+    private let urls: [URL]
+    private let selecteUrl: URL?
     private lazy var connectionFactory: ConnectionFactoryProtocol = {
         ConnectionFactory()
     }()
@@ -22,12 +22,12 @@ public final class SubstrateConnectionAutoBalance: ChainConnectionProtocol {
     private var failedUrls: Set<URL?> = []
     
     public init(
-        nodes: [URL],
-        selectedNode: URL? = nil,
+        urls: [URL],
+        selectedUrl: URL? = nil,
         chainId: ChainModel.Id
     ) {
-        self.nodes = nodes
-        self.selectedNode = selectedNode
+        self.urls = urls
+        self.selecteUrl = selectedUrl
         self.chainId = chainId
     }
     
@@ -47,11 +47,11 @@ public final class SubstrateConnectionAutoBalance: ChainConnectionProtocol {
 
         if ignoredUrl == nil,
            let connection = currentConnection,
-           connection.url?.absoluteString == selectedNode?.absoluteString {
+           connection.url?.absoluteString == selecteUrl?.absoluteString {
             return connection
         }
 
-        let node = selectedNode ?? nodes.first(where: {
+        let node = selecteUrl ?? urls.first(where: {
             ($0 != ignoredUrl) && !failedUrls.contains($0)
         })
         failedUrls.insert(ignoredUrl)
@@ -88,7 +88,7 @@ extension SubstrateConnectionAutoBalance: WebSocketEngineDelegate {
         from oldState: WebSocketEngine.State,
         to newState: WebSocketEngine.State
     ) {
-        guard selectedNode == nil,
+        guard selecteUrl == nil,
               let previousUrl = engine.url
         else {
             return

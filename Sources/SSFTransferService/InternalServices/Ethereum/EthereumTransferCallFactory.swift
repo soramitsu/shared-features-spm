@@ -4,31 +4,31 @@ import Web3
 import SSFChainConnection
 import SSFModels
 
-protocol EthereumCallFactory {
-    func signNative(transfer: EthereumTransfer) async throws -> EthereumSignedTransaction
-    func signERC20(transfer: EthereumTransfer) async throws -> EthereumSignedTransaction
+protocol EthereumTransferCallFactory {
+    func signNative(transfer: EthereumTransfer, chainAsset: ChainAsset) async throws -> EthereumSignedTransaction
+    func signERC20(transfer: EthereumTransfer, chainAsset: ChainAsset) async throws -> EthereumSignedTransaction
 }
 
-final class EthereumCallFactoryDefault: EthereumCallFactory {
+final class EthereumTransferCallFactoryDefault: EthereumTransferCallFactory {
     
     private let ethereumService: EthereumService
-    private let chainAsset: ChainAsset
     private let senderAddress: AccountAddress
     private let privateKey: EthereumPrivateKey
     
     init(
         ethereumService: EthereumService,
-        chainAsset: ChainAsset,
         senderAddress: AccountAddress,
         privateKey: EthereumPrivateKey
     ) {
         self.ethereumService = ethereumService
-        self.chainAsset = chainAsset
         self.senderAddress = senderAddress
         self.privateKey = privateKey
     }
     
-    func signNative(transfer: EthereumTransfer) async throws -> EthereumSignedTransaction {
+    func signNative(
+        transfer: EthereumTransfer,
+        chainAsset: ChainAsset
+    ) async throws -> EthereumSignedTransaction {
         guard let chainId = BigUInt(string: chainAsset.chain.chainId) else {
             let error = EthereumSignedTransaction.Error.chainIdNotSet(msg: "EIP1559 transactions need a chainId")
             throw error
@@ -61,7 +61,10 @@ final class EthereumCallFactoryDefault: EthereumCallFactory {
         return try tx.sign(with: privateKey, chainId: chainIdValue)
     }
     
-    func signERC20(transfer: EthereumTransfer) async throws -> EthereumSignedTransaction {
+    func signERC20(
+        transfer: EthereumTransfer,
+        chainAsset: ChainAsset
+    ) async throws -> EthereumSignedTransaction {
         guard let chainId = BigUInt(string: chainAsset.chain.chainId) else {
             throw EthereumSignedTransaction.Error.chainIdNotSet(msg: "EIP1559 transactions need a chainId")
         }

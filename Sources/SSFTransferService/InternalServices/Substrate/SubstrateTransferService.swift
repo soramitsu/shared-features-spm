@@ -7,35 +7,33 @@ import BigInt
 import SSFCrypto
 
 protocol SubstrateTransferService {
-    func submit(transfer: SubstrateTransfer) async throws -> String
-    func submit(transfer: XorlessTransfer) async throws -> String
+    func submit(transfer: SubstrateTransfer, chainAsset: ChainAsset) async throws -> String
+    func submit(transfer: XorlessTransfer, chainAsset: ChainAsset) async throws -> String
     
-    func estimateFee(for transfer: SubstrateTransfer) -> AsyncThrowingStream<BigUInt, Error>
-    func estimateFee(for transfer: XorlessTransfer) -> AsyncThrowingStream<BigUInt, Error>
+    func estimateFee(for transfer: SubstrateTransfer, chainAsset: ChainAsset) -> AsyncThrowingStream<BigUInt, Error>
+    func estimateFee(for transfer: XorlessTransfer, chainAsset: ChainAsset) -> AsyncThrowingStream<BigUInt, Error>
 }
 
 final class SubstrateTransferServiceDefault: SubstrateTransferService {
     private let extrinsicService: ExtrinsicServiceProtocol
-    private let callFactory: SubstrateCallFactory
+    private let callFactory: SubstrateTransferCallFactory
     private let signer: TransactionSignerProtocol
-    private let chainAsset: ChainAsset
     
     init(
         extrinsicService: ExtrinsicServiceProtocol,
-        callFactory: SubstrateCallFactory,
-        signer: TransactionSignerProtocol,
-        chainAsset: ChainAsset
+        callFactory: SubstrateTransferCallFactory,
+        signer: TransactionSignerProtocol
     ) {
         self.extrinsicService = extrinsicService
         self.callFactory = callFactory
         self.signer = signer
-        self.chainAsset = chainAsset
     }
     
     // MARK: - SubstrateTransferService
     
     func submit(
-        transfer: SubstrateTransfer
+        transfer: SubstrateTransfer,
+        chainAsset: ChainAsset
     ) async throws -> String {
         let accountId = try AddressFactory.accountId(from: transfer.receiver, chain: chainAsset.chain)
         let call = callFactory.transfer(
@@ -44,35 +42,31 @@ final class SubstrateTransferServiceDefault: SubstrateTransferService {
             chainAsset: chainAsset
         )
         
-        let extrinsicBuilderClosure: ExtrinsicBuilderClosure = { builder in
-            var resultBuilder = builder
-            resultBuilder = try builder.adding(call: call)
-            
-            if let tip = transfer.tip {
-                resultBuilder = resultBuilder.with(tip: tip)
-            }
-            return resultBuilder
-        }
+        let extrinsicBuilderClosure = buildExtrinsicClosure(
+            call: call,
+            tip: transfer.tip
+        )
         
         return try await submit(extrinsicBuilderClosure)
     }
     
     func submit(
-        transfer: XorlessTransfer
+        transfer: XorlessTransfer,
+        chainAsset: ChainAsset
     ) async throws -> String {
         let call = callFactory.xorlessTransfer(transfer)
         
-        let extrinsicBuilderClosure: ExtrinsicBuilderClosure = { builder in
-            var resultBuilder = builder
-            resultBuilder = try builder.adding(call: call)
-            return resultBuilder
-        }
+        let extrinsicBuilderClosure = buildExtrinsicClosure(
+            call: call,
+            tip: nil
+        )
         
         return try await submit(extrinsicBuilderClosure)
     }
     
     func estimateFee(
-        for transfer: SubstrateTransfer
+        for transfer: SubstrateTransfer,
+        chainAsset: ChainAsset
     ) -> AsyncThrowingStream<BigUInt, Error> {
         func accountId(from address: String?, chain: ChainModel) -> AccountId {
             guard let address = address,
@@ -91,29 +85,24 @@ final class SubstrateTransferServiceDefault: SubstrateTransferService {
             chainAsset: chainAsset
         )
         
-        let extrinsicBuilderClosure: ExtrinsicBuilderClosure = { builder in
-            var resultBuilder = builder
-            resultBuilder = try builder.adding(call: call)
-            
-            if let tip = transfer.tip {
-                resultBuilder = resultBuilder.with(tip: tip)
-            }
-            return resultBuilder
-        }
+        let extrinsicBuilderClosure = buildExtrinsicClosure(
+            call: call,
+            tip: transfer.tip
+        )
         
         return estimateFee(for: extrinsicBuilderClosure)
     }
     
     func estimateFee(
-        for transfer: XorlessTransfer
+        for transfer: XorlessTransfer,
+        chainAsset: ChainAsset
     ) -> AsyncThrowingStream<BigUInt, Error> {
         let call = callFactory.xorlessTransfer(transfer)
         
-        let extrinsicBuilderClosure: ExtrinsicBuilderClosure = { builder in
-            var resultBuilder = builder
-            resultBuilder = try builder.adding(call: call)
-            return resultBuilder
-        }
+        let extrinsicBuilderClosure = buildExtrinsicClosure(
+            call: call,
+            tip: nil
+        )
         
         return estimateFee(for: extrinsicBuilderClosure)
     }
@@ -156,5 +145,21 @@ final class SubstrateTransferServiceDefault: SubstrateTransferService {
                 }
             }
         }
+    }
+    
+    private func buildExtrinsicClosure(
+        call: any RuntimeCallable,
+        tip: BigUInt?
+    ) -> ExtrinsicBuilderClosure {
+        let extrinsicBuilderClosure: ExtrinsicBuilderClosure = { builder in
+            var resultBuilder = builder
+            resultBuilder = try builder.adding(call: call)
+            
+            if let tip = tip {
+                resultBuilder = resultBuilder.with(tip: tip)
+            }
+            return resultBuilder
+        }
+        return extrinsicBuilderClosure
     }
 }

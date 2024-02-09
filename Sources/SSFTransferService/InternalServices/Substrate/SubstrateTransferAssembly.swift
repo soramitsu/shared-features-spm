@@ -12,18 +12,18 @@ final class SubstrateTransferAssembly {
     
     func createSubstrateService(
         wallet: MetaAccountModel,
-        chainAsset: ChainAsset,
+        chain: ChainModel,
         secretKeyData: Data
     ) async throws -> SubstrateTransferService {
-        guard let accountResponse = wallet.fetch(for: chainAsset.chain.accountRequest()) else {
+        guard let accountResponse = wallet.fetch(for: chain.accountRequest()) else {
             throw TransferServiceError.accountNotExists
         }
 
         let chainRegistry = ChainRegistryAssembly.createDefaultRegistry()
-        let connection = try chainRegistry.getConnection(for: chainAsset.chain)
+        let connection = try await chainRegistry.getSubstrateConnection(for: chain)
 
         let runtimeService = try await chainRegistry.getRuntimeProvider(
-            chainId: chainAsset.chain.chainId,
+            chainId: chain.chainId,
             usedRuntimePaths: [:],
             runtimeItem: nil
         )
@@ -33,14 +33,14 @@ final class SubstrateTransferAssembly {
         let cryptoType = SFCryptoType(accountResponse.cryptoType)
         let extrinsicService = SSFExtrinsicKit.ExtrinsicService(
             accountId: accountResponse.accountId,
-            chainFormat: chainAsset.chain.chainFormat,
+            chainFormat: chain.chainFormat,
             cryptoType: cryptoType,
             runtimeRegistry: runtimeService,
             engine: connection,
             operationManager: operationManager
         )
         
-        let callFactory = SubstrateCallFactoryDefault(runtimeService: runtimeService)
+        let callFactory = SubstrateTransferCallFactoryDefault(runtimeService: runtimeService)
         let signer = TransactionSigner(
             publicKeyData: accountResponse.publicKey,
             secretKeyData: secretKeyData,
@@ -49,8 +49,7 @@ final class SubstrateTransferAssembly {
         return SubstrateTransferServiceDefault(
             extrinsicService: extrinsicService,
             callFactory: callFactory,
-            signer: signer,
-            chainAsset: chainAsset
+            signer: signer
         )
     }
 }
