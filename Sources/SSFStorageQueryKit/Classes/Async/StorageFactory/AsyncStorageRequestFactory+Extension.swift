@@ -4,12 +4,12 @@ import SSFUtils
 import SSFModels
 
 extension AsyncStorageRequestFactory {
-    func queryItems<K, T>(
+    func queryItems<T>(
         engine: JSONRPCEngine,
-        keyParams: [K],
+        keyParams: [any Encodable],
         factory: RuntimeCoderFactoryProtocol,
         storagePath: any StorageCodingPathProtocol
-    ) async throws -> [StorageResponse<T>] where K: Encodable, T: Decodable {
+    ) async throws -> [StorageResponse<T>] where T: Decodable {
         try await queryItems(
             engine: engine,
             keyParams: keyParams,

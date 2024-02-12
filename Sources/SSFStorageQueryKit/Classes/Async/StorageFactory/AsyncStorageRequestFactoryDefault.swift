@@ -11,13 +11,13 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
     
     // MARK: - AsyncStorageRequestFactory
     
-    func queryItems<K, T>(
+    func queryItems<T>(
         engine: JSONRPCEngine,
-        keyParams: [K],
+        keyParams: [any Encodable],
         factory: RuntimeCoderFactoryProtocol,
         storagePath: any StorageCodingPathProtocol,
         at blockHash: Data?
-    ) async throws -> [StorageResponse<T>] where K: Encodable, T: Decodable {
+    ) async throws -> [StorageResponse<T>] where T: Decodable {
         let keysWorker = MapKeyEncodingWorker(
             codingFactory: factory,
             path: storagePath,

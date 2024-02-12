@@ -29,7 +29,7 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
             request: request
         )
 
-        let responseDecoder = try StorageResponseDecoderFactoryDefault().buildResponseDecoder(for: request)
+        let responseDecoder = StorageSingleResponseDecoder()
         let response: [StorageResponse<T>] = try await worker.perform(request: request)
         let decoded = try responseDecoder.decode(storageResponse: response)
 

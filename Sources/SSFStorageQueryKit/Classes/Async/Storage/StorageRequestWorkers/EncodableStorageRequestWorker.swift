@@ -18,13 +18,14 @@ final class EncodableStorageRequestWorker<P: Decodable>: StorageRequestWorker {
     }
     
     func perform<T>(request: some StorageRequest) async throws -> [StorageResponse<T>] where T : Decodable {
-        guard case let StorageRequestParametersType.encodable(params: params) = request.parametersType else {
+        guard case let StorageRequestParametersType.encodable(param: param) = request.parametersType else {
             throw StorageRequestWorkerError.invalidParameters
         }
+
         let coderFactory = try await runtimeService.fetchCoderFactory()
         let response: [StorageResponse<T>] = try await storageRequestFactory.queryItems(
             engine: connection,
-            keyParams: params,
+            keyParams: [param],
             factory: coderFactory,
             storagePath: request.storagePath
         )
