@@ -2,7 +2,7 @@ import Foundation
 import SSFExtrinsicKit
 import SSFModels
 import BigInt
-
+//sourcery: AutoMockable
 protocol XcmExtrinsicBuilderProtocol {
     func buildReserveNativeTokenExtrinsicBuilderClosure(
         version: XcmCallFactoryVersion,
@@ -59,9 +59,11 @@ protocol XcmExtrinsicBuilderProtocol {
 
 final class XcmExtrinsicBuilder: XcmExtrinsicBuilderProtocol {
     
-    private var callFactory: XcmCallFactoryProtocol = {
-        XcmCallFactory()
-    }()
+    private var callFactory: XcmCallFactoryProtocol
+    
+    public init(callFactory: XcmCallFactoryProtocol? = nil) {
+        self.callFactory = callFactory ?? XcmCallFactory()
+    }
 
     // MARK: - Public methods
     func buildReserveNativeTokenExtrinsicBuilderClosure(

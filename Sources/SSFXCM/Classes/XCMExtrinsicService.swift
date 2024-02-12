@@ -33,8 +33,7 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
     private let signingWrapper: TransactionSignerProtocol
     private let xcmVersionFetcher: XcmVersionFetching
     private let chainRegistry: ChainRegistryProtocol
-    private let depsContainer: XcmDependencyContainer
-    private let operationManager: OperationManagerProtocol
+    private let depsContainer: XcmDependencyContainerProtocol
     private let callPathDeterminer: CallPathDeterminer
     private let xcmFeeFetcher: XcmDestinationFeeFetching
     
@@ -43,8 +42,7 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
         extrinsicBuilder: XcmExtrinsicBuilderProtocol,
         xcmVersionFetcher: XcmVersionFetching,
         chainRegistry: ChainRegistryProtocol,
-        depsContainer: XcmDependencyContainer,
-        operationManager: OperationManagerProtocol,
+        depsContainer: XcmDependencyContainerProtocol,
         callPathDeterminer: CallPathDeterminer,
         xcmFeeFetcher: XcmDestinationFeeFetching
     ) {
@@ -53,7 +51,6 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
         self.xcmVersionFetcher = xcmVersionFetcher
         self.chainRegistry = chainRegistry
         self.depsContainer = depsContainer
-        self.operationManager = operationManager
         self.callPathDeterminer = callPathDeterminer
         self.xcmFeeFetcher = xcmFeeFetcher
     }

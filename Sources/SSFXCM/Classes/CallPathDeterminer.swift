@@ -1,7 +1,7 @@
 import Foundation
 import SSFChainRegistry
 import SSFRuntimeCodingService
-
+//sourcery: AutoMockable
 protocol CallPathDeterminer {
     func determineCallPath(
         from: XcmChainType,

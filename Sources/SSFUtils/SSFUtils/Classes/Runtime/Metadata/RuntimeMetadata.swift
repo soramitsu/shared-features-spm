@@ -13,7 +13,7 @@ public final class RuntimeMetadata {
     public let schemaResolver: Schema.Resolver
 
     private let wrapped: RuntimeMetadataProtocol
-    private init(
+    public init(
         wrapping runtimeMetadata: RuntimeMetadataProtocol,
         metaReserved: UInt32,
         version: UInt8

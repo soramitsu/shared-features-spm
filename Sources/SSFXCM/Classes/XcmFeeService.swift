@@ -3,7 +3,7 @@ import SSFNetwork
 import RobinHood
 import BigInt
 import SSFModels
-
+//sourcery: AutoMockable
 public protocol XcmDestinationFeeFetching {
     func estimateFee(
         destinationChainId: String,

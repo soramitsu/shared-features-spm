@@ -1,8 +1,12 @@
 import BigInt
 
-public struct RuntimeDispatchInfo: Codable {
+public struct RuntimeDispatchInfo: Codable, Equatable {
     let inclusionFee: FeeDetails
-
+    
+    public init(inclusionFee: FeeDetails) {
+        self.inclusionFee = inclusionFee
+    }
+    
     public var fee: String {
         "\(inclusionFee.baseFee + inclusionFee.lenFee + inclusionFee.adjustedWeightFee)"
     }
@@ -12,12 +16,12 @@ public struct RuntimeDispatchInfo: Codable {
     }
 }
 
-struct FeeDetails: Codable {
+public struct FeeDetails: Codable, Equatable {
     let baseFee: BigUInt
     let lenFee: BigUInt
     let adjustedWeightFee: BigUInt
 
-    init(
+    public init(
         baseFee: BigUInt,
         lenFee: BigUInt,
         adjustedWeightFee: BigUInt
@@ -27,7 +31,7 @@ struct FeeDetails: Codable {
         self.adjustedWeightFee = adjustedWeightFee
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         let baseFeeHex = try container.decode(String.self, forKey: .baseFee)

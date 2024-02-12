@@ -16,7 +16,7 @@ public typealias SubmitExtrinsicResult = Result<String, Error>
 public typealias ExtrinsicSubmitClosure = (SubmitExtrinsicResult) -> Void
 public typealias ExtrinsicSubmitIndexedClosure = ([SubmitExtrinsicResult]) -> Void
 public typealias ExtrinsicSubmitAndWatchClosure = (Result<String, Error>, _ extrinsicHash: String?) -> Void
-
+//sourcery: AutoMockable
 public protocol ExtrinsicServiceProtocol {
     func estimateFee(
         _ closure: @escaping ExtrinsicBuilderClosure,

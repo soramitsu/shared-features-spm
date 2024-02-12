@@ -3,7 +3,7 @@ import SSFUtils
 import SSFModels
 import BigInt
 import SSFNetwork
-
+//sourcery: AutoMockable
 protocol XcmCallFactoryProtocol {
     func reserveNativeToken(
         version: XcmCallFactoryVersion,
@@ -60,14 +60,17 @@ protocol XcmCallFactoryProtocol {
 
 final class XcmCallFactory: XcmCallFactoryProtocol {
     
-    private var assetMultilocationFetcher: XcmAssetMultilocationFetching = {
+    private let assetMultilocationFetcher: XcmAssetMultilocationFetching
+    
+    init(assetMultilocationFetcher: XcmAssetMultilocationFetching? = nil) {
+        self.assetMultilocationFetcher = assetMultilocationFetcher ??
         XcmAssetMultilocationFetcher(
             sourceUrl: XcmConfig.shared.tokenLocationsSourceUrl,
             dataFetchFactory: NetworkOperationFactory(),
             retryStrategy: ExponentialReconnection(),
             operationQueue: OperationQueue()
         )
-    }()
+    }
     
     // MARK: - Public methods
     func reserveNativeToken(
@@ -233,7 +236,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             destChainId: destChainModel.parentId ?? destChainModel.chainId
         )
         
-        let remoteAsset = try createRemoteVersionedMultiassets(
+        let remoteAsset = createRemoteVersionedMultiassets(
             with: multilocation,
             version: version,
             amount: amount
@@ -595,7 +598,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         with remote: AssetMultilocation,
         version: XcmCallFactoryVersion,
         amount: BigUInt
-    ) throws -> XcmVersionedMultiAssets {
+    ) -> XcmVersionedMultiAssets {
         let interior: XcmV1MultilocationJunctions = .init(items: remote.interiors)
         let parents: UInt8 = (interior.items.isEmpty || interior.items.contains(where: { $0.isParachain() })) ? 1 : 0
         

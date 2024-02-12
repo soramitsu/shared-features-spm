@@ -12,8 +12,12 @@ import SSFModels
 struct XcmDeps {
     let extrinsicService: ExtrinsicServiceProtocol
 }
+//sourcery: AutoMockable
+protocol XcmDependencyContainerProtocol: AnyObject {
+    func prepareDeps() async throws -> XcmDeps
+}
 
-final class XcmDependencyContainer {
+final class XcmDependencyContainer: XcmDependencyContainerProtocol {
     
     private let chainRegistry: ChainRegistryProtocol
     private let fromChainData: XcmAssembly.FromChainData

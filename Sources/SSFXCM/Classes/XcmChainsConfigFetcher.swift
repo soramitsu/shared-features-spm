@@ -21,7 +21,7 @@ public protocol XcmChainsConfigFetching {
         assetSymbol: String?
     ) async throws -> [ChainModel.Id]
 }
-
+//sourcery: AutoMockable
 protocol XcmVersionFetching {
     func getVersion(for chainId: String) async throws -> XcmCallFactoryVersion
 }

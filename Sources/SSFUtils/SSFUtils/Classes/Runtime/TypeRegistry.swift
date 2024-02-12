@@ -9,8 +9,13 @@ public enum TypeRegistryError: Error {
 public struct ConstantPath: Hashable {
     let moduleName: String
     let constantName: String
+    
+    public init(moduleName: String, constantName: String) {
+        self.moduleName = moduleName
+        self.constantName = constantName
+    }
 }
-
+//sourcery: AutoMockable
 public protocol TypeRegistryProtocol {
     var registeredTypes: [Node] { get }
     var registeredTypeNames: Set<String> { get }

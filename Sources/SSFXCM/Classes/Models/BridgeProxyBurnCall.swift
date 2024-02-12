@@ -3,7 +3,7 @@ import BigInt
 import SSFUtils
 import SSFModels
 
-struct BridgeProxyBurnCall: Codable {
+struct BridgeProxyBurnCall: Codable, Equatable {
     let networkId: BridgeTypesGenericNetworkId
     let assetId: SoraAssetId
     let recipient: BridgeTypesGenericAccount
@@ -35,6 +35,19 @@ enum BridgeTypesGenericNetworkId: Codable {
         case let .sub(bridgeTypesSubNetworkId):
             try container.encode("Sub")
             try container.encode(bridgeTypesSubNetworkId)
+        }
+    }
+}
+
+extension BridgeTypesGenericNetworkId: Equatable {
+    static func ==(lhs: BridgeTypesGenericNetworkId, rhs: BridgeTypesGenericNetworkId) -> Bool {
+        switch (lhs, rhs) {
+        case let (.evm(lhsValue), .evm(rhsValue)):
+            return lhsValue == rhsValue
+        case let (.sub(lhsValue), .sub(rhsValue)):
+            return lhsValue == rhsValue
+        default:
+            return false
         }
     }
 }
@@ -83,6 +96,22 @@ enum BridgeTypesSubNetworkId: Codable {
     }
 }
 
+extension BridgeTypesSubNetworkId: Equatable {
+    static func ==(lhs: BridgeTypesSubNetworkId, rhs: BridgeTypesSubNetworkId) -> Bool {
+        switch (lhs, rhs) {
+        case (.mainnet, .mainnet),
+            (.kusama, .kusama),
+            (.polkadot, .polkadot),
+            (.rococo, .rococo):
+            return true
+        case let (.custom(lhsValue), .custom(rhsValue)):
+            return lhsValue == rhsValue
+        default:
+            return false
+        }
+    }
+}
+
 enum BridgeTypesGenericAccount: Codable {
     case evm(AccountId)
     case sora(AccountId)
@@ -113,7 +142,25 @@ enum BridgeTypesGenericAccount: Codable {
     }
 }
 
-struct SoraAssetId: Codable {
+extension BridgeTypesGenericAccount: Equatable {
+    static func ==(lhs: BridgeTypesGenericAccount, rhs: BridgeTypesGenericAccount) -> Bool {
+        switch (lhs, rhs) {
+        case (.unknown, .unknown),
+            (.root, .root):
+            return true
+        case let (.evm(lhsValue), .evm(rhsValue)):
+            return lhsValue == rhsValue
+        case let (.sora(lhsValue), .sora(rhsValue)):
+            return lhsValue == rhsValue
+        case let (.parachain(lhsValue), .parachain(rhsValue)):
+            return lhsValue == rhsValue
+        default:
+            return false
+        }
+    }
+}
+
+struct SoraAssetId: Codable, Equatable {
     @ArrayCodable var value: String
 
     init(wrappedValue: String) {
