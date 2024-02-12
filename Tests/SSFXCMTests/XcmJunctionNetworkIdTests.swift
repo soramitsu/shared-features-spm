@@ -5,6 +5,17 @@ import SSFModels
 
 final class XcmJunctionNetworkIdTests: XCTestCase {
 
+    func testEncode() throws {
+        // arrange
+        let networkId = XcmJunctionNetworkId.polkadot
+        
+        // act
+        let encodedData = try JSONEncoder().encode(networkId)
+        
+        // assert
+        XCTAssertEqual(encodedData, TestData.networkIdData)
+    }
+    
     func testFromEcosystem() {
         // arrange
         let ecosystem: ChainEcosystem = .ethereum
@@ -15,5 +26,12 @@ final class XcmJunctionNetworkIdTests: XCTestCase {
         // assert
         XCTAssertEqual(id, .ethereum)
     }
-    
+}
+
+extension XcmJunctionNetworkIdTests {
+    enum TestData {
+        static let networkIdData = """
+        ["Polkadot",null]
+        """.data(using: .utf8)
+    }
 }

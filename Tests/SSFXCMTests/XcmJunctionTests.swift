@@ -15,6 +15,21 @@ final class XcmJunctionTests: XCTestCase {
         XCTAssertTrue(isParachain)
     }
     
+    func testEncode() throws {
+        // arrange
+        let junction = XcmJunction.onlyChild
+        
+        // act
+        let encodedData = try JSONEncoder().encode(junction)
+        
+        // assert
+        XCTAssertEqual(encodedData, TestData.xcmJunctionData)
+    }
+    
+    func testXcmJunctionInitFromDecoder() throws {
+        
+    }
+    
     func testEquatable() {
         // arrange
         let junction1 = XcmJunction.generalKey(Data())
@@ -25,3 +40,10 @@ final class XcmJunctionTests: XCTestCase {
     }
 }
 
+extension XcmJunctionTests {
+    enum TestData {
+        static let xcmJunctionData = """
+        ["OnlyChild",null]
+        """.data(using: .utf8)
+    }
+}

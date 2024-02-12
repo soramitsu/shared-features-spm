@@ -35,6 +35,17 @@ final class BridgeProxyBurnCallTests: XCTestCase {
         XCTAssertEqual(networkId, .sub(TestData.subNetworkId))
     }
     
+    func testBridgeTypesGenericNetworkIdEncode() throws {
+        // arrange
+        let networkId = BridgeTypesGenericNetworkId(from: TestData.chain)
+        
+        // act
+        let encodedData = try JSONEncoder().encode(networkId)
+        
+        // assert
+        XCTAssertEqual(encodedData, TestData.genericNetworkIdData)
+    }
+    
     func testBridgeTypesSubNetworkIdInit() {
         // act
         let subNetworkId = BridgeTypesSubNetworkId(from: TestData.chain)
@@ -42,6 +53,28 @@ final class BridgeProxyBurnCallTests: XCTestCase {
         // assert
         XCTAssertNotNil(subNetworkId)
         XCTAssertEqual(subNetworkId, TestData.subNetworkId)
+    }
+    
+    func testBridgeTypesSubNetworkIdEncode() throws {
+        // arrange
+        let subNetworkId = BridgeTypesSubNetworkId(from: TestData.chain)
+        
+        // act
+        let encodedData = try JSONEncoder().encode(subNetworkId)
+        
+        // assert
+        XCTAssertEqual(encodedData, TestData.subNetworkIdData)
+    }
+    
+    func testBridgeTypesGenericAccountEncode() throws {
+        // arrange
+        let genericAccount = BridgeTypesGenericAccount.root
+        
+        // act
+        let encodedData = try JSONEncoder().encode(genericAccount)
+        
+        // assert
+        XCTAssertEqual(encodedData, TestData.genericAccountData)
     }
     
     func testSoraAssetIdInit() {
@@ -56,6 +89,17 @@ final class BridgeProxyBurnCallTests: XCTestCase {
         XCTAssertEqual(soraAssetId.value, value)
     }
     
+    func testSoraAssetIdEncode() throws {
+        // arrange
+        let soraAssetId = SoraAssetId(wrappedValue: TestData.hexString)
+        
+        // act
+        let encodedData = try JSONEncoder().encode(soraAssetId)
+        
+        // assert
+        XCTAssertEqual(encodedData, TestData.soraAssetIdData)
+    }
+    
     func testArrayCodableInit() {
         // arrange
         let value = "1"
@@ -68,6 +112,17 @@ final class BridgeProxyBurnCallTests: XCTestCase {
         XCTAssertEqual(arrayCodable.wrappedValue, value)
     }
     
+    func testArrayCodableEncode() throws {
+        // arrange
+        let arrayCodable = ArrayCodable(wrappedValue: TestData.hexString)
+        
+        // act
+        let encodedData = try JSONEncoder().encode(arrayCodable)
+        
+        // assert
+        XCTAssertEqual(encodedData, TestData.arrayCodableData)
+    }
+    
 }
 
 extension BridgeProxyBurnCallTests {
@@ -78,7 +133,7 @@ extension BridgeProxyBurnCallTests {
         
         static let chain = ChainModel(rank: 1,
                                       disabled: false,
-                                      chainId: "1",
+                                      chainId: "b0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe",
                                       paraId: "1",
                                       name: "test",
                                       xcm: nil,
@@ -88,5 +143,27 @@ extension BridgeProxyBurnCallTests {
                                       iosMinAppVersion: nil)
         
         static let subNetworkId = BridgeTypesSubNetworkId(from: chain)
+        
+        static let hexString = "0xbf57a61b1d24b6cde5a12f6779e9d13f7c59db72fc2a63bd382a6c91e7e41f61"
+        
+        static let genericNetworkIdData = """
+        ["Sub",["Kusama",null]]
+        """.data(using: .utf8)
+        
+        static let subNetworkIdData = """
+        ["Kusama",null]
+        """.data(using: .utf8)
+        
+        static let genericAccountData = """
+        ["Root",null]
+        """.data(using: .utf8)
+        
+        static let soraAssetIdData = """
+        {"code":["191","87","166","27","29","36","182","205","229","161","47","103","121","233","209","63","124","89","219","114","252","42","99","189","56","42","108","145","231","228","31","97"]}
+        """.data(using: .utf8)
+        
+        static let arrayCodableData = """
+        ["191","87","166","27","29","36","182","205","229","161","47","103","121","233","209","63","124","89","219","114","252","42","99","189","56","42","108","145","231","228","31","97"]
+        """.data(using: .utf8)
     }
 }
