@@ -26,8 +26,12 @@ final class XcmJunctionTests: XCTestCase {
         XCTAssertEqual(encodedData, TestData.xcmJunctionData)
     }
     
-    func testXcmJunctionInitFromDecoder() throws {
+    func testInitFromDecoder() throws {
+        // act
+        let junction = try JSONDecoder().decode(XcmJunction.self, from: TestData.decodedData ?? Data())
         
+        // assert
+        XCTAssertTrue(junction.isParachain())
     }
     
     func testEquatable() {
@@ -44,6 +48,10 @@ extension XcmJunctionTests {
     enum TestData {
         static let xcmJunctionData = """
         ["OnlyChild",null]
+        """.data(using: .utf8)
+        
+        static let decodedData = """
+        {"parachain": 42}
         """.data(using: .utf8)
     }
 }

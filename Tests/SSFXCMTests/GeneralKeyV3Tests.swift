@@ -18,4 +18,20 @@ final class GeneralKeyV3Tests: XCTestCase {
         XCTAssertEqual(generalKeyV3.data, data)
     }
     
+    func testInitFromDecoder() throws {
+        // act
+        let key = try JSONDecoder().decode(GeneralKeyV3.self, from: TestData.generalKeyData ?? Data())
+        
+        // assert
+        XCTAssertEqual(key.length, 4)
+        XCTAssertEqual(key.data.toHex(), "68656c6c6f")
+    }
+}
+
+extension GeneralKeyV3Tests {
+    enum TestData {
+        static let generalKeyData = """
+        {"length": 4,"data": "68656c6c6f"}
+        """.data(using: .utf8)
+    }
 }

@@ -89,6 +89,14 @@ final class BridgeProxyBurnCallTests: XCTestCase {
         XCTAssertEqual(soraAssetId.value, value)
     }
     
+    func testSoraAssetIdInitFromDecoder() throws {
+        // act
+        let soraAssetId = try JSONDecoder().decode(SoraAssetId.self, from: TestData.soraAssetIdDecodeData ?? Data())
+        
+        // assert
+        XCTAssertEqual(soraAssetId.value, "0x6dfe7b6bad5bd5ddb86fa71d7b96b5d9febbefd7bd775ddfedce7d75bef67dcd9aeb76dddfcd9ae9cf757bb7b8d5feb5")
+    }
+    
     func testSoraAssetIdEncode() throws {
         // arrange
         let soraAssetId = SoraAssetId(wrappedValue: TestData.hexString)
@@ -110,6 +118,14 @@ final class BridgeProxyBurnCallTests: XCTestCase {
         // assert
         XCTAssertNotNil(arrayCodable)
         XCTAssertEqual(arrayCodable.wrappedValue, value)
+    }
+    
+    func testArrayCodableInitFromDecoder() throws {
+        // act
+        let arrayCodable = try JSONDecoder().decode(ArrayCodable.self, from: TestData.arrayCodableData ?? Data())
+        
+        // assert
+        XCTAssertEqual(arrayCodable.wrappedValue, TestData.hexString)
     }
     
     func testArrayCodableEncode() throws {
@@ -160,6 +176,10 @@ extension BridgeProxyBurnCallTests {
         
         static let soraAssetIdData = """
         {"code":["191","87","166","27","29","36","182","205","229","161","47","103","121","233","209","63","124","89","219","114","252","42","99","189","56","42","108","145","231","228","31","97"]}
+        """.data(using: .utf8)
+        
+        static let soraAssetIdDecodeData = """
+        {"code": "bf57a61b1d24b6cde5a12f6779e9d13f7c59db72fc2a63bd382a6c91e7e41f61"}
         """.data(using: .utf8)
         
         static let arrayCodableData = """
