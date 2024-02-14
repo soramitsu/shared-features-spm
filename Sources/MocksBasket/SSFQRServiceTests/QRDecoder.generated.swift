@@ -5,21 +5,22 @@
 import UIKit
 @testable import SSFQRService
 
-class QRDecoderMock: QRDecoder {
+public class QRDecoderMock: QRDecoder {
+public init() {}
 
     //MARK: - decode
 
-    var decodeDataThrowableError: Error?
-    var decodeDataCallsCount = 0
-    var decodeDataCalled: Bool {
+    public var decodeDataThrowableError: Error?
+    public var decodeDataCallsCount = 0
+    public var decodeDataCalled: Bool {
         return decodeDataCallsCount > 0
     }
-    var decodeDataReceivedData: Data?
-    var decodeDataReceivedInvocations: [Data] = []
-    var decodeDataReturnValue: QRInfoType!
-    var decodeDataClosure: ((Data) throws -> QRInfoType)?
+    public var decodeDataReceivedData: Data?
+    public var decodeDataReceivedInvocations: [Data] = []
+    public var decodeDataReturnValue: QRInfoType!
+    public var decodeDataClosure: ((Data) throws -> QRInfoType)?
 
-    func decode(data: Data) throws -> QRInfoType {
+    public func decode(data: Data) throws -> QRInfoType {
         if let error = decodeDataThrowableError {
             throw error
         }

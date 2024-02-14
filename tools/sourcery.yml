@@ -1,33 +1,46 @@
 configurations:
+# SSFAssetManagment
     - sources:
       - ../Sources/SSFAssetManagment
       templates:
         - ./Templates/AutoMockable.stencil
       output:
-        ../Tests/SSFAssetManagmentTests/Mocks
+        ../Sources/MocksBasket/SSFAssetManagmentTests
       args:
         autoMockableTestableImports: ["SSFAssetManagment", "SSFModels"]
+# SSFAccountManagment
     - sources:
       - ../Sources/SSFAccountManagment
       templates:
         - ./Templates/AutoMockable.stencil
       output:
-        ../Tests/SSFAccountManagmentTests/Mocks
+        ../Sources/MocksBasket/SSFAccountManagmentTests
       args:
         autoMockableTestableImports: ["SSFAccountManagment", "SSFModels", "SSFUtils", "RobinHood"]
+# SSFKeyPair
     - sources:
       - ../Sources/SSFKeyPair
       templates:
         - ./Templates/AutoMockable.stencil
       output:
-        ../Tests/SSFAccountManagmentTests/Mocks
+        ../Sources/MocksBasket/SSFKeyPair
       args:
-        autoMockableTestableImports: ["IrohaCrypto", "SSFKeyPair", "SSFModels"]
+        autoMockableTestableImports: ["IrohaCrypto", "SSFKeyPair", "SSFModels", "SSFCrypto"]
+# SSFQRService
     - sources:
       - ../Sources/SSFQRService
       templates:
         - ./Templates/AutoMockable.stencil
       output:
-        ../Tests/SSFQRServiceTests/Mocks
+        ../Sources/MocksBasket/SSFQRServiceTests
       args:
         autoMockableTestableImports: ["SSFQRService"]
+# SSFCloudStorage
+    - sources:
+      - ../Sources/SSFCloudStorage
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Sources/MocksBasket/SSFCloudStorage
+      args:
+        autoMockableTestableImports: ["SSFCloudStorage"]

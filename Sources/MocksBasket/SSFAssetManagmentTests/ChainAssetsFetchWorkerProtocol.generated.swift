@@ -6,18 +6,19 @@ import UIKit
 @testable import SSFAssetManagment
 @testable import SSFModels
 
-class ChainAssetsFetchWorkerProtocolMock: ChainAssetsFetchWorkerProtocol {
+public class ChainAssetsFetchWorkerProtocolMock: ChainAssetsFetchWorkerProtocol {
+public init() {}
 
     //MARK: - getChainAssetsModels
 
-    var getChainAssetsModelsCallsCount = 0
-    var getChainAssetsModelsCalled: Bool {
+    public var getChainAssetsModelsCallsCount = 0
+    public var getChainAssetsModelsCalled: Bool {
         return getChainAssetsModelsCallsCount > 0
     }
-    var getChainAssetsModelsReturnValue: [ChainAsset]!
-    var getChainAssetsModelsClosure: (() -> [ChainAsset])?
+    public var getChainAssetsModelsReturnValue: [ChainAsset]!
+    public var getChainAssetsModelsClosure: (() -> [ChainAsset])?
 
-    func getChainAssetsModels() -> [ChainAsset] {
+    public func getChainAssetsModels() -> [ChainAsset] {
         getChainAssetsModelsCallsCount += 1
         return getChainAssetsModelsClosure.map({ $0() }) ?? getChainAssetsModelsReturnValue
     }

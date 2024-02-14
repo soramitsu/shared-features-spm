@@ -32,7 +32,8 @@ let package = Package(
         .library(name: "keccak", targets: ["keccak"]), //TODO: generate xcframework
         .library(name: "RobinHood", targets: ["RobinHood"]), //TODO: get from github
         .library(name: "SoraKeystore", targets: ["SoraKeystore"]), //TODO: get from github
-        .library(name: "SSFQRService", targets: ["SSFQRService"])
+        .library(name: "SSFQRService", targets: ["SSFQRService"]),
+        .library(name: "SSFSingleValueCache", targets: ["SSFSingleValueCache"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
@@ -52,7 +53,7 @@ let package = Package(
         .binaryTarget(name: "sr25519lib", path: "Binaries/sr25519lib.xcframework"),
         .binaryTarget(name: "MPQRCoreSDK", path: "Binaries/MPQRCoreSDK.xcframework"),
         
-        .target(name: "RobinHood"),
+            .target(name: "RobinHood"),
         .target(name: "keccak"),
         .target(name: "SoraKeystore"),
         .target(name: "SSFHelpers", dependencies: [ "SSFModels", "SSFUtils" ]),
@@ -218,7 +219,7 @@ let package = Package(
             name: "SSFSingleValueCache",
             dependencies: ["RobinHood"]
         ),
-
+        
         //Tests targets
         .testTarget(
             name: "SSFAssetManagmentTests",
@@ -228,12 +229,13 @@ let package = Package(
                 "SSFUtils",
                 "SSFModels",
                 "RobinHood",
-                "SSFHelpers"
+                "SSFHelpers",
+                "MocksBasket"
             ]
         ),
         .testTarget(
             name: "SSFAccountManagmentTests",
-            dependencies: [ 
+            dependencies: [
                 "SSFAccountManagment",
                 "SSFModels",
                 "SSFHelpers",
@@ -241,35 +243,43 @@ let package = Package(
                 "SSFKeyPair",
                 "IrohaCrypto",
                 "SoraKeystore",
+                "MocksBasket"
             ]
         ),
         .testTarget(
             name: "SSFQRServiceTests",
             dependencies: [
-                "SSFQRService"
+                "SSFQRService",
+                "MocksBasket"
             ]
         ),
         .testTarget(
             name: "SSFKeyPairTests",
             dependencies: [
                 "SSFKeyPair",
-                "IrohaCrypto"
+                "IrohaCrypto",
+                "MocksBasket"
             ]
         ),
         .testTarget(
             name: "SSFCloudStorageTests",
             dependencies: [
-                "SSFCloudStorage"
-            ]
-        ),
-        .testTarget(
-            name: "SSFStorageQueryKitTests",
-            dependencies: [
-                "SSFRuntimeCodingService",
-                "SSFCrypto",
-                "SSFChainConnection",
-                "SSFUtils"
+                "SSFCloudStorage",
+                "MocksBasket"
             ]
         )
     ]
 )
+
+func mockDeps() -> [Target.Dependency] {
+    let deps: [Target.Dependency] = package.products.map { product in
+            .byNameItem(name: product.name, condition: nil)
+    }
+    return deps
+}
+let mockBasketTarget: Target = .target(
+    name: "MocksBasket",
+    dependencies: mockDeps()
+)
+
+package.targets.append(mockBasketTarget)

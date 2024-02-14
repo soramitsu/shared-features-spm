@@ -534,6 +534,16 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "MocksBasket"
+               BuildableName = "MocksBasket"
+               BlueprintName = "MocksBasket"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "SSFCloudStorageTests"
                BuildableName = "SSFCloudStorageTests"
                BlueprintName = "SSFCloudStorageTests"

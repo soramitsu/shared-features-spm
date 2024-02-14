@@ -5,21 +5,22 @@
 import UIKit
 @testable import SSFQRService
 
-class QRServiceMock: QRService {
+public class QRServiceMock: QRService {
+public init() {}
 
     //MARK: - extractQrCode
 
-    var extractQrCodeFromThrowableError: Error?
-    var extractQrCodeFromCallsCount = 0
-    var extractQrCodeFromCalled: Bool {
+    public var extractQrCodeFromThrowableError: Error?
+    public var extractQrCodeFromCallsCount = 0
+    public var extractQrCodeFromCalled: Bool {
         return extractQrCodeFromCallsCount > 0
     }
-    var extractQrCodeFromReceivedImage: UIImage?
-    var extractQrCodeFromReceivedInvocations: [UIImage] = []
-    var extractQrCodeFromReturnValue: QRMatcherType!
-    var extractQrCodeFromClosure: ((UIImage) throws -> QRMatcherType)?
+    public var extractQrCodeFromReceivedImage: UIImage?
+    public var extractQrCodeFromReceivedInvocations: [UIImage] = []
+    public var extractQrCodeFromReturnValue: QRMatcherType!
+    public var extractQrCodeFromClosure: ((UIImage) throws -> QRMatcherType)?
 
-    func extractQrCode(from image: UIImage) throws -> QRMatcherType {
+    public func extractQrCode(from image: UIImage) throws -> QRMatcherType {
         if let error = extractQrCodeFromThrowableError {
             throw error
         }
@@ -31,17 +32,17 @@ class QRServiceMock: QRService {
 
     //MARK: - generate
 
-    var generateWithQrSizeThrowableError: Error?
-    var generateWithQrSizeCallsCount = 0
-    var generateWithQrSizeCalled: Bool {
+    public var generateWithQrSizeThrowableError: Error?
+    public var generateWithQrSizeCallsCount = 0
+    public var generateWithQrSizeCalled: Bool {
         return generateWithQrSizeCallsCount > 0
     }
-    var generateWithQrSizeReceivedArguments: (qrType: QRType, qrSize: CGSize)?
-    var generateWithQrSizeReceivedInvocations: [(qrType: QRType, qrSize: CGSize)] = []
-    var generateWithQrSizeReturnValue: UIImage!
-    var generateWithQrSizeClosure: ((QRType, CGSize) throws -> UIImage)?
+    public var generateWithQrSizeReceivedArguments: (qrType: QRType, qrSize: CGSize)?
+    public var generateWithQrSizeReceivedInvocations: [(qrType: QRType, qrSize: CGSize)] = []
+    public var generateWithQrSizeReturnValue: UIImage!
+    public var generateWithQrSizeClosure: ((QRType, CGSize) throws -> UIImage)?
 
-    func generate(with qrType: QRType, qrSize: CGSize) throws -> UIImage {
+    public func generate(with qrType: QRType, qrSize: CGSize) throws -> UIImage {
         if let error = generateWithQrSizeThrowableError {
             throw error
         }

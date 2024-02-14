@@ -5,21 +5,22 @@
 import UIKit
 @testable import SSFQRService
 
-class QREncoderMock: QREncoder {
+public class QREncoderMock: QREncoder {
+public init() {}
 
     //MARK: - encode
 
-    var encodeWithThrowableError: Error?
-    var encodeWithCallsCount = 0
-    var encodeWithCalled: Bool {
+    public var encodeWithThrowableError: Error?
+    public var encodeWithCallsCount = 0
+    public var encodeWithCalled: Bool {
         return encodeWithCallsCount > 0
     }
-    var encodeWithReceivedType: QRType?
-    var encodeWithReceivedInvocations: [QRType] = []
-    var encodeWithReturnValue: Data!
-    var encodeWithClosure: ((QRType) throws -> Data)?
+    public var encodeWithReceivedType: QRType?
+    public var encodeWithReceivedInvocations: [QRType] = []
+    public var encodeWithReturnValue: Data!
+    public var encodeWithClosure: ((QRType) throws -> Data)?
 
-    func encode(with type: QRType) throws -> Data {
+    public func encode(with type: QRType) throws -> Data {
         if let error = encodeWithThrowableError {
             throw error
         }

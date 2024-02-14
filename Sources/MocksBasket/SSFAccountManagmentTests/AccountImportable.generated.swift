@@ -8,21 +8,22 @@ import UIKit
 @testable import SSFUtils
 @testable import RobinHood
 
-class AccountImportableMock: AccountImportable {
+public class AccountImportableMock: AccountImportable {
+public init() {}
 
     //MARK: - importMetaAccount
 
-    var importMetaAccountRequestThrowableError: Error?
-    var importMetaAccountRequestCallsCount = 0
-    var importMetaAccountRequestCalled: Bool {
+    public var importMetaAccountRequestThrowableError: Error?
+    public var importMetaAccountRequestCallsCount = 0
+    public var importMetaAccountRequestCalled: Bool {
         return importMetaAccountRequestCallsCount > 0
     }
-    var importMetaAccountRequestReceivedRequest: MetaAccountImportRequest?
-    var importMetaAccountRequestReceivedInvocations: [MetaAccountImportRequest] = []
-    var importMetaAccountRequestReturnValue: MetaAccountModel!
-    var importMetaAccountRequestClosure: ((MetaAccountImportRequest) throws -> MetaAccountModel)?
+    public var importMetaAccountRequestReceivedRequest: MetaAccountImportRequest?
+    public var importMetaAccountRequestReceivedInvocations: [MetaAccountImportRequest] = []
+    public var importMetaAccountRequestReturnValue: MetaAccountModel!
+    public var importMetaAccountRequestClosure: ((MetaAccountImportRequest) throws -> MetaAccountModel)?
 
-    func importMetaAccount(request: MetaAccountImportRequest) throws -> MetaAccountModel {
+    public func importMetaAccount(request: MetaAccountImportRequest) throws -> MetaAccountModel {
         if let error = importMetaAccountRequestThrowableError {
             throw error
         }

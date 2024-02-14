@@ -3,6 +3,7 @@ import TweetNacl
 import IrohaCrypto
 import SSFUtils
 
+//sourcery: AutoMockable
 public protocol EncryptionServiceProtocol {
     func getDecrypted(from message: String?, password: String) throws -> String?
     func createEncryptedData(with password: String, message: String?) throws -> Data?

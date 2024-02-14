@@ -64,9 +64,9 @@ extension OpenBackupAccountTests {
                                                substrateDerivationPath: "substrateDerivationPath",
                                                ethDerivationPath: "ethDerivationPath",
                                                backupAccountType: [.passphrase, .seed, .json],
-                                               json: OpenBackupAccount.Json(substrateJson: "substrateJson", 
+                                               json: OpenBackupAccount.Json(substrateJson: "substrateJson",
                                                                             ethJson: "ethJson"),
-                                               encryptedSeed: OpenBackupAccount.Seed(substrateSeed: "substrateSeed", 
+                                               encryptedSeed: OpenBackupAccount.Seed(substrateSeed: "substrateSeed",
                                                                                      ethSeed: "ethSeed"))
     }
 }

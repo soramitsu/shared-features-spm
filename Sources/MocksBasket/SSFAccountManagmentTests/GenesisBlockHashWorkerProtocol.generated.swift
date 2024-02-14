@@ -8,18 +8,19 @@ import UIKit
 @testable import SSFUtils
 @testable import RobinHood
 
-class GenesisBlockHashWorkerProtocolMock: GenesisBlockHashWorkerProtocol {
+public class GenesisBlockHashWorkerProtocolMock: GenesisBlockHashWorkerProtocol {
+public init() {}
 
     //MARK: - getGenesisHash
 
-    var getGenesisHashCallsCount = 0
-    var getGenesisHashCalled: Bool {
+    public var getGenesisHashCallsCount = 0
+    public var getGenesisHashCalled: Bool {
         return getGenesisHashCallsCount > 0
     }
-    var getGenesisHashReturnValue: String?
-    var getGenesisHashClosure: (() -> String?)?
+    public var getGenesisHashReturnValue: String?
+    public var getGenesisHashClosure: (() -> String?)?
 
-    func getGenesisHash() -> String? {
+    public func getGenesisHash() -> String? {
         getGenesisHashCallsCount += 1
         return getGenesisHashClosure.map({ $0() }) ?? getGenesisHashReturnValue
     }

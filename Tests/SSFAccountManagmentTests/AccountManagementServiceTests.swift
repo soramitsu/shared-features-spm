@@ -4,6 +4,7 @@ import SSFHelpers
 import SSFModels
 import SSFUtils
 import SSFAccountManagmentStorage
+import MocksBasket
 
 @testable import SSFAccountManagment
 
@@ -11,14 +12,14 @@ final class AccountManagementServiceTests: XCTestCase {
 
     var service: AccountManageble?
     var accountManagementWorker: AccountManagementWorkerProtocolMock?
-    
+
     override func setUp() {
         super.setUp()
         let storageFacade = AccountStorageTestFacade()
-        
+
         let accountManagementWorker = AccountManagementWorkerProtocolMock()
         self.accountManagementWorker = accountManagementWorker
-        
+
         let selectedWallet = SelectedWalletSettings(storageFacade: storageFacade)
 
         service = AccountManagementService(
@@ -40,12 +41,12 @@ final class AccountManagementServiceTests: XCTestCase {
         // assert
         XCTAssertNil(result)
     }
-    
+
     func testSetCurrentAccount() throws {
         // act
         service?.setCurrentAccount(account: TestData.account, completionClosure: { [weak self] result in
             let currentAccount = self?.service?.getCurrentAccount()
-            
+
             // assert
             XCTAssertEqual(currentAccount, TestData.account)
         })
@@ -54,11 +55,11 @@ final class AccountManagementServiceTests: XCTestCase {
     func testUpdateVisability() throws {
         // arrange
         service?.setCurrentAccount(account: TestData.account, completionClosure: { [weak self] result in
-            
+
             // act
             let chain = TestData.chain
             let asset = TestData.asset
-            
+
             let chainAsset = ChainAsset(chain: chain, asset: asset)
 
             do {
@@ -71,14 +72,14 @@ final class AccountManagementServiceTests: XCTestCase {
             }
         })
     }
-    
+
     func testLogout() throws {
         // act
         service?.setCurrentAccount(account: TestData.account, completionClosure: { [weak self] result in
             Task { [weak self] in
                 try await self?.service?.logout()
                 let currentAccount = self?.service?.getCurrentAccount()
-                
+
                 // assert
                 XCTAssertNil(currentAccount)
             }
@@ -107,7 +108,7 @@ private extension AccountManagementServiceTests {
             customNodes: [],
             iosMinAppVersion: nil
         )
-        
+
         static let asset = AssetModel(
             id: "2",
             name: "test",
@@ -128,7 +129,7 @@ private extension AccountManagementServiceTests {
             priceProvider: nil,
             coingeckoPriceId: nil
         )
-        
+
         static let chainAccounts = ChainAccountModel(
             chainId: "Kusama",
             accountId: Data(),
@@ -136,7 +137,7 @@ private extension AccountManagementServiceTests {
             cryptoType: 2,
             ethereumBased: false
         )
-        
+
         static let account = MetaAccountModel(
             metaId: "1",
             name: "test",
