@@ -4,7 +4,7 @@ import SSFModels
 import SSFUtils
 
 final class NMapKeyEncodingWorker {
-    private let keyParams: [[NMapKeyParamProtocol]]
+    private let keyParams: [[any NMapKeyParamProtocol]]
     private let codingFactory: RuntimeCoderFactoryProtocol
     private let path: any StorageCodingPathProtocol
     private let storageKeyFactory: StorageKeyFactoryProtocol
@@ -13,7 +13,7 @@ final class NMapKeyEncodingWorker {
         codingFactory: RuntimeCoderFactoryProtocol,
         path: any StorageCodingPathProtocol,
         storageKeyFactory: StorageKeyFactoryProtocol,
-        keyParams: [[NMapKeyParamProtocol]]
+        keyParams: [[any NMapKeyParamProtocol]]
     ) {
         self.codingFactory = codingFactory
         self.path = path
@@ -38,9 +38,9 @@ final class NMapKeyEncodingWorker {
             throw StorageKeyEncodingOperationError.incompatibleStorageType
         }
         
-        var params: [[NMapKeyParamProtocol]] = []
+        var params: [[any NMapKeyParamProtocol]] = []
         for index in 0 ..< keyParams[0].count {
-            var array: [NMapKeyParamProtocol] = []
+            var array: [any NMapKeyParamProtocol] = []
             for param in keyParams {
                 array.append(param[index])
             }
@@ -63,7 +63,7 @@ final class NMapKeyEncodingWorker {
     }
 
     private func encodeParam(
-        _ param: NMapKeyParamProtocol,
+        _ param: any NMapKeyParamProtocol,
         factory: RuntimeCoderFactoryProtocol,
         type: String
     ) throws -> Data {

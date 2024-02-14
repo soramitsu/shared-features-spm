@@ -2,7 +2,7 @@ import Foundation
 import SSFRuntimeCodingService
 import SSFUtils
 
-final class KeysStorageRequestWorker<P: Decodable>: StorageRequestWorker {
+final class SimpleStorageRequestWorker<P: Decodable>: StorageRequestWorker {
     private let runtimeService: RuntimeCodingServiceProtocol
     private let connection: JSONRPCEngine
     private let storageRequestFactory: AsyncStorageRequestFactory
@@ -18,7 +18,7 @@ final class KeysStorageRequestWorker<P: Decodable>: StorageRequestWorker {
     }
 
     func perform<T>(request: some StorageRequest) async throws -> [StorageResponse<T>] where T : Decodable {
-        guard case StorageRequestParametersType.keys = request.parametersType else {
+        guard case StorageRequestParametersType.simple = request.parametersType else {
             throw StorageRequestWorkerError.invalidParameters
         }
 

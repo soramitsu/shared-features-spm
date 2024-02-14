@@ -5,6 +5,8 @@ import SSFModels
 import SSFRuntimeCodingService
 
 public protocol NMapKeyParamProtocol {
+    associatedtype Value: Encodable
+    var value: Value { get }
     func encode(encoder: DynamicScaleEncoding, type: String) throws -> Data
 }
 
@@ -252,7 +254,7 @@ class DoubleMapKeyEncodingOperation<T1: Encodable, T2: Encodable>: BaseOperation
 }
 
 class NMapKeyEncodingOperation: BaseOperation<[Data]> {
-    var keyParams: [[NMapKeyParamProtocol]]?
+    var keyParams: [[any NMapKeyParamProtocol]]?
     var codingFactory: RuntimeCoderFactoryProtocol?
 
     let path: any StorageCodingPathProtocol
@@ -261,7 +263,7 @@ class NMapKeyEncodingOperation: BaseOperation<[Data]> {
     init(
         path: any StorageCodingPathProtocol,
         storageKeyFactory: StorageKeyFactoryProtocol,
-        keyParams: [[NMapKeyParamProtocol]]? = nil
+        keyParams: [[any NMapKeyParamProtocol]]? = nil
     ) {
         self.path = path
         self.keyParams = keyParams
@@ -304,9 +306,9 @@ class NMapKeyEncodingOperation: BaseOperation<[Data]> {
                 throw StorageKeyEncodingOperationError.incompatibleStorageType
             }
 
-            var params: [[NMapKeyParamProtocol]] = []
+            var params: [[any NMapKeyParamProtocol]] = []
             for index in 0 ..< keyParams[0].count {
-                var array: [NMapKeyParamProtocol] = []
+                var array: [any NMapKeyParamProtocol] = []
                 for param in keyParams {
                     array.append(param[index])
                 }
@@ -333,7 +335,7 @@ class NMapKeyEncodingOperation: BaseOperation<[Data]> {
     }
 
     private func encodeParam(
-        _ param: NMapKeyParamProtocol,
+        _ param: any NMapKeyParamProtocol,
         factory: RuntimeCoderFactoryProtocol,
         type: String
     ) throws -> Data {

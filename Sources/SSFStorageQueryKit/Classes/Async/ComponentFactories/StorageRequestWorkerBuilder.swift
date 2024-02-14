@@ -31,8 +31,8 @@ final class StorageRequestWorkerBuilderDefault<T: Decodable>: StorageRequestWork
                 connection: connection,
                 storageRequestFactory: storageRequestFactory
             )
-        case .keys:
-            return KeysStorageRequestWorker<T>(
+        case .simple:
+            return SimpleStorageRequestWorker<T>(
                 runtimeService: runtimeService,
                 connection: connection,
                 storageRequestFactory: storageRequestFactory

@@ -122,7 +122,7 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
     
     func queryItems<T>(
         engine: JSONRPCEngine,
-        keyParams: [[NMapKeyParamProtocol]],
+        keyParams: [[any NMapKeyParamProtocol]],
         factory: RuntimeCoderFactoryProtocol,
         storagePath: any StorageCodingPathProtocol,
         at blockHash: Data?

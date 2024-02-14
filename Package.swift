@@ -142,7 +142,8 @@ let package = Package(
                 "SSFRuntimeCodingService",
                 "SSFCrypto",
                 "SSFChainConnection",
-                "SSFUtils"
+                "SSFUtils",
+                "SSFSingleValueCache"
             ]
         ),
         .target(
@@ -213,6 +214,10 @@ let package = Package(
                 "SSFChainRegistry"
             ]
         ),
+        .target(
+            name: "SSFSingleValueCache",
+            dependencies: ["RobinHood"]
+        ),
 
         //Tests targets
         .testTarget(
@@ -223,7 +228,7 @@ let package = Package(
                 "SSFUtils",
                 "SSFModels",
                 "RobinHood",
-                "SSFHelpers",
+                "SSFHelpers"
             ]
         ),
         .testTarget(
@@ -256,11 +261,15 @@ let package = Package(
             dependencies: [
                 "SSFCloudStorage"
             ]
+        ),
+        .testTarget(
+            name: "SSFStorageQueryKitTests",
+            dependencies: [
+                "SSFRuntimeCodingService",
+                "SSFCrypto",
+                "SSFChainConnection",
+                "SSFUtils"
+            ]
         )
     ]
 )
-
-
-
-
-

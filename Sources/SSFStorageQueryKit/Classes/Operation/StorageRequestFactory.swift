@@ -57,7 +57,7 @@ public protocol StorageRequestFactoryProtocol {
 
     func queryItems<T>(
         engine: JSONRPCEngine,
-        keyParams: @escaping () throws -> [[NMapKeyParamProtocol]],
+        keyParams: @escaping () throws -> [[any NMapKeyParamProtocol]],
         factory: @escaping () throws -> RuntimeCoderFactoryProtocol,
         storagePath: any StorageCodingPathProtocol,
         at blockHash: Data?
@@ -376,7 +376,7 @@ public final class StorageRequestFactory: StorageRequestFactoryProtocol {
 
     public func queryItems<T>(
         engine: JSONRPCEngine,
-        keyParams: @escaping () throws -> [[NMapKeyParamProtocol]],
+        keyParams: @escaping () throws -> [[any NMapKeyParamProtocol]],
         factory: @escaping () throws -> RuntimeCoderFactoryProtocol,
         storagePath: any StorageCodingPathProtocol,
         at blockHash: Data?
@@ -542,7 +542,7 @@ public extension StorageRequestFactoryProtocol {
 
     func queryItems<T>(
         engine: JSONRPCEngine,
-        keyParams: @escaping () throws -> [[NMapKeyParamProtocol]],
+        keyParams: @escaping () throws -> [[any NMapKeyParamProtocol]],
         factory: @escaping () throws -> RuntimeCoderFactoryProtocol,
         storagePath: any StorageCodingPathProtocol
     ) -> CompoundOperationWrapper<[StorageResponse<T>]> where T: Decodable {
