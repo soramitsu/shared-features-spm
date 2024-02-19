@@ -39,7 +39,7 @@ public extension TypeRegistry {
                         jsonDic[map.key2] = .stringValue(map.key2)
                         jsonDic[map.value] = .stringValue(map.value)
                     case let .nMap(nMap):
-                        for key in nMap.keys(using: schemaResolver) {
+                        for key in try nMap.keys(using: schemaResolver) {
                             jsonDic[key] = .stringValue(key)
                         }
                         let nMapValue = try nMap.value(using: schemaResolver)

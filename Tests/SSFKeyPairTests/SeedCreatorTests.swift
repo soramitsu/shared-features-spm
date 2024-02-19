@@ -4,6 +4,7 @@ import SSFCrypto
 import SSFModels
 import SSFUtils
 import XCTest
+import MocksBasket
 
 @testable import SSFKeyPair
 
