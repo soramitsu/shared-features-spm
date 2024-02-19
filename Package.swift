@@ -52,21 +52,68 @@ let package = Package(
         .binaryTarget(name: "libed25519", path: "Binaries/libed25519.xcframework"),
         .binaryTarget(name: "sr25519lib", path: "Binaries/sr25519lib.xcframework"),
         .binaryTarget(name: "MPQRCoreSDK", path: "Binaries/MPQRCoreSDK.xcframework"),
-        
-            .target(name: "RobinHood"),
+        .target(name: "RobinHood"),
         .target(name: "keccak"),
         .target(name: "SoraKeystore"),
-        .target(name: "SSFHelpers", dependencies: [ "SSFModels", "SSFUtils" ]),
-        .target(name: "SSFKeyPair", dependencies: [ "IrohaCrypto", "SSFCrypto" ]),
-        .target(name: "SSFModels", dependencies: [ "IrohaCrypto" ]),
-        .target(name: "SSFCrypto", dependencies: [ "IrohaCrypto", "SSFUtils", "SSFModels", "keccak" ]),
-        .target(name: "SSFChainConnection", dependencies: [ "SSFUtils" ]),
-        .target(name: "SSFSigner", dependencies: [ "IrohaCrypto", "SSFCrypto" ]),
-        .target(name: "SSFQRService", dependencies: [
-            .byName(name: "MPQRCoreSDK"),
-            "SSFCrypto",
-            "SSFModels"
-        ]),
+        .target(
+            name: "SSFHelpers",
+            dependencies: [
+                "SSFModels",
+                "SSFUtils"
+            ]
+        ),
+        .target(
+            name: "SSFKeyPair",
+            dependencies: [
+                "IrohaCrypto",
+                "SSFCrypto"
+            ]
+        ),
+        .testTarget(
+            name: "SSFKeyPairTests",
+            dependencies: [
+                "SSFKeyPair",
+                "IrohaCrypto",
+                "MocksBasket"
+            ]
+        ),
+        .target(
+            name: "SSFModels",
+            dependencies: [ "IrohaCrypto" ]
+        ),
+        .target(
+            name: "SSFCrypto",
+            dependencies: [
+                "IrohaCrypto",
+                "SSFUtils",
+                "SSFModels",
+                "keccak"
+            ]
+        ),
+        .target(
+            name: "SSFChainConnection",
+            dependencies: ["SSFUtils"]
+        ),
+        .target(
+            name: "SSFSigner",
+            dependencies: [
+                "IrohaCrypto",
+                "SSFCrypto" ]
+        ),
+        .target(
+            name: "SSFQRService",
+            dependencies: [
+                .byName(name: "MPQRCoreSDK"),
+                "SSFCrypto",
+                "SSFModels"
+            ]),
+        .testTarget(
+            name: "SSFQRServiceTests",
+            dependencies: [
+                "SSFQRService",
+                "MocksBasket"
+            ]
+        ),
         .target(
             name: "IrohaCrypto",
             dependencies: [
@@ -90,6 +137,13 @@ let package = Package(
                 "IrohaCrypto"
             ]
         ),
+        .testTarget(
+            name: "SSFCloudStorageTests",
+            dependencies: [
+                "SSFCloudStorage",
+                "MocksBasket"
+            ]
+        ),
         .target(
             name: "SSFRuntimeCodingService",
             dependencies: [
@@ -107,6 +161,19 @@ let package = Package(
                 "SSFKeyPair",
                 "SSFAccountManagmentStorage",
                 "SSFExtrinsicKit"
+            ]
+        ),
+        .testTarget(
+            name: "SSFAccountManagmentTests",
+            dependencies: [
+                "SSFAccountManagment",
+                "SSFModels",
+                "SSFHelpers",
+                "RobinHood",
+                "SSFKeyPair",
+                "IrohaCrypto",
+                "SoraKeystore",
+                "MocksBasket"
             ]
         ),
         .target(
@@ -128,6 +195,18 @@ let package = Package(
                 "SSFUtils"
             ]
         ),
+        .testTarget(
+            name: "SSFAssetManagmentTests",
+            dependencies: [
+                "SSFAssetManagment",
+                "SSFAssetManagmentStorage",
+                "SSFUtils",
+                "SSFModels",
+                "RobinHood",
+                "SSFHelpers",
+                "MocksBasket"
+            ]
+        ),
         .target(
             name: "SSFAssetManagmentStorage",
             dependencies: [
@@ -145,6 +224,14 @@ let package = Package(
                 "SSFChainConnection",
                 "SSFUtils",
                 "SSFSingleValueCache"
+            ]
+        ),
+        .testTarget(
+            name: "SSFStorageQueryKitTest",
+            dependencies: [
+                "SSFStorageQueryKit",
+                "MocksBasket",
+                "SSFModels"
             ]
         ),
         .target(
@@ -219,54 +306,9 @@ let package = Package(
             name: "SSFSingleValueCache",
             dependencies: ["RobinHood"]
         ),
-        
-        //Tests targets
         .testTarget(
-            name: "SSFAssetManagmentTests",
-            dependencies: [
-                "SSFAssetManagment",
-                "SSFAssetManagmentStorage",
-                "SSFUtils",
-                "SSFModels",
-                "RobinHood",
-                "SSFHelpers",
-                "MocksBasket"
-            ]
-        ),
-        .testTarget(
-            name: "SSFAccountManagmentTests",
-            dependencies: [
-                "SSFAccountManagment",
-                "SSFModels",
-                "SSFHelpers",
-                "RobinHood",
-                "SSFKeyPair",
-                "IrohaCrypto",
-                "SoraKeystore",
-                "MocksBasket"
-            ]
-        ),
-        .testTarget(
-            name: "SSFQRServiceTests",
-            dependencies: [
-                "SSFQRService",
-                "MocksBasket"
-            ]
-        ),
-        .testTarget(
-            name: "SSFKeyPairTests",
-            dependencies: [
-                "SSFKeyPair",
-                "IrohaCrypto",
-                "MocksBasket"
-            ]
-        ),
-        .testTarget(
-            name: "SSFCloudStorageTests",
-            dependencies: [
-                "SSFCloudStorage",
-                "MocksBasket"
-            ]
+            name: "SSFSingleValueCacheTests",
+            dependencies: ["SSFSingleValueCache"]
         )
     ]
 )
@@ -279,7 +321,10 @@ func mockDeps() -> [Target.Dependency] {
 }
 let mockBasketTarget: Target = .target(
     name: "MocksBasket",
-    dependencies: mockDeps()
+    dependencies: mockDeps(),
+    resources: [
+        .process("Resources")
+    ]
 )
 
 package.targets.append(mockBasketTarget)

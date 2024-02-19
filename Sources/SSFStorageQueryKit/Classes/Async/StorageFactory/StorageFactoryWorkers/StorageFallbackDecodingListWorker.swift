@@ -17,7 +17,7 @@ final class StorageFallbackDecodingListWorker<T: Decodable>: StorageDecodable, S
         self.dataList = dataList
     }
 
-    func performDeoding() throws -> [T?] {
+    func performDecoding() throws -> [T?] {
         let items: [T?] = try dataList.map { data in
             if let data = data {
                 return try decode(data: data, path: path, codingFactory: codingFactory).map(to: T.self)

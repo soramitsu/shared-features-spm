@@ -20,7 +20,7 @@ final class StorageRequestKeyFactoryDefault: StorageRequestKeyFactory {
         
         switch request.parametersType {
         case .nMap(let params):
-            let keys = try params.map { try encoder.encode($0.value) }
+            let keys = try params.reduce([], +).map { try encoder.encode($0.value )}
             let storageKey = try keys.map {
                 try storageKeyFactory.createStorageKey(
                     moduleName: request.storagePath.moduleName,

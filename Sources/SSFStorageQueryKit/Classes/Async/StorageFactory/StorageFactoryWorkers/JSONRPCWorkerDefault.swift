@@ -24,16 +24,19 @@ class JSONRPCWorker<P: Encodable, T: Decodable> {
     
     func performCall() async throws -> T {
         try await withCheckedThrowingContinuation { continuation in
-            currentTask = Task(timeout: timeout) { [weak self] in
-                guard let self else {
+            currentTask = Task {
+                let timeoutTask = Task {
+                    let duration = UInt64(timeout * 1_000_000_000)
+                    try await Task.sleep(nanoseconds: duration)
                     continuation.resume(throwing: JSONRPCWorkerContinuationError())
-                    return
                 }
+                
                 do {
                     requestId = try engine.callMethod(
                         method,
                         params: parameters
                     ) { (result: Result<T, Error>) in
+                        timeoutTask.cancel()
                         continuation.resume(with: result)
                     }
                 } catch {
@@ -49,5 +52,5 @@ class JSONRPCWorker<P: Encodable, T: Decodable> {
 }
 
 public struct JSONRPCWorkerContinuationError: LocalizedError {
-    public var errorDescription: String? = "Worker was released"
+    public var errorDescription: String? = "timeout"
 }

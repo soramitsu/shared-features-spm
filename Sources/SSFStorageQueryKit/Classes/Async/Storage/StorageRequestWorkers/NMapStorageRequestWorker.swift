@@ -25,7 +25,7 @@ final class NMapStorageRequestWorker<P: Decodable>: StorageRequestWorker {
         let coderFactoryOperation = try await runtimeService.fetchCoderFactory()
         let response: [StorageResponse<T>] = try await storageRequestFactory.queryItems(
             engine: connection,
-            keyParams: [params],
+            keyParams: params,
             factory: coderFactoryOperation,
             storagePath: request.storagePath
         )

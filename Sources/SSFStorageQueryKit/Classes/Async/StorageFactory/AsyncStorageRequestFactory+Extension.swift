@@ -19,23 +19,6 @@ extension AsyncStorageRequestFactory {
         )
     }
 
-    func queryItems<K1, K2, T>(
-        engine: JSONRPCEngine,
-        keyParams1: [K1],
-        keyParams2: [K2],
-        factory: RuntimeCoderFactoryProtocol,
-        storagePath: any StorageCodingPathProtocol
-    ) async throws -> [StorageResponse<T>] where K1: Encodable, K2: Encodable, T: Decodable {
-        try await queryItems(
-            engine: engine,
-            keyParams1: keyParams1,
-            keyParams2: keyParams2,
-            factory: factory,
-            storagePath: storagePath,
-            at: nil
-        )
-    }
-
     func queryItems<T>(
         engine: JSONRPCEngine,
         keyParams: [[any NMapKeyParamProtocol]],

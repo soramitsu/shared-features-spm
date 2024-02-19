@@ -1,6 +1,6 @@
 import Foundation
 
-public enum StorageCodingPath: Equatable, CaseIterable {
+public enum StorageCodingPath: Equatable, CaseIterable, StorageCodingPathProtocol {
     public var moduleName: String {
         path.moduleName
     }

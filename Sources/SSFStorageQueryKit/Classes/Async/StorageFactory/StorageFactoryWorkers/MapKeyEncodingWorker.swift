@@ -42,7 +42,8 @@ final class MapKeyEncodingWorker {
         case let .nMap(nMapEntry):
             guard
                 let firstKey = try nMapEntry.keys(using: codingFactory.metadata.schemaResolver).first,
-                let firstHasher = nMapEntry.hashers.first else {
+                let firstHasher = nMapEntry.hashers.first
+            else {
                 throw StorageKeyEncodingOperationError.missingRequiredParams
             }
             

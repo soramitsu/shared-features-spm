@@ -491,6 +491,20 @@
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Modules_MocksBasket"
+               BuildableName = "Modules_MocksBasket"
+               BlueprintName = "Modules_MocksBasket"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -557,6 +571,26 @@
                BlueprintIdentifier = "SSFKeyPairTests"
                BuildableName = "SSFKeyPairTests"
                BlueprintName = "SSFKeyPairTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFSingleValueCacheTests"
+               BuildableName = "SSFSingleValueCacheTests"
+               BlueprintName = "SSFSingleValueCacheTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFStorageQueryKitTest"
+               BuildableName = "SSFStorageQueryKitTest"
+               BlueprintName = "SSFStorageQueryKitTest"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>

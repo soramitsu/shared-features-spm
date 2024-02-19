@@ -58,37 +58,10 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
             path: storagePath,
             dataList: dataList
         )
-        let decoded = try decodingWorker.performDeoding()
+        let decoded = try decodingWorker.performDecoding()
 
         let result = mergeResult(updates: queryResult, decoded: decoded, keys: keys)
         return result
-    }
-    
-    func queryItems<K1, K2, T>(
-        engine: JSONRPCEngine,
-        keyParams1: [K1],
-        keyParams2: [K2],
-        factory: RuntimeCoderFactoryProtocol,
-        storagePath: any StorageCodingPathProtocol,
-        at blockHash: Data?
-    ) async throws -> [StorageResponse<T>] where K1: Encodable, K2: Encodable, T: Decodable {
-        let keysWorker = DoubleMapKeyEncodingWorker<K1, K2>(
-            codingFactory: factory,
-            path: storagePath,
-            storageKeyFactory: remoteFactory,
-            keyParams1: keyParams1,
-            keyParams2: keyParams2
-        )
-        let keys = try keysWorker.performEncoding()
-
-        let queryItems: [StorageResponse<T>] = try await queryItems(
-            engine: engine,
-            keys: keys,
-            factory: factory,
-            storagePath: storagePath,
-            at: blockHash
-        )
-        return queryItems
     }
     
     func queryChildItem<T>(
@@ -168,7 +141,7 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
             path: storagePath,
             dataList: result
         )
-        let decoded = try decodingWorker.performDeoding()
+        let decoded = try decodingWorker.performDecoding()
         
         let mergeResult = mergeResult(
             updates: queryItems,

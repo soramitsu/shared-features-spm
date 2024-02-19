@@ -44,3 +44,21 @@ configurations:
         ../Sources/MocksBasket/SSFCloudStorage
       args:
         autoMockableTestableImports: ["SSFCloudStorage"]
+# SSFRuntimeCodingService
+    - sources:
+      - ../Sources/SSFRuntimeCodingService
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Sources/MocksBasket/SSFRuntimeCodingService
+      args:
+        autoMockableTestableImports: ["SSFRuntimeCodingService", "SSFUtils", "RobinHood", "SSFModels"]
+# SSFUtils
+    - sources:
+      - ../Sources/SSFUtils
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Sources/MocksBasket/SSFUtils
+      args:
+        autoMockableTestableImports: ["SSFUtils"]

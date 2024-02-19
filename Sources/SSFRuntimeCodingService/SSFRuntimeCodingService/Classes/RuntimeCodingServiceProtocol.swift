@@ -4,6 +4,7 @@ import RobinHood
 
 public typealias RuntimeMetadataClosure = () throws -> RuntimeMetadata
 
+//sourcery: AutoMockable
 public protocol RuntimeCodingServiceProtocol {
     var snapshot: RuntimeSnapshot? { get }
 
