@@ -17,7 +17,8 @@ class EnumNodeFactory: TypeNodeFactoryProtocol {
                   nameAndValueType.count == 2,
                   let name = nameAndValueType.first?.stringValue,
                   let value = nameAndValueType.last,
-                  let valueTypeName = value.stringValue else {
+                  let valueTypeName = value.stringValue else
+            {
                 throw TypeNodeFactoryError.unexpectedParsingResult(typeName: typeName)
             }
 

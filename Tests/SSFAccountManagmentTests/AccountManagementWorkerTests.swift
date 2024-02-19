@@ -1,35 +1,35 @@
-import XCTest
 import RobinHood
+import SSFAccountManagmentStorage
 import SSFHelpers
 import SSFModels
 import SSFUtils
-import SSFAccountManagmentStorage
+import XCTest
 
 @testable import SSFAccountManagment
 
 final class AccountManagementWorkerTests: XCTestCase {
-
     var worker: AccountManagementWorkerProtocol?
-    
+
     override func setUp() {
         super.setUp()
         let storageFacade = AccountStorageTestFacade()
         let metaAccountRepository = prepareMetaAccountRepository(storageFacade: storageFacade)
-        let managedAccountRepository = prepareManagedMetaAccountRepository(storageFacade: storageFacade)
+        let managedAccountRepository =
+            prepareManagedMetaAccountRepository(storageFacade: storageFacade)
         let operationQueue = OperationQueue()
-        
+
         worker = AccountManagementWorker(
             metaAccountRepository: metaAccountRepository,
             managedAccountRepository: managedAccountRepository,
             operationQueue: operationQueue
         )
     }
-    
+
     override func tearDown() {
         super.tearDown()
         worker = nil
     }
-    
+
     func testSaveAccount() throws {
         // act
         let managedAccount = ManagedMetaAccountModel(info: TestData.newAccount)
@@ -43,7 +43,7 @@ final class AccountManagementWorkerTests: XCTestCase {
             }
         })
     }
-    
+
     func testDeleteAllAccounts() async throws {
         // act
         worker?.deleteAll(completion: { [weak self] in
@@ -64,7 +64,7 @@ private extension AccountManagementWorkerTests {
             order: 2,
             balance: nil
         )
-        
+
         static let account = MetaAccountModel(
             metaId: "1",
             name: "test",
@@ -86,30 +86,35 @@ private extension AccountManagementWorkerTests {
             favouriteChainIds: []
         )
     }
-    
-    func prepareMetaAccountRepository(storageFacade: StorageFacadeProtocol) -> AnyDataProviderRepository<MetaAccountModel> {
-        let accountRepositoryFactory = AccountRepositoryFactory.init(storageFacade: storageFacade)
-        let repository: AnyDataProviderRepository<MetaAccountModel> = accountRepositoryFactory.createMetaAccountRepository(
-            for: nil,
-            sortDescriptors: []
-        )
-        
+
+    func prepareMetaAccountRepository(storageFacade: StorageFacadeProtocol)
+        -> AnyDataProviderRepository<MetaAccountModel>
+    {
+        let accountRepositoryFactory = AccountRepositoryFactory(storageFacade: storageFacade)
+        let repository: AnyDataProviderRepository<MetaAccountModel> = accountRepositoryFactory
+            .createMetaAccountRepository(
+                for: nil,
+                sortDescriptors: []
+            )
+
         return repository
     }
-    
-    func prepareManagedMetaAccountRepository(storageFacade: StorageFacadeProtocol) -> AnyDataProviderRepository<ManagedMetaAccountModel> {
-        let account: ManagedMetaAccountModel = ManagedMetaAccountModel(info: TestData.account)
-        
-        let accountRepositoryFactory = AccountRepositoryFactory.init(storageFacade: storageFacade)
-        let repository: AnyDataProviderRepository<ManagedMetaAccountModel> = accountRepositoryFactory.createManagedMetaAccountRepository(
-            for: nil,
-            sortDescriptors: []
-        )
-        
-        let saveOperation = repository.saveOperation({ [ account ] }, { [] })
+
+    func prepareManagedMetaAccountRepository(storageFacade: StorageFacadeProtocol)
+        -> AnyDataProviderRepository<ManagedMetaAccountModel>
+    {
+        let account = ManagedMetaAccountModel(info: TestData.account)
+
+        let accountRepositoryFactory = AccountRepositoryFactory(storageFacade: storageFacade)
+        let repository: AnyDataProviderRepository<ManagedMetaAccountModel> =
+            accountRepositoryFactory.createManagedMetaAccountRepository(
+                for: nil,
+                sortDescriptors: []
+            )
+
+        let saveOperation = repository.saveOperation({ [account] }, { [] })
         OperationQueue().addOperations([saveOperation], waitUntilFinished: true)
-        
+
         return repository
     }
 }
-

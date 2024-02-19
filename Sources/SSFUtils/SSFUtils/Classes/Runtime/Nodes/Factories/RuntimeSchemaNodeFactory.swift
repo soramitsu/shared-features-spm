@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 
 private extension JSON {
     static func typeId(_ id: BigUInt) -> JSON {
@@ -9,14 +9,14 @@ private extension JSON {
 
 class RuntimeSchemaNodeFactory: TypeNodeFactoryProtocol {
     let schemaResolver: Schema.Resolver
-    
+
     init(schemaResolver: Schema.Resolver) {
         self.schemaResolver = schemaResolver
     }
-    
+
     func buildNode(from json: JSON, typeName: String, mediator: TypeRegistering) throws -> Node? {
         guard let type = try schemaResolver.resolveType(json: json) else { return nil }
-        
+
         switch type.def {
         case let .composite(value):
             return try buildComposite(typeName: typeName, value: value, mediator: mediator)
@@ -36,7 +36,7 @@ class RuntimeSchemaNodeFactory: TypeNodeFactoryProtocol {
             return try buildBitSequence(typeName: typeName, value: value, mediator: mediator)
         }
     }
-    
+
     private func buildComposite(
         typeName: String,
         value: TypeMetadata.Def.Composite,
@@ -50,36 +50,36 @@ class RuntimeSchemaNodeFactory: TypeNodeFactoryProtocol {
 //                underlyingTypeName: underlyingNode.typeName
 //            )
 //        }
-        
-        let childrenNodes = try value.fields.enumerated().compactMap { (index, field) -> NameNode? in
+
+        let childrenNodes = try value.fields.enumerated().compactMap { index, field -> NameNode? in
             guard let name = field.name else { return nil }
-            return NameNode(
+            return try NameNode(
                 name: name,
-                node: try underlyingNode(for: field.type, mediator: mediator),
+                node: underlyingNode(for: field.type, mediator: mediator),
                 index: index
             )
         }
-        
+
         if childrenNodes.count != value.fields.count {
             // unnamed fields
             let childrenTypes = value.fields.map { $0.type }
             return try buildTuple(typeName: typeName, value: childrenTypes, mediator: mediator)
         }
-        
+
         return StructNode(typeName: typeName, typeMapping: childrenNodes)
     }
-    
+
     private func buildOption(
         typeName: String,
         type: BigUInt,
         mediator: TypeRegistering
     ) throws -> Node {
-        OptionNode(
+        try OptionNode(
             typeName: typeName,
-            underlying: try underlyingNode(for: type, mediator: mediator)
+            underlying: underlyingNode(for: type, mediator: mediator)
         )
     }
-    
+
     private func buildVariant(
         typeName: String,
         value: TypeMetadata.Def.Variant,
@@ -90,17 +90,19 @@ class RuntimeSchemaNodeFactory: TypeNodeFactoryProtocol {
            value.variants[0].name == "None",
            value.variants[1].name == "Some",
            value.variants[1].fields.count == 1,
-           let optionType = value.variants[1].fields.first?.type {
+           let optionType = value.variants[1].fields.first?.type
+        {
             return try buildOption(typeName: typeName, type: optionType, mediator: mediator)
         }
-        
+
         let childNodes = try value.variants.map { variant -> NameNode in
             let variantNode = try buildComposite(
-                typeName: "\(typeName).\(variant.name)", // provide abstract type name for "struct" with list of fields
+                typeName: "\(typeName).\(variant.name)",
+                // provide abstract type name for "struct" with list of fields
                 value: .init(fields: variant.fields),
                 mediator: mediator
             )
-            
+
             // register this custom type with prepared node
             return NameNode(
                 name: variant.name,
@@ -108,33 +110,33 @@ class RuntimeSchemaNodeFactory: TypeNodeFactoryProtocol {
                 index: variant.index
             )
         }
-        
+
         return EnumNode(typeName: typeName, typeMapping: childNodes)
     }
-    
+
     private func buildSequence(
         typeName: String,
         value: TypeMetadata.Def.Sequence,
         mediator: TypeRegistering
     ) throws -> Node {
-        VectorNode(
+        try VectorNode(
             typeName: typeName,
-            underlying: try underlyingNode(for: value.type, mediator: mediator)
+            underlying: underlyingNode(for: value.type, mediator: mediator)
         )
     }
-    
+
     private func buildArray(
         typeName: String,
         value: TypeMetadata.Def.Array,
         mediator: TypeRegistering
     ) throws -> Node {
-        FixedArrayNode(
+        try FixedArrayNode(
             typeName: typeName,
-            elementType: try underlyingNode(for: value.type, mediator: mediator),
+            elementType: underlyingNode(for: value.type, mediator: mediator),
             length: UInt64(value.length)
         )
     }
-    
+
     private func buildTuple(
         typeName: String,
         value: [BigUInt],
@@ -148,19 +150,18 @@ class RuntimeSchemaNodeFactory: TypeNodeFactoryProtocol {
                 underlyingTypeName: underlyingNode.typeName
             )
         }
-    
-        
+
         let innerNodes = try value.map {
             try underlyingNode(for: $0, mediator: mediator)
         }
-        
+
         return TupleNode(typeName: typeName, innerNodes: innerNodes)
     }
-    
+
     private func buildPrimitive(
-        typeName: String,
+        typeName _: String,
         value: TypeMetadata.Def.Primitive,
-        mediator: TypeRegistering
+        mediator _: TypeRegistering
     ) throws -> Node? {
         // Some types like char not yet supported, nor presented in actual runtimes
         switch value {
@@ -197,29 +198,29 @@ class RuntimeSchemaNodeFactory: TypeNodeFactoryProtocol {
             return I256Node()
         }
     }
-    
+
     private func buildCompact(
         typeName: String,
         value: TypeMetadata.Def.Compact,
         mediator: TypeRegistering
     ) throws -> Node {
-        CompactNode(
+        try CompactNode(
             typeName: typeName,
-            underlying: try underlyingNode(for: value.type, mediator: mediator)
+            underlying: underlyingNode(for: value.type, mediator: mediator)
         )
     }
-    
+
     private func buildBitSequence(
-        typeName: String,
-        value: TypeMetadata.Def.BitSequence,
-        mediator: TypeRegistering
-    ) throws -> Node     {
+        typeName _: String,
+        value _: TypeMetadata.Def.BitSequence,
+        mediator _: TypeRegistering
+    ) throws -> Node {
         // Might be failing, as BitVecNode supports static types
         BitVecNode()
     }
-    
+
     // MARK: - Underlying node
-    
+
     private func underlyingNode(for type: BigUInt, mediator: TypeRegistering) throws -> Node {
         let typeName = try schemaResolver.typeName(for: type)
         return mediator.register(typeName: typeName, json: .typeId(type))

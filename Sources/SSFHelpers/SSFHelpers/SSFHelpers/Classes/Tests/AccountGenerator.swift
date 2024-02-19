@@ -3,12 +3,14 @@ import SSFModels
 
 public enum AccountGenerator {
     public static func generateMetaAccount(generatingChainAccounts count: Int) -> MetaAccountModel {
-        let chainAccounts = (0..<count).map { _ in generateChainAccount() }
+        let chainAccounts = (0 ..< count).map { _ in generateChainAccount() }
         return generateMetaAccount(with: Set(chainAccounts))
     }
 
-    public static func generateMetaAccount(with chainAccounts: Set<ChainAccountModel> = []) -> MetaAccountModel {
-        return MetaAccountModel(
+    public static func generateMetaAccount(with chainAccounts: Set<ChainAccountModel> = [])
+        -> MetaAccountModel
+    {
+        MetaAccountModel(
             metaId: UUID().uuidString,
             name: UUID().uuidString,
             substrateAccountId: Data.random(of: 32)!,

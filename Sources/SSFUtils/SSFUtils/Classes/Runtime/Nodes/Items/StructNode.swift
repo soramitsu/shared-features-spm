@@ -22,7 +22,8 @@ public class StructNode: Node {
                     }
                 }
             } else if typeMapping.count == 1 {
-                // accept single value JSON if struct fields count is the 1 (backward compatibility for <= V13 for some types)
+                // accept single value JSON if struct fields count is the 1 (backward compatibility
+                // for <= V13 for some types)
                 switch value {
                 case .unsignedIntValue, .signedIntValue, .stringValue, .boolValue, .null:
                     let typeName = typeMapping[0].name
@@ -32,18 +33,20 @@ public class StructNode: Node {
                 }
             }
         }
-        
+
         guard let mapping = mapping else {
             throw DynamicScaleEncoderError.dictExpected(json: value)
         }
 
         guard typeMapping.count == mapping.count else {
             let fieldNames = typeMapping.map { $0.name }
-            throw DynamicScaleEncoderError.unexpectedStructFields(json: value,
-                                                                  expectedFields: fieldNames)
+            throw DynamicScaleEncoderError.unexpectedStructFields(
+                json: value,
+                expectedFields: fieldNames
+            )
         }
 
-        for index in 0..<typeMapping.count {
+        for index in 0 ..< typeMapping.count {
             guard let child = mapping[typeMapping[index].name] else {
                 throw DynamicScaleCoderError.unresolvedType(name: typeMapping[index].name)
             }
@@ -53,7 +56,7 @@ public class StructNode: Node {
     }
 
     public func accept(decoder: DynamicScaleDecoding) throws -> JSON {
-        let dictJson = try typeMapping.reduce(into: [String: JSON]()) { (result, item) in
+        let dictJson = try typeMapping.reduce(into: [String: JSON]()) { result, item in
             let json = try decoder.read(type: item.node.typeName)
             result[item.name] = json
         }

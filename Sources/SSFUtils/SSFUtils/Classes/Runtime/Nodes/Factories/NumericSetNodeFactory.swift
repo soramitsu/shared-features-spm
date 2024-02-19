@@ -17,11 +17,11 @@ class NumericSetNodeFactory: TypeNodeFactoryProtocol {
         }
 
         let bitVector: [SetNode.Item] = items.dropFirst().compactMap { bitItem in
-            guard
-                let components = bitItem.arrayValue,
-                components.count == 2,
-                let name = components.first?.stringValue,
-                let value = components.last?.unsignedIntValue else {
+            guard let components = bitItem.arrayValue,
+                  components.count == 2,
+                  let name = components.first?.stringValue,
+                  let value = components.last?.unsignedIntValue else
+            {
                 return nil
             }
 

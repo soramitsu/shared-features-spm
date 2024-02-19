@@ -5,7 +5,7 @@ public struct PriceData: Codable, Equatable {
     public let priceId: String
     public let price: String
     public let fiatDayChange: Decimal?
-    
+
     public init(
         currencyId: String,
         priceId: String,

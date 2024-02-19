@@ -1,6 +1,6 @@
 import Foundation
 
-public struct DerivationPathConstants {
+public enum DerivationPathConstants {
     static let hardSoftPasswordPlaceholder = "//hard/soft///password"
     static let hardSoftPlaceholder = "//hard/soft"
     static let hardPlaceholder = "//hard"

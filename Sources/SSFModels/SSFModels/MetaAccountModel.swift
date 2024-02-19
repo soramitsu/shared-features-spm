@@ -28,7 +28,7 @@ public struct MetaAccountModel: Equatable, Codable, Identifiable {
     public let zeroBalanceAssetsHidden: Bool
     public let hasBackup: Bool
     public let favouriteChainIds: [ChainModel.Id]
-    
+
     public init(
         metaId: MetaAccountId,
         name: String,
@@ -76,8 +76,8 @@ extension MetaAccountModel {
     }
 }
 
-extension MetaAccountModel {
-    public func insertingChainAccount(_ newChainAccount: ChainAccountModel) -> MetaAccountModel {
+public extension MetaAccountModel {
+    func insertingChainAccount(_ newChainAccount: ChainAccountModel) -> MetaAccountModel {
         var newChainAccounts = chainAccounts.filter {
             $0.chainId != newChainAccount.chainId
         }
@@ -106,7 +106,7 @@ extension MetaAccountModel {
         )
     }
 
-    public func replacingEthereumAddress(_ newEthereumAddress: Data?) -> MetaAccountModel {
+    func replacingEthereumAddress(_ newEthereumAddress: Data?) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -129,7 +129,7 @@ extension MetaAccountModel {
         )
     }
 
-    public func replacingEthereumPublicKey(_ newEthereumPublicKey: Data?) -> MetaAccountModel {
+    func replacingEthereumPublicKey(_ newEthereumPublicKey: Data?) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -152,7 +152,7 @@ extension MetaAccountModel {
         )
     }
 
-    public func replacingName(_ walletName: String) -> MetaAccountModel {
+    func replacingName(_ walletName: String) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: walletName,
@@ -175,7 +175,7 @@ extension MetaAccountModel {
         )
     }
 
-    public func replacingAssetKeysOrder(_ newAssetKeysOrder: [String]) -> MetaAccountModel {
+    func replacingAssetKeysOrder(_ newAssetKeysOrder: [String]) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -198,7 +198,7 @@ extension MetaAccountModel {
         )
     }
 
-    public func replacingUnusedChainIds(_ newUnusedChainIds: [String]) -> MetaAccountModel {
+    func replacingUnusedChainIds(_ newUnusedChainIds: [String]) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -221,7 +221,7 @@ extension MetaAccountModel {
         )
     }
 
-    public func replacingCurrency(_ currency: Currency) -> MetaAccountModel {
+    func replacingCurrency(_ currency: Currency) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -244,7 +244,7 @@ extension MetaAccountModel {
         )
     }
 
-    public func replacingAssetsFilterOptions(_ options: [FilterOption]) -> MetaAccountModel {
+    func replacingAssetsFilterOptions(_ options: [FilterOption]) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -267,7 +267,7 @@ extension MetaAccountModel {
         )
     }
 
-    public func replacingNetworkManagmentFilter(_ identifire: String) -> MetaAccountModel {
+    func replacingNetworkManagmentFilter(_ identifire: String) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -290,7 +290,7 @@ extension MetaAccountModel {
         )
     }
 
-    public func replacingAssetsVisibility(_ newAssetsVisibility: [AssetVisibility]) -> MetaAccountModel {
+    func replacingAssetsVisibility(_ newAssetsVisibility: [AssetVisibility]) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -313,7 +313,7 @@ extension MetaAccountModel {
         )
     }
 
-    public func replacingZeroBalanceAssetsHidden(_ newZeroBalanceAssetsHidden: Bool) -> MetaAccountModel {
+    func replacingZeroBalanceAssetsHidden(_ newZeroBalanceAssetsHidden: Bool) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -336,7 +336,7 @@ extension MetaAccountModel {
         )
     }
 
-    public func replacingIsBackuped(_ isBackuped: Bool) -> MetaAccountModel {
+    func replacingIsBackuped(_ isBackuped: Bool) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -359,7 +359,7 @@ extension MetaAccountModel {
         )
     }
 
-    public func replacingFavoutites(_ favouriteChainIds: [ChainModel.Id]) -> MetaAccountModel {
+    func replacingFavoutites(_ favouriteChainIds: [ChainModel.Id]) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,

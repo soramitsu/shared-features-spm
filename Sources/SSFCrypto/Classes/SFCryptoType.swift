@@ -23,6 +23,7 @@ public extension SFCryptoType {
             }
         }
     }
+
     init(_ utilsType: SSFModels.CryptoType) {
         switch utilsType {
         case .sr25519:

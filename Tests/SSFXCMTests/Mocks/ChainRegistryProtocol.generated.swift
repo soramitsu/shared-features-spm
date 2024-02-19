@@ -20,12 +20,12 @@ class ChainRegistryProtocolMock: ChainRegistryProtocol {
     var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemCalled: Bool {
         return getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemCallsCount > 0
     }
-    var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReceivedArguments: (chainId: ChainModel.Id, usedRuntimePaths: [String : [String]], runtimeItem: RuntimeMetadataItemProtocol?)?
-    var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReceivedInvocations: [(chainId: ChainModel.Id, usedRuntimePaths: [String : [String]], runtimeItem: RuntimeMetadataItemProtocol?)] = []
+    var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReceivedArguments: (chainId: ChainModel.Id, usedRuntimePaths: [String: [String]], runtimeItem: RuntimeMetadataItemProtocol?)?
+    var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReceivedInvocations: [(chainId: ChainModel.Id, usedRuntimePaths: [String: [String]], runtimeItem: RuntimeMetadataItemProtocol?)] = []
     var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReturnValue: RuntimeProviderProtocol!
-    var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemClosure: ((ChainModel.Id, [String : [String]], RuntimeMetadataItemProtocol?) throws -> RuntimeProviderProtocol)?
+    var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemClosure: ((ChainModel.Id, [String: [String]], RuntimeMetadataItemProtocol?) throws -> RuntimeProviderProtocol)?
 
-    func getRuntimeProvider(chainId: ChainModel.Id, usedRuntimePaths: [String : [String]], runtimeItem: RuntimeMetadataItemProtocol?) throws -> RuntimeProviderProtocol {
+    func getRuntimeProvider(chainId: ChainModel.Id, usedRuntimePaths: [String: [String]], runtimeItem: RuntimeMetadataItemProtocol?) throws -> RuntimeProviderProtocol {
         if let error = getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemThrowableError {
             throw error
         }
@@ -104,12 +104,12 @@ class ChainRegistryProtocolMock: ChainRegistryProtocol {
     var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemCalled: Bool {
         return getReadySnapshotChainIdUsedRuntimePathsRuntimeItemCallsCount > 0
     }
-    var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReceivedArguments: (chainId: ChainModel.Id, usedRuntimePaths: [String : [String]], runtimeItem: RuntimeMetadataItemProtocol?)?
-    var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReceivedInvocations: [(chainId: ChainModel.Id, usedRuntimePaths: [String : [String]], runtimeItem: RuntimeMetadataItemProtocol?)] = []
+    var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReceivedArguments: (chainId: ChainModel.Id, usedRuntimePaths: [String: [String]], runtimeItem: RuntimeMetadataItemProtocol?)?
+    var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReceivedInvocations: [(chainId: ChainModel.Id, usedRuntimePaths: [String: [String]], runtimeItem: RuntimeMetadataItemProtocol?)] = []
     var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReturnValue: RuntimeSnapshot!
-    var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemClosure: ((ChainModel.Id, [String : [String]], RuntimeMetadataItemProtocol?) throws -> RuntimeSnapshot)?
+    var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemClosure: ((ChainModel.Id, [String: [String]], RuntimeMetadataItemProtocol?) throws -> RuntimeSnapshot)?
 
-    func getReadySnapshot(chainId: ChainModel.Id, usedRuntimePaths: [String : [String]], runtimeItem: RuntimeMetadataItemProtocol?) throws -> RuntimeSnapshot {
+    func getReadySnapshot(chainId: ChainModel.Id, usedRuntimePaths: [String: [String]], runtimeItem: RuntimeMetadataItemProtocol?) throws -> RuntimeSnapshot {
         if let error = getReadySnapshotChainIdUsedRuntimePathsRuntimeItemThrowableError {
             throw error
         }

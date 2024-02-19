@@ -26,7 +26,7 @@ public struct EcdsaKeypairFactory: DerivableSeedFactoryProtocol {
         try Self.hdkdPrefix.encode(scaleEncoder: scaleEncoder)
         let prefix = scaleEncoder.encode()
 
-        return try chaincodeList.reduce(seed) { (currentSeed, chaincode) in
+        return try chaincodeList.reduce(seed) { currentSeed, chaincode in
             guard chaincode.type == .hard else {
                 throw KeypairFactoryError.unsupportedChaincodeType
             }

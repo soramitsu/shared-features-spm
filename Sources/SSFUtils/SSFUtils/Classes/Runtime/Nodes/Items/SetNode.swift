@@ -30,9 +30,9 @@ public class SetNode: Node {
     }
 
     public func accept(decoder: DynamicScaleDecoding) throws -> JSON {
-        guard
-            let stringValue = try decoder.read(type: itemType.typeName).stringValue,
-            let intValue = UInt64(stringValue) else {
+        guard let stringValue = try decoder.read(type: itemType.typeName).stringValue,
+              let intValue = UInt64(stringValue) else
+        {
             throw DynamicScaleCoderError.invalidParams
         }
 

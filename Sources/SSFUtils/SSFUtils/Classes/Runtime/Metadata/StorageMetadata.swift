@@ -9,15 +9,15 @@ public protocol RuntimeStorageMetadata: ScaleCodable {
 
 // MARK: - V1
 
-extension RuntimeMetadataV1 {
-    public struct StorageMetadata: RuntimeStorageMetadata, ScaleCodable {
+public extension RuntimeMetadataV1 {
+    struct StorageMetadata: RuntimeStorageMetadata, ScaleCodable {
         public let prefix: String
         private let _entries: [StorageEntryMetadata]
         public var entries: [RuntimeStorageEntryMetadata] { _entries }
 
         public init(prefix: String, entries: [StorageEntryMetadata]) {
             self.prefix = prefix
-            self._entries = entries
+            _entries = entries
         }
 
         public func encode(scaleEncoder: ScaleEncoding) throws {
@@ -34,15 +34,15 @@ extension RuntimeMetadataV1 {
 
 // MARK: - V14
 
-extension RuntimeMetadataV14 {
-    public struct StorageMetadata: RuntimeStorageMetadata, ScaleCodable {
+public extension RuntimeMetadataV14 {
+    struct StorageMetadata: RuntimeStorageMetadata, ScaleCodable {
         public let prefix: String
         private let _entries: [StorageEntryMetadata]
         public var entries: [RuntimeStorageEntryMetadata] { _entries }
 
         public init(prefix: String, entries: [StorageEntryMetadata]) {
             self.prefix = prefix
-            self._entries = entries
+            _entries = entries
         }
 
         public func encode(scaleEncoder: ScaleEncoding) throws {

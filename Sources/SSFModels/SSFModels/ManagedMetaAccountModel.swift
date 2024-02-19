@@ -22,8 +22,8 @@ public struct ManagedMetaAccountModel: Equatable, Identifiable {
     }
 }
 
-extension ManagedMetaAccountModel {
-    public var identifier: String { info.metaId }
+public extension ManagedMetaAccountModel {
+    var identifier: String { info.metaId }
 }
 
 extension ManagedMetaAccountModel {

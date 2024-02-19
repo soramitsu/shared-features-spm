@@ -1,8 +1,8 @@
 import Foundation
 import IrohaCrypto
-import SSFUtils
 import SSFCrypto
 import SSFModels
+import SSFUtils
 
 public typealias JsonCreatorResult = (json: Data, mnemonic: IRMnemonicProtocol)
 
@@ -15,7 +15,7 @@ public protocol JsonCreator {
         derivationPath: String,
         isEthereumBased: Bool
     ) throws -> JsonCreatorResult
-    
+
     func deriveJson(
         mnemonicWords: String,
         walletName: String,
@@ -27,29 +27,22 @@ public protocol JsonCreator {
 }
 
 public final class JsonCreatorImpl: JsonCreator {
-    
-    private lazy var mnemonicCreator: MnemonicCreator = {
-        MnemonicCreatorImpl()
-    }()
-    
-    private lazy var seedCreator: SeedCreator = {
-        SeedCreatorImpl()
-    }()
-    
-    private lazy var commonCrypto: CommonCrypto = {
-        CommonCryptoImpl()
-    }()
-    
+    private lazy var mnemonicCreator: MnemonicCreator = MnemonicCreatorImpl()
+
+    private lazy var seedCreator: SeedCreator = SeedCreatorImpl()
+
+    private lazy var commonCrypto: CommonCrypto = CommonCryptoImpl()
+
     private lazy var jsonEncoder: JSONEncoder = {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .sortedKeys
         return encoder
     }()
-    
+
     public init() {}
-    
+
     // MARK: - Public methods
-    
+
     public func createJson(
         strength: IRMnemonicStrength,
         walletName: String,
@@ -68,10 +61,10 @@ public final class JsonCreatorImpl: JsonCreator {
             derivationPath: derivationPath,
             isEthereumBased: isEthereumBased
         )
-        
+
         return JsonCreatorResult(json: jsonResult.json, mnemonic: mnemonic)
     }
-    
+
     public func deriveJson(
         mnemonicWords: String,
         walletName: String,
@@ -86,7 +79,7 @@ public final class JsonCreatorImpl: JsonCreator {
             ethereumBased: isEthereumBased,
             cryptoType: cryptoType
         )
-        
+
         let query = try commonCrypto.getQuery(
             seed: seedResult.seed,
             derivationPath: derivationPath,
@@ -111,7 +104,7 @@ public final class JsonCreatorImpl: JsonCreator {
 
         let json = try jsonEncoder.encode(definition)
         let mnemonic = seedResult.mnemonic
-        
+
         return JsonCreatorResult(json: json, mnemonic: mnemonic)
     }
 }

@@ -1,6 +1,6 @@
+import BigInt
 import Foundation
 import SSFUtils
-import BigInt
 
 enum XcmWeightLimit: Codable {
     case unlimited
@@ -30,9 +30,9 @@ enum XcmWeightLimit: Codable {
 extension XcmWeightLimit: Equatable {
     static func == (lhs: XcmWeightLimit, rhs: XcmWeightLimit) -> Bool {
         switch (lhs, rhs) {
-        case (let .limited(lhsValue), let .limited(rhsValue)):
+        case let (.limited(lhsValue), .limited(rhsValue)):
             return lhsValue == rhsValue
-        case (let .limitedV3(lhsValue), let .limitedV3(rhsValue)):
+        case let (.limitedV3(lhsValue), .limitedV3(rhsValue)):
             return lhsValue == rhsValue
         case (.unlimited, .unlimited):
             return true

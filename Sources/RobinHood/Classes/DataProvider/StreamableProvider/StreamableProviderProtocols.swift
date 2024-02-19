@@ -1,7 +1,7 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 
@@ -40,10 +40,13 @@ public protocol StreamableProviderProtocol {
      *  block to the function instead.
      */
 
-    func fetch(offset: Int,
-               count: Int,
-               synchronized: Bool,
-               with completionBlock: @escaping (Result<[Model], Error>?) -> Void) -> CompoundOperationWrapper<[Model]>
+    func fetch(
+        offset: Int,
+        count: Int,
+        synchronized: Bool,
+        with completionBlock: @escaping (Result<[Model], Error>?) -> Void
+    )
+        -> CompoundOperationWrapper<[Model]>
 
     /**
      *  Adds observer to notify when there are changes in local storage.
@@ -69,11 +72,13 @@ public protocol StreamableProviderProtocol {
      *    - options: Controls a way of how and when observer is handled.
      */
 
-    func addObserver(_ observer: AnyObject,
-                     deliverOn queue: DispatchQueue,
-                     executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void,
-                     failing failureBlock: @escaping (Error) -> Void,
-                     options: StreamableProviderObserverOptions)
+    func addObserver(
+        _ observer: AnyObject,
+        deliverOn queue: DispatchQueue,
+        executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void,
+        failing failureBlock: @escaping (Error) -> Void,
+        options: StreamableProviderObserverOptions
+    )
 
     /**
      *  Removes an observer from the list of observers.
@@ -86,7 +91,6 @@ public protocol StreamableProviderProtocol {
 }
 
 public extension StreamableProviderProtocol {
-
     /**
      *  Adds observer to notify when there are changes in local storage.
      *
@@ -114,15 +118,19 @@ public extension StreamableProviderProtocol {
      *    - options: Controls a way of how and when observer is notified.
      */
 
-    func addObserver(_ observer: AnyObject,
-                     deliverOn queue: DispatchQueue,
-                     executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void,
-                     failing failureBlock: @escaping (Error) -> Void) {
-        addObserver(observer,
-                    deliverOn: queue,
-                    executing: updateBlock,
-                    failing: failureBlock,
-                    options: StreamableProviderObserverOptions())
+    func addObserver(
+        _ observer: AnyObject,
+        deliverOn queue: DispatchQueue,
+        executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void,
+        failing failureBlock: @escaping (Error) -> Void
+    ) {
+        addObserver(
+            observer,
+            deliverOn: queue,
+            executing: updateBlock,
+            failing: failureBlock,
+            options: StreamableProviderObserverOptions()
+        )
     }
 }
 
@@ -150,8 +158,10 @@ public protocol StreamableSourceProtocol {
      *    fetching already in progress.
      */
 
-    func fetchHistory(runningIn queue: DispatchQueue?,
-                      commitNotificationBlock: ((Result<Int, Error>?) -> Void)?)
+    func fetchHistory(
+        runningIn queue: DispatchQueue?,
+        commitNotificationBlock: ((Result<Int, Error>?) -> Void)?
+    )
 
     /**
      *  Fetches actual data from remote and replaces local ones.
@@ -166,6 +176,8 @@ public protocol StreamableSourceProtocol {
      *  - note: Implementation of the method must cancel any pending history fetch request and
      *    must call completion with ```nil``` in case refreshing already in progress.
      */
-    func refresh(runningIn queue: DispatchQueue?,
-                 commitNotificationBlock: ((Result<Int, Error>?) -> Void)?)
+    func refresh(
+        runningIn queue: DispatchQueue?,
+        commitNotificationBlock: ((Result<Int, Error>?) -> Void)?
+    )
 }

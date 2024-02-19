@@ -45,6 +45,7 @@ let package = Package(
         .package(url: "https://github.com/attaswift/BigInt.git", from: "5.3.0"),
         .package(url: "https://github.com/daisuke-t-jp/xxHash-Swift", from: "1.1.1"),
         .package(url: "https://github.com/SwiftyBeaver/SwiftyBeaver.git", .upToNextMajor(from: "2.0.0")),
+        .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.50.4"),
     ],
     targets: [
         .binaryTarget(name: "blake2lib", path: "Binaries/blake2lib.xcframework"),
@@ -82,7 +83,7 @@ let package = Package(
             name: "SSFCloudStorage",
             dependencies: [
                 .product(name: "TweetNacl", package: "tweetnacl-swiftwrap"),
-                .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),
+                .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS", condition: .when(platforms: [.iOS])),
                 .product(name: "GoogleAPIClientForREST_Drive", package: "google-api-objectivec-client-for-rest"),
                 "SSFUtils",
                 "SSFModels",

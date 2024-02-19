@@ -2,6 +2,7 @@ import Foundation
 import SSFModels
 
 // MARK: - RemoteAssetMultilocation
+
 struct RemoteAssetMultilocation: Codable, Equatable {
     let name: String
     let chainId: String
@@ -9,6 +10,7 @@ struct RemoteAssetMultilocation: Codable, Equatable {
 }
 
 // MARK: - Asset
+
 struct AssetMultilocation: Codable, Equatable {
     let id: String
     let symbol: String

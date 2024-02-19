@@ -1,5 +1,5 @@
-import GoogleAPIClientForRESTCore
 import GoogleAPIClientForREST_Drive
+import GoogleAPIClientForRESTCore
 
 public protocol GoogleServiceTicket {}
 

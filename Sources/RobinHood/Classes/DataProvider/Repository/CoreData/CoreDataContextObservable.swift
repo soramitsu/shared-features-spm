@@ -1,10 +1,10 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
-import Foundation
 import CoreData
+import Foundation
 
 /**
  *  Class is designed to provide implementation for ```DataProviderRepositoryObservable``` and allows
@@ -14,7 +14,7 @@ import CoreData
  *  Changes can be filtered by providing predicate closure during initialization.
  */
 
-final public class CoreDataContextObservable<T: Identifiable, U: NSManagedObject> {
+public final class CoreDataContextObservable<T: Identifiable, U: NSManagedObject> {
     private(set) var service: CoreDataServiceProtocol
     private(set) var mapper: AnyCoreDataMapper<T, U>
     private(set) var processingQueue: DispatchQueue
@@ -34,10 +34,12 @@ final public class CoreDataContextObservable<T: Identifiable, U: NSManagedObject
      *    but the client can pass shared queue for optimization reasons.
      */
 
-    public init(service: CoreDataServiceProtocol,
-                mapper: AnyCoreDataMapper<T, U>,
-                predicate: @escaping (U) -> Bool,
-                processingQueue: DispatchQueue? = nil) {
+    public init(
+        service: CoreDataServiceProtocol,
+        mapper: AnyCoreDataMapper<T, U>,
+        predicate: @escaping (U) -> Bool,
+        processingQueue: DispatchQueue? = nil
+    ) {
         self.service = service
         self.mapper = mapper
         self.predicate = predicate
@@ -47,11 +49,13 @@ final public class CoreDataContextObservable<T: Identifiable, U: NSManagedObject
         } else {
             self.processingQueue = DispatchQueue(
                 label: "co.jp.streamableobservable.queue.\(UUID().uuidString)",
-                qos: .utility)
+                qos: .utility
+            )
         }
     }
 
-    @objc private func didReceive(notification: Notification) {
+    @objc
+    private func didReceive(notification: Notification) {
         var changes: [DataProviderChange<T>] = []
 
         let translationClosure: (Any) -> U? = { object in
@@ -63,12 +67,11 @@ final public class CoreDataContextObservable<T: Identifiable, U: NSManagedObject
         }
 
         if let updatedObjects = notification.userInfo?[NSUpdatedObjectsKey] as? NSSet {
-
             let matchingChanges: [DataProviderChange<T>] = updatedObjects.allObjects
                 .compactMap(translationClosure)
                 .filter(predicate)
-                .compactMap({ try? mapper.transform(entity: $0) })
-                .map({ DataProviderChange.update(newItem: $0) })
+                .compactMap { try? mapper.transform(entity: $0) }
+                .map { DataProviderChange.update(newItem: $0) }
 
             changes.append(contentsOf: matchingChanges)
         }
@@ -77,8 +80,8 @@ final public class CoreDataContextObservable<T: Identifiable, U: NSManagedObject
             let matchingChanges: [DataProviderChange<T>] = deletedObjects.allObjects
                 .compactMap(translationClosure)
                 .filter(predicate)
-                .compactMap({ $0.value(forKey: mapper.entityIdentifierFieldName) as? String })
-                .map({ DataProviderChange.delete(deletedIdentifier: $0) })
+                .compactMap { $0.value(forKey: mapper.entityIdentifierFieldName) as? String }
+                .map { DataProviderChange.delete(deletedIdentifier: $0) }
 
             changes.append(contentsOf: matchingChanges)
         }
@@ -87,13 +90,13 @@ final public class CoreDataContextObservable<T: Identifiable, U: NSManagedObject
             let matchingChanges: [DataProviderChange<T>] = insertedObjects.allObjects
                 .compactMap(translationClosure)
                 .filter(predicate)
-                .compactMap({ try? mapper.transform(entity: $0) })
-                .map({ DataProviderChange.insert(newItem: $0) })
+                .compactMap { try? mapper.transform(entity: $0) }
+                .map { DataProviderChange.insert(newItem: $0) }
 
             changes.append(contentsOf: matchingChanges)
         }
 
-        guard changes.count > 0 else {
+        guard !changes.isEmpty else {
             return
         }
 
@@ -119,17 +122,23 @@ extension CoreDataContextObservable: DataProviderRepositoryObservable {
     public typealias Model = T
 
     public func start(completionBlock: @escaping (Error?) -> Void) {
-        service.performAsync { [weak self] (optionalContext, optionalError) in
+        service.performAsync { [weak self] optionalContext, optionalError in
             guard let strongSelf = self else {
                 completionBlock(nil)
                 return
             }
 
             if let context = optionalContext {
-                NotificationCenter.default.addObserver(strongSelf,
-                                                       selector: #selector(strongSelf.didReceive(notification:)),
-                                                       name: Notification.Name.NSManagedObjectContextDidSave,
-                                                       object: context)
+                NotificationCenter.default.addObserver(
+                    strongSelf,
+                    selector: #selector(
+                        strongSelf
+                            .didReceive(notification:)
+                    ),
+                    name: Notification.Name
+                        .NSManagedObjectContextDidSave,
+                    object: context
+                )
             }
 
             completionBlock(optionalError)
@@ -137,30 +146,39 @@ extension CoreDataContextObservable: DataProviderRepositoryObservable {
     }
 
     public func stop(completionBlock: @escaping (Error?) -> Void) {
-        service.performAsync { [weak self] (optionalContext, optionalError) in
+        service.performAsync { [weak self] optionalContext, optionalError in
             guard let strongSelf = self else {
                 completionBlock(nil)
                 return
             }
 
             if let context = optionalContext {
-                NotificationCenter.default.removeObserver(strongSelf,
-                                                          name: Notification.Name.NSManagedObjectContextDidSave,
-                                                          object: context)
+                NotificationCenter.default.removeObserver(
+                    strongSelf,
+                    name: Notification.Name
+                        .NSManagedObjectContextDidSave,
+                    object: context
+                )
             }
 
             completionBlock(optionalError)
         }
     }
 
-    public func addObserver(_ observer: AnyObject,
-                            deliverOn queue: DispatchQueue,
-                            executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void) {
+    public func addObserver(
+        _ observer: AnyObject,
+        deliverOn queue: DispatchQueue,
+        executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void
+    ) {
         processingQueue.async {
             self.observers = self.observers.filter { $0.observer != nil }
 
             if !self.observers.contains(where: { $0.observer === observer }) {
-                let newObserver = RepositoryObserver(observer: observer, queue: queue, updateBlock: updateBlock)
+                let newObserver = RepositoryObserver(
+                    observer: observer,
+                    queue: queue,
+                    updateBlock: updateBlock
+                )
                 self.observers.append(newObserver)
             }
         }
@@ -168,7 +186,8 @@ extension CoreDataContextObservable: DataProviderRepositoryObservable {
 
     public func removeObserver(_ observer: AnyObject) {
         processingQueue.async {
-            self.observers = self.observers.filter { $0.observer != nil && $0.observer !== observer }
+            self.observers = self.observers
+                .filter { $0.observer != nil && $0.observer !== observer }
         }
     }
 }

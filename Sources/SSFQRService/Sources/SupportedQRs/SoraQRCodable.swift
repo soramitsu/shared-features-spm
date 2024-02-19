@@ -15,7 +15,7 @@ final class SoraQREncoder {
             addressInfo.rawPublicKey.toHex(includePrefix: true),
             addressInfo.username,
             addressInfo.assetId,
-            addressInfo.amount
+            addressInfo.amount,
         ].compactMap { $0 }
 
         guard let data = fields.joined(separator: separator).data(using: .utf8) else {

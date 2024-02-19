@@ -1,13 +1,13 @@
 import Foundation
-import SSFModels
 import SoraKeystore
 import SSFKeyPair
+import SSFModels
 
 enum JSONExportDataFactoryError: Error {
     case invalidData
 }
 
-//sourcery: AutoMockable
+// sourcery: AutoMockable
 protocol JSONExportDataFactoryProtocol {
     func createJSONExportData(
         metaId: MetaAccountId,
@@ -21,13 +21,12 @@ protocol JSONExportDataFactoryProtocol {
 }
 
 struct JSONExportDataFactory: JSONExportDataFactoryProtocol {
-    
     private let exportJsonWrapper: KeystoreExportWrapperProtocol
-    
+
     init(exportJsonWrapper: KeystoreExportWrapperProtocol) {
         self.exportJsonWrapper = exportJsonWrapper
     }
-    
+
     func createJSONExportData(
         metaId: MetaAccountId,
         accountId: AccountId?,
@@ -37,7 +36,6 @@ struct JSONExportDataFactory: JSONExportDataFactoryProtocol {
         address: String,
         genesisHash: String?
     ) throws -> JSONExportData? {
-
         let data = try exportJsonWrapper.export(
             chainAccount: chainAccount,
             password: password,

@@ -2,16 +2,17 @@ import Foundation
 import RobinHood
 
 public final class AwaitOperation<ResultType>: BaseOperation<ResultType> {
-    private lazy var lockQueue: DispatchQueue = {
-        DispatchQueue(label: "co.jp.soramitsu.ssfUtils.awaitOpeation", attributes: .concurrent)
-    }()
+    private lazy var lockQueue: DispatchQueue = .init(
+        label: "co.jp.soramitsu.ssfUtils.awaitOpeation",
+        attributes: .concurrent
+    )
 
-    public override var isAsynchronous: Bool {
+    override public var isAsynchronous: Bool {
         true
     }
 
     private var _isExecuting: Bool = false
-    public override private(set) var isExecuting: Bool {
+    override public private(set) var isExecuting: Bool {
         get {
             lockQueue.sync { () -> Bool in
                 _isExecuting
@@ -27,7 +28,7 @@ public final class AwaitOperation<ResultType>: BaseOperation<ResultType> {
     }
 
     private var _isFinished: Bool = false
-    public override private(set) var isFinished: Bool {
+    override public private(set) var isFinished: Bool {
         get {
             lockQueue.sync { () -> Bool in
                 _isFinished
@@ -56,13 +57,13 @@ public final class AwaitOperation<ResultType>: BaseOperation<ResultType> {
         self.closure = closure
     }
 
-    public override func start() {
+    override public func start() {
         isFinished = false
         isExecuting = true
         main()
     }
 
-    public override func main() {
+    override public func main() {
         super.main()
 
         if isCancelled {

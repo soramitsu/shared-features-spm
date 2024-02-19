@@ -9,7 +9,8 @@ extension TransactionSignerProtocol {
         secretKeyData: Data,
         publicKeyData: Data
     ) throws
-        -> IRSignatureProtocol {
+        -> IRSignatureProtocol
+    {
         let privateKey = try SNPrivateKey(rawData: secretKeyData)
         let publicKey = try SNPublicKey(rawData: publicKeyData)
 
@@ -64,12 +65,11 @@ extension TransactionSignerProtocol {
     }
 }
 
-final public class TransactionSigner: TransactionSignerProtocol {
-    
+public final class TransactionSigner: TransactionSignerProtocol {
     private let publicKeyData: Data
     private let secretKeyData: Data
     private let cryptoType: SFCryptoType
-    
+
     public init(
         publicKeyData: Data,
         secretKeyData: Data,
@@ -79,7 +79,7 @@ final public class TransactionSigner: TransactionSignerProtocol {
         self.secretKeyData = secretKeyData
         self.cryptoType = cryptoType
     }
-    
+
     public func sign(_ originalData: Data) throws -> IRSignatureProtocol {
         switch cryptoType {
         case .sr25519:

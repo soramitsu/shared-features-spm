@@ -1,7 +1,7 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 
@@ -44,12 +44,12 @@ public protocol ListDifferenceCalculatorProtocol {
     typealias ListDifferenceSortBlock = (Model, Model) -> Bool
 
     /**
-     *  Maximum number of objects that the calculator must maintain. If this value
-     *  is zero than no constraints are applied.
-     *
-     *  - note: For objects which are exlicitly removed due to the constraint
-     *    corresponding diff events must be generated.
-    */
+      *  Maximum number of objects that the calculator must maintain. If this value
+      *  is zero than no constraints are applied.
+      *
+      *  - note: For objects which are exlicitly removed due to the constraint
+      *    corresponding diff events must be generated.
+     */
 
     var limit: Int { get set }
 
@@ -124,7 +124,7 @@ public final class ListDifferenceCalculator<T: Identifiable>: ListDifferenceCalc
      */
 
     public init(initialItems: [T], limit: Int = 0, sortBlock: @escaping ListDifferenceSortBlock) {
-        self.allItems = initialItems
+        allItems = initialItems
         self.sortBlock = sortBlock
         self.limit = limit
     }
@@ -138,16 +138,23 @@ public final class ListDifferenceCalculator<T: Identifiable>: ListDifferenceCalc
 
         for change in changes {
             switch change {
-            case .insert(let newItem):
+            case let .insert(newItem):
                 insertItems[newItem.identifier] = newItem
-            case .update(let newItem):
-                if let oldItemIndex = allItems.firstIndex(where: { $0.identifier == newItem.identifier }) {
+            case let .update(newItem):
+                if let oldItemIndex = allItems
+                    .firstIndex(where: { $0.identifier == newItem.identifier })
+                {
                     // If updating value changes the order than replace update with delete + insert
 
-                    if sortBlock(newItem, allItems[oldItemIndex]) == sortBlock(allItems[oldItemIndex], newItem) {
-                        lastDifferences.append(.update(index: oldItemIndex,
-                                                       old: allItems[oldItemIndex],
-                                                       new: newItem))
+                    if sortBlock(newItem, allItems[oldItemIndex]) == sortBlock(
+                        allItems[oldItemIndex],
+                        newItem
+                    ) {
+                        lastDifferences.append(.update(
+                            index: oldItemIndex,
+                            old: allItems[oldItemIndex],
+                            new: newItem
+                        ))
                         allItems[oldItemIndex] = newItem
                     } else {
                         deleteIdentifiers.insert(newItem.identifier)
@@ -161,28 +168,34 @@ public final class ListDifferenceCalculator<T: Identifiable>: ListDifferenceCalc
                     }
                 }
 
-            case .delete(let deletedIdentifier):
+            case let .delete(deletedIdentifier):
                 deleteIdentifiers.insert(deletedIdentifier)
             }
         }
 
         applyConstraints(insertItems: &insertItems, deleteIdentifiers: &deleteIdentifiers)
 
-        if deleteIdentifiers.count > 0 {
-            delete(identifiers: deleteIdentifiers,
-                   targetList: &allItems,
-                   diffList: &lastDifferences)
+        if !deleteIdentifiers.isEmpty {
+            delete(
+                identifiers: deleteIdentifiers,
+                targetList: &allItems,
+                diffList: &lastDifferences
+            )
         }
 
-        if insertItems.count > 0 {
-            insert(items: Array(insertItems.values),
-                   targetList: &allItems,
-                   diffList: &lastDifferences)
+        if !insertItems.isEmpty {
+            insert(
+                items: Array(insertItems.values),
+                targetList: &allItems,
+                diffList: &lastDifferences
+            )
         }
     }
 
-    private func applyConstraints(insertItems: inout [String: Model],
-                                  deleteIdentifiers: inout Set<String>) {
+    private func applyConstraints(
+        insertItems: inout [String: Model],
+        deleteIdentifiers: inout Set<String>
+    ) {
         guard limit > 0 else {
             return
         }
@@ -190,24 +203,29 @@ public final class ListDifferenceCalculator<T: Identifiable>: ListDifferenceCalc
         var targetList = allItems
         var diffList: [ListDifference<Model>] = []
 
-        if deleteIdentifiers.count > 0 {
-            delete(identifiers: deleteIdentifiers,
-                   targetList: &targetList,
-                   diffList: &diffList)
+        if !deleteIdentifiers.isEmpty {
+            delete(
+                identifiers: deleteIdentifiers,
+                targetList: &targetList,
+                diffList: &diffList
+            )
         }
 
-        if insertItems.count > 0 {
-            insert(items: Array(insertItems.values),
-                   targetList: &targetList,
-                   diffList: &diffList)
+        if !insertItems.isEmpty {
+            insert(
+                items: Array(insertItems.values),
+                targetList: &targetList,
+                diffList: &diffList
+            )
         }
 
         if targetList.count > limit {
-            let implicitDeleteIdentifiers = targetList[limit..<targetList.count]
-                .reduce(into: Set(), { $0.insert($1.identifier) })
+            let implicitDeleteIdentifiers = targetList[limit ..< targetList.count]
+                .reduce(into: Set()) { $0.insert($1.identifier) }
             deleteIdentifiers.formUnion(implicitDeleteIdentifiers)
 
-            insertItems = insertItems.filter { !implicitDeleteIdentifiers.contains($0.value.identifier) }
+            insertItems = insertItems
+                .filter { !implicitDeleteIdentifiers.contains($0.value.identifier) }
         }
     }
 
@@ -218,17 +236,21 @@ public final class ListDifferenceCalculator<T: Identifiable>: ListDifferenceCalc
 
         lastDifferences.removeAll()
 
-        let implicitDeleteIdentifiers = allItems[limit..<allItems.count]
-            .reduce(into: Set(), { $0.insert($1.identifier) })
+        let implicitDeleteIdentifiers = allItems[limit ..< allItems.count]
+            .reduce(into: Set()) { $0.insert($1.identifier) }
 
-        delete(identifiers: implicitDeleteIdentifiers,
-               targetList: &allItems,
-               diffList: &lastDifferences)
+        delete(
+            identifiers: implicitDeleteIdentifiers,
+            targetList: &allItems,
+            diffList: &lastDifferences
+        )
     }
 
-    private func delete(identifiers: Set<String>,
-                        targetList: inout [Model],
-                        diffList: inout [ListDifference<Model>]) {
+    private func delete(
+        identifiers: Set<String>,
+        targetList: inout [Model],
+        diffList: inout [ListDifference<Model>]
+    ) {
         // delete changes should be sorted by index desc
 
         for (index, oldItem) in targetList.enumerated().reversed() {
@@ -237,14 +259,16 @@ public final class ListDifferenceCalculator<T: Identifiable>: ListDifferenceCalc
             }
         }
 
-        targetList.removeAll { (item) in
-            return identifiers.contains(item.identifier)
+        targetList.removeAll { item in
+            identifiers.contains(item.identifier)
         }
     }
 
-    private func insert(items: [T],
-                        targetList: inout [Model],
-                        diffList: inout [ListDifference<Model>]) {
+    private func insert(
+        items: [T],
+        targetList: inout [Model],
+        diffList: inout [ListDifference<Model>]
+    ) {
         targetList.append(contentsOf: items)
         targetList.sort(by: sortBlock)
 

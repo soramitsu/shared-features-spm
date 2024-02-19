@@ -1,8 +1,8 @@
 import Foundation
-import SSFUtils
 import RobinHood
-import SSFRuntimeCodingService
 import SSFModels
+import SSFRuntimeCodingService
+import SSFUtils
 
 enum StorageDecodingOperationError: Error {
     case missingRequiredParams
@@ -10,11 +10,19 @@ enum StorageDecodingOperationError: Error {
 }
 
 protocol StorageDecodable {
-    func decode(data: Data, path: any StorageCodingPathProtocol, codingFactory: RuntimeCoderFactoryProtocol) throws -> JSON
+    func decode(
+        data: Data,
+        path: any StorageCodingPathProtocol,
+        codingFactory: RuntimeCoderFactoryProtocol
+    ) throws -> JSON
 }
 
 extension StorageDecodable {
-    func decode(data: Data, path: any StorageCodingPathProtocol, codingFactory: RuntimeCoderFactoryProtocol) throws -> JSON {
+    func decode(
+        data: Data,
+        path: any StorageCodingPathProtocol,
+        codingFactory: RuntimeCoderFactoryProtocol
+    ) throws -> JSON {
         guard let entry = codingFactory.metadata.getStorageMetadata(
             in: path.moduleName,
             storageName: path.itemName
@@ -29,11 +37,17 @@ extension StorageDecodable {
 }
 
 protocol StorageModifierHandling {
-    func handleModifier(at path: any StorageCodingPathProtocol, codingFactory: RuntimeCoderFactoryProtocol) throws -> JSON?
+    func handleModifier(
+        at path: any StorageCodingPathProtocol,
+        codingFactory: RuntimeCoderFactoryProtocol
+    ) throws -> JSON?
 }
 
 extension StorageModifierHandling {
-    func handleModifier(at path: any StorageCodingPathProtocol, codingFactory: RuntimeCoderFactoryProtocol) throws -> JSON? {
+    func handleModifier(
+        at path: any StorageCodingPathProtocol,
+        codingFactory: RuntimeCoderFactoryProtocol
+    ) throws -> JSON? {
         guard let entry = codingFactory.metadata.getStorageMetadata(
             in: path.moduleName,
             storageName: path.itemName
@@ -90,7 +104,8 @@ final class StorageDecodingOperation<T: Decodable>: BaseOperation<T>, StorageDec
 }
 
 final class StorageFallbackDecodingOperation<T: Decodable>: BaseOperation<T?>,
-    StorageDecodable, StorageModifierHandling {
+    StorageDecodable, StorageModifierHandling
+{
     var data: Data?
     var codingFactory: RuntimeCoderFactoryProtocol?
 
@@ -120,7 +135,8 @@ final class StorageFallbackDecodingOperation<T: Decodable>: BaseOperation<T?>,
             }
 
             if let data = data {
-                let item = try decode(data: data, path: path, codingFactory: factory).map(to: T.self)
+                let item = try decode(data: data, path: path, codingFactory: factory)
+                    .map(to: T.self)
                 result = .success(item)
             } else {
                 let item = try handleModifier(at: path, codingFactory: factory)?.map(to: T.self)
@@ -162,8 +178,12 @@ final class StorageDecodingListOperation<T: Decodable>: BaseOperation<[T]>, Stor
                 throw StorageDecodingOperationError.missingRequiredParams
             }
 
-            let items: [T] = try dataList.map { try decode(data: $0, path: path, codingFactory: factory)
-                .map(to: T.self)
+            let items: [T] = try dataList.map { try decode(
+                data: $0,
+                path: path,
+                codingFactory: factory
+            )
+            .map(to: T.self)
             }
 
             result = .success(items)
@@ -174,7 +194,8 @@ final class StorageDecodingListOperation<T: Decodable>: BaseOperation<[T]>, Stor
 }
 
 final class StorageFallbackDecodingListOperation<T: Decodable>: BaseOperation<[T?]>,
-    StorageDecodable, StorageModifierHandling {
+    StorageDecodable, StorageModifierHandling
+{
     var dataList: [Data?]?
     var codingFactory: RuntimeCoderFactoryProtocol?
 
@@ -205,7 +226,8 @@ final class StorageFallbackDecodingListOperation<T: Decodable>: BaseOperation<[T
 
             let items: [T?] = try dataList.map { data in
                 if let data = data {
-                    return try decode(data: data, path: path, codingFactory: factory).map(to: T.self)
+                    return try decode(data: data, path: path, codingFactory: factory)
+                        .map(to: T.self)
                 } else {
                     return try handleModifier(at: path, codingFactory: factory)?.map(to: T.self)
                 }
@@ -219,12 +241,19 @@ final class StorageFallbackDecodingListOperation<T: Decodable>: BaseOperation<[T
 }
 
 protocol ConstantDecodable {
-    func decode(at path: ConstantCodingPath, codingFactory: RuntimeCoderFactoryProtocol) throws -> JSON
+    func decode(at path: ConstantCodingPath, codingFactory: RuntimeCoderFactoryProtocol) throws
+        -> JSON
 }
 
 extension ConstantDecodable {
-    func decode(at path: ConstantCodingPath, codingFactory: RuntimeCoderFactoryProtocol) throws -> JSON {
-        guard let entry = codingFactory.metadata.getConstant(in: path.moduleName, constantName: path.constantName) else {
+    func decode(
+        at path: ConstantCodingPath,
+        codingFactory: RuntimeCoderFactoryProtocol
+    ) throws -> JSON {
+        guard let entry = codingFactory.metadata.getConstant(
+            in: path.moduleName,
+            constantName: path.constantName
+        ) else {
             throw StorageDecodingOperationError.invalidStoragePath
         }
 
@@ -269,7 +298,10 @@ final class StorageConstantOperation<T: Decodable>: BaseOperation<T>, ConstantDe
     }
 }
 
-public final class PrimitiveConstantOperation<T: LosslessStringConvertible & Equatable>: BaseOperation<T>, ConstantDecodable {
+public final class PrimitiveConstantOperation<
+    T: LosslessStringConvertible &
+        Equatable
+>: BaseOperation<T>, ConstantDecodable {
     public var codingFactory: RuntimeCoderFactoryProtocol?
 
     let path: ConstantCodingPath
@@ -280,7 +312,7 @@ public final class PrimitiveConstantOperation<T: LosslessStringConvertible & Equ
         super.init()
     }
 
-    public override func main() {
+    override public func main() {
         super.main()
 
         if isCancelled {

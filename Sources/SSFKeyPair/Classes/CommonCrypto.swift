@@ -1,7 +1,7 @@
 import Foundation
 import SSFCrypto
-import SSFUtils
 import SSFModels
+import SSFUtils
 
 protocol CommonCrypto {
     func getQuery(
@@ -10,19 +10,19 @@ protocol CommonCrypto {
         cryptoType: CryptoType,
         ethereumBased: Bool
     ) throws -> AccountQuery
-    
+
     func getJunctionResult(
         from derivationPath: String,
         ethereumBased: Bool
     ) throws -> JunctionResult?
-    
+
     func generateKeypair(
         from seed: Data,
         chaincodes: [Chaincode],
         cryptoType: CryptoType,
         isEthereum: Bool
     ) throws -> (publicKey: Data, secretKey: Data)
-    
+
     func createKeypairFactory(
         _ cryptoType: CryptoType,
         isEthereumBased: Bool
@@ -65,11 +65,11 @@ final class CommonCryptoImpl: CommonCrypto {
         ethereumBased: Bool
     ) throws -> JunctionResult? {
         guard !derivationPath.isEmpty else { return nil }
-        
+
         let junctionFactory = ethereumBased
-        ? BIP32JunctionFactory()
-        : SubstrateJunctionFactory()
-        
+            ? BIP32JunctionFactory()
+            : SubstrateJunctionFactory()
+
         return try junctionFactory.parse(path: derivationPath)
     }
 

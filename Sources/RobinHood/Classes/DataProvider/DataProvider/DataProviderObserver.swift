@@ -1,7 +1,7 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 
@@ -12,12 +12,13 @@ public struct DataProviderObserver<T, P> {
     public private(set) var failureBlock: (Error) -> Void
     public private(set) var options: P
 
-    public init(observer: AnyObject,
-                queue: DispatchQueue?,
-                updateBlock: @escaping ([DataProviderChange<T>]) -> Void,
-                failureBlock: @escaping (Error) -> Void,
-                options: P) {
-
+    public init(
+        observer: AnyObject,
+        queue: DispatchQueue?,
+        updateBlock: @escaping ([DataProviderChange<T>]) -> Void,
+        failureBlock: @escaping (Error) -> Void,
+        options: P
+    ) {
         self.observer = observer
         self.options = options
         self.queue = queue

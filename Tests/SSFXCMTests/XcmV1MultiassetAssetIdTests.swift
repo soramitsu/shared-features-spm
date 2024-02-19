@@ -1,15 +1,16 @@
-import XCTest
 import BigInt
+import XCTest
 
 @testable import SSFXCM
 
 final class XcmV1MultiassetAssetIdTests: XCTestCase {
-    
     func testEncode() throws {
         // arrange
-        let assetId = XcmV1MultiassetAssetId.concrete(.init(parents: 0,
-                                                            interior: .init(items: [.onlyChild])))
-        
+        let assetId = XcmV1MultiassetAssetId.concrete(.init(
+            parents: 0,
+            interior: .init(items: [.onlyChild])
+        ))
+
         // act
         let encodedData = try JSONEncoder().encode(assetId)
 

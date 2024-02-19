@@ -1,65 +1,64 @@
-import XCTest
-import SoraKeystore
-import RobinHood
-import SSFModels
 import IrohaCrypto
+import RobinHood
+import SoraKeystore
+import SSFModels
+import XCTest
 
 @testable import SSFAccountManagment
 
 final class MnemonicExportServiceTests: XCTestCase {
-
     var service: MnemonicExportServiceProtocol?
-    
+
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        let mnemonicText = "street firm worth record skin taste legend lobster magnet stove drive side"
-        let mnemonicData = MnemonicExportData(
-            mnemonic: try IRMnemonicCreator().mnemonic(fromList: mnemonicText) ,
+        let mnemonicText =
+            "street firm worth record skin taste legend lobster magnet stove drive side"
+        let mnemonicData = try MnemonicExportData(
+            mnemonic: IRMnemonicCreator().mnemonic(fromList: mnemonicText),
             derivationPath: nil,
             cryptoType: nil,
             chain: TestData.chain
         )
-        
+
         let factory = MnemonicExportDataFactoryProtocolMock()
         factory.createMnemonicExportDataMetaIdAccountIdCryptoTypeChainReturnValue = mnemonicData
-        
+
         let operationManager = OperationManager()
-        
+
         service = MnemonicExportService(
             factory: factory,
             operationManager: operationManager
         )
     }
-    
+
     override func tearDown() {
         super.tearDown()
         service = nil
     }
 
-    func testfetchExportDataForAddress() throws  {
+    func testfetchExportDataForAddress() throws {
         // act
         let data = try service?.fetchExportDataFor(
             address: "77TsMPwQq1UjycY3xZ5AJGRfCTjYS6hR7JypCsC7gUjsQSe",
             chain: TestData.chain,
             wallet: TestData.account
         )
-        
+
         // assert
         XCTAssertNotNil(data)
     }
-    
-    
-    func testfetchExportDataForWallet() throws  {
+
+    func testfetchExportDataForWallet() throws {
         // arrange
         let account = ChainAccountInfo(chain: TestData.chain, account: TestData.response)
-        
+
         // act
         let data = service?.fetchExportDataFor(
             wallet: TestData.account,
             accounts: [account]
         )
-        
+
         // assert
         XCTAssertNotNil(data)
     }
@@ -67,7 +66,6 @@ final class MnemonicExportServiceTests: XCTestCase {
 
 extension MnemonicExportServiceTests {
     enum TestData {
-        
         static let chainAccount = ChainAccountModel(
             chainId: "Kusama",
             accountId: Data(),
@@ -75,7 +73,7 @@ extension MnemonicExportServiceTests {
             cryptoType: 23,
             ethereumBased: false
         )
-        
+
         static let account = MetaAccountModel(
             metaId: "1",
             name: "test",
@@ -96,7 +94,7 @@ extension MnemonicExportServiceTests {
             hasBackup: false,
             favouriteChainIds: []
         )
-        
+
         static let chain = ChainModel(
             rank: 1,
             disabled: true,
@@ -116,7 +114,7 @@ extension MnemonicExportServiceTests {
             customNodes: [],
             iosMinAppVersion: nil
         )
-        
+
         static let response = ChainAccountResponse(
             chainId: TestData.chain.chainId,
             accountId: Data(),

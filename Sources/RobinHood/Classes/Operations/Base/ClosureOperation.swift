@@ -1,7 +1,7 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 
@@ -13,7 +13,6 @@ import Foundation
  */
 
 public final class ClosureOperation<ResultType>: BaseOperation<ResultType> {
-
     /// Closure to execute to produce operation result.
     public let closure: () throws -> ResultType
 

@@ -33,14 +33,14 @@ enum XcmCallPath: StorageCodingPathProtocol {
             return (moduleName: "xTokens", itemName: "transfer")
         case .xTokensTransferMultiasset:
             return (moduleName: "xTokens", itemName: "transfer_multiasset")
-            
+
         case .bridgeProxyBurn:
             return (moduleName: "bridgeProxy", itemName: "burn")
         case .bridgeProxyTransactions:
             return (moduleName: "BridgeProxy", itemName: "Transactions")
         }
     }
-    
+
     case parachainId
 
     case xcmPalletLimitedTeleportAssets
@@ -53,7 +53,7 @@ enum XcmCallPath: StorageCodingPathProtocol {
 
     case xTokensTransfer
     case xTokensTransferMultiasset
-    
+
     case bridgeProxyBurn
     case bridgeProxyTransactions
 }
@@ -61,8 +61,8 @@ enum XcmCallPath: StorageCodingPathProtocol {
 extension XcmCallPath {
     static var usedRuntimePaths: [String: [String]] {
         var usedRuntimePaths = [String: [String]]()
-        XcmCallPath.allCases.forEach {
-            usedRuntimePaths[$0.moduleName] = [$0.itemName]
+        for cas in XcmCallPath.allCases {
+            usedRuntimePaths[cas.moduleName] = [cas.itemName]
         }
         return usedRuntimePaths
     }

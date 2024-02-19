@@ -5,7 +5,7 @@ public struct XcmChain: Codable, Equatable {
     public let destWeightIsPrimitive: Bool?
     public let availableAssets: [XcmAvailableAsset]
     public let availableDestinations: [XcmAvailableDestination]
-    
+
     public init(
         xcmVersion: XcmCallFactoryVersion?,
         destWeightIsPrimitive: Bool?,
@@ -17,12 +17,12 @@ public struct XcmChain: Codable, Equatable {
         self.availableAssets = availableAssets
         self.availableDestinations = availableDestinations
     }
-    
+
     public static func == (lhs: XcmChain, rhs: XcmChain) -> Bool {
         lhs.xcmVersion == rhs.xcmVersion &&
-        lhs.availableAssets == rhs.availableAssets &&
-        Set(lhs.availableDestinations) == Set(rhs.availableDestinations) &&
-        lhs.destWeightIsPrimitive ?? false == rhs.destWeightIsPrimitive ?? false
+            lhs.availableAssets == rhs.availableAssets &&
+            Set(lhs.availableDestinations) == Set(rhs.availableDestinations) &&
+            lhs.destWeightIsPrimitive ?? false == rhs.destWeightIsPrimitive ?? false
     }
 }
 
@@ -30,7 +30,7 @@ public struct XcmAvailableDestination: Codable, Hashable {
     public let chainId: ChainModel.Id
     public let bridgeParachainId: String?
     public let assets: [XcmAvailableAsset]
-    
+
     public init(
         chainId: ChainModel.Id,
         bridgeParachainId: String?,

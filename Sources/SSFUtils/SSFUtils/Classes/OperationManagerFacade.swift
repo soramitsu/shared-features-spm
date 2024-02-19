@@ -1,7 +1,7 @@
 import Foundation
 import RobinHood
 
-public final class OperationManagerFacade {
+public enum OperationManagerFacade {
     public static let sharedDefaultQueue = OperationQueue()
 
     public static let runtimeBuildingQueue: OperationQueue = {

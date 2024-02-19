@@ -2,8 +2,8 @@ import Foundation
 
 // MARK: - Base
 
-extension Optional {
-    public func or(_ value: Wrapped) -> Wrapped {
+public extension Optional {
+    func or(_ value: Wrapped) -> Wrapped {
         if let value = self {
             return value
         }

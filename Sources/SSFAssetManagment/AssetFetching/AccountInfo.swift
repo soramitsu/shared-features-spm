@@ -1,7 +1,7 @@
-import Foundation
-import SSFUtils
-import RobinHood
 import BigInt
+import Foundation
+import RobinHood
+import SSFUtils
 
 // MARK: - Normal
 
@@ -133,7 +133,8 @@ struct AccountData: Codable, Equatable {
         }
 
         do {
-            reserved = try container.decode(StringScaleMapper<BigUInt>.self, forKey: .reserved).value
+            reserved = try container.decode(StringScaleMapper<BigUInt>.self, forKey: .reserved)
+                .value
         } catch {
             reserved = try container.decode(BigUInt.self, forKey: .reserved)
         }
@@ -150,8 +151,14 @@ struct AccountData: Codable, Equatable {
             do {
                 frozen = try container.decode(BigUInt.self, forKey: .frozen)
             } catch {
-                let feeFrozen = try container.decode(StringScaleMapper<BigUInt>.self, forKey: .feeFrozen).value
-                let miscFrozen = try container.decode(StringScaleMapper<BigUInt>.self, forKey: .miscFrozen).value
+                let feeFrozen = try container.decode(
+                    StringScaleMapper<BigUInt>.self,
+                    forKey: .feeFrozen
+                ).value
+                let miscFrozen = try container.decode(
+                    StringScaleMapper<BigUInt>.self,
+                    forKey: .miscFrozen
+                ).value
 
                 frozen = max(feeFrozen, miscFrozen)
             }
@@ -225,7 +232,7 @@ struct EquilibriumV0AccountData: Decodable {
 
     func mapBalances() -> [String: BigUInt] {
         var map = [String: BigUInt]()
-        balance.forEach { balanceData in
+        for balanceData in balance {
             switch balanceData.positive {
             case let .positive(balance):
                 map[balanceData.currencyId] = balance

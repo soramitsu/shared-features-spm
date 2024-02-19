@@ -7,7 +7,12 @@ public struct KeystoreData: Equatable {
     public let publicKeyData: Data
     public let cryptoType: CryptoType
 
-    public init(address: String?, secretKeyData: Data, publicKeyData: Data, cryptoType: CryptoType) {
+    public init(
+        address: String?,
+        secretKeyData: Data,
+        publicKeyData: Data,
+        cryptoType: CryptoType
+    ) {
         self.address = address
         self.secretKeyData = secretKeyData
         self.publicKeyData = publicKeyData

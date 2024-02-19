@@ -1,14 +1,14 @@
-import RobinHood
 import Foundation
-import SSFUtils
+import RobinHood
 import SSFModels
+import SSFUtils
 
 // To regenerate mock object
 // Change '_AutoMockable' to 'AutoMockable'
 // Run build to generate the mock
 // Replace 'class' to 'actor' in genereated mock file
 // Change 'AutoMockable' to '_AutoMockable' to avoid future generations
-//sourcery: _AutoMockable
+// sourcery: _AutoMockable
 public protocol ChainAssetFetchingServiceProtocol: Actor {
     func fetch(filters: [AssetFilter], sorts: [AssetSort], forceUpdate: Bool) async -> [ChainAsset]
 }
@@ -39,7 +39,6 @@ public enum AssetSortOrder {
 }
 
 public actor ChainAssetsFetchingService {
-
     private var allChainAssets: [ChainAsset] = []
     private let chainAssetsFetcher: ChainAssetsFetchWorkerProtocol
 
@@ -49,12 +48,16 @@ public actor ChainAssetsFetchingService {
 }
 
 extension ChainAssetsFetchingService: ChainAssetFetchingServiceProtocol {
-    public func fetch(filters: [AssetFilter], sorts: [AssetSort], forceUpdate: Bool) async -> [ChainAsset] {
+    public func fetch(
+        filters: [AssetFilter],
+        sorts: [AssetSort],
+        forceUpdate: Bool
+    ) async -> [ChainAsset] {
         if !allChainAssets.isEmpty, !forceUpdate {
             let filtredChainAssets = filter(chainAssets: allChainAssets, filters: filters)
             return sort(chainAssets: filtredChainAssets, sorts: sorts)
         }
-        
+
         allChainAssets = await chainAssetsFetcher.getChainAssetsModels()
         let filtredChainAssets = filter(chainAssets: allChainAssets, filters: filters)
         return sort(chainAssets: filtredChainAssets, sorts: sorts)
@@ -62,18 +65,17 @@ extension ChainAssetsFetchingService: ChainAssetFetchingServiceProtocol {
 }
 
 private extension ChainAssetsFetchingService {
-
     func filter(chainAssets: [ChainAsset], filters: [AssetFilter]) -> [ChainAsset] {
         var filteredChainAssets: [ChainAsset] = chainAssets
-        filters.forEach { filter in
+        for filter in filters {
             filteredChainAssets = apply(filter: filter, for: filteredChainAssets)
         }
         return filteredChainAssets
     }
-    
+
     private func sort(chainAssets: [ChainAsset], sorts: [AssetSort]) -> [ChainAsset] {
         var sortedChainAssets: [ChainAsset] = chainAssets
-        sorts.reversed().forEach { sort in
+        for sort in sorts.reversed() {
             sortedChainAssets = apply(sort: sort, chainAssets: sortedChainAssets)
         }
         return sortedChainAssets
@@ -98,7 +100,7 @@ private extension ChainAssetsFetchingService {
             }
         case let .ecosystem(ecosystem):
             return chainAssets.filter {
-                return $0.defineEcosystem() == ecosystem
+                $0.defineEcosystem() == ecosystem
             }
         case let .chainIds(ids):
             return chainAssets.filter { ids.contains($0.chain.chainId) }

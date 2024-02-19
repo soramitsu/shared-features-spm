@@ -1,11 +1,11 @@
 import Foundation
-import Starscream
 import SSFModels
+import Starscream
 
 public protocol WebSocketConnectionProtocol: WebSocketClient {
     var callbackQueue: DispatchQueue { get }
     var delegate: WebSocketDelegate? { get set }
-    
+
     func forceDisconnect()
 }
 
@@ -20,7 +20,8 @@ public protocol WebSocketEngineDelegate: AnyObject {
 }
 
 public final class WebSocketEngine {
-    public static let sharedProcessingQueue = DispatchQueue(label: "jp.co.soramitsu.fearless.ws.processing")
+    public static let sharedProcessingQueue =
+        DispatchQueue(label: "jp.co.soramitsu.fearless.ws.processing")
 
     public enum State {
         case notConnected
@@ -42,12 +43,12 @@ public final class WebSocketEngine {
             if let delegate = delegate {
                 let oldState = oldValue
                 let newState = state
-                    delegate.webSocketDidChangeState(engine: self, from: oldState, to: newState)
+                delegate.webSocketDidChangeState(engine: self, from: oldState, to: newState)
             }
         }
     }
 
-    internal let mutex = NSLock()
+    let mutex = NSLock()
 
     private let jsonEncoder = JSONEncoder()
     private let jsonDecoder = JSONDecoder()
@@ -219,7 +220,7 @@ extension WebSocketEngine {
 
     func send(request: JSONRPCRequest) {
         inProgressRequests[request.requestId] = request
-        
+
         connection.write(stringData: request.data, completion: nil)
     }
 
@@ -310,7 +311,8 @@ extension WebSocketEngine {
         options: JSONRPCOptions,
         completion closure: ((Result<T, Error>) -> Void)?
     )
-        throws -> JSONRPCRequest {
+        throws -> JSONRPCRequest
+    {
         let data: Data
 
         let requestId = generateRequestId()
@@ -356,13 +358,13 @@ extension WebSocketEngine {
     public func generateRequestId() -> UInt16 {
         let items = pendingRequests.map(\.requestId) + inProgressRequests.map(\.key)
         let existingIds: Set<UInt16> = Set(items)
-        
+
         let targetId = (1 ... UInt16.max).randomElement() ?? 1
-        
+
         if existingIds.contains(targetId) {
             return generateRequestId()
         }
-        
+
         return targetId
     }
 
@@ -425,7 +427,8 @@ extension WebSocketEngine {
         let remoteId = basicResponse.params.subscription
 
         if let (_, subscription) = subscriptions
-            .first(where: { $1.remoteId == remoteId }) {
+            .first(where: { $1.remoteId == remoteId })
+        {
             logger?.debug("Did receive update for subscription: \(remoteId)")
 
             completionQueue.async {
@@ -475,8 +478,8 @@ extension WebSocketEngine {
         }
 
         completionQueue.async {
-            requests.forEach {
-                $0.responseHandler?.handle(error: error)
+            for request in requests {
+                request.responseHandler?.handle(error: error)
             }
         }
     }
@@ -485,7 +488,8 @@ extension WebSocketEngine {
         if reachabilityManager?.isReachable == false {
             state = .notReachable
         } else if let reconnectionStrategy = reconnectionStrategy,
-           let nextDelay = reconnectionStrategy.reconnectAfter(attempt: attempt - 1) {
+                  let nextDelay = reconnectionStrategy.reconnectAfter(attempt: attempt - 1)
+        {
             state = .waitingReconnection(attempt: attempt)
 
             logger?.debug("Schedule reconnection with attempt \(attempt) and delay \(nextDelay)")
@@ -558,7 +562,7 @@ extension WebSocketEngine {
 
         connection.connect()
     }
-    
+
     private func handleNodeNotHealthy() {
         connection.disconnect()
         scheduleReconnectionOrDisconnect(NetworkConstants.websocketReconnectAttemptsLimit + 1)

@@ -8,23 +8,26 @@ extension ChainData: Codable {
         case sha256 = "Sha256"
         case keccak256 = "Keccak256"
         case shaThree256 = "ShaThree256"
-        
+
         static func from(rawValue: String) -> Case? {
             if rawValue.lowercased().contains("raw") {
                 return .raw
             }
-            
+
             return Case(rawValue: rawValue)
         }
     }
+
     public init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
         let typeString = try container.decode(String.self)
         guard let type = Case.from(rawValue: typeString) else {
-            throw DecodingError.dataCorruptedError(in: container,
-                                                   debugDescription: "unexpected type found: \(typeString)")
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "unexpected type found: \(typeString)"
+            )
         }
-        
+
         if type == .none {
             self = .none
         } else {
@@ -42,8 +45,10 @@ extension ChainData: Codable {
             case .shaThree256:
                 self = .shaThree256(data: H256(value: data))
             default:
-                throw DecodingError.dataCorruptedError(in: container,
-                                                       debugDescription: "unexpected type found: \(type)")
+                throw DecodingError.dataCorruptedError(
+                    in: container,
+                    debugDescription: "unexpected type found: \(type)"
+                )
             }
         }
     }
@@ -54,19 +59,19 @@ extension ChainData: Codable {
         switch self {
         case .none:
             try container.encode(Case.none.rawValue)
-        case .raw(let data):
+        case let .raw(data):
             try container.encode(Case.raw.rawValue)
             try container.encode(data)
-        case .blakeTwo256(let hash):
+        case let .blakeTwo256(hash):
             try container.encode(Case.blakeTwo256.rawValue)
             try container.encode(hash.value)
-        case .sha256(let hash):
+        case let .sha256(hash):
             try container.encode(Case.sha256.rawValue)
             try container.encode(hash.value)
-        case .keccak256(let hash):
+        case let .keccak256(hash):
             try container.encode(Case.keccak256.rawValue)
             try container.encode(hash.value)
-        case .shaThree256(let hash):
+        case let .shaThree256(hash):
             try container.encode(Case.shaThree256.rawValue)
             try container.encode(hash.value)
         }

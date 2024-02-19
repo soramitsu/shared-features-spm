@@ -1,6 +1,6 @@
 import Foundation
-import SSFUtils
 import SSFModels
+import SSFUtils
 
 public typealias ChainConnection = JSONRPCEngine
 
@@ -10,42 +10,40 @@ public protocol ChainConnectionProtocol {
 }
 
 public final class ChainConnectionAutoBalance: ChainConnectionProtocol {
-
     public var isActive: Bool = true
-    
+
     private let chainId: ChainModel.Id
     private let nodes: [URL]
     private let selectedNode: URL?
-    private lazy var connectionFactory: ConnectionFactoryProtocol = {
-        ConnectionFactory()
-    }()
-    
+    private lazy var connectionFactory: ConnectionFactoryProtocol = ConnectionFactory()
+
     private lazy var connectionIssuesCenter = NetworkIssuesCenterImpl.shared
-    
+
     private weak var currentConnection: ChainConnection?
     private var failedUrls: Set<URL?> = []
-    
+
     public init(nodes: [URL], selectedNode: URL? = nil, chainId: ChainModel.Id) {
         self.nodes = nodes
         self.selectedNode = selectedNode
         self.chainId = chainId
     }
-    
+
     // MARK: - Public methods
-    
+
     public func connection() throws -> ChainConnection {
         guard let connection = currentConnection else {
             return try setupConnection(ignoredUrl: nil)
         }
         return connection
     }
-    
-    // MARK: - Private methods
-    private func setupConnection(ignoredUrl: URL?) throws -> ChainConnection {
 
+    // MARK: - Private methods
+
+    private func setupConnection(ignoredUrl: URL?) throws -> ChainConnection {
         if ignoredUrl == nil,
            let connection = currentConnection,
-           connection.url?.absoluteString == selectedNode?.absoluteString {
+           connection.url?.absoluteString == selectedNode?.absoluteString
+        {
             return connection
         }
 
@@ -57,7 +55,6 @@ public final class ChainConnectionAutoBalance: ChainConnectionProtocol {
         guard let url = node else {
             throw ConnectionPoolError.onlyOneNode
         }
-
 
         if let connection = currentConnection {
             if connection.url == url {
@@ -73,25 +70,26 @@ public final class ChainConnectionAutoBalance: ChainConnectionProtocol {
             for: url,
             delegate: self
         )
-        
+
         currentConnection = connection
         return connection
     }
 }
 
 // MARK: - WebSocketEngineDelegate
+
 extension ChainConnectionAutoBalance: WebSocketEngineDelegate {
     public func webSocketDidChangeState(
         engine: SSFUtils.WebSocketEngine,
-        from oldState: SSFUtils.WebSocketEngine.State,
+        from _: SSFUtils.WebSocketEngine.State,
         to newState: SSFUtils.WebSocketEngine.State
     ) {
         guard selectedNode == nil,
-              let previousUrl = engine.url
-        else {
+              let previousUrl = engine.url else
+        {
             return
         }
-        
+
         switch newState {
         case let .waitingReconnection(attempt: attempt):
             isActive = true
@@ -103,7 +101,7 @@ extension ChainConnectionAutoBalance: WebSocketEngineDelegate {
         default:
             isActive = true
         }
-        
+
         connectionIssuesCenter.handle(chain: chainId, state: newState)
     }
 }

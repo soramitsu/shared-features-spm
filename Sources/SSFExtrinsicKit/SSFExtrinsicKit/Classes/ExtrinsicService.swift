@@ -1,22 +1,26 @@
 import Foundation
-import SSFUtils
-import RobinHood
 import IrohaCrypto
-import SSFSigner
-import SSFRuntimeCodingService
-import SSFModels
+import RobinHood
 import SSFCrypto
+import SSFModels
+import SSFRuntimeCodingService
+import SSFSigner
+import SSFUtils
 
 public typealias FeeExtrinsicResult = Result<RuntimeDispatchInfo, Error>
 public typealias EstimateFeeClosure = (FeeExtrinsicResult) -> Void
 public typealias EstimateFeeIndexedClosure = ([FeeExtrinsicResult]) -> Void
 
-public typealias SubmitAndWatchExtrinsicResult = (result: Result<String, Error>, extrinsicHash: String?)
+public typealias SubmitAndWatchExtrinsicResult = (
+    result: Result<String, Error>,
+    extrinsicHash: String?
+)
 public typealias SubmitExtrinsicResult = Result<String, Error>
 public typealias ExtrinsicSubmitClosure = (SubmitExtrinsicResult) -> Void
 public typealias ExtrinsicSubmitIndexedClosure = ([SubmitExtrinsicResult]) -> Void
-public typealias ExtrinsicSubmitAndWatchClosure = (Result<String, Error>, _ extrinsicHash: String?) -> Void
-//sourcery: AutoMockable
+public typealias ExtrinsicSubmitAndWatchClosure = (Result<String, Error>, _ extrinsicHash: String?)
+    -> Void
+// sourcery: AutoMockable
 public protocol ExtrinsicServiceProtocol {
     func estimateFee(
         _ closure: @escaping ExtrinsicBuilderClosure,
@@ -54,7 +58,7 @@ public protocol ExtrinsicServiceProtocol {
     )
 }
 
-final public class ExtrinsicService {
+public final class ExtrinsicService {
     private let operationFactory: ExtrinsicOperationFactoryProtocol
     private let operationManager: OperationManagerProtocol
 
@@ -142,9 +146,15 @@ extension ExtrinsicService: ExtrinsicServiceProtocol {
                 if let result = wrapper.targetOperation.result {
                     switch result {
                     case let .success(submitAndWatchExtrinsicResult):
-                        completionClosure(submitAndWatchExtrinsicResult.result, submitAndWatchExtrinsicResult.extrinsicHash)
+                        completionClosure(
+                            submitAndWatchExtrinsicResult.result,
+                            submitAndWatchExtrinsicResult.extrinsicHash
+                        )
                     case .failure:
-                        completionClosure(.failure(BaseOperationError.parentOperationCancelled), nil)
+                        completionClosure(
+                            .failure(BaseOperationError.parentOperationCancelled),
+                            nil
+                        )
                     }
                 } else {
                     completionClosure(.failure(BaseOperationError.unexpectedDependentResult), nil)
@@ -183,12 +193,17 @@ extension ExtrinsicService: ExtrinsicServiceProtocol {
         numberOfExtrinsics: Int,
         completion completionClosure: @escaping ExtrinsicSubmitIndexedClosure
     ) {
-        let wrapper = operationFactory.submit(closure, signer: signer, numberOfExtrinsics: numberOfExtrinsics)
+        let wrapper = operationFactory.submit(
+            closure,
+            signer: signer,
+            numberOfExtrinsics: numberOfExtrinsics
+        )
 
         wrapper.targetOperation.completionBlock = {
             queue.async {
                 do {
-                    let operationResult = try wrapper.targetOperation.extractNoCancellableResultData()
+                    let operationResult = try wrapper.targetOperation
+                        .extractNoCancellableResultData()
                     completionClosure(operationResult)
                 } catch {
                     let results: [SubmitExtrinsicResult] = Array(

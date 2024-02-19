@@ -1,15 +1,15 @@
 import Foundation
+import RobinHood
+import SSFChainConnection
+import SSFChainRegistry
+import SSFCrypto
 import SSFExtrinsicKit
 import SSFModels
-import SSFCrypto
+import SSFNetwork
 import SSFRuntimeCodingService
-import SSFUtils
-import RobinHood
 import SSFSigner
 import SSFStorageQueryKit
-import SSFChainConnection
-import SSFNetwork
-import SSFChainRegistry
+import SSFUtils
 
 public struct XcmExtrinsicServices {
     public let extrinsic: XcmExtrinsicServiceProtocol
@@ -17,8 +17,7 @@ public struct XcmExtrinsicServices {
     public let availableDestionationFetching: XcmChainsConfigFetching
 }
 
-final public class XcmAssembly {
-    
+public enum XcmAssembly {
     public static func createExtrincisServices(
         fromChainData: FromChainData,
         sourceConfig: XcmConfigProtocol?
@@ -28,23 +27,23 @@ final public class XcmAssembly {
             secretKeyData: fromChainData.signingWrapperData.secretKeyData,
             cryptoType: fromChainData.cryptoType
         )
-        
+
         let extrinsicBuilder = XcmExtrinsicBuilder()
-        
+
         let chainSyncService = ChainSyncService(
             chainsUrl: sourceConfig?.chainsSourceUrl ?? XcmConfig.shared.chainsSourceUrl,
             operationQueue: OperationQueue(),
             dataFetchFactory: NetworkOperationFactory()
         )
-        
+
         let chainsTypesSyncService = ChainsTypesSyncService(
             url: sourceConfig?.chainTypesSourceUrl ?? XcmConfig.shared.chainTypesSourceUrl,
             dataOperationFactory: NetworkOperationFactory(),
             operationQueue: OperationQueue()
         )
-        
+
         let runtimeSyncService = RuntimeSyncService(dataOperationFactory: NetworkOperationFactory())
-        
+
         let chainRegistry = ChainRegistry(
             runtimeProviderPool: RuntimeProviderPool(),
             connectionPool: ConnectionPool(),
@@ -52,24 +51,25 @@ final public class XcmAssembly {
             chainsTypesSyncService: chainsTypesSyncService,
             runtimeSyncService: runtimeSyncService
         )
-        
+
         let xcmChainsConfigFetcher = XcmChainsConfigFetcher(chainRegistry: chainRegistry)
         let depsContainer = XcmDependencyContainer(
             chainRegistry: chainRegistry,
             fromChainData: fromChainData
         )
-        
+
         let callPathDeterminer = CallPathDeterminerImpl(
             chainRegistry: chainRegistry,
             fromChainData: fromChainData
         )
-        
+
         let destinationFeeFetcher = XcmDestinationFeeFetcher(
-            sourceUrl: sourceConfig?.destinationFeeSourceUrl ?? XcmConfig.shared.destinationFeeSourceUrl,
+            sourceUrl: sourceConfig?.destinationFeeSourceUrl ?? XcmConfig.shared
+                .destinationFeeSourceUrl,
             networkOperationFactory: NetworkOperationFactory(),
             operationQueue: OperationQueue()
         )
-        
+
         let extrinsic = XcmExtrinsicService(
             signingWrapper: signingWrapper,
             extrinsicBuilder: extrinsicBuilder,
@@ -79,7 +79,7 @@ final public class XcmAssembly {
             callPathDeterminer: callPathDeterminer,
             xcmFeeFetcher: destinationFeeFetcher
         )
-        
+
         return XcmExtrinsicServices(
             extrinsic: extrinsic,
             destinationFeeFetcher: destinationFeeFetcher,
@@ -88,24 +88,24 @@ final public class XcmAssembly {
     }
 }
 
-extension XcmAssembly {
-    public struct SigningWrapperData: Equatable {
+public extension XcmAssembly {
+    struct SigningWrapperData: Equatable {
         public let publicKeyData: Data
         public let secretKeyData: Data
-        
+
         public init(publicKeyData: Data, secretKeyData: Data) {
             self.publicKeyData = publicKeyData
             self.secretKeyData = secretKeyData
         }
     }
-    
-    public struct FromChainData {
+
+    struct FromChainData {
         public let chainId: String
         public let cryptoType: SFCryptoType
         public let chainMetadata: RuntimeMetadataItemProtocol?
         public let accountId: AccountId
         public let signingWrapperData: SigningWrapperData
-        
+
         public init(
             chainId: String,
             cryptoType: SFCryptoType,

@@ -1,7 +1,7 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL 3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL 3.0
+ */
 
 import Foundation
 
@@ -52,7 +52,6 @@ public enum OperationMode {
  */
 
 public protocol OperationManagerProtocol {
-
     /**
      *  Submit group operations to the queue establishing dependencies using mode.
      *
@@ -74,7 +73,7 @@ public final class OperationManager: OperationManagerProtocol {
     private(set) var barrierOperations: [Operation] = []
     let operationQueue: OperationQueue
 
-    private var lock: NSLock = NSLock()
+    private var lock: NSLock = .init()
 
     public init(operationQueue: OperationQueue = OperationQueue()) {
         self.operationQueue = operationQueue
@@ -102,7 +101,7 @@ public final class OperationManager: OperationManagerProtocol {
             handleWaitBefore(for: operations)
         case .sync:
             handleSync(for: operations)
-        case .byIdentifier(let identifier):
+        case let .byIdentifier(identifier):
             handle(operations: operations, for: identifier)
         case .transient:
             break
@@ -115,7 +114,7 @@ public final class OperationManager: OperationManagerProtocol {
 
     private func handleBarrier(for operations: [Operation]) {
         for barrierOperation in barrierOperations where !barrierOperation.isFinished {
-            operations.forEach { $0.addDependency(barrierOperation)}
+            operations.forEach { $0.addDependency(barrierOperation) }
         }
     }
 
@@ -150,7 +149,8 @@ public final class OperationManager: OperationManagerProtocol {
     }
 
     private func clearCompletedOperations() {
-        inProgressOperations = inProgressOperations.filter { !$0.value.allSatisfy { $0.isFinished } }
+        inProgressOperations = inProgressOperations
+            .filter { !$0.value.allSatisfy { $0.isFinished } }
         barrierOperations = barrierOperations.filter { !$0.isFinished }
     }
 }
