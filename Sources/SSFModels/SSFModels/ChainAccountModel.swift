@@ -6,8 +6,14 @@ public struct ChainAccountModel: Equatable, Hashable, Codable {
     public let publicKey: Data
     public let cryptoType: UInt8
     public let ethereumBased: Bool
-    
-    public init(chainId: String, accountId: AccountId, publicKey: Data, cryptoType: UInt8, ethereumBased: Bool) {
+
+    public init(
+        chainId: String,
+        accountId: AccountId,
+        publicKey: Data,
+        cryptoType: UInt8,
+        ethereumBased: Bool
+    ) {
         self.chainId = chainId
         self.accountId = accountId
         self.publicKey = publicKey

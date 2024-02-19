@@ -1,7 +1,7 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 
@@ -27,7 +27,7 @@ public final class InMemoryKeychain: KeystoreProtocol {
     }
 
     public func checkKey(for identifier: String) throws -> Bool {
-        return keystore[identifier] != nil
+        keystore[identifier] != nil
     }
 
     public func deleteKey(for identifier: String) throws {
@@ -40,17 +40,22 @@ public final class InMemoryKeychain: KeystoreProtocol {
 }
 
 extension InMemoryKeychain: SecretStoreManagerProtocol {
-    public func loadSecret(for identifier: String,
-                    completionQueue: DispatchQueue,
-                    completionBlock: @escaping (SecretDataRepresentable?) -> Void) {
+    public func loadSecret(
+        for identifier: String,
+        completionQueue: DispatchQueue,
+        completionBlock: @escaping (SecretDataRepresentable?) -> Void
+    ) {
         completionQueue.async {
             completionBlock(self.keystore[identifier])
         }
     }
 
-    public func saveSecret(_ secret: SecretDataRepresentable,
-                    for identifier: String,
-                    completionQueue: DispatchQueue, completionBlock: @escaping (Bool) -> Void) {
+    public func saveSecret(
+        _ secret: SecretDataRepresentable,
+        for identifier: String,
+        completionQueue: DispatchQueue,
+        completionBlock: @escaping (Bool) -> Void
+    ) {
         keystore[identifier] = secret.asSecretData()
 
         completionQueue.async {
@@ -58,8 +63,11 @@ extension InMemoryKeychain: SecretStoreManagerProtocol {
         }
     }
 
-    public func removeSecret(for identifier: String, completionQueue: DispatchQueue,
-                      completionBlock: @escaping (Bool) -> Void) {
+    public func removeSecret(
+        for identifier: String,
+        completionQueue: DispatchQueue,
+        completionBlock: @escaping (Bool) -> Void
+    ) {
         keystore[identifier] = nil
 
         completionQueue.async {
@@ -67,8 +75,11 @@ extension InMemoryKeychain: SecretStoreManagerProtocol {
         }
     }
 
-    public func checkSecret(for identifier: String, completionQueue: DispatchQueue,
-                     completionBlock: @escaping (Bool) -> Void) {
+    public func checkSecret(
+        for identifier: String,
+        completionQueue: DispatchQueue,
+        completionBlock: @escaping (Bool) -> Void
+    ) {
         let exists = keystore[identifier] != nil
 
         completionQueue.async {
@@ -77,6 +88,6 @@ extension InMemoryKeychain: SecretStoreManagerProtocol {
     }
 
     public func checkSecret(for identifier: String) -> Bool {
-        return keystore[identifier] != nil
+        keystore[identifier] != nil
     }
 }

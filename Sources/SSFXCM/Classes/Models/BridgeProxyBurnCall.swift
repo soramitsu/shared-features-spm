@@ -1,9 +1,9 @@
-import Foundation
 import BigInt
-import SSFUtils
+import Foundation
 import SSFModels
+import SSFUtils
 
-struct BridgeProxyBurnCall: Codable {
+struct BridgeProxyBurnCall: Codable, Equatable {
     let networkId: BridgeTypesGenericNetworkId
     let assetId: SoraAssetId
     let recipient: BridgeTypesGenericAccount
@@ -13,7 +13,7 @@ struct BridgeProxyBurnCall: Codable {
 enum BridgeTypesGenericNetworkId: Codable {
     case evm(BigUInt)
     case sub(BridgeTypesSubNetworkId)
-    
+
     init(from chain: ChainModel) {
         switch chain.chainBaseType {
         case .substrate:
@@ -24,10 +24,10 @@ enum BridgeTypesGenericNetworkId: Codable {
             self = .evm(evmChainId)
         }
     }
-    
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.unkeyedContainer()
-        
+
         switch self {
         case let .evm(id):
             try container.encode("EVM")
@@ -35,6 +35,19 @@ enum BridgeTypesGenericNetworkId: Codable {
         case let .sub(bridgeTypesSubNetworkId):
             try container.encode("Sub")
             try container.encode(bridgeTypesSubNetworkId)
+        }
+    }
+}
+
+extension BridgeTypesGenericNetworkId: Equatable {
+    static func == (lhs: BridgeTypesGenericNetworkId, rhs: BridgeTypesGenericNetworkId) -> Bool {
+        switch (lhs, rhs) {
+        case let (.evm(lhsValue), .evm(rhsValue)):
+            return lhsValue == rhsValue
+        case let (.sub(lhsValue), .sub(rhsValue)):
+            return lhsValue == rhsValue
+        default:
+            return false
         }
     }
 }
@@ -60,7 +73,7 @@ enum BridgeTypesSubNetworkId: Codable {
             self = .custom(0)
         }
     }
-    
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.unkeyedContainer()
 
@@ -83,16 +96,32 @@ enum BridgeTypesSubNetworkId: Codable {
     }
 }
 
+extension BridgeTypesSubNetworkId: Equatable {
+    static func == (lhs: BridgeTypesSubNetworkId, rhs: BridgeTypesSubNetworkId) -> Bool {
+        switch (lhs, rhs) {
+        case (.mainnet, .mainnet),
+             (.kusama, .kusama),
+             (.polkadot, .polkadot),
+             (.rococo, .rococo):
+            return true
+        case let (.custom(lhsValue), .custom(rhsValue)):
+            return lhsValue == rhsValue
+        default:
+            return false
+        }
+    }
+}
+
 enum BridgeTypesGenericAccount: Codable {
     case evm(AccountId)
     case sora(AccountId)
     case parachain(XcmVersionedMultiLocation)
     case unknown
     case root
-    
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.unkeyedContainer()
-        
+
         switch self {
         case let .evm(accountId):
             try container.encode("EVM")
@@ -113,7 +142,25 @@ enum BridgeTypesGenericAccount: Codable {
     }
 }
 
-struct SoraAssetId: Codable {
+extension BridgeTypesGenericAccount: Equatable {
+    static func == (lhs: BridgeTypesGenericAccount, rhs: BridgeTypesGenericAccount) -> Bool {
+        switch (lhs, rhs) {
+        case (.unknown, .unknown),
+             (.root, .root):
+            return true
+        case let (.evm(lhsValue), .evm(rhsValue)):
+            return lhsValue == rhsValue
+        case let (.sora(lhsValue), .sora(rhsValue)):
+            return lhsValue == rhsValue
+        case let (.parachain(lhsValue), .parachain(rhsValue)):
+            return lhsValue == rhsValue
+        default:
+            return false
+        }
+    }
+}
+
+struct SoraAssetId: Codable, Equatable {
     @ArrayCodable var value: String
 
     init(wrappedValue: String) {
@@ -129,9 +176,7 @@ struct SoraAssetId: Codable {
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        guard
-            let bytes = try? Data(hexStringSSF: value).map({ StringCodable(wrappedValue: $0) })
-        else {
+        guard let bytes = try? Data(hexStringSSF: value).map({ StringCodable(wrappedValue: $0) }) else {
             let context = EncodingError.Context(
                 codingPath: container.codingPath,
                 debugDescription: "Invalid encoding"
@@ -161,9 +206,9 @@ struct ArrayCodable: Codable, Equatable {
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
 
-        guard
-            let bytes = try? Data(hexStringSSF: wrappedValue).map({ StringScaleMapper(value: $0) })
-        else {
+        guard let bytes = try? Data(hexStringSSF: wrappedValue)
+            .map({ StringScaleMapper(value: $0) }) else
+        {
             let context = EncodingError.Context(
                 codingPath: container.codingPath,
                 debugDescription: "Invalid encoding"

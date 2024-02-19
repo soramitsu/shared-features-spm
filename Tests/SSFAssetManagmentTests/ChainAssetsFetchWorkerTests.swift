@@ -1,16 +1,15 @@
-import XCTest
-import SSFAssetManagmentStorage
-import SSFUtils
-import SSFModels
 import RobinHood
+import SSFAssetManagmentStorage
 import SSFHelpers
+import SSFModels
+import SSFUtils
+import XCTest
 
 @testable import SSFAssetManagment
 
 final class ChainAssetsFetchWorkerTests: XCTestCase {
-
     var worker: ChainAssetsFetchWorkerProtocol?
-    
+
     override func setUp() {
         super.setUp()
         let chainRepository = AnyDataProviderRepository(prepareRepostory())
@@ -21,7 +20,7 @@ final class ChainAssetsFetchWorkerTests: XCTestCase {
             operationManager: operationManager
         )
     }
-    
+
     override func tearDown() {
         super.tearDown()
         worker = nil
@@ -41,19 +40,20 @@ private extension ChainAssetsFetchWorkerTests {
     func prepareRepostory() -> CoreDataRepository<ChainModel, CDChain> {
         let facade = SubstrateStorageTestFacade()
         let mapper = ChainModelMapper()
-        
-        let chains: [ChainModel] = (0..<10).map { index in
+
+        let chains: [ChainModel] = (0 ..< 10).map { index in
             ChainModelGenerator.generateChain(
                 generatingAssets: 2,
                 addressPrefix: UInt16(index),
                 hasCrowdloans: true
             )
         }
-        
-        let repository: CoreDataRepository<ChainModel, CDChain> = facade.createRepository(mapper: AnyCoreDataMapper(mapper))
+
+        let repository: CoreDataRepository<ChainModel, CDChain> = facade
+            .createRepository(mapper: AnyCoreDataMapper(mapper))
         let saveOperation = repository.saveOperation({ chains }, { [] })
         OperationQueue().addOperations([saveOperation], waitUntilFinished: true)
-        
+
         return repository
     }
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-public class HexCodingStrategy {
+public enum HexCodingStrategy {
     static func encoding(data: Data, encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
 //        let hex = data.toHex(includePrefix: true)
@@ -22,7 +22,7 @@ public class HexCodingStrategy {
 
             return byte
         }
-    
+
         return Data(bytes)
     }
 }
@@ -40,7 +40,7 @@ public extension JSONDecoder {
     static func scaleCompatible(snakeCase: Bool = true) -> JSONDecoder {
         let decoder = JSONDecoder()
         decoder.dataDecodingStrategy = .custom(HexCodingStrategy.decoding(with:))
-        
+
         if snakeCase {
             decoder.keyDecodingStrategy = .convertFromSnakeCase
         }
@@ -65,14 +65,17 @@ public extension Encodable {
         let container = EncodingContainer(value: self)
 
         let data = try JSONEncoder.scaleCompatible().encode(container)
-        let json = try JSONDecoder.scaleCompatible(snakeCase: false).decode(JsonContainer.self, from: data).value
+        let json = try JSONDecoder.scaleCompatible(snakeCase: false).decode(
+            JsonContainer.self,
+            from: data
+        ).value
 
         return json
     }
 }
 
 public extension JSON {
-    func map<T: Decodable>(to type: T.Type) throws -> T {
+    func map<T: Decodable>(to _: T.Type) throws -> T {
         let encoder = JSONEncoder.scaleCompatible()
         let encodingContainer = JsonContainer(value: self)
         let data = try encoder.encode(encodingContainer)
@@ -80,8 +83,8 @@ public extension JSON {
         let decoder = JSONDecoder.scaleCompatible()
         return try decoder.decode(DecodingContainer<T>.self, from: data).value
     }
-    
-    func plainMap<T: Decodable>(to type: T.Type) throws -> T {
+
+    func plainMap<T: Decodable>(to _: T.Type) throws -> T {
         let encoder = JSONEncoder.scaleCompatible()
         let encodingContainer = JsonContainer(value: self)
         let data = try encoder.encode(encodingContainer)

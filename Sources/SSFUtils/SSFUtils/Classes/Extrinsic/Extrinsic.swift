@@ -1,7 +1,7 @@
-import Foundation
 import BigInt
+import Foundation
 
-public struct ExtrinsicConstants {
+public enum ExtrinsicConstants {
     static let version: UInt8 = 4
     static let signedMask: UInt8 = 1 << 7
 }
@@ -14,8 +14,8 @@ public struct ExtrinsicSignedExtra: Codable {
     }
 
     public var era: Era?
-    @OptionStringCodable public  var nonce: UInt32?
-    @OptionStringCodable public  var tip: BigUInt?
+    @OptionStringCodable public var nonce: UInt32?
+    @OptionStringCodable public var tip: BigUInt?
 
     public init(era: Era?, nonce: UInt32?, tip: BigUInt?) {
         self.era = era
@@ -94,13 +94,13 @@ public enum MultiSignature: Codable {
         var container = encoder.unkeyedContainer()
 
         switch self {
-        case .sr25519(let data):
+        case let .sr25519(data):
             try container.encode(Self.sr25519Field)
             try container.encode(data)
-        case .ed25519(let data):
+        case let .ed25519(data):
             try container.encode(Self.ed25519Field)
             try container.encode(data)
-        case .ecdsa(let data):
+        case let .ecdsa(data):
             try container.encode(Self.ecdsaField)
             try container.encode(data)
         }

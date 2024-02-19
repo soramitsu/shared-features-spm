@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 
 // MARK: - Protocol
 
@@ -11,8 +11,8 @@ public protocol RuntimeExtrinsicMetadata {
 
 // MARK: - V1
 
-extension RuntimeMetadataV1 {
-    public struct ExtrinsicMetadata: RuntimeExtrinsicMetadata {
+public extension RuntimeMetadataV1 {
+    struct ExtrinsicMetadata: RuntimeExtrinsicMetadata {
         public let version: UInt8
         public let type: BigUInt? = nil
         public let signedExtensions: [String]
@@ -21,8 +21,8 @@ extension RuntimeMetadataV1 {
             self.version = version
             self.signedExtensions = signedExtensions
         }
-        
-        public func signedExtensions(using schemaResolver: Schema.Resolver) throws -> [String] {
+
+        public func signedExtensions(using _: Schema.Resolver) throws -> [String] {
             signedExtensions
         }
     }
@@ -42,15 +42,15 @@ extension RuntimeMetadataV1.ExtrinsicMetadata: ScaleCodable {
 
 // MARK: - V14
 
-extension RuntimeMetadataV14 {
-    public struct ExtrinsicMetadata: RuntimeExtrinsicMetadata {
+public extension RuntimeMetadataV14 {
+    struct ExtrinsicMetadata: RuntimeExtrinsicMetadata {
         private let _type: BigUInt
         public var type: BigUInt? { _type }
         public let version: UInt8
         public let signedExtensions: [SignedExtension]
 
         public init(type: BigUInt, version: UInt8, signedExtensions: [SignedExtension]) {
-            self._type = type
+            _type = type
             self.version = version
             self.signedExtensions = signedExtensions
         }
@@ -77,8 +77,8 @@ extension RuntimeMetadataV14.ExtrinsicMetadata: ScaleCodable {
     }
 }
 
-extension RuntimeMetadataV14.ExtrinsicMetadata {
-    public struct SignedExtension {
+public extension RuntimeMetadataV14.ExtrinsicMetadata {
+    struct SignedExtension {
         public let identifier: String
         public let type: BigUInt
         public let additionalSigned: BigUInt

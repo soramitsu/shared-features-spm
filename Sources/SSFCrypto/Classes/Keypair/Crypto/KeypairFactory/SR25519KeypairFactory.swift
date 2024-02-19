@@ -27,7 +27,7 @@ public struct SR25519KeypairFactory: DerivableKeypairFactoryProtocol {
         let publicKey = try SNPublicKey(rawData: keypair.publicKey().rawData())
         let snKeypair: SNKeypairProtocol = SNKeypair(privateKey: privateKey, publicKey: publicKey)
 
-        let childKeypair = try chaincodeList.reduce(snKeypair) { (keypair, chaincode) in
+        let childKeypair = try chaincodeList.reduce(snKeypair) { keypair, chaincode in
             switch chaincode.type {
             case .soft:
                 return try internalFactory.createKeypairSoft(keypair, chaincode: chaincode.data)

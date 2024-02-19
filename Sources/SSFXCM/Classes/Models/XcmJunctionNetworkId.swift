@@ -1,6 +1,6 @@
 import Foundation
-import SSFUtils
 import SSFModels
+import SSFUtils
 
 enum XcmJunctionNetworkId: Codable {
     case any
@@ -38,7 +38,7 @@ enum XcmJunctionNetworkId: Codable {
             try container.encode(JSON.null)
         }
     }
-    
+
     static func from(ecosystem: ChainEcosystem) -> XcmJunctionNetworkId {
         switch ecosystem {
         case .kusama:

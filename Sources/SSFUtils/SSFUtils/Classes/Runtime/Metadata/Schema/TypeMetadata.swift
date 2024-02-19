@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 
 // MARK: - TypeMetadata
 
@@ -14,8 +14,8 @@ extension TypeMetadata: Codable & Equatable {}
 
 // MARK: TypeMetadata.Param
 
-extension TypeMetadata {
-    public struct Param: ScaleCodable {
+public extension TypeMetadata {
+    struct Param: ScaleCodable {
         public let name: String
         public let type: BigUInt?
 
@@ -25,8 +25,8 @@ extension TypeMetadata {
         }
 
         public init(scaleDecoder: ScaleDecoding) throws {
-            self.name = try String(scaleDecoder: scaleDecoder)
-            self.type = try ScaleOption(scaleDecoder: scaleDecoder).value
+            name = try String(scaleDecoder: scaleDecoder)
+            type = try ScaleOption(scaleDecoder: scaleDecoder).value
         }
     }
 }
@@ -42,17 +42,17 @@ extension TypeMetadata: ScaleCodable {
     }
 
     public init(scaleDecoder: ScaleDecoding) throws {
-        self.path = try [String](scaleDecoder: scaleDecoder)
-        self.params = try [Param](scaleDecoder: scaleDecoder)
-        self.def = try Def(scaleDecoder: scaleDecoder)
-        self.docs = try [String](scaleDecoder: scaleDecoder)
+        path = try [String](scaleDecoder: scaleDecoder)
+        params = try [Param](scaleDecoder: scaleDecoder)
+        def = try Def(scaleDecoder: scaleDecoder)
+        docs = try [String](scaleDecoder: scaleDecoder)
     }
 }
 
 // MARK: TypeMetadata.Def
 
-extension TypeMetadata {
-    public enum Def {
+public extension TypeMetadata {
+    enum Def {
         case composite(Composite)
         case variant(Variant)
         case sequence(Sequence)
@@ -65,7 +65,6 @@ extension TypeMetadata {
 }
 
 extension TypeMetadata.Def: Codable & Equatable {
-    
     static let compositeField = "composite"
     static let variantField = "variant"
     static let sequenceField = "sequence"
@@ -74,11 +73,11 @@ extension TypeMetadata.Def: Codable & Equatable {
     static let primitiveField = "primitive"
     static let compactField = "compact"
     static let bitSequenceField = "bitSequence"
-    
+
     public init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
         let type = try container.decode(String.self)
-        
+
         switch type {
         case Self.compositeField:
             let composite = try container.decode(Composite.self)
@@ -111,10 +110,10 @@ extension TypeMetadata.Def: Codable & Equatable {
             )
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.unkeyedContainer()
-        
+
         switch self {
         case let .composite(composite):
             try container.encode(Self.compositeField)
@@ -142,9 +141,9 @@ extension TypeMetadata.Def: Codable & Equatable {
             try container.encode(bitSequence)
         }
     }
-    
-    public static func == (lhs: TypeMetadata.Def, rhs: TypeMetadata.Def) -> Bool {
-        return true//
+
+    public static func == (_: TypeMetadata.Def, _: TypeMetadata.Def) -> Bool {
+        true //
     }
 }
 
@@ -186,14 +185,14 @@ extension TypeMetadata.Def: ScaleCodable {
     public init(scaleDecoder: ScaleDecoding) throws {
         let index = try UInt8(scaleDecoder: scaleDecoder)
         switch index {
-        case 0: self = .composite(try Composite(scaleDecoder: scaleDecoder))
-        case 1: self = .variant(try Variant(scaleDecoder: scaleDecoder))
-        case 2: self = .sequence(try Sequence(scaleDecoder: scaleDecoder))
-        case 3: self = .array(try Array(scaleDecoder: scaleDecoder))
-        case 4: self = .tuple(try [BigUInt](scaleDecoder: scaleDecoder))
-        case 5: self = .primitive(try Primitive(scaleDecoder: scaleDecoder))
-        case 6: self = .compact(try Compact(scaleDecoder: scaleDecoder))
-        case 7: self = .bitSequence(try BitSequence(scaleDecoder: scaleDecoder))
+        case 0: self = try .composite(Composite(scaleDecoder: scaleDecoder))
+        case 1: self = try .variant(Variant(scaleDecoder: scaleDecoder))
+        case 2: self = try .sequence(Sequence(scaleDecoder: scaleDecoder))
+        case 3: self = try .array(Array(scaleDecoder: scaleDecoder))
+        case 4: self = try .tuple([BigUInt](scaleDecoder: scaleDecoder))
+        case 5: self = try .primitive(Primitive(scaleDecoder: scaleDecoder))
+        case 6: self = try .compact(Compact(scaleDecoder: scaleDecoder))
+        case 7: self = try .bitSequence(BitSequence(scaleDecoder: scaleDecoder))
         default:
             throw DecodingError.typeMismatch(
                 Self.self,
@@ -209,15 +208,13 @@ extension TypeMetadata.Def: ScaleCodable {
 
 // MARK: TypeMetadata.Def.Composite
 
-extension TypeMetadata.Def {
-    public struct Composite {
+public extension TypeMetadata.Def {
+    struct Composite {
         public let fields: [Field]
     }
 }
 
-extension TypeMetadata.Def.Composite: Codable & Equatable {
-    
-}
+extension TypeMetadata.Def.Composite: Codable & Equatable {}
 
 extension TypeMetadata.Def.Composite: ScaleCodable {
     public func encode(scaleEncoder: ScaleEncoding) throws {
@@ -225,14 +222,14 @@ extension TypeMetadata.Def.Composite: ScaleCodable {
     }
 
     public init(scaleDecoder: ScaleDecoding) throws {
-        self.fields = try [Field](scaleDecoder: scaleDecoder)
+        fields = try [Field](scaleDecoder: scaleDecoder)
     }
 }
 
 // MARK: TypeMetadata.Def.Composite.Field
 
-extension TypeMetadata.Def.Composite {
-    public struct Field {
+public extension TypeMetadata.Def.Composite {
+    struct Field {
         public let name: String?
         public let type: BigUInt
         public let typeName: String?
@@ -251,17 +248,17 @@ extension TypeMetadata.Def.Composite.Field: ScaleCodable {
     }
 
     public init(scaleDecoder: ScaleDecoding) throws {
-        self.name = try ScaleOption<String>(scaleDecoder: scaleDecoder).value
-        self.type = try BigUInt(scaleDecoder: scaleDecoder)
-        self.typeName = try ScaleOption<String>(scaleDecoder: scaleDecoder).value
-        self.docs = try [String](scaleDecoder: scaleDecoder)
+        name = try ScaleOption<String>(scaleDecoder: scaleDecoder).value
+        type = try BigUInt(scaleDecoder: scaleDecoder)
+        typeName = try ScaleOption<String>(scaleDecoder: scaleDecoder).value
+        docs = try [String](scaleDecoder: scaleDecoder)
     }
 }
 
 // MARK: TypeMetadata.Def.Variant
 
-extension TypeMetadata.Def {
-    public struct Variant {
+public extension TypeMetadata.Def {
+    struct Variant {
         public let variants: [Item]
     }
 }
@@ -274,14 +271,14 @@ extension TypeMetadata.Def.Variant: ScaleCodable {
     }
 
     public init(scaleDecoder: ScaleDecoding) throws {
-        self.variants = try [Item](scaleDecoder: scaleDecoder)
+        variants = try [Item](scaleDecoder: scaleDecoder)
     }
 }
 
 // MARK: TypeMetadata.Def.Variant.Item
 
-extension TypeMetadata.Def.Variant {
-    public struct Item {
+public extension TypeMetadata.Def.Variant {
+    struct Item {
         public let name: String
         public let fields: [TypeMetadata.Def.Composite.Field]
         public let index: UInt8
@@ -300,17 +297,17 @@ extension TypeMetadata.Def.Variant.Item: ScaleCodable {
     }
 
     public init(scaleDecoder: ScaleDecoding) throws {
-        self.name = try String(scaleDecoder: scaleDecoder)
-        self.fields = try [TypeMetadata.Def.Composite.Field](scaleDecoder: scaleDecoder)
-        self.index = try UInt8(scaleDecoder: scaleDecoder)
-        self.docs = try [String](scaleDecoder: scaleDecoder)
+        name = try String(scaleDecoder: scaleDecoder)
+        fields = try [TypeMetadata.Def.Composite.Field](scaleDecoder: scaleDecoder)
+        index = try UInt8(scaleDecoder: scaleDecoder)
+        docs = try [String](scaleDecoder: scaleDecoder)
     }
 }
 
 // MARK: TypeMetadata.Def.Sequence
 
-extension TypeMetadata.Def {
-    public struct Sequence {
+public extension TypeMetadata.Def {
+    struct Sequence {
         public let type: BigUInt
     }
 }
@@ -323,14 +320,14 @@ extension TypeMetadata.Def.Sequence: ScaleCodable {
     }
 
     public init(scaleDecoder: ScaleDecoding) throws {
-        self.type = try BigUInt(scaleDecoder: scaleDecoder)
+        type = try BigUInt(scaleDecoder: scaleDecoder)
     }
 }
 
 // MARK: TypeMetadata.Def.Array
 
-extension TypeMetadata.Def {
-    public struct Array {
+public extension TypeMetadata.Def {
+    struct Array {
         public let length: UInt32
         public let type: BigUInt
     }
@@ -345,15 +342,15 @@ extension TypeMetadata.Def.Array: ScaleCodable {
     }
 
     public init(scaleDecoder: ScaleDecoding) throws {
-        self.length = try UInt32(scaleDecoder: scaleDecoder)
-        self.type = try BigUInt(scaleDecoder: scaleDecoder)
+        length = try UInt32(scaleDecoder: scaleDecoder)
+        type = try BigUInt(scaleDecoder: scaleDecoder)
     }
 }
 
 // MARK: TypeMetadata.Def.Primitive
 
-extension TypeMetadata.Def {
-    public enum Primitive: UInt8 {
+public extension TypeMetadata.Def {
+    enum Primitive: UInt8 {
         case bool
         case char
         case string
@@ -398,8 +395,8 @@ extension TypeMetadata.Def.Primitive: ScaleCodable {
 
 // MARK: TypeMetadata.Def.Compact
 
-extension TypeMetadata.Def {
-    public struct Compact {
+public extension TypeMetadata.Def {
+    struct Compact {
         public let type: BigUInt
     }
 }
@@ -412,14 +409,14 @@ extension TypeMetadata.Def.Compact: ScaleCodable {
     }
 
     public init(scaleDecoder: ScaleDecoding) throws {
-        self.type = try BigUInt(scaleDecoder: scaleDecoder)
+        type = try BigUInt(scaleDecoder: scaleDecoder)
     }
 }
 
 // MARK: TypeMetadata.Def.BitSequence
 
-extension TypeMetadata.Def {
-    public struct BitSequence {
+public extension TypeMetadata.Def {
+    struct BitSequence {
         public let store: BigUInt
         public let order: BigUInt
     }
@@ -434,7 +431,7 @@ extension TypeMetadata.Def.BitSequence: ScaleCodable {
     }
 
     public init(scaleDecoder: ScaleDecoding) throws {
-        self.store = try BigUInt(scaleDecoder: scaleDecoder)
-        self.order = try BigUInt(scaleDecoder: scaleDecoder)
+        store = try BigUInt(scaleDecoder: scaleDecoder)
+        order = try BigUInt(scaleDecoder: scaleDecoder)
     }
 }

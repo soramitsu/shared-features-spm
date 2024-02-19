@@ -1,7 +1,7 @@
 import Foundation
 
-extension Bool {
-    public var intValue: Int {
+public extension Bool {
+    var intValue: Int {
         self ? 1 : 0
     }
 }

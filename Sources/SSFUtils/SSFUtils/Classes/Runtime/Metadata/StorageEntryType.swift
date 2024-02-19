@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 
 public enum StorageEntryType {
     case plain(_ value: PlainEntry)
@@ -9,13 +9,13 @@ public enum StorageEntryType {
 
     public func typeName(using schemaResolver: Schema.Resolver) throws -> String {
         switch self {
-        case .plain(let plain):
+        case let .plain(plain):
             return try plain.value(using: schemaResolver)
-        case .map(let singleMap):
+        case let .map(singleMap):
             return singleMap.value
-        case .doubleMap(let doubleMap):
+        case let .doubleMap(doubleMap):
             return doubleMap.value
-        case .nMap(let nMap):
+        case let .nMap(nMap):
             return try nMap.value(using: schemaResolver)
         }
     }
@@ -24,16 +24,16 @@ public enum StorageEntryType {
 extension StorageEntryType: ScaleCodable {
     public func encode(scaleEncoder: ScaleEncoding) throws {
         switch self {
-        case .plain(let value):
+        case let .plain(value):
             try UInt8(0).encode(scaleEncoder: scaleEncoder)
             try value.encode(scaleEncoder: scaleEncoder)
-        case .map(let value):
+        case let .map(value):
             try UInt8(1).encode(scaleEncoder: scaleEncoder)
             try value.encode(scaleEncoder: scaleEncoder)
-        case .doubleMap(let value):
+        case let .doubleMap(value):
             try UInt8(2).encode(scaleEncoder: scaleEncoder)
             try value.encode(scaleEncoder: scaleEncoder)
-        case .nMap(let value):
+        case let .nMap(value):
             if value.v14 {
                 try UInt8(1).encode(scaleEncoder: scaleEncoder)
             } else {
@@ -64,7 +64,7 @@ extension StorageEntryType: ScaleCodable {
         }
     }
 
-    internal init(v14ScaleDecoder scaleDecoder: ScaleDecoding) throws {
+    init(v14ScaleDecoder scaleDecoder: ScaleDecoding) throws {
         let rawValue = try UInt8(scaleDecoder: scaleDecoder)
 
         switch rawValue {
@@ -86,11 +86,11 @@ public struct PlainEntry {
 
     public init(stringValue: String) {
         self.stringValue = stringValue
-        self.index = nil
+        index = nil
     }
 
     public init(index: BigUInt) {
-        self.stringValue = nil
+        stringValue = nil
         self.index = index
     }
 
@@ -227,17 +227,17 @@ public struct NMapEntry {
     }
 
     public init(keysStrings: [String], hashers: [StorageHasher], valueString: String) {
-        self.v14 = false
-        self.keyEntries = keysStrings.map { PlainEntry(stringValue: $0) }
+        v14 = false
+        keyEntries = keysStrings.map { PlainEntry(stringValue: $0) }
         self.hashers = hashers
-        self.valueEntry = PlainEntry(stringValue: valueString)
+        valueEntry = PlainEntry(stringValue: valueString)
     }
 
     public init(keysIndices: [BigUInt], hashers: [StorageHasher], valueIndex: BigUInt) {
-        self.v14 = true
-        self.keyEntries = keysIndices.map { PlainEntry(index: $0) }
+        v14 = true
+        keyEntries = keysIndices.map { PlainEntry(index: $0) }
         self.hashers = hashers
-        self.valueEntry = PlainEntry(index: valueIndex)
+        valueEntry = PlainEntry(index: valueIndex)
     }
 }
 
@@ -265,7 +265,7 @@ extension NMapEntry: ScaleCodable {
     public init(v14ScaleDecoder scaleDecoder: ScaleDecoding) throws {
         v14 = true
         hashers = try [StorageHasher](scaleDecoder: scaleDecoder)
-        keyEntries = [try PlainEntry(v14ScaleDecoder: scaleDecoder)]
+        keyEntries = try [PlainEntry(v14ScaleDecoder: scaleDecoder)]
         valueEntry = try PlainEntry(v14ScaleDecoder: scaleDecoder)
     }
 }

@@ -1,6 +1,6 @@
+import CoreData
 import Foundation
 import RobinHood
-import CoreData
 import SSFModels
 
 public final class MetaAccountMapper {
@@ -8,7 +8,7 @@ public final class MetaAccountMapper {
 
     public typealias DataProviderModel = MetaAccountModel
     public typealias CoreDataEntity = CDMetaAccount
-    
+
     public init() {}
 }
 
@@ -49,7 +49,10 @@ extension MetaAccountMapper: CoreDataMapperProtocol {
         let substrateAccountId = try Data(hexStringSSF: entity.substrateAccountId!)
         let ethereumAddress = try entity.ethereumAddress.map { try Data(hexStringSSF: $0) }
         let assetFilterOptions = entity.assetFilterOptions as? [String]
-        let assetsVisibility: [AssetVisibility]? = (entity.assetsVisibility?.allObjects as? [CDAssetVisibility])?.compactMap {
+        let assetsVisibility: [AssetVisibility]? = (
+            entity.assetsVisibility?
+                .allObjects as? [CDAssetVisibility]
+        )?.compactMap {
             guard let assetId = $0.assetId else {
                 return nil
             }
@@ -123,7 +126,8 @@ extension MetaAccountMapper: CoreDataMapperProtocol {
         for chainAccount in model.chainAccounts {
             var chainAccountEntity = entity.chainAccounts?.first {
                 if let entity = $0 as? CDChainAccount,
-                   entity.chainId == chainAccount.chainId {
+                   entity.chainId == chainAccount.chainId
+                {
                     return true
                 } else {
                     return false
@@ -147,7 +151,7 @@ extension MetaAccountMapper: CoreDataMapperProtocol {
     }
 
     private func updatedEntityCurrency(
-        for entity: CoreDataEntity,
+        for _: CoreDataEntity,
         from model: DataProviderModel,
         context: NSManagedObjectContext
     ) {

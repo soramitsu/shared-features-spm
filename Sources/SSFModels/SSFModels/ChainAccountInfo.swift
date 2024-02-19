@@ -1,6 +1,6 @@
 import Foundation
 
-//depricated
+// depricated
 public enum CryptoType: UInt8, Codable, CaseIterable {
     case sr25519
     case ed25519
@@ -16,7 +16,7 @@ public enum CryptoType: UInt8, Codable, CaseIterable {
             return "ecdsa"
         }
     }
-    
+
     public var supportsSeedFromSecretKey: Bool {
         switch self {
         case .ed25519, .ecdsa:
@@ -51,8 +51,18 @@ public struct ChainAccountResponse: Equatable {
     public let isEthereumBased: Bool
     public let isChainAccount: Bool
     public let walletId: String
-    
-    public init(chainId: ChainModel.Id, accountId: AccountId, publicKey: Data, name: String, cryptoType: CryptoType, addressPrefix: UInt16, isEthereumBased: Bool, isChainAccount: Bool, walletId: String) {
+
+    public init(
+        chainId: ChainModel.Id,
+        accountId: AccountId,
+        publicKey: Data,
+        name: String,
+        cryptoType: CryptoType,
+        addressPrefix: UInt16,
+        isEthereumBased: Bool,
+        isChainAccount: Bool,
+        walletId: String
+    ) {
         self.chainId = chainId
         self.accountId = accountId
         self.publicKey = publicKey
@@ -68,7 +78,7 @@ public struct ChainAccountResponse: Equatable {
 public struct ChainAccountInfo {
     public let chain: ChainModel
     public let account: ChainAccountResponse
-    
+
     public init(chain: ChainModel, account: ChainAccountResponse) {
         self.chain = chain
         self.account = account

@@ -33,7 +33,7 @@ public enum Chain: String, Codable, CaseIterable {
         default: return nil
         }
     }
-    
+
     public init?(chainId: String) {
         switch chainId {
         case Self.kusama.genesisHash: self = .kusama
@@ -53,7 +53,6 @@ public enum Chain: String, Codable, CaseIterable {
         default: return nil
         }
     }
-
 
     public var genesisHash: String {
         switch self {

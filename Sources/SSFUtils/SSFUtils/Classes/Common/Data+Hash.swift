@@ -1,6 +1,6 @@
 import Foundation
-import xxHash_Swift
 import IrohaCrypto
+import xxHash_Swift
 
 public extension Data {
     func blake128Concat() throws -> Data {

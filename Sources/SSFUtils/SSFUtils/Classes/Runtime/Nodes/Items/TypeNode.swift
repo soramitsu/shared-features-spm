@@ -14,7 +14,7 @@ public struct NameNode {
         self.node = node
         self.index = UInt8(index)
     }
-    
+
     init(name: String, node: Node, index: UInt8) {
         self.name = name
         self.node = node

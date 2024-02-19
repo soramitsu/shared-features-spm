@@ -9,7 +9,6 @@ import MocksBasket
 @testable import SSFAccountManagment
 
 final class AccountImportServiceTests: XCTestCase {
-
     var service: AccountImportable?
     var mnemonicCreator: MnemonicCreatorMock?
 
@@ -39,7 +38,7 @@ final class AccountImportServiceTests: XCTestCase {
         mnemonicCreator = nil
     }
 
-    func testImportMetaAccountMnemonic() async throws  {
+    func testImportMetaAccountMnemonic() async throws {
         // arrange
         let data = MetaAccountImportRequestSource.MnemonicImportRequestData(
             mnemonic: TestData.mnemonicString,
@@ -64,7 +63,7 @@ final class AccountImportServiceTests: XCTestCase {
         XCTAssertEqual(mnemonicCreator?.mnemonicFromListCallsCount, 1)
     }
 
-    func testImportMetaAccountSeed() async throws  {
+    func testImportMetaAccountSeed() async throws {
         // arrange
         let data = MetaAccountImportRequestSource.SeedImportRequestData(
             substrateSeed: "0xbf57a61b1d24b6cde5a12f6779e9d13f7c59db72fc2a63bd382a6c91e7e41f61",
@@ -88,7 +87,7 @@ final class AccountImportServiceTests: XCTestCase {
         XCTAssertEqual(account?.name, TestData.accountName)
     }
 
-    func testImportMetaAccountKey() async throws  {
+    func testImportMetaAccountKey() async throws {
         // arrange
         let data = MetaAccountImportRequestSource.KeystoreImportRequestData(
             substrateKeystore: TestData.keystore,
@@ -115,7 +114,8 @@ final class AccountImportServiceTests: XCTestCase {
 
 extension AccountImportServiceTests {
     enum TestData {
-        static let mnemonicString = "street firm worth record skin taste legend lobster magnet stove drive side"
+        static let mnemonicString =
+            "street firm worth record skin taste legend lobster magnet stove drive side"
 
         static let accountName = "Test user 1"
         static let account = MetaAccountModel(
@@ -146,7 +146,8 @@ extension AccountImportServiceTests {
 
     private func setupMnemonicCreator() throws -> MnemonicCreatorMock {
         let mnemonicCreator = MnemonicCreatorMock()
-        let mnemonicText = "street firm worth record skin taste legend lobster magnet stove drive side"
+        let mnemonicText =
+            "street firm worth record skin taste legend lobster magnet stove drive side"
         let mnemonic = try IRMnemonicCreator().mnemonic(fromList: mnemonicText)
         mnemonicCreator.mnemonicFromListReturnValue = mnemonic
         return mnemonicCreator

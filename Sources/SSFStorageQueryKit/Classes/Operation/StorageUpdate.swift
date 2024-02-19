@@ -38,9 +38,9 @@ public struct StorageUpdateData {
     public let changes: [StorageUpdateChangeData]
 
     public init(update: StorageUpdate) {
-        if
-            let blockHashString = update.blockHash,
-            let blockHashData = try? Data(hexStringSSF: blockHashString) {
+        if let blockHashString = update.blockHash,
+           let blockHashData = try? Data(hexStringSSF: blockHashString)
+        {
             blockHash = blockHashData
         } else {
             blockHash = nil

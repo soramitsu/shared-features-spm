@@ -13,7 +13,6 @@ enum ChainAccountFetchingError: Error {
 }
 
 extension ChainAccountResponse {
-
     func toAddress() -> AccountAddress? {
         let chainFormat: SFChainFormat = isEthereumBased ? .sfEthereum : .sfSubstrate(addressPrefix)
         return try? accountId.toAddress(using: chainFormat)
@@ -78,17 +77,19 @@ extension MetaAccountModel {
             walletId: metaId
         )
     }
-    
+
     func fetchChainAccountFor(chain: ChainModel, address: String) throws -> ChainAccountResponse? {
         let nativeChainAccount = fetch(for: chain.accountRequest())
         if let nativeAddress = nativeChainAccount?.toAddress(), nativeAddress == address {
             return nativeChainAccount
         }
-        
+
         for chainAccount in chainAccounts {
-            let chainFormat: SFChainFormat = chainAccount.ethereumBased ? .sfEthereum : .sfSubstrate(chain.addressPrefix)
+            let chainFormat: SFChainFormat = chainAccount
+                .ethereumBased ? .sfEthereum : .sfSubstrate(chain.addressPrefix)
             if let chainAddress = try? chainAccount.accountId.toAddress(using: chainFormat),
-               chainAddress == address {
+               chainAddress == address
+            {
                 let account = ChainAccountResponse(
                     chainId: chain.chainId,
                     accountId: chainAccount.accountId,

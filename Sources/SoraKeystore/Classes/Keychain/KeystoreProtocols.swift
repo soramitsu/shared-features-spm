@@ -1,7 +1,7 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 
@@ -20,8 +20,8 @@ public protocol KeystoreProtocol: AnyObject {
     func deleteKey(for identifier: String) throws
 }
 
-extension KeystoreProtocol {
-    public func saveKey(_ key: Data, with identifier: String) throws {
+public extension KeystoreProtocol {
+    func saveKey(_ key: Data, with identifier: String) throws {
         let exists = try checkKey(for: identifier)
         if !exists {
             try addKey(key, with: identifier)
@@ -30,14 +30,14 @@ extension KeystoreProtocol {
         }
     }
 
-    public func deleteKeyIfExists(for identifier: String) throws {
+    func deleteKeyIfExists(for identifier: String) throws {
         let exists = try checkKey(for: identifier)
         if exists {
             try deleteKey(for: identifier)
         }
     }
 
-    public func deleteKeysIfExist(for identifiers: [String]) throws {
+    func deleteKeysIfExist(for identifiers: [String]) throws {
         for identifier in identifiers {
             try deleteKeyIfExists(for: identifier)
         }
@@ -48,37 +48,50 @@ public protocol SecretDataRepresentable {
     func asSecretData() -> Data?
 }
 
-extension SecretDataRepresentable {
-    public func toUTF8String() -> String? {
-        guard let existingData = asSecretData() else { return nil}
+public extension SecretDataRepresentable {
+    func toUTF8String() -> String? {
+        guard let existingData = asSecretData() else { return nil }
         return String(data: existingData, encoding: .utf8)
     }
 }
 
 extension String: SecretDataRepresentable {
     public func asSecretData() -> Data? {
-        return data(using: .utf8)
+        data(using: .utf8)
     }
 }
 
 extension Data: SecretDataRepresentable {
     public func asSecretData() -> Data? {
-        return self
+        self
     }
 }
 
 public protocol SecretStoreManagerProtocol: AnyObject {
-    func loadSecret(for identifier: String,
-                    completionQueue: DispatchQueue,
-                    completionBlock: @escaping (SecretDataRepresentable?) -> Void)
+    func loadSecret(
+        for identifier: String,
+        completionQueue: DispatchQueue,
+        completionBlock: @escaping (SecretDataRepresentable?) -> Void
+    )
 
-    func saveSecret(_ secret: SecretDataRepresentable,
-                    for identifier: String,
-                    completionQueue: DispatchQueue, completionBlock: @escaping (Bool) -> Void)
+    func saveSecret(
+        _ secret: SecretDataRepresentable,
+        for identifier: String,
+        completionQueue: DispatchQueue,
+        completionBlock: @escaping (Bool) -> Void
+    )
 
-    func removeSecret(for identifier: String, completionQueue: DispatchQueue, completionBlock: @escaping (Bool) -> Void)
+    func removeSecret(
+        for identifier: String,
+        completionQueue: DispatchQueue,
+        completionBlock: @escaping (Bool) -> Void
+    )
 
-    func checkSecret(for identifier: String, completionQueue: DispatchQueue, completionBlock: @escaping (Bool) -> Void)
+    func checkSecret(
+        for identifier: String,
+        completionQueue: DispatchQueue,
+        completionBlock: @escaping (Bool) -> Void
+    )
 
     func checkSecret(for identifier: String) -> Bool
 }

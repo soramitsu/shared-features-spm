@@ -1,17 +1,17 @@
+import BigInt
 import Foundation
 import RobinHood
-import SSFUtils
-import BigInt
 import SSFModels
 import SSFRuntimeCodingService
 import SSFStorageQueryKit
+import SSFUtils
 
 public final class MortalEraOperationFactory {
     static let fallbackMaxHashCount: BlockNumber = 250
     static let maxFinalityLag: BlockNumber = 5
     static let fallbackPeriod: Moment = 6 * 1000
     static let mortalPeriod: UInt64 = 5 * 60 * 1000
-    
+
     public init() {}
 
     private func createFinalizedHeaderOperation(
@@ -90,10 +90,9 @@ public final class MortalEraOperationFactory {
                 .extractNoCancellableResultData()
             let bestHeader = try bestHeaderWrapper.targetOperation.extractNoCancellableResultData()
 
-            guard
-                let bestNumber = BigUInt.fromHexString(bestHeader.number),
-                let finalizedNumber = BigUInt.fromHexString(finalizedHeader.number)
-            else {
+            guard let bestNumber = BigUInt.fromHexString(bestHeader.number),
+                  let finalizedNumber = BigUInt.fromHexString(finalizedHeader.number) else
+            {
                 throw BaseOperationError.unexpectedDependentResult
             }
 
@@ -101,7 +100,8 @@ public final class MortalEraOperationFactory {
                 return BlockNumber(finalizedNumber)
             }
 
-            let blockNumber = bestNumber - finalizedNumber > Self.maxFinalityLag ? bestNumber : finalizedNumber
+            let blockNumber = bestNumber - finalizedNumber > Self
+                .maxFinalityLag ? bestNumber : finalizedNumber
 
             return BlockNumber(blockNumber)
         }
@@ -128,7 +128,8 @@ public final class MortalEraOperationFactory {
             }
         }
 
-        let minimumPeriodOperation = PrimitiveConstantOperation<Moment>(path: .minimumPeriodBetweenBlocks)
+        let minimumPeriodOperation =
+            PrimitiveConstantOperation<Moment>(path: .minimumPeriodBetweenBlocks)
         minimumPeriodOperation.configurationBlock = {
             do {
                 minimumPeriodOperation.codingFactory = try codingFactoryOperation
@@ -206,7 +207,8 @@ public final class MortalEraOperationFactory {
                 throw BaseOperationError.unexpectedDependentResult
             }
 
-            let unmappedPeriod = (Self.mortalPeriod / UInt64(blockTime)) + UInt64(Self.maxFinalityLag)
+            let unmappedPeriod = (Self.mortalPeriod / UInt64(blockTime)) +
+                UInt64(Self.maxFinalityLag)
 
             return min(UInt64(blockHashCount), unmappedPeriod)
         }
@@ -233,8 +235,10 @@ extension MortalEraOperationFactory: ExtrinsicEraOperationFactoryProtocol {
         let blockNumberWrapper = createBlockNumberOperation(from: connection)
 
         let mapOperation = ClosureOperation<ExtrinsicEraParameters> {
-            let mortalLength = try mortalLengthWrapper.targetOperation.extractNoCancellableResultData()
-            let blockNumber = try blockNumberWrapper.targetOperation.extractNoCancellableResultData()
+            let mortalLength = try mortalLengthWrapper.targetOperation
+                .extractNoCancellableResultData()
+            let blockNumber = try blockNumberWrapper.targetOperation
+                .extractNoCancellableResultData()
 
             let constrainedPeriod: UInt64 = min(1 << 16, max(4, mortalLength))
             var period: UInt64 = 1

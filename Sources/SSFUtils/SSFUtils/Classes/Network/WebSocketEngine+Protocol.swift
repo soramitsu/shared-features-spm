@@ -3,9 +3,9 @@ import Starscream
 
 extension WebSocketEngine: JSONRPCEngine {
     public var pendingEngineRequests: [JSONRPCRequest] {
-        self.pendingRequests
+        pendingRequests
     }
-    
+
     public func callMethod<P: Encodable, T: Decodable>(
         _ method: String,
         params: P?,
@@ -73,19 +73,18 @@ extension WebSocketEngine: JSONRPCEngine {
 
         mutex.unlock()
     }
-    
+
     public func reconnect(url: URL) {
         self.connection.delegate = nil
-        
+
         self.url = url
         let request = URLRequest(url: url, timeoutInterval: 10)
         let engine = self.connection.engine
-        
+
         let connection = WebSocket(request: request, engine: engine)
         self.connection = connection
-        
+
         connection.callbackQueue = Self.sharedProcessingQueue
         connection.delegate = self
     }
 }
-

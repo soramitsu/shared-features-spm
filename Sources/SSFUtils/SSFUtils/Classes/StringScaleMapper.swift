@@ -17,7 +17,8 @@
 // Ltd., SORA, and Polkaswap.
 //
 // Neither the name of the Polka Biome Ltd. nor the names of its contributors may be used
-// to endorse or promote products derived from this software without specific prior written permission.
+// to endorse or promote products derived from this software without specific prior written
+// permission.
 
 // THIS SOFTWARE IS PROVIDED BY Polka Biome Ltd. AS IS AND ANY EXPRESS OR IMPLIED WARRANTIES,
 // INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -43,11 +44,13 @@ public struct StringScaleMapper<T: LosslessStringConvertible>: Codable {
         let strValue = try container.decode(String.self)
 
         guard let convertedValue = T(strValue) else {
-            throw DecodingError.dataCorruptedError(in: container,
-                                                   debugDescription: "Can't decode value: \(strValue)")
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Can't decode value: \(strValue)"
+            )
         }
 
-        self.value = convertedValue
+        value = convertedValue
     }
 
     public func encode(to encoder: Encoder) throws {

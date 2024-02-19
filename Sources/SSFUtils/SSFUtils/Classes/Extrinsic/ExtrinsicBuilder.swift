@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 import IrohaCrypto
 import SSFModels
 
@@ -59,10 +59,10 @@ public final class ExtrinsicBuilder {
         self.specVersion = specVersion
         self.transactionVersion = transactionVersion
         self.genesisHash = genesisHash
-        self.blockHash = genesisHash
-        self.era = .immortal
-        self.tip = 0
-        self.calls = []
+        blockHash = genesisHash
+        era = .immortal
+        tip = 0
+        calls = []
     }
 
     private func prepareExtrinsicCall(for metadata: RuntimeMetadata) throws -> JSON {
@@ -74,7 +74,8 @@ public final class ExtrinsicBuilder {
             return calls[0]
         }
 
-        let callName = shouldUseAtomicBatch ? KnowRuntimeModule.Utitlity.batchAll : KnowRuntimeModule.Utitlity.batch
+        let callName = shouldUseAtomicBatch ? KnowRuntimeModule.Utitlity
+            .batchAll : KnowRuntimeModule.Utitlity.batch
 
         let call = RuntimeCall(
             moduleName: KnowRuntimeModule.Utitlity.name,
@@ -130,21 +131,21 @@ public final class ExtrinsicBuilder {
 
         let payload = try encoder.encode()
 
-        return payload.count > Self.payloadHashingTreshold ? (try payload.blake2b32()) : payload
+        return try payload.count > Self.payloadHashingTreshold ? (payload.blake2b32()) : payload
     }
 }
 
 extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
     public func with<A: Codable>(address: A) throws -> Self {
         self.address = try address.toScaleCompatibleJSON()
-        self.signature = nil
+        signature = nil
 
         return self
     }
 
     public func with(nonce: UInt32) -> Self {
         self.nonce = nonce
-        self.signature = nil
+        signature = nil
 
         return self
     }
@@ -152,14 +153,14 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
     public func with(era: Era, blockHash: String) -> Self {
         self.era = era
         self.blockHash = blockHash
-        self.signature = nil
+        signature = nil
 
         return self
     }
 
     public func with(tip: BigUInt) -> Self {
         self.tip = tip
-        self.signature = nil
+        signature = nil
 
         return self
     }
@@ -192,13 +193,19 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
 
         var signatureJson = JSON.null
         var signatureTypeString = KnownType.signature.rawValue
-        
-        // Some networks like Moonbeam/Moonriver have signature as direct byte-array rather than MultiSignature enum
-        // Though they have MultiSignature enum in their metadata, check what signature type is used within extrinsic
+
+        // Some networks like Moonbeam/Moonriver have signature as direct byte-array rather than
+        // MultiSignature enum
+        // Though they have MultiSignature enum in their metadata, check what signature type is used
+        // within extrinsic
         // Otherwise provide default enum based MultiSignature behavior
-        if let extrinsicType = try? metadata.schemaResolver.typeMetadata(for: metadata.extrinsic.type) {
+        if let extrinsicType = try? metadata.schemaResolver
+            .typeMetadata(for: metadata.extrinsic.type)
+        {
             let signatureParam = extrinsicType.params.first { $0.name == "Signature" }
-            if let signatureType = try? metadata.schemaResolver.typeMetadata(for: signatureParam?.type) {
+            if let signatureType = try? metadata.schemaResolver
+                .typeMetadata(for: signatureParam?.type)
+            {
                 switch signatureType.def {
                 case .variant:
                     break
@@ -208,7 +215,7 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
                 }
             }
         }
-        
+
         if signatureJson == .null {
             let signature: MultiSignature
             switch type {
@@ -224,7 +231,7 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
         }
 
         let extra = ExtrinsicSignedExtra(era: era, nonce: nonce ?? 0, tip: tip)
-        self.signature = ExtrinsicSignature(
+        signature = ExtrinsicSignature(
             address: address,
             signature: signatureJson,
             extra: extra,
@@ -239,31 +246,34 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
         metadata: RuntimeMetadata
     ) throws -> Data {
         let call = try prepareExtrinsicCall(for: metadata)
-        
+
         Log.enable(kind: "DynamicScale")
         let extrinsic = Extrinsic(signature: signature, call: call)
 
         try encoder.append(extrinsic, ofType: GenericType.extrinsic.name)
-        
+
         let encoded = try encoder.encode()
-        Log.write("DynamicScale", message: "Extrinsic encoded: \(encoded.toHex(includePrefix: true))")
+        Log.write(
+            "DynamicScale",
+            message: "Extrinsic encoded: \(encoded.toHex(includePrefix: true))"
+        )
         Log.disable(kind: "DynamicScale")
-        
+
         return encoded
     }
 }
 
-struct Log {
+enum Log {
     private static var enabled: [String] = []
-    
+
     static func enable(kind: String) {
         enabled.append(kind)
     }
-    
+
     static func disable(kind: String) {
         enabled.removeAll { $0 == kind }
     }
-    
+
     static func write(_ kind: String, message: String) {
         if enabled.contains(kind) {
             print("[\(kind)] \(message)")

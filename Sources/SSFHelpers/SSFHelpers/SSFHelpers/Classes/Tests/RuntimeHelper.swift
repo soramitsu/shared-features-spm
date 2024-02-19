@@ -22,7 +22,8 @@ final class RuntimeHelper {
     }
 
     static func createTypeRegistry(from name: String, runtimeMetadataName: String) throws
-    -> TypeRegistry {
+        -> TypeRegistry
+    {
         guard let url = Bundle(for: self).url(forResource: name, withExtension: "json") else {
             throw RuntimeHelperError.invalidCatalogBaseName
         }
@@ -44,7 +45,7 @@ final class RuntimeHelper {
         from baseName: String,
         networkName: String,
         runtimeMetadataName: String,
-        usedRuntimePaths: [String : [String]]
+        usedRuntimePaths: [String: [String]]
     ) throws -> TypeRegistryCatalog {
         let runtimeMetadata = try Self.createRuntimeMetadata(runtimeMetadataName)
 
@@ -59,7 +60,7 @@ final class RuntimeHelper {
     static func createTypeRegistryCatalog(
         from baseName: String,
         runtimeMetadataName: String,
-        usedRuntimePaths: [String : [String]]
+        usedRuntimePaths: [String: [String]]
     ) throws -> TypeRegistryCatalog {
         let runtimeMetadata = try Self.createRuntimeMetadata(runtimeMetadataName)
 
@@ -74,13 +75,15 @@ final class RuntimeHelper {
         from baseName: String,
         networkName: String,
         runtimeMetadata: RuntimeMetadata,
-        usedRuntimePaths: [String : [String]]
+        usedRuntimePaths: [String: [String]]
     ) throws -> TypeRegistryCatalog {
         guard let baseUrl = Bundle(for: self).url(forResource: baseName, withExtension: "json") else {
             throw RuntimeHelperError.invalidCatalogBaseName
         }
 
-        guard let networkUrl = Bundle(for: self).url(forResource: networkName, withExtension: "json") else {
+        guard let networkUrl = Bundle(for: self)
+            .url(forResource: networkName, withExtension: "json") else
+        {
             throw RuntimeHelperError.invalidCatalogNetworkName
         }
 
@@ -100,7 +103,7 @@ final class RuntimeHelper {
     static func createTypeRegistryCatalog(
         from baseName: String,
         runtimeMetadata: RuntimeMetadata,
-        usedRuntimePaths: [String : [String]]
+        usedRuntimePaths: [String: [String]]
     ) throws -> TypeRegistryCatalog {
         guard let baseUrl = Bundle(for: self).url(forResource: baseName, withExtension: "json") else {
             throw RuntimeHelperError.invalidCatalogBaseName
@@ -127,23 +130,29 @@ final class RuntimeHelper {
                         RuntimeMetadataV1.FunctionMetadata(
                             name: "B",
                             arguments: [
-                                RuntimeMetadataV1.FunctionArgumentMetadata(name: "arg1", type: "bool"),
-                                RuntimeMetadataV1.FunctionArgumentMetadata(name: "arg2", type: "u8")
+                                RuntimeMetadataV1.FunctionArgumentMetadata(
+                                    name: "arg1",
+                                    type: "bool"
+                                ),
+                                RuntimeMetadataV1.FunctionArgumentMetadata(
+                                    name: "arg2",
+                                    type: "u8"
+                                ),
                             ],
                             documentation: []
-                        )
+                        ),
                     ],
                     events: [
                         RuntimeMetadataV1.EventMetadata(
                             name: "A",
                             arguments: ["bool", "u8"],
                             documentation: []
-                        )
+                        ),
                     ],
                     constants: [],
                     errors: [],
                     index: 1
-                )
+                ),
             ],
             extrinsic: RuntimeMetadataV1.ExtrinsicMetadata(version: 1, signedExtensions: [])
         )

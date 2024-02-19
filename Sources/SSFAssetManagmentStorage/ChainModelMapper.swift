@@ -1,5 +1,5 @@
-import Foundation
 import CoreData
+import Foundation
 import RobinHood
 import SSFModels
 import SSFUtils
@@ -11,7 +11,7 @@ public final class ChainModelMapper {
     public typealias CoreDataEntity = CDChain
 
     public init() {}
-    
+
     private func createAsset(from entity: CDAsset) -> AssetModel? {
         var symbol: String?
         if let entitySymbol = entity.symbol {
@@ -26,11 +26,10 @@ public final class ChainModelMapper {
         } else {
             name = entity.symbol
         }
-        guard
-            let id = entity.id,
-            let symbol = symbol,
-            let name = name
-        else {
+        guard let id = entity.id,
+              let symbol = symbol,
+              let name = name else
+        {
             return nil
         }
 
@@ -40,14 +39,16 @@ public final class ChainModelMapper {
         } else {
             staking = nil
         }
-        let purchaseProviders: [SSFModels.PurchaseProvider]? = entity.purchaseProviders?.compactMap {
-            SSFModels.PurchaseProvider(rawValue: $0)
-        }
+        let purchaseProviders: [SSFModels.PurchaseProvider]? = entity.purchaseProviders?
+            .compactMap {
+                SSFModels.PurchaseProvider(rawValue: $0)
+            }
 
         var priceProvider: PriceProvider?
         if let typeRawValue = entity.priceProvider?.type,
            let type = PriceProviderType(rawValue: typeRawValue),
-           let id = entity.priceProvider?.id {
+           let id = entity.priceProvider?.id
+        {
             let precision = entity.priceProvider?.precision ?? ""
             priceProvider = PriceProvider(type: type, id: id, precision: Int16(precision))
         }
@@ -268,7 +269,12 @@ public final class ChainModelMapper {
         let explorers = createExplorers(from: entity)
 
         if staking != nil || history != nil || crowdloans != nil || explorers != nil {
-            return ChainModel.ExternalApiSet(staking: staking, history: history, crowdloans: crowdloans, explorers: explorers)
+            return ChainModel.ExternalApiSet(
+                staking: staking,
+                history: history,
+                crowdloans: crowdloans,
+                explorers: explorers
+            )
         } else {
             return nil
         }
@@ -280,14 +286,16 @@ public final class ChainModelMapper {
         }
 
         let version = XcmCallFactoryVersion(rawValue: versionRaw)
-        let availableXcmAssets = entity.xcmConfig?.availableAssets?.allObjects as? [CDXcmAvailableAsset] ?? []
+        let availableXcmAssets = entity.xcmConfig?.availableAssets?
+            .allObjects as? [CDXcmAvailableAsset] ?? []
         let assets: [XcmAvailableAsset] = availableXcmAssets.compactMap { entity in
             guard let id = entity.id, let symbol = entity.symbol else {
                 return nil
             }
             return XcmAvailableAsset(id: id, symbol: symbol)
         }
-        let availableXcmAssetDestinations = entity.xcmConfig?.availableDestinations?.allObjects as? [CDXcmAvailableDestination] ?? []
+        let availableXcmAssetDestinations = entity.xcmConfig?.availableDestinations?
+            .allObjects as? [CDXcmAvailableDestination] ?? []
         let destinations: [XcmAvailableDestination] = availableXcmAssetDestinations.compactMap {
             guard let chainId = $0.chainId else {
                 return nil
@@ -323,8 +331,8 @@ public final class ChainModelMapper {
             guard let explorer = $0 as? CDExternalApi,
                   let type = explorer.type,
                   let types = explorer.types as? [String],
-                  let url = explorer.url
-            else {
+                  let url = explorer.url else
+            {
                 return nil
             }
             let externapApiTypes = types.compactMap {

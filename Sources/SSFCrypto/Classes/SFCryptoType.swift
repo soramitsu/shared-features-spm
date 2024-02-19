@@ -1,7 +1,7 @@
 import Foundation
 import SSFModels
 
-public enum SFCryptoType: UInt8, Codable, CaseIterable {
+public enum SFCryptoType: UInt8, Codable, CaseIterable, Equatable {
     case sr25519
     case ed25519
     case ecdsa
@@ -23,6 +23,7 @@ public extension SFCryptoType {
             }
         }
     }
+
     init(_ utilsType: SSFModels.CryptoType) {
         switch utilsType {
         case .sr25519:

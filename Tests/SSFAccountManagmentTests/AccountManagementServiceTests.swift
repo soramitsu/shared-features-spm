@@ -1,15 +1,15 @@
-import XCTest
 import RobinHood
+import SSFAccountManagmentStorage
 import SSFHelpers
 import SSFModels
 import SSFUtils
 import SSFAccountManagmentStorage
 import MocksBasket
+import XCTest
 
 @testable import SSFAccountManagment
 
 final class AccountManagementServiceTests: XCTestCase {
-
     var service: AccountManageble?
     var accountManagementWorker: AccountManagementWorkerProtocolMock?
 
@@ -27,7 +27,7 @@ final class AccountManagementServiceTests: XCTestCase {
             selectedWallet: selectedWallet
         )
     }
-    
+
     override func tearDown() {
         super.tearDown()
         service = nil
@@ -44,17 +44,17 @@ final class AccountManagementServiceTests: XCTestCase {
 
     func testSetCurrentAccount() throws {
         // act
-        service?.setCurrentAccount(account: TestData.account, completionClosure: { [weak self] result in
+        service?.setCurrentAccount(account: TestData.account, completionClosure: { [weak self] _ in
             let currentAccount = self?.service?.getCurrentAccount()
 
             // assert
             XCTAssertEqual(currentAccount, TestData.account)
         })
     }
-    
+
     func testUpdateVisability() throws {
         // arrange
-        service?.setCurrentAccount(account: TestData.account, completionClosure: { [weak self] result in
+        service?.setCurrentAccount(account: TestData.account, completionClosure: { [weak self] _ in
 
             // act
             let chain = TestData.chain
@@ -65,7 +65,10 @@ final class AccountManagementServiceTests: XCTestCase {
             do {
                 try self?.service?.update(visible: true, for: chainAsset, completion: {})
                 DispatchQueue.main.async {
-                    XCTAssertEqual(self?.accountManagementWorker?.saveAccountCompletionCallsCount, 1)
+                    XCTAssertEqual(
+                        self?.accountManagementWorker?.saveAccountCompletionCallsCount,
+                        1
+                    )
                 }
             } catch {
                 XCTFail("UpdateVisability test failed with error - \(error)")
@@ -75,7 +78,7 @@ final class AccountManagementServiceTests: XCTestCase {
 
     func testLogout() throws {
         // act
-        service?.setCurrentAccount(account: TestData.account, completionClosure: { [weak self] result in
+        service?.setCurrentAccount(account: TestData.account, completionClosure: { [weak self] _ in
             Task { [weak self] in
                 try await self?.service?.logout()
                 let currentAccount = self?.service?.getCurrentAccount()
@@ -160,4 +163,3 @@ private extension AccountManagementServiceTests {
         )
     }
 }
-

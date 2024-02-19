@@ -1,8 +1,8 @@
 import Foundation
-import SoraKeystore
-import SSFUtils
 import IrohaCrypto
+import SoraKeystore
 import SSFModels
+import SSFUtils
 
 protocol KeystoreExportWrapperProtocol {
     func export(
@@ -49,7 +49,9 @@ final class KeystoreExportWrapper: KeystoreExportWrapperProtocol {
 
         var builder = KeystoreBuilder().with(name: chainAccount.name)
 
-        if let genesisHash = genesisHash, let genesisHashData = try? Data(hexStringSSF: genesisHash) {
+        if let genesisHash = genesisHash,
+           let genesisHashData = try? Data(hexStringSSF: genesisHash)
+        {
             builder = builder.with(genesisHash: genesisHashData.toHex(includePrefix: true))
         }
 

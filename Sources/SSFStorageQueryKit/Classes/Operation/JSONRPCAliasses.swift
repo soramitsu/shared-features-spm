@@ -1,7 +1,7 @@
 import Foundation
 import RobinHood
-import SSFUtils
 import SSFModels
+import SSFUtils
 
 public typealias RuntimeVersionUpdate = JSONRPCSubscriptionUpdate<RuntimeVersion>
 public typealias StorageSubscriptionUpdate = JSONRPCSubscriptionUpdate<StorageUpdate>

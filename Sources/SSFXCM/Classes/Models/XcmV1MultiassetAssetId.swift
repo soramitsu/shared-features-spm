@@ -22,9 +22,9 @@ enum XcmV1MultiassetAssetId: Codable {
 extension XcmV1MultiassetAssetId: Equatable {
     static func == (lhs: XcmV1MultiassetAssetId, rhs: XcmV1MultiassetAssetId) -> Bool {
         switch (lhs, rhs) {
-        case (let .concrete(lhsValue), let .concrete(rhsValue)):
+        case let (.concrete(lhsValue), .concrete(rhsValue)):
             return lhsValue == rhsValue
-        case (let .abstract(lhsValue), let .abstract(rhsValue)):
+        case let (.abstract(lhsValue), .abstract(rhsValue)):
             return lhsValue == rhsValue
         default:
             return false

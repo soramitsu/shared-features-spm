@@ -28,7 +28,7 @@ public extension TableResolver {
             "<inherentofflinereport as inherentofflinereport>::inherent": "InherentOfflineReport",
             "<balance as hascompact>::type": "Compact<Balance>",
             "<blocknumber as hascompact>::type": "Compact<BlockNumber>",
-            "<moment as hascompact>::type": "Compact<Moment>"
+            "<moment as hascompact>::type": "Compact<Moment>",
         ]
 
         return TableResolver(mapping: mapping)

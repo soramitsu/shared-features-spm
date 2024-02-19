@@ -1,10 +1,10 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
-import Foundation
 import CoreData
+import Foundation
 
 /**
  *  Enum is defining possible strategies to handle situations
@@ -35,7 +35,7 @@ public struct CoreDataPersistentSettings {
 
     /// Flag that states whether to allow database backup to iCloud.
     public var excludeFromiCloudBackup: Bool
-    
+
     /// Store Options and Migration Options
     public var options: [AnyHashable: Any]?
 
@@ -54,11 +54,13 @@ public struct CoreDataPersistentSettings {
      *    For key definitions, see Store Options and Migration Options. This value may be nil.
      */
 
-    public init(databaseDirectory: URL,
-                databaseName: String,
-                incompatibleModelStrategy: IncompatibleModelHandlingStrategy = .ignore,
-                excludeFromiCloudBackup: Bool = true,
-                options: [AnyHashable: Any]? = nil) {
+    public init(
+        databaseDirectory: URL,
+        databaseName: String,
+        incompatibleModelStrategy: IncompatibleModelHandlingStrategy = .ignore,
+        excludeFromiCloudBackup: Bool = true,
+        options: [AnyHashable: Any]? = nil
+    ) {
         self.databaseDirectory = databaseDirectory
         self.databaseName = databaseName
         self.incompatibleModelStrategy = incompatibleModelStrategy

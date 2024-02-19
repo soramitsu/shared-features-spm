@@ -1,9 +1,10 @@
-import Foundation
-import SSFUtils
-import SSFModels
 import BigInt
+import Foundation
+import SSFModels
 import SSFNetwork
+import SSFUtils
 
+// sourcery: AutoMockable
 protocol XcmCallFactoryProtocol {
     func reserveNativeToken(
         version: XcmCallFactoryVersion,
@@ -14,7 +15,7 @@ protocol XcmCallFactoryProtocol {
         weightLimit: BigUInt?,
         path: XcmCallPath
     ) -> RuntimeCall<ReserveTransferAssetsCall>
-    
+
     func xTokensTransfer(
         version: XcmCallFactoryVersion,
         accountId: AccountId?,
@@ -24,7 +25,7 @@ protocol XcmCallFactoryProtocol {
         weightLimit: BigUInt,
         path: XcmCallPath
     ) -> RuntimeCall<XTokensTransferCall>
-    
+
     func xTokensTransferMultiasset(
         version: XcmCallFactoryVersion,
         assetSymbol: String,
@@ -36,7 +37,7 @@ protocol XcmCallFactoryProtocol {
         path: XcmCallPath,
         destWeightIsPrimitive: Bool?
     ) async throws -> RuntimeCall<XTokensTransferMultiassetCall>
-    
+
     func polkadotXcmLimitedReserveTransferAssets(
         fromChainModel: ChainModel,
         version: XcmCallFactoryVersion,
@@ -47,7 +48,7 @@ protocol XcmCallFactoryProtocol {
         weightLimit: BigUInt,
         path: XcmCallPath
     ) async throws -> RuntimeCall<ReserveTransferAssetsCall>
-    
+
     func bridgeProxyBurn(
         fromChainModel: ChainModel,
         currencyId: String,
@@ -59,20 +60,23 @@ protocol XcmCallFactoryProtocol {
 }
 
 final class XcmCallFactory: XcmCallFactoryProtocol {
-    
-    private var assetMultilocationFetcher: XcmAssetMultilocationFetching = {
-        XcmAssetMultilocationFetcher(
-            sourceUrl: XcmConfig.shared.tokenLocationsSourceUrl,
-            dataFetchFactory: NetworkOperationFactory(),
-            retryStrategy: ExponentialReconnection(),
-            operationQueue: OperationQueue()
-        )
-    }()
-    
+    private let assetMultilocationFetcher: XcmAssetMultilocationFetching
+
+    init(assetMultilocationFetcher: XcmAssetMultilocationFetching? = nil) {
+        self.assetMultilocationFetcher = assetMultilocationFetcher ??
+            XcmAssetMultilocationFetcher(
+                sourceUrl: XcmConfig.shared.tokenLocationsSourceUrl,
+                dataFetchFactory: NetworkOperationFactory(),
+                retryStrategy: ExponentialReconnection(),
+                operationQueue: OperationQueue()
+            )
+    }
+
     // MARK: - Public methods
+
     func reserveNativeToken(
         version: XcmCallFactoryVersion,
-        fromChainModel: ChainModel,
+        fromChainModel _: ChainModel,
         destChainModel: ChainModel,
         destAccountId: AccountId,
         amount: BigUInt,
@@ -96,7 +100,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             accountId: destAccountId,
             parents: 0
         )
-        
+
         let assetsParents: UInt8 = destChainModel.isRelaychain ? 1 : 0
         let assets = createVersionedMultiAssets(
             version: version,
@@ -107,9 +111,9 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             parents: assetsParents,
             generalKey: nil
         )
-        
+
         let weightLimit = createWeight(version: version, weightLimit: weightLimit)
-        
+
         let args = ReserveTransferAssetsCall(
             destination: destination,
             beneficiary: beneficiary,
@@ -124,7 +128,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             args: args
         )
     }
-    
+
     func xTokensTransfer(
         version: XcmCallFactoryVersion,
         accountId: AccountId?,
@@ -143,23 +147,23 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             accountId: accountId,
             parents: destParents
         )
-        
+
         let weightLimit = createWeight(version: version, weightLimit: weightLimit)
-        
+
         let args = XTokensTransferCall(
             currencyId: currencyId,
             amount: amount,
             dest: destination,
             destWeightLimit: weightLimit
         )
-        
+
         return RuntimeCall(
             moduleName: path.moduleName,
             callName: path.itemName,
             args: args
         )
     }
-    
+
     func xTokensTransferMultiasset(
         version: XcmCallFactoryVersion,
         assetSymbol: String,
@@ -171,20 +175,22 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         path: XcmCallPath,
         destWeightIsPrimitive: Bool?
     ) async throws -> RuntimeCall<XTokensTransferMultiassetCall> {
-        guard let originAssetId = fromChainModel.xcm?.availableAssets.first(where: { $0.symbol.lowercased() == assetSymbol.lowercased() })?.id else {
+        guard let originAssetId = fromChainModel.xcm?.availableAssets
+            .first(where: { $0.symbol.lowercased() == assetSymbol.lowercased() })?.id else
+        {
             throw XcmError.noAvailableXcmAsset(symbol: assetSymbol)
         }
         let multilocation = try await assetMultilocationFetcher.versionedMultilocation(
             originAssetId: originAssetId,
             destChainId: destChainModel.parentId ?? destChainModel.chainId
         )
-        
+
         let remoteAsset = try createRemoteVersionedMultiasset(
             with: multilocation,
             version: version,
             amount: amount
         )
-        
+
         let destParachainId = UInt32(destChainModel.paraId ?? "")
         let destination = createVersionedMultiLocation(
             version: version,
@@ -193,12 +199,12 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             accountId: accountId,
             parents: 1
         )
-        
+
         let destWeightLimit = createWeight(
             version: version,
             weightLimit: weightLimit
         )
-        
+
         let args = XTokensTransferMultiassetCall(
             asset: remoteAsset,
             dest: destination,
@@ -206,7 +212,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             destWeightIsPrimitive: destWeightIsPrimitive,
             destWeight: weightLimit
         )
-        
+
         let runtimeCall = RuntimeCall(
             moduleName: path.moduleName,
             callName: path.itemName,
@@ -214,7 +220,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         )
         return runtimeCall
     }
-    
+
     func polkadotXcmLimitedReserveTransferAssets(
         fromChainModel: ChainModel,
         version: XcmCallFactoryVersion,
@@ -225,20 +231,22 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         weightLimit: BigUInt,
         path: XcmCallPath
     ) async throws -> RuntimeCall<ReserveTransferAssetsCall> {
-        guard let originAssetId = fromChainModel.xcm?.availableAssets.first(where: { $0.symbol.lowercased() == assetSymbol.lowercased() })?.id else {
+        guard let originAssetId = fromChainModel.xcm?.availableAssets
+            .first(where: { $0.symbol.lowercased() == assetSymbol.lowercased() })?.id else
+        {
             throw XcmError.noAvailableXcmAsset(symbol: assetSymbol)
         }
         let multilocation = try await assetMultilocationFetcher.versionedMultilocation(
             originAssetId: originAssetId,
             destChainId: destChainModel.parentId ?? destChainModel.chainId
         )
-        
-        let remoteAsset = try createRemoteVersionedMultiassets(
+
+        let remoteAsset = createRemoteVersionedMultiassets(
             with: multilocation,
             version: version,
             amount: amount
         )
-        
+
         let destParachainId = UInt32(destChainModel.paraId ?? "")
         let destination = createVersionedMultiLocation(
             version: version,
@@ -247,7 +255,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             accountId: nil,
             parents: 1
         )
-        
+
         let beneficiary = createVersionedMultiLocation(
             version: version,
             chainModel: destChainModel,
@@ -255,12 +263,12 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             accountId: accountId,
             parents: 0
         )
-        
+
         let destWeightLimit = createWeight(
             version: version,
             weightLimit: weightLimit
         )
-        
+
         let args = ReserveTransferAssetsCall(
             destination: destination,
             beneficiary: beneficiary,
@@ -268,16 +276,16 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             weightLimit: destWeightLimit,
             feeAssetItem: 0
         )
-        
+
         return RuntimeCall(
             moduleName: path.moduleName,
             callName: path.itemName,
             args: args
         )
     }
-    
+
     func bridgeProxyBurn(
-        fromChainModel: ChainModel,
+        fromChainModel _: ChainModel,
         currencyId: String,
         destChainModel: ChainModel,
         accountId: AccountId?,
@@ -286,7 +294,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
     ) -> RuntimeCall<BridgeProxyBurnCall> {
         let networkId = BridgeTypesGenericNetworkId(from: destChainModel)
         let assetId = SoraAssetId(wrappedValue: currencyId)
-        
+
         let destParachainId = UInt32(destChainModel.paraId ?? "")
         let destParents: UInt8 = destChainModel.isRelaychain ? 1 : 0
         let destination = createVersionedMultiLocation(
@@ -297,23 +305,25 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             parents: destParents
         )
         let recipient = BridgeTypesGenericAccount.parachain(destination)
-        
+
         let args = BridgeProxyBurnCall(
             networkId: networkId,
             assetId: assetId,
             recipient: recipient,
             amount: amount
         )
-        
+
         return RuntimeCall(
             moduleName: path.moduleName,
             callName: path.itemName,
             args: args
         )
     }
-    
+
     // MARK: - Private methods
+
     // MARK: - XcmVersionedMultiLocation
+
     private func createVersionedMultiLocation(
         version: XcmCallFactoryVersion,
         chainModel: ChainModel,
@@ -321,7 +331,6 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         accountId: AccountId?,
         parents: UInt8
     ) -> XcmVersionedMultiLocation {
-        
         let multiLocation = createMultiLocation(
             version: version,
             chainModel: chainModel,
@@ -330,7 +339,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             parents: parents,
             generalKey: nil
         )
-        
+
         let versionedMultiLocation: XcmVersionedMultiLocation
         switch version {
         case .V1:
@@ -338,10 +347,10 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         case .V3:
             versionedMultiLocation = .V3(multiLocation)
         }
-        
+
         return versionedMultiLocation
     }
-    
+
     private func createMultiLocation(
         version: XcmCallFactoryVersion,
         chainModel: ChainModel,
@@ -363,7 +372,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         )
         return multiLocation
     }
-    
+
     private func createMultilocationJunctions(
         version: XcmCallFactoryVersion,
         chainModel: ChainModel,
@@ -380,7 +389,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         )
         return XcmV1MultilocationJunctions(items: items)
     }
-    
+
     private func createJunctions(
         version: XcmCallFactoryVersion,
         chainModel: ChainModel,
@@ -394,23 +403,23 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             isEthereumBased: chainModel.isEthereumBased,
             chainModel: chainModel
         )
-        
+
         let parachainJunction = parachainId.map {
             XcmJunction.parachain($0)
         }
-        
+
         let generalKeyJunction = generalKey.map {
             XcmJunction.generalKey($0)
         }
-        
+
         let items: [XcmJunction] = [
             parachainJunction,
             accountIdJunction,
-            generalKeyJunction
+            generalKeyJunction,
         ].compactMap { $0 }
         return items
     }
-    
+
     private func createAccountJunction(
         version: XcmCallFactoryVersion,
         accountId: AccountId?,
@@ -431,7 +440,8 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             return accountIdJunction
         case .V3:
             let accountIdJunction = accountId.map {
-                let network = XcmJunctionNetworkId.from(ecosystem: ChainEcosystem.defineEcosystem(chain: chainModel))
+                let network = XcmJunctionNetworkId
+                    .from(ecosystem: ChainEcosystem.defineEcosystem(chain: chainModel))
                 if isEthereumBased {
                     let accountIdValue = AccountId20Value(network: network, key: $0)
                     return XcmJunction.accountKey20(accountIdValue)
@@ -443,8 +453,9 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             return accountIdJunction
         }
     }
-    
+
     // MARK: - XcmVersionedMultiAssets
+
     private func createVersionedMultiAssets(
         version: XcmCallFactoryVersion,
         chainModel: ChainModel,
@@ -454,7 +465,6 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         parents: UInt8,
         generalKey: Data?
     ) -> XcmVersionedMultiAssets {
-        
         let assets = createMultiAssets(
             version: version,
             chainModel: chainModel,
@@ -464,7 +474,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             parents: parents,
             generalKey: generalKey
         )
-        
+
         switch version {
         case .V1:
             return XcmVersionedMultiAssets.V1(assets)
@@ -472,7 +482,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             return XcmVersionedMultiAssets.V3(assets)
         }
     }
-    
+
     private func createMultiAssets(
         version: XcmCallFactoryVersion,
         chainModel: ChainModel,
@@ -482,7 +492,6 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         parents: UInt8,
         generalKey: Data?
     ) -> [XcmV1MultiAsset] {
-        
         let multilocation = createMultiLocation(
             version: version,
             chainModel: chainModel,
@@ -491,11 +500,12 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             parents: parents,
             generalKey: generalKey
         )
-        
+
         return [XcmV1MultiAsset(multilocation: multilocation, amount: amount)]
     }
-    
+
     // MARK: - XcmVersionedMultiAsset
+
     private func createVersionedMultiAsset(
         version: XcmCallFactoryVersion,
         chainModel: ChainModel,
@@ -505,7 +515,6 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         parents: UInt8,
         generalKey: Data?
     ) -> XcmVersionedMultiAsset {
-        
         let asset = createMultiAsset(
             version: version,
             chainModel: chainModel,
@@ -515,7 +524,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             parents: parents,
             generalKey: generalKey
         )
-        
+
         switch version {
         case .V1:
             return XcmVersionedMultiAsset.V1(asset)
@@ -523,7 +532,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             return XcmVersionedMultiAsset.V3(asset)
         }
     }
-    
+
     private func createMultiAsset(
         version: XcmCallFactoryVersion,
         chainModel: ChainModel,
@@ -533,7 +542,6 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         parents: UInt8,
         generalKey: Data?
     ) -> XcmV1MultiAsset {
-        
         let multilocation = createMultiLocation(
             version: version,
             chainModel: chainModel,
@@ -542,30 +550,33 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             parents: parents,
             generalKey: generalKey
         )
-        
+
         return XcmV1MultiAsset(multilocation: multilocation, amount: amount)
     }
-    
+
     // MARK: - from remote
-    
+
     private func createRemoteVersionedMultiasset(
         with remote: AssetMultilocation,
         version: XcmCallFactoryVersion,
         amount: BigUInt
     ) throws -> XcmVersionedMultiAsset {
         let interior: XcmV1MultilocationJunctions = .init(items: remote.interiors)
-        let parents: UInt8 = (interior.items.isEmpty || interior.items.contains(where: { $0.isParachain() })) ? 1 : 0
-        
+        let parents: UInt8 = (
+            interior.items.isEmpty || interior.items
+                .contains(where: { $0.isParachain() })
+        ) ? 1 : 0
+
         let multilocation = XcmV1MultiLocation(
             parents: parents,
             interior: interior
         )
-        
+
         let asset = XcmV1MultiAsset(
             multilocation: multilocation,
             amount: amount
         )
-        
+
         switch version {
         case .V1:
             return XcmVersionedMultiAsset.V1(asset)
@@ -573,7 +584,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             return XcmVersionedMultiAsset.V3(asset)
         }
     }
-    
+
     private func generateV3Junctions(from junctions: [XcmJunction]) -> [XcmJunction] {
         junctions.map {
             guard case let .generalKey(key) = $0 else {
@@ -590,25 +601,28 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             return .generalKeyV3(keyV3)
         }
     }
-    
+
     private func createRemoteVersionedMultiassets(
         with remote: AssetMultilocation,
         version: XcmCallFactoryVersion,
         amount: BigUInt
-    ) throws -> XcmVersionedMultiAssets {
+    ) -> XcmVersionedMultiAssets {
         let interior: XcmV1MultilocationJunctions = .init(items: remote.interiors)
-        let parents: UInt8 = (interior.items.isEmpty || interior.items.contains(where: { $0.isParachain() })) ? 1 : 0
-        
+        let parents: UInt8 = (
+            interior.items.isEmpty || interior.items
+                .contains(where: { $0.isParachain() })
+        ) ? 1 : 0
+
         let multilocation = XcmV1MultiLocation(
             parents: parents,
             interior: interior
         )
-        
+
         let asset = XcmV1MultiAsset(
             multilocation: multilocation,
             amount: amount
         )
-        
+
         switch version {
         case .V1:
             return XcmVersionedMultiAssets.V1([asset])
@@ -616,9 +630,9 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             return XcmVersionedMultiAssets.V3([asset])
         }
     }
-    
+
     // MARK: - Weight
-    
+
     private func createWeight(
         version: XcmCallFactoryVersion,
         weightLimit: BigUInt?

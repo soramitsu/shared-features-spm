@@ -1,7 +1,7 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 
@@ -28,9 +28,11 @@ public struct RepositoryObserver<T> {
      *    - updateBlock: Closure to deliver changes to observers. Closure is executed in ```queue```.
      */
 
-    public init(observer: AnyObject,
-                queue: DispatchQueue,
-                updateBlock: @escaping ([DataProviderChange<T>]) -> Void) {
+    public init(
+        observer: AnyObject,
+        queue: DispatchQueue,
+        updateBlock: @escaping ([DataProviderChange<T>]) -> Void
+    ) {
         self.observer = observer
         self.queue = queue
         self.updateBlock = updateBlock

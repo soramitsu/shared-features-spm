@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 
 // MARK: - Protocol
 
@@ -11,8 +11,8 @@ public protocol RuntimeFunctionMetadata {
 
 // MARK: - V1
 
-extension RuntimeMetadataV1 {
-    public struct FunctionMetadata: RuntimeFunctionMetadata, ScaleCodable {
+public extension RuntimeMetadataV1 {
+    struct FunctionMetadata: RuntimeFunctionMetadata, ScaleCodable {
         public let name: String
         private let _arguments: [FunctionArgumentMetadata]
         public var arguments: [RuntimeFunctionArgumentMetadata] { _arguments }
@@ -20,7 +20,7 @@ extension RuntimeMetadataV1 {
 
         public init(name: String, arguments: [FunctionArgumentMetadata], documentation: [String]) {
             self.name = name
-            self._arguments = arguments
+            _arguments = arguments
             self.documentation = documentation
         }
 
@@ -40,23 +40,23 @@ extension RuntimeMetadataV1 {
 
 // MARK: - V14
 
-extension RuntimeMetadataV14 {
-    public struct FunctionMetadata: RuntimeFunctionMetadata {
+public extension RuntimeMetadataV14 {
+    struct FunctionMetadata: RuntimeFunctionMetadata {
         public let name: String
         private let _arguments: [FunctionArgumentMetadata]
         public var arguments: [RuntimeFunctionArgumentMetadata] { _arguments }
         public let documentation: [String]
 
         public init(item: TypeMetadata.Def.Variant.Item, schemaResolver: Schema.Resolver) throws {
-            self.name = item.name
-            self._arguments = try item.fields.map {
+            name = item.name
+            _arguments = try item.fields.map {
                 guard let name = $0.name else {
                     throw Schema.Resolver.Error.wrongData
                 }
                 let typeName = try schemaResolver.typeName(for: $0.type)
                 return FunctionArgumentMetadata(name: name, type: typeName)
             }
-            self.documentation = item.docs
+            documentation = item.docs
         }
     }
 }

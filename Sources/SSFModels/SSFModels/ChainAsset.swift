@@ -6,7 +6,7 @@ public typealias ChainAssetKey = String
 public struct ChainAsset: Equatable, Hashable {
     public let chain: ChainModel
     public let asset: AssetModel
-    
+
     public init(chain: ChainModel, asset: AssetModel) {
         self.chain = chain
         self.asset = asset
@@ -104,12 +104,14 @@ public struct ChainAsset: Equatable, Hashable {
         let accountIdHex = (accountId as NSData).toHexString()
         return [asset.id, chain.chainId, accountIdHex].joined(separator: ":")
     }
-    
+
     public func defineEcosystem() -> ChainEcosystem {
         if chain.options?.contains(.ethereum) == true {
             return .ethereum
         }
-        if chain.parentId == Chain.polkadot.genesisHash || chain.chainId == Chain.polkadot.genesisHash {
+        if chain.parentId == Chain.polkadot.genesisHash || chain.chainId == Chain.polkadot
+            .genesisHash
+        {
             return .polkadot
         }
         return .kusama
@@ -119,7 +121,7 @@ public struct ChainAsset: Equatable, Hashable {
 public struct ChainAssetId: Equatable, Codable, Hashable {
     public let chainId: ChainModel.Id
     public let assetId: AssetModel.Id
-    
+
     public init(chainId: ChainModel.Id, assetId: AssetModel.Id) {
         self.chainId = chainId
         self.assetId = assetId
@@ -134,11 +136,10 @@ public extension ChainAsset {
     var rawStakingType: RawStakingType? {
         chain.assets.first(where: { $0.id == asset.id })?.staking
     }
-    
+
     var stakingType: StakingType? {
         StakingType(chainAsset: self)
     }
-
 
     var debugName: String {
         "\(chain.name)-\(asset.name)"

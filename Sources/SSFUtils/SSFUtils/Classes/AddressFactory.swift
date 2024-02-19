@@ -5,11 +5,17 @@ import SSFModels
 public enum AddressFactory {
     private static let substrateFactory = SS58AddressFactory()
 
-    public static func address(for accountId: AccountId, chainFormat: SFChainFormat) throws -> AccountAddress {
+    public static func address(
+        for accountId: AccountId,
+        chainFormat: SFChainFormat
+    ) throws -> AccountAddress {
         try accountId.toAddress(using: chainFormat)
     }
 
-    public static func accountId(from address: AccountAddress, chainFormat: SFChainFormat) throws -> AccountId {
+    public static func accountId(
+        from address: AccountAddress,
+        chainFormat: SFChainFormat
+    ) throws -> AccountId {
         try address.toAccountId(using: chainFormat)
     }
 

@@ -21,15 +21,13 @@ public struct AssetModel: Equatable, Codable, Hashable {
     public let type: SubstrateAssetType?
     public let ethereumType: EthereumAssetType?
     public let priceProvider: PriceProvider?
-    
+
     public let coingeckoPriceId: PriceId?
     public var priceId: PriceId? {
-        get {
-            if priceProvider?.type == .chainlink {
-                return priceProvider?.id
-            } else {
-                return coingeckoPriceId
-            }
+        if priceProvider?.type == .chainlink {
+            return priceProvider?.id
+        } else {
+            return coingeckoPriceId
         }
     }
 
@@ -42,20 +40,20 @@ public struct AssetModel: Equatable, Codable, Hashable {
         name: String,
         symbol: String,
         precision: UInt16,
-        icon: URL?,
-        price: Decimal?,
-        fiatDayChange: Decimal?,
-        currencyId: String?,
-        existentialDeposit: String?,
-        color: String?,
+        icon: URL? = nil,
+        price: Decimal? = nil,
+        fiatDayChange: Decimal? = nil,
+        currencyId: String? = nil,
+        existentialDeposit: String? = nil,
+        color: String? = nil,
         isUtility: Bool,
         isNative: Bool,
-        staking: RawStakingType?,
-        purchaseProviders: [PurchaseProvider]?,
-        type: SubstrateAssetType?,
-        ethereumType: EthereumAssetType?,
-        priceProvider: PriceProvider?,
-        coingeckoPriceId: PriceId?
+        staking: RawStakingType? = nil,
+        purchaseProviders: [PurchaseProvider]? = nil,
+        type: SubstrateAssetType? = nil,
+        ethereumType: EthereumAssetType? = nil,
+        priceProvider: PriceProvider? = nil,
+        coingeckoPriceId: PriceId? = nil
     ) {
         self.id = id
         self.symbol = symbol
@@ -91,7 +89,10 @@ public struct AssetModel: Equatable, Codable, Hashable {
         isUtility = (try? container.decode(Bool?.self, forKey: .isUtility)) ?? false
         isNative = (try? container.decode(Bool?.self, forKey: .isNative)) ?? false
         staking = try? container.decode(RawStakingType.self, forKey: .staking)
-        purchaseProviders = try? container.decode([PurchaseProvider]?.self, forKey: .purchaseProviders)
+        purchaseProviders = try? container.decode(
+            [PurchaseProvider]?.self,
+            forKey: .purchaseProviders
+        )
         type = try? container.decode(SubstrateAssetType?.self, forKey: .type)
         ethereumType = try? container.decode(EthereumAssetType?.self, forKey: .ethereumType)
 
@@ -101,8 +102,8 @@ public struct AssetModel: Equatable, Codable, Hashable {
         price = nil
         fiatDayChange = nil
     }
-    
-    public func encode(to encoder: Encoder) throws {}
+
+    public func encode(to _: Encoder) throws {}
 
     public func replacingPrice(_ priceData: PriceData) -> AssetModel {
         AssetModel(
@@ -142,9 +143,9 @@ public struct AssetModel: Equatable, Codable, Hashable {
             lhs.purchaseProviders == rhs.purchaseProviders &&
             lhs.type == rhs.type &&
             lhs.ethereumType == rhs.ethereumType &&
-        lhs.priceProvider == rhs.priceProvider
+            lhs.priceProvider == rhs.priceProvider
     }
-    
+
     public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }

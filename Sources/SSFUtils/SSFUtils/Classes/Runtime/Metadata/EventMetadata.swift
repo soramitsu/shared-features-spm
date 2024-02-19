@@ -10,8 +10,8 @@ public protocol RuntimeEventMetadata {
 
 // MARK: - V1
 
-extension RuntimeMetadataV1 {
-    public struct EventMetadata: RuntimeEventMetadata {
+public extension RuntimeMetadataV1 {
+    struct EventMetadata: RuntimeEventMetadata {
         public let name: String
         public let arguments: [String]
         public let documentation: [String]
@@ -40,16 +40,16 @@ extension RuntimeMetadataV1.EventMetadata: ScaleCodable {
 
 // MARK: - V14
 
-extension RuntimeMetadataV14 {
-    public struct EventMetadata: RuntimeEventMetadata {
+public extension RuntimeMetadataV14 {
+    struct EventMetadata: RuntimeEventMetadata {
         public let name: String
         public let arguments: [String]
         public let documentation: [String]
 
         public init(item: TypeMetadata.Def.Variant.Item, schemaResolver: Schema.Resolver) throws {
-            self.name = item.name
-            self.arguments = try item.fields.map { try schemaResolver.typeName(for: $0.type) }
-            self.documentation = item.docs
+            name = item.name
+            arguments = try item.fields.map { try schemaResolver.typeName(for: $0.type) }
+            documentation = item.docs
         }
     }
 }

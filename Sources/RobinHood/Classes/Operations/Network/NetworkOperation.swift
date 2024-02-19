@@ -1,7 +1,7 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 
@@ -16,13 +16,15 @@ import Foundation
 
 public final class NetworkOperation<ResultType>: BaseOperation<ResultType> {
     /// Network session to create intenal network data task. By default shared session is used.
-    public lazy var networkSession: URLSession = URLSession.shared
+    public lazy var networkSession: URLSession = .shared
 
     /// Network indicator manager to maintain network indicator display.
     /// By default ```NetworkIndicatorManager.shared```.
-    public lazy var networkIndicatorManager: NetworkIndicatorManagerProtocol = NetworkIndicatorManager.shared
+    public lazy var networkIndicatorManager: NetworkIndicatorManagerProtocol =
+        NetworkIndicatorManager.shared
 
-    /// Modifies created request. Pass this object modify requests of the application in a common way.
+    /// Modifies created request. Pass this object modify requests of the application in a common
+    /// way.
     /// For example, provide additional fields in the header or include signature.
     /// Otherwise, consider to create specific custom request in ```NetworkRequestFactoryProtocol```
     /// implementation.
@@ -45,7 +47,10 @@ public final class NetworkOperation<ResultType>: BaseOperation<ResultType> {
      *    - resultFactory: Factory to process response.
      */
 
-    public init(requestFactory: NetworkRequestFactoryProtocol, resultFactory: AnyNetworkResultFactory<ResultType>) {
+    public init(
+        requestFactory: NetworkRequestFactoryProtocol,
+        resultFactory: AnyNetworkResultFactory<ResultType>
+    ) {
         self.requestFactory = requestFactory
         self.resultFactory = resultFactory
 
@@ -86,7 +91,7 @@ public final class NetworkOperation<ResultType>: BaseOperation<ResultType> {
                 networkIndicatorManager.decrement()
             }
 
-            let dataTask = networkSession.dataTask(with: request) { (data, response, error) in
+            let dataTask = networkSession.dataTask(with: request) { data, response, error in
 
                 receivedData = data
                 receivedResponse = response
@@ -104,8 +109,11 @@ public final class NetworkOperation<ResultType>: BaseOperation<ResultType> {
                 return
             }
 
-            result = resultFactory.createResult(data: receivedData,
-                                                response: receivedResponse, error: receivedError)
+            result = resultFactory.createResult(
+                data: receivedData,
+                response: receivedResponse,
+                error: receivedError
+            )
 
         } catch {
             result = .failure(error)

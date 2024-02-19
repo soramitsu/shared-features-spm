@@ -1,7 +1,7 @@
 import Foundation
-import SSFUtils
 import SSFChainConnection
 import SSFModels
+import SSFUtils
 
 public enum ConnectionPoolError: Error {
     case missingConnection
@@ -19,7 +19,7 @@ protocol ConnectionPoolDelegate: AnyObject {
 public final class ConnectionPool: ConnectionPoolProtocol {
     private let mutex = NSLock()
     private var autoBalancesByChainIds: [ChainModel.Id: ChainConnectionProtocol] = [:]
-    
+
     public init() {}
 
     public func setupConnection(for chain: ChainModel) throws -> ChainConnection {
@@ -28,7 +28,7 @@ public final class ConnectionPool: ConnectionPoolProtocol {
         defer {
             mutex.unlock()
         }
-        
+
         if let connection = try? getConnection(for: chain.chainId) {
             return connection
         }
@@ -53,7 +53,7 @@ public final class ConnectionPool: ConnectionPoolProtocol {
         }
         return try autoBalance.connection()
     }
-    
+
     private func clearUnusedConnections() {
         autoBalancesByChainIds = autoBalancesByChainIds.filter { $0.value.isActive }
     }

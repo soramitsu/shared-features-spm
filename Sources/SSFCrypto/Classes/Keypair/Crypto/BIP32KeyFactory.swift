@@ -1,6 +1,6 @@
+import BigInt
 import CommonCrypto
 import IrohaCrypto
-import BigInt
 
 public enum BIP32KeyFactoryError: Error {
     case invalidChildKey
@@ -8,7 +8,8 @@ public enum BIP32KeyFactoryError: Error {
 
 protocol BIP32KeyFactoryProtocol {
     func deriveFromSeed(_ seed: Data) throws -> BIP32ExtendedKeypair
-    func createKeypairFrom(_ parentKeypair: BIP32ExtendedKeypair, chaincode: Chaincode) throws -> BIP32ExtendedKeypair
+    func createKeypairFrom(_ parentKeypair: BIP32ExtendedKeypair, chaincode: Chaincode) throws
+        -> BIP32ExtendedKeypair
 }
 
 public struct BIP32KeyFactory {
@@ -98,7 +99,7 @@ extension BIP32KeyFactory: BIP32KeyFactoryProtocol {
             throw BIP32KeyFactoryError.invalidChildKey
         }
 
-        var privateKeyData  = privateKeyInt.serialize()
+        var privateKeyData = privateKeyInt.serialize()
 
         let keyLength = SECPrivateKey.length()
 

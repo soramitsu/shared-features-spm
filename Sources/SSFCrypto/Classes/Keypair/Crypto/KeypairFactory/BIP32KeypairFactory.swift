@@ -5,7 +5,7 @@ public struct BIP32KeypairFactory: KeypairFactoryProtocol {
     private let internalFactory = BIP32KeyFactory()
 
     public init() {}
-    
+
     public func createKeypairFromSeed(
         _ seed: Data,
         chaincodeList: [Chaincode]
@@ -22,9 +22,10 @@ public struct BIP32KeypairFactory: KeypairFactoryProtocol {
         _ masterKeypair: BIP32ExtendedKeypair,
         chainIndexList: [Chaincode]
     ) throws -> IRCryptoKeypairProtocol {
-        let childExtendedKeypair = try chainIndexList.reduce(masterKeypair) { (parentKeypair, chainIndex) in
-            try internalFactory.createKeypairFrom(parentKeypair, chaincode: chainIndex)
-        }
+        let childExtendedKeypair = try chainIndexList
+            .reduce(masterKeypair) { parentKeypair, chainIndex in
+                try internalFactory.createKeypairFrom(parentKeypair, chaincode: chainIndex)
+            }
 
         return childExtendedKeypair.keypair
     }

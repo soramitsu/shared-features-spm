@@ -1,8 +1,8 @@
 import Foundation
-import SSFUtils
 import RobinHood
-import SSFNetwork
 import SSFModels
+import SSFNetwork
+import SSFUtils
 
 public enum ChainsTypesSyncError: Error {
     case missingChainId
@@ -16,7 +16,6 @@ public protocol ChainsTypesSyncServiceProtocol {
 }
 
 public final class ChainsTypesSyncService {
-
     private let url: URL?
     private let dataOperationFactory: NetworkOperationFactoryProtocol
     private let retryStrategy: ReconnectionStrategyProtocol
@@ -27,10 +26,8 @@ public final class ChainsTypesSyncService {
 
     private let mutex = NSLock()
 
-    private lazy var scheduler: Scheduler = {
-        Scheduler(with: self, callbackQueue: DispatchQueue.global())
-    }()
-    
+    private lazy var scheduler: Scheduler = .init(with: self, callbackQueue: DispatchQueue.global())
+
     private var versioningMap: [String: Data] = [:]
 
     public init(
@@ -63,16 +60,16 @@ public final class ChainsTypesSyncService {
 
         let fetchOperation: BaseOperation<JSON> = dataOperationFactory.fetchData(from: url)
         operationQueue.addOperation(fetchOperation)
-        
-        return try await withUnsafeThrowingContinuation({ continuation in
+
+        return try await withUnsafeThrowingContinuation { continuation in
             fetchOperation.completionBlock = { [weak self] in
                 guard let result = fetchOperation.result,
-                      let strongSelf = self
-                else {
+                      let strongSelf = self else
+                {
                     self?.handleFailure(with: ChainsTypesSyncError.missingData)
                     return
                 }
-                
+
                 switch result {
                 case let .success(json):
                     do {
@@ -86,8 +83,7 @@ public final class ChainsTypesSyncService {
                     return continuation.resume(throwing: error)
                 }
             }
-        })
-
+        }
     }
 
     private func handle(json: JSON) throws -> [String: Data] {
@@ -128,7 +124,7 @@ public final class ChainsTypesSyncService {
         self.versioningMap = versioningMap
     }
 
-    private func handleFailure(with error: Error) {
+    private func handleFailure(with _: Error) {
         mutex.lock()
 
         defer {
@@ -174,12 +170,12 @@ extension ChainsTypesSyncService: ChainsTypesSyncServiceProtocol {
 
         performSyncUpIfNeeded()
     }
-    
+
     public func getTypes(for chainId: ChainModel.Id) async throws -> Data {
         if let types = versioningMap[chainId] {
             return types
         }
-        
+
         let remoteVersioningMap = try await fetchRemoteData()
         guard let types = remoteVersioningMap[chainId] else {
             throw ChainsTypesSyncError.missingData

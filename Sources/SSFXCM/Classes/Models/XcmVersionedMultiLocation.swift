@@ -21,9 +21,9 @@ enum XcmVersionedMultiLocation: Codable {
 extension XcmVersionedMultiLocation: Equatable {
     static func == (lhs: XcmVersionedMultiLocation, rhs: XcmVersionedMultiLocation) -> Bool {
         switch (lhs, rhs) {
-        case (let .V1(lhsMultilocation), let .V1(rhsMultilocation)):
+        case let (.V1(lhsMultilocation), .V1(rhsMultilocation)):
             return lhsMultilocation == rhsMultilocation
-        case (let .V3(lhsMultilocation), let .V3(rhsMultilocation)):
+        case let (.V3(lhsMultilocation), .V3(rhsMultilocation)):
             return lhsMultilocation == rhsMultilocation
         default:
             return false

@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 
 // MARK: - Protocol
 
@@ -12,8 +12,8 @@ public protocol RuntimeModuleConstantMetadata {
 
 // MARK: - V1
 
-extension RuntimeMetadataV1 {
-    public struct ModuleConstantMetadata: RuntimeModuleConstantMetadata {
+public extension RuntimeMetadataV1 {
+    struct ModuleConstantMetadata: RuntimeModuleConstantMetadata {
         public let name: String
         public let type: String
         public let value: Data
@@ -26,7 +26,7 @@ extension RuntimeMetadataV1 {
             self.documentation = documentation
         }
 
-        public func type(using schemaResolver: Schema.Resolver) throws -> String {
+        public func type(using _: Schema.Resolver) throws -> String {
             type
         }
     }
@@ -50,8 +50,8 @@ extension RuntimeMetadataV1.ModuleConstantMetadata: ScaleCodable {
 
 // MARK: - V14
 
-extension RuntimeMetadataV14 {
-    public struct ModuleConstantMetadata: RuntimeModuleConstantMetadata {
+public extension RuntimeMetadataV14 {
+    struct ModuleConstantMetadata: RuntimeModuleConstantMetadata {
         public let name: String
         private let typeIndex: BigUInt
         public let value: Data

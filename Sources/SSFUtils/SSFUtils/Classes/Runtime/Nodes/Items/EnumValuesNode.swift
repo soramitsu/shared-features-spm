@@ -15,8 +15,10 @@ public class EnumValuesNode: Node {
         }
 
         guard caseValue < values.count else {
-            throw DynamicScaleEncoderError.unexpectedEnumValues(value: caseValue,
-                                                                count: values.count)
+            throw DynamicScaleEncoderError.unexpectedEnumValues(
+                value: caseValue,
+                count: values.count
+            )
         }
 
         try encoder.appendU8(json: .stringValue(String(caseValue)))
@@ -24,7 +26,8 @@ public class EnumValuesNode: Node {
 
     public func accept(decoder: DynamicScaleDecoding) throws -> JSON {
         guard let caseValueStr = try decoder.readU8().stringValue,
-              let caseValue = Int(caseValueStr) else {
+              let caseValue = Int(caseValueStr) else
+        {
             throw DynamicScaleDecoderError.unexpectedEnumCase
         }
 

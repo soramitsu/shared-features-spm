@@ -1,8 +1,8 @@
 import Foundation
-import SSFUtils
 import RobinHood
 import SSFModels
 import SSFRuntimeCodingService
+import SSFUtils
 
 public protocol NMapKeyParamProtocol {
     associatedtype Value: Encodable
@@ -44,7 +44,10 @@ class UnkeyedEncodingOperation: BaseOperation<Data> {
                 throw StorageKeyEncodingOperationError.missingRequiredParams
             }
 
-            guard factory.metadata.getStorageMetadata(in: path.moduleName, storageName: path.itemName) != nil else {
+            guard factory.metadata.getStorageMetadata(
+                in: path.moduleName,
+                storageName: path.itemName
+            ) != nil else {
                 throw StorageKeyEncodingOperationError.invalidStoragePath
             }
 
@@ -81,7 +84,11 @@ class MapKeyEncodingOperation<T: Encodable>: BaseOperation<[Data]> {
     let path: any StorageCodingPathProtocol
     let storageKeyFactory: StorageKeyFactoryProtocol
 
-    init(path: any StorageCodingPathProtocol, storageKeyFactory: StorageKeyFactoryProtocol, keyParams: [T]? = nil) {
+    init(
+        path: any StorageCodingPathProtocol,
+        storageKeyFactory: StorageKeyFactoryProtocol,
+        keyParams: [T]? = nil
+    ) {
         self.path = path
         self.keyParams = keyParams
         self.storageKeyFactory = storageKeyFactory
@@ -113,9 +120,10 @@ class MapKeyEncodingOperation<T: Encodable>: BaseOperation<[Data]> {
                 keyType = doubleMapEntry.key1
                 hasher = doubleMapEntry.hasher
             case let .nMap(nMapEntry):
-                guard
-                    let firstKey = try nMapEntry.keys(using: factory.metadata.schemaResolver).first,
-                    let firstHasher = nMapEntry.hashers.first else {
+                guard let firstKey = try nMapEntry.keys(using: factory.metadata.schemaResolver)
+                    .first,
+                    let firstHasher = nMapEntry.hashers.first else
+                {
                     throw StorageKeyEncodingOperationError.missingRequiredParams
                 }
 
@@ -197,8 +205,8 @@ class DoubleMapKeyEncodingOperation<T1: Encodable, T2: Encodable>: BaseOperation
             guard let factory = codingFactory,
                   let keyParams1 = keyParams1,
                   let keyParams2 = keyParams2,
-                  keyParams1.count == keyParams2.count
-            else {
+                  keyParams1.count == keyParams2.count else
+            {
                 throw StorageKeyEncodingOperationError.missingRequiredParams
             }
 
@@ -285,8 +293,8 @@ class NMapKeyEncodingOperation: BaseOperation<[Data]> {
 
         do {
             guard let factory = codingFactory,
-                  let keyParams = keyParams
-            else {
+                  let keyParams = keyParams else
+            {
                 throw StorageKeyEncodingOperationError.missingRequiredParams
             }
 

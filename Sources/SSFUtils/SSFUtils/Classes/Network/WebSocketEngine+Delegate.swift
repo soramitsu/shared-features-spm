@@ -2,7 +2,7 @@ import Foundation
 import Starscream
 
 extension WebSocketEngine: WebSocketDelegate {
-    public func didReceive(event: WebSocketEvent, client: WebSocketClient) {
+    public func didReceive(event: WebSocketEvent, client _: WebSocketClient) {
         mutex.lock()
 
         switch event {
@@ -130,10 +130,10 @@ extension WebSocketEngine: WebSocketDelegate {
 extension WebSocketEngine: ReachabilityListenerDelegate {
     public func didChangeReachability(by manager: ReachabilityManagerProtocol) {
         mutex.lock()
-        
+
         if manager.isReachable, case .notReachable = state {
             logger?.debug("Network became reachable, retrying connection")
-            
+
             reconnectionScheduler.cancel()
             startConnecting(0)
         }

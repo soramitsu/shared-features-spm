@@ -1,10 +1,10 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
-import Foundation
 import CoreData
+import Foundation
 
 /**
  *  Enum is designed to define internal errors which can occur
@@ -58,24 +58,27 @@ public final class CoreDataRepository<T: Identifiable, U: NSManagedObject> {
      *    - sortDescriptor: Descriptor to sort fetched objects. By default `nil`.
      */
 
-    public init(databaseService: CoreDataServiceProtocol,
-                mapper: AnyCoreDataMapper<T, U>,
-                filter: NSPredicate? = nil,
-                sortDescriptors: [NSSortDescriptor] = []) {
-
+    public init(
+        databaseService: CoreDataServiceProtocol,
+        mapper: AnyCoreDataMapper<T, U>,
+        filter: NSPredicate? = nil,
+        sortDescriptors: [NSSortDescriptor] = []
+    ) {
         self.databaseService = databaseService
-        self.dataMapper = mapper
+        dataMapper = mapper
         self.filter = filter
         self.sortDescriptors = sortDescriptors
     }
 
     func save(models: [Model], in context: NSManagedObjectContext) throws {
-        try models.forEach { (model) in
+        for model in models {
             let entityName = String(describing: U.self)
             let fetchRequest = NSFetchRequest<U>(entityName: entityName)
-            var predicate = NSPredicate(format: "%K == %@",
-                                        dataMapper.entityIdentifierFieldName,
-                                        model.identifier)
+            var predicate = NSPredicate(
+                format: "%K == %@",
+                dataMapper.entityIdentifierFieldName,
+                model.identifier
+            )
 
             if let filter = filter {
                 predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [filter, predicate])
@@ -87,8 +90,10 @@ public final class CoreDataRepository<T: Identifiable, U: NSManagedObject> {
             var optionalEntitity = try context.fetch(fetchRequest).first
 
             if optionalEntitity == nil {
-                optionalEntitity = NSEntityDescription.insertNewObject(forEntityName: entityName,
-                                                                       into: context) as? U
+                optionalEntitity = NSEntityDescription.insertNewObject(
+                    forEntityName: entityName,
+                    into: context
+                ) as? U
             }
 
             guard let entity = optionalEntitity else {
@@ -100,12 +105,13 @@ public final class CoreDataRepository<T: Identifiable, U: NSManagedObject> {
     }
 
     func create(models: [Model], in context: NSManagedObjectContext) throws {
-        try models.forEach { (model) in
+        for model in models {
             let entityName = String(describing: U.self)
 
-            guard
-                let entity = NSEntityDescription.insertNewObject(forEntityName: entityName,
-                                                                 into: context) as? U else {
+            guard let entity = NSEntityDescription.insertNewObject(
+                forEntityName: entityName,
+                into: context
+            ) as? U else {
                 throw CoreDataRepositoryError.creationFailed
             }
 
@@ -114,14 +120,16 @@ public final class CoreDataRepository<T: Identifiable, U: NSManagedObject> {
     }
 
     func delete(modelIds: [String], in context: NSManagedObjectContext) throws {
-        try modelIds.forEach { (modelId) in
+        for modelId in modelIds {
             let entityName = String(describing: U.self)
             let fetchRequest = NSFetchRequest<U>(entityName: entityName)
             fetchRequest.includesPropertyValues = false
 
-            var predicate = NSPredicate(format: "%K == %@",
-                                        dataMapper.entityIdentifierFieldName,
-                                        modelId)
+            var predicate = NSPredicate(
+                format: "%K == %@",
+                dataMapper.entityIdentifierFieldName,
+                modelId
+            )
 
             if let filter = filter {
                 predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [filter, predicate])
@@ -148,7 +156,12 @@ public final class CoreDataRepository<T: Identifiable, U: NSManagedObject> {
         }
     }
 
-    func call<T>(block: @escaping (T, Error?) -> Void, model: T, error: Error?, queue: DispatchQueue?) {
+    func call<T>(
+        block: @escaping (T, Error?) -> Void,
+        model: T,
+        error: Error?,
+        queue: DispatchQueue?
+    ) {
         if let queue = queue {
             queue.async {
                 block(model, error)

@@ -4,7 +4,6 @@ import MocksBasket
 @testable import SSFQRService
 
 final class QRServiceTests: XCTestCase {
-
     var qrService: QRService?
 
     override func setUpWithError() throws {
@@ -18,7 +17,6 @@ final class QRServiceTests: XCTestCase {
     }
 
     func testQRImage() async throws {
-
         // arrange
         let address = "5GLDeyxgNzsnm4NeSHZd9imbSMaV2RUPGRSkchxsUqSbfBpu"
         let qrSize = CGSize(width: 100.0, height: 120.0)
@@ -32,7 +30,6 @@ final class QRServiceTests: XCTestCase {
     }
 
     func testGenerateAddress() async throws {
-        
         // arrange
         let address = "5GLDeyxgNzsnm4NeSHZd9imbSMaV2RUPGRSkchxsUqSbfBpu"
         let qrSize = CGSize(width: 500, height: 500)
@@ -49,13 +46,12 @@ final class QRServiceTests: XCTestCase {
     }
 
     func testGenerateSoraQRInfo() async throws {
-
         // arrange
         let rawPublicKey = "0xbcc5ecf679ebd776866a04c212a4ec5dc45cefab57d7aa858c389844e212693f"
         let qrSize = CGSize(width: 500, height: 500)
-        let qrInfo = SoraQRInfo(
+        let qrInfo = try SoraQRInfo(
             address: "cnVkoGs3rEMqLqY27c2nfVXJRGdzNJk2ns78DcqtppaSRe8qm",
-            rawPublicKey: try Data(hexStringSSF: rawPublicKey),
+            rawPublicKey: Data(hexStringSSF: rawPublicKey),
             username: "UserName",
             assetId: "0x0200000000000000000000000000000000000000000000000000000000000000",
             amount: "123"
@@ -72,15 +68,14 @@ final class QRServiceTests: XCTestCase {
         XCTAssertEqual(qrMatcher?.address, qrInfo.address)
 
         switch qrMatcher!.qrInfo {
-        case .sora(let qrInfoResult):
+        case let .sora(qrInfoResult):
             XCTAssertEqual(qrInfoResult, qrInfo)
-        case .none, .some :
+        case .none, .some:
             XCTExpectFailure()
         }
     }
 
     func testGenerateMock() async throws {
-
         // arrange
         let qrService = QRServiceMock()
         qrService.generateWithQrSizeReturnValue = .init()
@@ -95,7 +90,6 @@ final class QRServiceTests: XCTestCase {
     }
 
     func testExtractBokoloCash() async throws {
-
         // arrange
         let qrService = QRServiceMock()
         let qrInfo = BokoloCashQRInfo(
@@ -115,15 +109,14 @@ final class QRServiceTests: XCTestCase {
         XCTAssertEqual(qrMatcher.address, qrInfo.address)
 
         switch qrMatcher.qrInfo {
-        case .bokoloCash(let qrInfoResult):
+        case let .bokoloCash(qrInfoResult):
             XCTAssertEqual(qrInfoResult, qrInfo)
-        case .none, .some :
+        case .none, .some:
             XCTExpectFailure()
         }
     }
 
     func testExtractCex() async throws {
-
         // arrange
         let qrService = QRServiceMock()
         let qrInfo = CexQRInfo(address: "cnVkoGs3rEMqLqY27c2nfVXJRGdzNJk2ns78DcqtppaSRe8qm")
@@ -138,15 +131,14 @@ final class QRServiceTests: XCTestCase {
         XCTAssertEqual(qrMatcher.address, qrInfo.address)
 
         switch qrMatcher.qrInfo {
-        case .cex(let qrInfoResult):
+        case let .cex(qrInfoResult):
             XCTAssertEqual(qrInfoResult, qrInfo)
-        case .none, .some :
+        case .none, .some:
             XCTExpectFailure()
         }
     }
 
     func testExtractError() async throws {
-
         // arrange
         let qrService = QRServiceMock()
         let error = QRExtractionError.invalidImage
@@ -157,11 +149,9 @@ final class QRServiceTests: XCTestCase {
 
         // assert
         XCTAssertEqual(qrService.extractQrCodeFromCallsCount, 0)
-
     }
 
     func testExtractionErrorInvalidImage() async throws {
-
         // arrange
         let address = "5GLDeyxgNzsnm4NeSHZd9imbSMaV2RUPGRSkchxsUqSbfBpu"
         let qrSize = CGSize(width: 100.0, height: 120.0)
@@ -174,11 +164,13 @@ final class QRServiceTests: XCTestCase {
     }
 
     func testExtractionErrorSeveralCoincidences() async throws {
-
         // arrange
         let address = "5GLDeyxgNzsnm4NeSHZd9imbSMaV2RUPGRSkchxsUqSbfBpu"
         let qrSize = CGSize(width: 100.0, height: 120.0)
-        let matchers = [QRInfoMatcher(decoder: QRDecoderDefault()), QRInfoMatcher(decoder: QRDecoderDefault())]
+        let matchers = [
+            QRInfoMatcher(decoder: QRDecoderDefault()),
+            QRInfoMatcher(decoder: QRDecoderDefault()),
+        ]
         let qrService = QRServiceDefault(matchers: matchers)
         let error = QRExtractionError.invalidImage
         let image = try await qrService.generate(with: .address(address), qrSize: qrSize)
@@ -188,7 +180,6 @@ final class QRServiceTests: XCTestCase {
     }
 
     func testGenerateError() async throws {
-
         // arrange
         let qrService = QRServiceMock()
         let error = QRExtractionError.invalidQrCode
@@ -202,12 +193,11 @@ final class QRServiceTests: XCTestCase {
     }
 
     func testExtractionErrorError() async throws {
-
         // arrange
         let rawPublicKey = "0xbcc5ecf679ebd776866a04c212a4ec5dc45cefab57d7aa858c389844e212693f"
-        let qrInfo = SoraQRInfo(
+        let qrInfo = try SoraQRInfo(
             address: "cnVkoGs3rEMqLqY27c2nfVXJRGdzNJk2ns78DcqtppaSRe8qm",
-            rawPublicKey: try Data(hexStringSSF: rawPublicKey),
+            rawPublicKey: Data(hexStringSSF: rawPublicKey),
             username: "UserName",
             assetId: "0x0200000000000000000000000000000000000000000000000000000000000000",
             amount: "123"
@@ -217,12 +207,15 @@ final class QRServiceTests: XCTestCase {
         let decoder = QRDecoderMock()
         decoder.decodeDataThrowableError = error
         let qrService = QRServiceDefault(matchers: [QRInfoMatcher(decoder: decoder)])
-        let image = try await qrService.generate(with: .addressInfo(qrInfo), qrSize: .init(width: 50, height: 50))
+        let image = try await qrService.generate(
+            with: .addressInfo(qrInfo),
+            qrSize: .init(width: 50, height: 50)
+        )
 
         // act
         do {
             _ = try qrService.extractQrCode(from: image)
-        } catch (let caughtError) {
+        } catch let caughtError {
             XCTAssertTrue(caughtError is QRExtractionError)
             XCTAssertEqual(error, caughtError as! QRExtractionError)
             expectation.fulfill()
@@ -235,16 +228,16 @@ final class QRServiceTests: XCTestCase {
     }
 
     func testQRCreationOperationError() async throws {
-
         // arrange
         let error = QRCreationOperationError.bitmapImageCreationFailed
-        let expectation = expectation(description: "expect call to throw QRCreationOperationError error")
+        let expectation =
+            expectation(description: "expect call to throw QRCreationOperationError error")
         let qrService = QRServiceDefault()
 
         // act
         do {
             _ = try await qrService.generate(with: .address(""), qrSize: .zero)
-        } catch (let caughtError) {
+        } catch let caughtError {
             XCTAssertTrue(caughtError is QRCreationOperationError)
             XCTAssertEqual(error, caughtError as! QRCreationOperationError)
             expectation.fulfill()

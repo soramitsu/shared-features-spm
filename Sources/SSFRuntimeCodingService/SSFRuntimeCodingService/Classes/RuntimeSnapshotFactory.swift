@@ -1,7 +1,7 @@
 import Foundation
-import SSFUtils
 import RobinHood
 import SSFModels
+import SSFUtils
 
 public protocol RuntimeSnapshotFactoryProtocol {
     func createRuntimeSnapshotWrapper(
@@ -24,7 +24,7 @@ public final class RuntimeSnapshotFactory: RuntimeSnapshotFactoryProtocol {
             // TODO: think about it
             let json: JSON = .dictionaryValue(["types": .dictionaryValue([:])])
             let catalog = try TypeRegistryCatalog.createFromTypeDefinition(
-                try JSONEncoder().encode(json),
+                JSONEncoder().encode(json),
                 versioningData: chainTypes,
                 runtimeMetadata: runtimeMetadata,
                 usedRuntimePaths: usedRuntimePaths

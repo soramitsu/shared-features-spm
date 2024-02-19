@@ -56,9 +56,9 @@ public final class NetworkIssuesCenterImpl: NetworkIssuesCenterProtocol {
     public func forceNotify() {
         notify()
     }
-    
+
     // MARK: - Internal methods
-    
+
     func handle(
         chain: ChainModel.Id,
         state: SSFUtils.WebSocketEngine.State
@@ -87,8 +87,9 @@ public final class NetworkIssuesCenterImpl: NetworkIssuesCenterProtocol {
 
     private func notify() {
         let chains = Array(_chainsWithIssues)
-        issuesListeners.forEach {
-            ($0.target as? ConnectionIssuesCenterListener)?.handleChainsWithIssues(chains)
+        for issuesListener in issuesListeners {
+            (issuesListener.target as? ConnectionIssuesCenterListener)?
+                .handleChainsWithIssues(chains)
         }
     }
 }

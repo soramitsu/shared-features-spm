@@ -9,8 +9,8 @@ public protocol RuntimeFunctionArgumentMetadata {
 
 // MARK: - V1
 
-extension RuntimeMetadataV1 {
-    public struct FunctionArgumentMetadata: RuntimeFunctionArgumentMetadata {
+public extension RuntimeMetadataV1 {
+    struct FunctionArgumentMetadata: RuntimeFunctionArgumentMetadata {
         public let name: String
         public let type: String
 
@@ -28,13 +28,13 @@ extension RuntimeMetadataV1.FunctionArgumentMetadata: ScaleCodable {
     }
 
     public init(scaleDecoder: ScaleDecoding) throws {
-        self.name = try String(scaleDecoder: scaleDecoder)
-        self.type = try String(scaleDecoder: scaleDecoder)
+        name = try String(scaleDecoder: scaleDecoder)
+        type = try String(scaleDecoder: scaleDecoder)
     }
 }
 
 // MARK: - V14
 
-extension RuntimeMetadataV14 {
-    public typealias FunctionArgumentMetadata = RuntimeMetadataV1.FunctionArgumentMetadata
+public extension RuntimeMetadataV14 {
+    typealias FunctionArgumentMetadata = RuntimeMetadataV1.FunctionArgumentMetadata
 }
