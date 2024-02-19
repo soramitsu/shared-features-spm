@@ -1,28 +1,36 @@
-import XCTest
-import SSFModels
 import BigInt
+import SSFModels
+import XCTest
 
 @testable import SSFXCM
 
 final class XTokensTransferMultiassetCallTests: XCTestCase {
-        
     func testXTokensTransferMultiassetCallInit() {
         // arrange
-        let asset: XcmVersionedMultiAsset = .V1(.init(multilocation: .init(parents: 0,
-                                                                           interior: .init(items: [.onlyChild])),
-                                                      amount: BigUInt()))
-        let dest: XcmVersionedMultiLocation = .V1(.init(parents: 0, interior: .init(items: [.onlyChild])))
+        let asset: XcmVersionedMultiAsset = .V1(.init(
+            multilocation: .init(
+                parents: 0,
+                interior: .init(items: [.onlyChild])
+            ),
+            amount: BigUInt()
+        ))
+        let dest: XcmVersionedMultiLocation = .V1(.init(
+            parents: 0,
+            interior: .init(items: [.onlyChild])
+        ))
         let destWeightLimit: XcmWeightLimit = .unlimited
-        let destWeightIsPrimitive: Bool = true
-        let destWeight: BigUInt = BigUInt()
-        
+        let destWeightIsPrimitive = true
+        let destWeight = BigUInt()
+
         // act
-        let call = XTokensTransferMultiassetCall(asset: asset,
-                                                 dest: dest,
-                                                 destWeightLimit: destWeightLimit,
-                                                 destWeightIsPrimitive: destWeightIsPrimitive,
-                                                 destWeight: destWeight)
-        
+        let call = XTokensTransferMultiassetCall(
+            asset: asset,
+            dest: dest,
+            destWeightLimit: destWeightLimit,
+            destWeightIsPrimitive: destWeightIsPrimitive,
+            destWeight: destWeight
+        )
+
         // assert
         XCTAssertEqual(call.asset, asset)
         XCTAssertEqual(call.dest, dest)
@@ -30,25 +38,34 @@ final class XTokensTransferMultiassetCallTests: XCTestCase {
         XCTAssertEqual(call.destWeightIsPrimitive, destWeightIsPrimitive)
         XCTAssertEqual(call.destWeight, destWeight)
     }
-    
+
     func testEncode() throws {
         // arrange
-        let asset: XcmVersionedMultiAsset = .V1(.init(multilocation: .init(parents: 0,
-                                                                           interior: .init(items: [.onlyChild])),
-                                                      amount: BigUInt()))
-        let dest: XcmVersionedMultiLocation = .V1(.init(parents: 0, interior: .init(items: [.onlyChild])))
+        let asset: XcmVersionedMultiAsset = .V1(.init(
+            multilocation: .init(
+                parents: 0,
+                interior: .init(items: [.onlyChild])
+            ),
+            amount: BigUInt()
+        ))
+        let dest: XcmVersionedMultiLocation = .V1(.init(
+            parents: 0,
+            interior: .init(items: [.onlyChild])
+        ))
         let destWeightLimit: XcmWeightLimit = .unlimited
-        let destWeightIsPrimitive: Bool = true
-        let destWeight: BigUInt = BigUInt()
-        let call = XTokensTransferMultiassetCall(asset: asset,
-                                                 dest: dest,
-                                                 destWeightLimit: destWeightLimit,
-                                                 destWeightIsPrimitive: destWeightIsPrimitive,
-                                                 destWeight: destWeight)
-        
+        let destWeightIsPrimitive = true
+        let destWeight = BigUInt()
+        let call = XTokensTransferMultiassetCall(
+            asset: asset,
+            dest: dest,
+            destWeightLimit: destWeightLimit,
+            destWeightIsPrimitive: destWeightIsPrimitive,
+            destWeight: destWeight
+        )
+
         // act
         let encodedData = try JSONEncoder().encode(call)
-        
+
         // assert
         XCTAssertEqual(encodedData, TestData.callData)
     }

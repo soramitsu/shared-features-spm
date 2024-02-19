@@ -1,33 +1,32 @@
-import XCTest
 import RobinHood
 import SSFModels
+import XCTest
 
 @testable import SSFAccountManagment
 
 final class SeedExportServiceTests: XCTestCase {
-
     var service: SeedExportService?
-    
+
     override func setUpWithError() throws {
         try super.setUpWithError()
-        
+
         let seedData = SeedExportData(
             seed: Data(),
             derivationPath: nil,
             chain: TestData.chain,
             cryptoType: .ecdsa
         )
-        
+
         let seedFactory = SeedExportDataFactoryProtocolMock()
         seedFactory.createSeedExportDataMetaIdAccountIdCryptoTypeChainReturnValue = seedData
         let operationManager = OperationManager()
-        
+
         service = SeedExportService(
             seedFactory: seedFactory,
             operationManager: operationManager
         )
     }
-    
+
     override func tearDown() {
         super.tearDown()
         service = nil
@@ -40,21 +39,21 @@ final class SeedExportServiceTests: XCTestCase {
             chain: TestData.chain,
             wallet: TestData.account
         )
-        
+
         // assert
         XCTAssertNotNil(data)
     }
-    
-    func testfetchExportDataForWallet()  {
+
+    func testfetchExportDataForWallet() {
         // arrange
         let account = ChainAccountInfo(chain: TestData.chain, account: TestData.response)
-        
+
         // act
         let data = service?.fetchExportDataFor(
             wallet: TestData.account,
             accounts: [account]
         )
-        
+
         // assert
         XCTAssertNotNil(data)
     }
@@ -110,7 +109,7 @@ extension SeedExportServiceTests {
             customNodes: [],
             iosMinAppVersion: nil
         )
-        
+
         static let response = ChainAccountResponse(
             chainId: TestData.chain.chainId,
             accountId: Data(),

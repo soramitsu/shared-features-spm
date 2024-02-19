@@ -1,7 +1,8 @@
 import Foundation
 import SSFChainRegistry
 import SSFRuntimeCodingService
-//sourcery: AutoMockable
+
+// sourcery: AutoMockable
 protocol CallPathDeterminer {
     func determineCallPath(
         from: XcmChainType,
@@ -10,15 +11,14 @@ protocol CallPathDeterminer {
 }
 
 final class CallPathDeterminerImpl: CallPathDeterminer {
-    
     private enum Pallet: String {
         case xTokens
         case polkadotXcm
     }
-    
+
     private let chainRegistry: ChainRegistryProtocol
     private let fromChainData: XcmAssembly.FromChainData
-    
+
     init(
         chainRegistry: ChainRegistryProtocol,
         fromChainData: XcmAssembly.FromChainData
@@ -26,9 +26,9 @@ final class CallPathDeterminerImpl: CallPathDeterminer {
         self.chainRegistry = chainRegistry
         self.fromChainData = fromChainData
     }
-    
+
     // MARK: - Public methods
-    
+
     func determineCallPath(
         from: XcmChainType,
         dest: XcmChainType
@@ -58,21 +58,21 @@ final class CallPathDeterminerImpl: CallPathDeterminer {
             throw XcmError.directionNotSupported
         }
     }
-    
+
     // MARK: - Private methods
-    
+
     private func determineForParachain(
         dest: XcmChainType
     ) async throws -> XcmCallPath {
         let pallet = try await getPallet()
-        switch (pallet ,dest) {
+        switch (pallet, dest) {
         case (.xTokens, .relaychain):
             return .xTokensTransferMultiasset
         case (.xTokens, .nativeParachain):
             return .xTokensTransferMultiasset
         case (.xTokens, .parachain):
             return .xTokensTransferMultiasset
-            
+
         case (.polkadotXcm, .relaychain):
             return .polkadotXcmLimitedReserveWithdrawAssets
         case (.polkadotXcm, .nativeParachain):
@@ -83,7 +83,7 @@ final class CallPathDeterminerImpl: CallPathDeterminer {
             throw XcmError.directionNotSupported
         }
     }
-    
+
     private func getPallet() async throws -> Pallet {
         let metadata = try await getRuntimeSnapshot().metadata
         if metadata.getModuleIndex(Pallet.xTokens.rawValue) != nil {
@@ -93,7 +93,7 @@ final class CallPathDeterminerImpl: CallPathDeterminer {
         }
         throw XcmError.noXcmPallet(chainId: fromChainData.chainId)
     }
-    
+
     private func getRuntimeSnapshot() async throws -> RuntimeSnapshot {
         try await chainRegistry.getReadySnapshot(
             chainId: fromChainData.chainId,

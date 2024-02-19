@@ -68,7 +68,7 @@ extension SettingsMigrator: SettingsMigrating {
             throw KeystoreMigratingError.destinationNotReached
         }
 
-        keysToRemoveOnFinalize.forEach { key in
+        for key in keysToRemoveOnFinalize {
             settings.removeValue(for: key)
         }
 

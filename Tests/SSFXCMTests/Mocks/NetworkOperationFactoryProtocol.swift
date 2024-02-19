@@ -1,15 +1,15 @@
 import UIKit
-@testable import SSFNetwork
 @testable import RobinHood
+@testable import SSFNetwork
 
 class NetworkOperationFactoryProtocolMock<U: Decodable>: NetworkOperationFactoryProtocol {
-
-    //MARK: - fetchData<T: Decodable>
+    // MARK: - fetchData<T: Decodable>
 
     var fetchDataFromCallsCount = 0
     var fetchDataFromCalled: Bool {
-        return fetchDataFromCallsCount > 0
+        fetchDataFromCallsCount > 0
     }
+
     var fetchDataFromReceivedUrl: URL?
     var fetchDataFromReceivedInvocations: [URL] = []
     var fetchDataFromReturnValue: BaseOperation<U>!
@@ -22,4 +22,3 @@ class NetworkOperationFactoryProtocolMock<U: Decodable>: NetworkOperationFactory
         return fetchDataFromReturnValue as! BaseOperation<T>
     }
 }
-

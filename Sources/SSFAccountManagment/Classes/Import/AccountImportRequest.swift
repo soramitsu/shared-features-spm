@@ -35,8 +35,12 @@ public enum MetaAccountImportRequestSource {
         let mnemonic: String
         let substrateDerivationPath: String
         let ethereumDerivationPath: String
-        
-        public init(mnemonic: String, substrateDerivationPath: String, ethereumDerivationPath: String) {
+
+        public init(
+            mnemonic: String,
+            substrateDerivationPath: String,
+            ethereumDerivationPath: String
+        ) {
             self.mnemonic = mnemonic
             self.substrateDerivationPath = substrateDerivationPath
             self.ethereumDerivationPath = ethereumDerivationPath
@@ -67,8 +71,13 @@ public struct MetaAccountImportRequest {
     let username: String
     let cryptoType: CryptoType
     let defaultChainId: ChainModel.Id?
-    
-    public init(source: MetaAccountImportRequestSource, username: String, cryptoType: CryptoType, defaultChainId: ChainModel.Id?) {
+
+    public init(
+        source: MetaAccountImportRequestSource,
+        username: String,
+        cryptoType: CryptoType,
+        defaultChainId: ChainModel.Id?
+    ) {
         self.source = source
         self.username = username
         self.cryptoType = cryptoType

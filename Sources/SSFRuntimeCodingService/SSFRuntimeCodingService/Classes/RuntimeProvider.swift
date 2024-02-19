@@ -1,7 +1,7 @@
 import Foundation
 import RobinHood
-import SSFUtils
 import SSFModels
+import SSFUtils
 
 public enum RuntimeSpecVersion: UInt32 {
     case v9370 = 9370
@@ -56,22 +56,19 @@ public final class RuntimeProvider {
         let resultClosure: (RuntimeCoderFactoryProtocol?) -> Void
         let queue: DispatchQueue?
     }
-    
+
     private let usedRuntimePaths: [String: [String]]
     private var chainMetadata: RuntimeMetadataItemProtocol
     private let operationQueue: OperationQueue
     private var chainTypes: Data
 
-    private lazy var snapshotOperationFactory: RuntimeSnapshotFactoryProtocol = {
+    private lazy var snapshotOperationFactory: RuntimeSnapshotFactoryProtocol =
         RuntimeSnapshotFactory()
-    }()
 
-    private lazy var completionQueue: DispatchQueue = {
-        DispatchQueue(
-            label: "jp.co.soramitsu.fearless.fetchCoder.\(UUID().uuidString)",
-            qos: .userInitiated
-        )
-    }()
+    private lazy var completionQueue: DispatchQueue = .init(
+        label: "jp.co.soramitsu.fearless.fetchCoder.\(UUID().uuidString)",
+        qos: .userInitiated
+    )
 
     public var snapshot: RuntimeSnapshot?
     private(set) var pendingRequests: [PendingRequest] = []
@@ -180,7 +177,7 @@ extension RuntimeProvider: RuntimeProviderProtocol {
     public var runtimeSpecVersion: RuntimeSpecVersion {
         runtimeSnapshot?.runtimeSpecVersion ?? RuntimeSpecVersion.defaultVersion
     }
-    
+
     var runtimeSnapshot: RuntimeSnapshot? {
         snapshot
     }
@@ -198,7 +195,7 @@ extension RuntimeProvider: RuntimeProviderProtocol {
 
         buildSnapshot()
     }
-    
+
     public func readySnapshot() async throws -> RuntimeSnapshot {
         let wrapper = snapshotOperationFactory.createRuntimeSnapshotWrapper(
             chainTypes: chainTypes,
@@ -207,24 +204,25 @@ extension RuntimeProvider: RuntimeProviderProtocol {
         )
         currentWrapper = wrapper
         operationQueue.addOperation(wrapper)
-        
-        return try await withUnsafeThrowingContinuation({ continuation in
+
+        return try await withUnsafeThrowingContinuation { continuation in
             wrapper.completionBlock = { [weak self] in
                 let result = wrapper.result
                 self?.handleCompletion(result: result)
                 switch result {
-                case .success(let snapshot):
+                case let .success(snapshot):
                     guard let snapshot = snapshot else {
-                        return continuation.resume(throwing: RuntimeProviderError.buildSnapshotError)
+                        return continuation
+                            .resume(throwing: RuntimeProviderError.buildSnapshotError)
                     }
                     return continuation.resume(returning: snapshot)
-                case .failure(let error):
+                case let .failure(error):
                     return continuation.resume(throwing: error)
                 case .none:
                     return continuation.resume(throwing: RuntimeProviderError.buildSnapshotError)
                 }
             }
-        })
+        }
     }
 
     public func cleanup() {
@@ -241,7 +239,7 @@ extension RuntimeProvider: RuntimeProviderProtocol {
 
         resolveRequests()
     }
-    
+
     public func fetchCoderFactoryOperation() -> BaseOperation<RuntimeCoderFactoryProtocol> {
         AwaitOperation { [weak self] in
             try await withCheckedThrowingContinuation { continuation in
@@ -249,7 +247,7 @@ extension RuntimeProvider: RuntimeProviderProtocol {
                     continuation.resume(throwing: RuntimeProviderError.providerUnavailable)
                     return
                 }
-                
+
                 let timeoutTask = Task {
                     let duration = UInt64(20 * 1_000_000_000)
                     try await Task.sleep(nanoseconds: duration)
@@ -259,7 +257,8 @@ extension RuntimeProvider: RuntimeProviderProtocol {
                 self.fetchCoderFactory(runCompletionIn: nil) { factory in
                     timeoutTask.cancel()
                     guard let factory = factory else {
-                        continuation.resume(with: .failure(RuntimeProviderError.providerUnavailable))
+                        continuation
+                            .resume(with: .failure(RuntimeProviderError.providerUnavailable))
                         return
                     }
 

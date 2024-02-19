@@ -1,13 +1,13 @@
-import Foundation
-import SSFModels
 import BigInt
-import SSFExtrinsicKit
-import SSFSigner
+import Foundation
 import RobinHood
-import SSFRuntimeCodingService
-import SSFUtils
-import SSFCrypto
 import SSFChainRegistry
+import SSFCrypto
+import SSFExtrinsicKit
+import SSFModels
+import SSFRuntimeCodingService
+import SSFSigner
+import SSFUtils
 
 public protocol XcmExtrinsicServiceProtocol {
     func transfer(
@@ -17,7 +17,7 @@ public protocol XcmExtrinsicServiceProtocol {
         destAccountId: AccountId,
         amount: BigUInt
     ) async -> SubmitExtrinsicResult
-    
+
     func estimateOriginalFee(
         fromChainId: String,
         assetSymbol: String,
@@ -28,7 +28,6 @@ public protocol XcmExtrinsicServiceProtocol {
 }
 
 final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
-    
     private let extrinsicBuilder: XcmExtrinsicBuilderProtocol
     private let signingWrapper: TransactionSignerProtocol
     private let xcmVersionFetcher: XcmVersionFetching
@@ -36,7 +35,7 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
     private let depsContainer: XcmDependencyContainerProtocol
     private let callPathDeterminer: CallPathDeterminer
     private let xcmFeeFetcher: XcmDestinationFeeFetching
-    
+
     init(
         signingWrapper: TransactionSignerProtocol,
         extrinsicBuilder: XcmExtrinsicBuilderProtocol,
@@ -54,9 +53,9 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
         self.callPathDeterminer = callPathDeterminer
         self.xcmFeeFetcher = xcmFeeFetcher
     }
-    
+
     // MARK: - Public methods
-    
+
     func estimateOriginalFee(
         fromChainId: String,
         assetSymbol: String,
@@ -69,9 +68,12 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             var destChainModel = try await chainRegistry.getChain(for: destChainId)
             let fromChainType = try XcmChainType.determineChainType(for: fromChainModel)
             let destChainType = try XcmChainType.determineChainType(for: destChainModel)
-            let callPath = try await callPathDeterminer.determineCallPath(from: fromChainType, dest: destChainType)
+            let callPath = try await callPathDeterminer.determineCallPath(
+                from: fromChainType,
+                dest: destChainType
+            )
             let xcmWeight = try await xcmFeeFetcher.estimateWeight(for: destChainId)
-            
+
             switch callPath {
             case .xcmPalletLimitedTeleportAssets:
                 return try await estimateNativeTokenTransferFee(
@@ -83,13 +85,16 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                     weightLimit: xcmWeight
                 )
             case
-                    .xcmPalletLimitedReserveTransferAssets,
-                    .polkadotXcmLimitedTeleportAssets:
+                .xcmPalletLimitedReserveTransferAssets,
+                .polkadotXcmLimitedTeleportAssets:
                 if destChainType == .soraMainnet {
-                    guard let bridgeParachainId = fromChainModel.xcm?.availableDestinations.first(where: { $0.chainId == destChainId })?.bridgeParachainId else {
+                    guard let bridgeParachainId = fromChainModel.xcm?.availableDestinations
+                        .first(where: { $0.chainId == destChainId })?.bridgeParachainId else
+                    {
                         throw XcmError.convenience(error: "missing bridgeParachainId")
                     }
-                    let soraParachainModel = try await chainRegistry.getChain(for: bridgeParachainId)
+                    let soraParachainModel = try await chainRegistry
+                        .getChain(for: bridgeParachainId)
                     destChainModel = soraParachainModel
                 }
                 return try await estimateNativeTokenTransferFee(
@@ -111,8 +116,8 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                     path: callPath
                 )
             case
-                    .polkadotXcmLimitedReserveTransferAssets,
-                    .polkadotXcmLimitedReserveWithdrawAssets:
+                .polkadotXcmLimitedReserveTransferAssets,
+                .polkadotXcmLimitedReserveWithdrawAssets:
                 return try await estimatePolkadotXcmLimitedReserveTransferAssetsFee(
                     fromChainModel: fromChainModel,
                     assetSymbol: assetSymbol.dropXcPrefix(chain: fromChainModel),
@@ -123,7 +128,10 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                     path: callPath
                 )
             case .bridgeProxyBurn:
-                guard let currencyId = fromChainModel.assets.first(where: { $0.symbol.lowercased() == assetSymbol.lowercased() })?.currencyId else {
+                guard let currencyId = fromChainModel.assets
+                    .first(where: { $0.symbol.lowercased() == assetSymbol.lowercased() })?
+                    .currencyId else
+                {
                     throw XcmError.missingCurrencyId
                 }
                 return try await estimateBridgeProxyBurn(
@@ -141,7 +149,7 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             return .failure(error)
         }
     }
-    
+
     public func transfer(
         fromChainId: String,
         assetSymbol: String,
@@ -154,9 +162,12 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             var destChainModel = try await chainRegistry.getChain(for: destChainId)
             let fromChainType = try XcmChainType.determineChainType(for: fromChainModel)
             let destChainType = try XcmChainType.determineChainType(for: destChainModel)
-            let callPath = try await callPathDeterminer.determineCallPath(from: fromChainType, dest: destChainType)
+            let callPath = try await callPathDeterminer.determineCallPath(
+                from: fromChainType,
+                dest: destChainType
+            )
             let xcmWeight = try await xcmFeeFetcher.estimateWeight(for: destChainId)
-            
+
             switch callPath {
             case .xcmPalletLimitedTeleportAssets:
                 return try await submitNativeTokenTransfer(
@@ -168,13 +179,16 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                     weightLimit: xcmWeight
                 )
             case
-                    .xcmPalletLimitedReserveTransferAssets,
-                    .polkadotXcmLimitedTeleportAssets:
+                .xcmPalletLimitedReserveTransferAssets,
+                .polkadotXcmLimitedTeleportAssets:
                 if destChainType == .soraMainnet {
-                    guard let bridgeParachainId = fromChainModel.xcm?.availableDestinations.first(where: { $0.chainId == destChainId })?.bridgeParachainId else {
+                    guard let bridgeParachainId = fromChainModel.xcm?.availableDestinations
+                        .first(where: { $0.chainId == destChainId })?.bridgeParachainId else
+                    {
                         throw XcmError.convenience(error: "missing bridgeParachainId")
                     }
-                    let soraParachainModel = try await chainRegistry.getChain(for: bridgeParachainId)
+                    let soraParachainModel = try await chainRegistry
+                        .getChain(for: bridgeParachainId)
                     destChainModel = soraParachainModel
                 }
                 return try await submitNativeTokenTransfer(
@@ -196,8 +210,8 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                     path: callPath
                 )
             case
-                    .polkadotXcmLimitedReserveTransferAssets,
-                    .polkadotXcmLimitedReserveWithdrawAssets:
+                .polkadotXcmLimitedReserveTransferAssets,
+                .polkadotXcmLimitedReserveWithdrawAssets:
                 return try await submitPolkadotXcmLimitedReserveTransferAssetsExtrinsic(
                     fromChainModel: fromChainModel,
                     assetSymbol: assetSymbol.dropXcPrefix(chain: fromChainModel),
@@ -208,7 +222,10 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                     path: callPath
                 )
             case .bridgeProxyBurn:
-                guard let currencyId = fromChainModel.assets.first(where: { $0.symbol.lowercased() == assetSymbol.lowercased() })?.currencyId else {
+                guard let currencyId = fromChainModel.assets
+                    .first(where: { $0.symbol.lowercased() == assetSymbol.lowercased() })?
+                    .currencyId else
+                {
                     throw XcmError.missingCurrencyId
                 }
                 return try await submitBridgeProxyBurn(
@@ -226,10 +243,11 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             return .failure(error)
         }
     }
-    
+
     // MARK: - Private methods
+
     // MARK: - Extrinsic building
-    
+
     private func makeNativeTokenTransferExtrinsic(
         with path: XcmCallPath,
         fromChainModel: ChainModel,
@@ -249,12 +267,12 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             path: path
         )
     }
-    
+
     private func makeXTokensTransferExtrinsic(
         fromChainModelId: ChainModel.Id,
         accountId: AccountId?,
         currencyId: CurrencyId,
-        destChainModel:  ChainModel,
+        destChainModel: ChainModel,
         amount: BigUInt,
         weightLimit: BigUInt,
         path: XcmCallPath
@@ -271,7 +289,7 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                 path: path
             )
     }
-    
+
     private func makeXTokensTransferMultiassetExtrinsic(
         fromChainModel: ChainModel,
         assetSymbol: String,
@@ -295,7 +313,7 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                 destWeightIsPrimitive: fromChainModel.xcm?.destWeightIsPrimitive
             )
     }
-    
+
     private func makePolkadotXcmLimitedReserveTransferAssetsExtrinsic(
         fromChainModel: ChainModel,
         assetSymbol: String,
@@ -318,7 +336,7 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                 path: path
             )
     }
-    
+
     private func makeBridgeProxyBurnExtrinsic(
         fromChainModel: ChainModel,
         currencyId: String,
@@ -336,9 +354,9 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             path: path
         )
     }
- 
+
     // MARK: - Submits
-    
+
     private func submitNativeTokenTransfer(
         with path: XcmCallPath,
         fromChainModel: ChainModel,
@@ -355,9 +373,9 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             amount: amount,
             weightLimit: weightLimit
         )
-        
+
         let extrinsicService = try await depsContainer.prepareDeps().extrinsicService
-        
+
         return await withCheckedContinuation { continuation in
             extrinsicService.submit(
                 extrinsic,
@@ -368,12 +386,12 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             }
         }
     }
-    
+
     private func submitXTokensTransfer(
         fromChainModelId: ChainModel.Id,
         accountId: AccountId?,
         currencyId: CurrencyId,
-        destChainModel:  ChainModel,
+        destChainModel: ChainModel,
         amount: BigUInt,
         weightLimit: BigUInt,
         path: XcmCallPath
@@ -387,9 +405,9 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             weightLimit: weightLimit,
             path: path
         )
-        
+
         let extrinsicService = try await depsContainer.prepareDeps().extrinsicService
-        
+
         return await withCheckedContinuation { continuation in
             extrinsicService.submit(
                 extrinsic,
@@ -400,12 +418,12 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             }
         }
     }
-    
+
     private func submitXTokensTransferMultiasset(
         fromChainModel: ChainModel,
         assetSymbol: String,
         accountId: AccountId?,
-        destChainModel:  ChainModel,
+        destChainModel: ChainModel,
         amount: BigUInt,
         weightLimit: BigUInt,
         path: XcmCallPath
@@ -419,9 +437,9 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             weightLimit: weightLimit,
             path: path
         )
-        
+
         let extrinsicService = try await depsContainer.prepareDeps().extrinsicService
-        
+
         return await withCheckedContinuation { continuation in
             extrinsicService.submit(
                 extrinsicCall,
@@ -432,12 +450,12 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             }
         }
     }
-    
+
     private func submitPolkadotXcmLimitedReserveTransferAssetsExtrinsic(
         fromChainModel: ChainModel,
         assetSymbol: String,
         accountId: AccountId?,
-        destChainModel:  ChainModel,
+        destChainModel: ChainModel,
         amount: BigUInt,
         weightLimit: BigUInt,
         path: XcmCallPath
@@ -451,9 +469,9 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             weightLimit: weightLimit,
             path: path
         )
-        
+
         let extrinsicService = try await depsContainer.prepareDeps().extrinsicService
-        
+
         return await withCheckedContinuation { continuation in
             extrinsicService.submit(
                 extrinsicCall,
@@ -464,7 +482,7 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             }
         }
     }
-    
+
     private func submitBridgeProxyBurn(
         fromChainModel: ChainModel,
         currencyId: String,
@@ -481,9 +499,9 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             amount: amount,
             path: path
         )
-        
+
         let extrinsicService = try await depsContainer.prepareDeps().extrinsicService
-        
+
         return await withCheckedContinuation { continuation in
             extrinsicService.submit(
                 extrinsicCall,
@@ -494,9 +512,9 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             }
         }
     }
-    
+
     // MARK: - Fees
-    
+
     private func estimateNativeTokenTransferFee(
         with path: XcmCallPath,
         fromChainModel: ChainModel,
@@ -513,21 +531,21 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             amount: amount,
             weightLimit: weightLimit
         )
-        
+
         let extrinsicService = try await depsContainer.prepareDeps().extrinsicService
-        
+
         return await withCheckedContinuation { continuation in
             extrinsicService.estimateFee(extrinsic, runningIn: .global()) { result in
                 continuation.resume(returning: result)
             }
         }
     }
-    
+
     private func estimateXTokensTransferFee(
         fromChainModelId: ChainModel.Id,
         accountId: AccountId?,
         currencyId: CurrencyId,
-        destChainModel:  ChainModel,
+        destChainModel: ChainModel,
         amount: BigUInt,
         weightLimit: BigUInt,
         path: XcmCallPath
@@ -541,16 +559,16 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             weightLimit: weightLimit,
             path: path
         )
-        
+
         let extrinsicService = try await depsContainer.prepareDeps().extrinsicService
-        
+
         return await withCheckedContinuation { continuation in
             extrinsicService.estimateFee(extrinsic, runningIn: .global()) { result in
                 continuation.resume(returning: result)
             }
         }
     }
-    
+
     private func estimateXTokensTransferMultiassetFee(
         fromChainModel: ChainModel,
         assetSymbol: String,
@@ -569,16 +587,16 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             weightLimit: weightLimit,
             path: path
         )
-        
+
         let extrinsicService = try await depsContainer.prepareDeps().extrinsicService
-        
+
         return await withCheckedContinuation { continuation in
             extrinsicService.estimateFee(extrinsicCall, runningIn: .global()) { result in
                 continuation.resume(returning: result)
             }
         }
     }
-    
+
     private func estimatePolkadotXcmLimitedReserveTransferAssetsFee(
         fromChainModel: ChainModel,
         assetSymbol: String,
@@ -597,18 +615,18 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             weightLimit: weightLimit,
             path: path
         )
-        
+
         let extrinsicService = try await depsContainer.prepareDeps().extrinsicService
-        
+
         return await withCheckedContinuation { continuation in
             extrinsicService.estimateFee(extrinsicCall, runningIn: .global()) { result in
                 continuation.resume(returning: result)
             }
         }
     }
-    
+
     // MARK: - Sora Mainnet
-    
+
     private func estimateBridgeProxyBurn(
         fromChainModel: ChainModel,
         currencyId: String,
@@ -625,9 +643,9 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             amount: amount,
             path: path
         )
-        
+
         let extrinsicService = try await depsContainer.prepareDeps().extrinsicService
-        
+
         return await withCheckedContinuation { continuation in
             extrinsicService.estimateFee(extrinsicCall, runningIn: .global()) { result in
                 continuation.resume(returning: result)
@@ -641,10 +659,10 @@ private extension String {
         guard chain.hasXcAssetPrefix else {
             return self
         }
-        guard self.lowercased().hasPrefix("xc") else {
+        guard lowercased().hasPrefix("xc") else {
             return self
         }
-        let modifySymbol = String(self.dropFirst(2))
+        let modifySymbol = String(dropFirst(2))
         return modifySymbol
     }
 }

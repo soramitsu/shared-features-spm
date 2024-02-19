@@ -50,7 +50,10 @@ public enum ConstantCodingPath: CaseIterable {
         case .maxTopDelegationsPerCandidate:
             return (moduleName: "ParachainStaking", constantName: "MaxTopDelegationsPerCandidate")
         case .maxBottomDelegationsPerCandidate:
-            return (moduleName: "ParachainStaking", constantName: "MaxBottomDelegationsPerCandidate")
+            return (
+                moduleName: "ParachainStaking",
+                constantName: "MaxBottomDelegationsPerCandidate"
+            )
         case .defaultTip:
             return (moduleName: "Balances", constantName: "DefaultTip")
         case .candidateBondLessDelay:

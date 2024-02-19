@@ -1,18 +1,19 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
-import Foundation
 import CoreData
+import Foundation
 
 extension CoreDataRepository {
-    func fetch(by modelIdsClosure: @escaping () throws -> [String],
-               options: RepositoryFetchOptions,
-               runCompletionIn queue: DispatchQueue?,
-               executing block: @escaping ([Model]?, Error?) -> Void) {
-
-        databaseService.performAsync { [weak self] (optionalContext, optionalError) in
+    func fetch(
+        by modelIdsClosure: @escaping () throws -> [String],
+        options: RepositoryFetchOptions,
+        runCompletionIn queue: DispatchQueue?,
+        executing block: @escaping ([Model]?, Error?) -> Void
+    ) {
+        databaseService.performAsync { [weak self] optionalContext, optionalError in
             guard let strongSelf = self else {
                 return
             }
@@ -22,12 +23,17 @@ extension CoreDataRepository {
                     let entityName = String(describing: U.self)
                     let fetchRequest = NSFetchRequest<U>(entityName: entityName)
                     let modelIds = try modelIdsClosure()
-                    var predicate = NSPredicate(format: "%K in %@",
-                                                strongSelf.dataMapper.entityIdentifierFieldName,
-                                                modelIds)
+                    var predicate = NSPredicate(
+                        format: "%K in %@",
+                        strongSelf.dataMapper.entityIdentifierFieldName,
+                        modelIds
+                    )
 
                     if let filter = strongSelf.filter {
-                        predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [filter, predicate])
+                        predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+                            filter,
+                            predicate,
+                        ])
                     }
 
                     fetchRequest.predicate = predicate
@@ -36,7 +42,8 @@ extension CoreDataRepository {
                     fetchRequest.includesSubentities = options.includesSubentities
 
                     let entities = try context.fetch(fetchRequest)
-                    let models = try entities.map { try strongSelf.dataMapper.transform(entity: $0) }
+                    let models = try entities
+                        .map { try strongSelf.dataMapper.transform(entity: $0) }
 
                     strongSelf.call(block: block, model: models, error: nil, queue: queue)
                 } catch {
@@ -47,13 +54,14 @@ extension CoreDataRepository {
             }
         }
     }
-    
-    func fetch(by modelIdClosure: @escaping () throws -> String,
-               options: RepositoryFetchOptions,
-               runCompletionIn queue: DispatchQueue?,
-               executing block: @escaping (Model?, Error?) -> Void) {
 
-        databaseService.performAsync { [weak self] (optionalContext, optionalError) in
+    func fetch(
+        by modelIdClosure: @escaping () throws -> String,
+        options: RepositoryFetchOptions,
+        runCompletionIn queue: DispatchQueue?,
+        executing block: @escaping (Model?, Error?) -> Void
+    ) {
+        databaseService.performAsync { [weak self] optionalContext, optionalError in
             guard let strongSelf = self else {
                 return
             }
@@ -63,12 +71,17 @@ extension CoreDataRepository {
                     let entityName = String(describing: U.self)
                     let fetchRequest = NSFetchRequest<U>(entityName: entityName)
                     let modelId = try modelIdClosure()
-                    var predicate = NSPredicate(format: "%K == %@",
-                                                strongSelf.dataMapper.entityIdentifierFieldName,
-                                                modelId)
+                    var predicate = NSPredicate(
+                        format: "%K == %@",
+                        strongSelf.dataMapper.entityIdentifierFieldName,
+                        modelId
+                    )
 
                     if let filter = strongSelf.filter {
-                        predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [filter, predicate])
+                        predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+                            filter,
+                            predicate,
+                        ])
                     }
 
                     fetchRequest.predicate = predicate
@@ -94,11 +107,12 @@ extension CoreDataRepository {
         }
     }
 
-    func fetchAll(with options: RepositoryFetchOptions,
-                  runCompletionIn queue: DispatchQueue?,
-                  executing block: @escaping ([Model]?, Error?) -> Void) {
-
-        databaseService.performAsync { [weak self] (optionalContext, optionalError) in
+    func fetchAll(
+        with options: RepositoryFetchOptions,
+        runCompletionIn queue: DispatchQueue?,
+        executing block: @escaping ([Model]?, Error?) -> Void
+    ) {
+        databaseService.performAsync { [weak self] optionalContext, optionalError in
             guard let strongSelf = self else {
                 return
             }
@@ -117,7 +131,8 @@ extension CoreDataRepository {
                     fetchRequest.includesSubentities = options.includesSubentities
 
                     let entities = try context.fetch(fetchRequest)
-                    let models = try entities.map { try strongSelf.dataMapper.transform(entity: $0) }
+                    let models = try entities
+                        .map { try strongSelf.dataMapper.transform(entity: $0) }
 
                     strongSelf.call(block: block, model: models, error: nil, queue: queue)
 
@@ -130,11 +145,13 @@ extension CoreDataRepository {
         }
     }
 
-    func fetch(request: RepositorySliceRequest,
-               options: RepositoryFetchOptions,
-               runCompletionIn queue: DispatchQueue?,
-               executing block: @escaping ([Model]?, Error?) -> Void) {
-        databaseService.performAsync { [weak self] (optionalContext, optionalError) in
+    func fetch(
+        request: RepositorySliceRequest,
+        options: RepositoryFetchOptions,
+        runCompletionIn queue: DispatchQueue?,
+        executing block: @escaping ([Model]?, Error?) -> Void
+    ) {
+        databaseService.performAsync { [weak self] optionalContext, optionalError in
             guard let strongSelf = self else {
                 return
             }
@@ -163,7 +180,8 @@ extension CoreDataRepository {
                     fetchRequest.includesSubentities = options.includesSubentities
 
                     let entities = try context.fetch(fetchRequest)
-                    let models = try entities.map { try strongSelf.dataMapper.transform(entity: $0) }
+                    let models = try entities
+                        .map { try strongSelf.dataMapper.transform(entity: $0) }
 
                     strongSelf.call(block: block, model: models, error: nil, queue: queue)
 
@@ -176,11 +194,13 @@ extension CoreDataRepository {
         }
     }
 
-    func save(updating updatedModels: [Model], deleting deletedIds: [String],
-              runCompletionIn queue: DispatchQueue?,
-              executing block: @escaping (Error?) -> Void) {
-
-        databaseService.performAsync { (optionalContext, optionalError) in
+    func save(
+        updating updatedModels: [Model],
+        deleting deletedIds: [String],
+        runCompletionIn queue: DispatchQueue?,
+        executing block: @escaping (Error?) -> Void
+    ) {
+        databaseService.performAsync { optionalContext, optionalError in
 
             if let context = optionalContext {
                 do {
@@ -203,10 +223,12 @@ extension CoreDataRepository {
         }
     }
 
-    func replace(with newModels: [Model],
-                 runCompletionIn queue: DispatchQueue?,
-                 executing block: @escaping (Error?) -> Void) {
-        databaseService.performAsync { (optionalContext, optionalError) in
+    func replace(
+        with newModels: [Model],
+        runCompletionIn queue: DispatchQueue?,
+        executing block: @escaping (Error?) -> Void
+    ) {
+        databaseService.performAsync { optionalContext, optionalError in
             if let context = optionalContext {
                 do {
                     try self.deleteAll(in: context)
@@ -227,9 +249,11 @@ extension CoreDataRepository {
         }
     }
 
-    func fetchCount(runCompletionIn queue: DispatchQueue?,
-                    executing block: @escaping (Int?, Error?) -> Void) {
-        databaseService.performAsync { [weak self] (optionalContext, optionalError) in
+    func fetchCount(
+        runCompletionIn queue: DispatchQueue?,
+        executing block: @escaping (Int?, Error?) -> Void
+    ) {
+        databaseService.performAsync { [weak self] optionalContext, optionalError in
             guard let strongSelf = self else {
                 return
             }
@@ -255,9 +279,11 @@ extension CoreDataRepository {
         }
     }
 
-    func deleteAll(runCompletionIn queue: DispatchQueue?,
-                   executing block: @escaping (Error?) -> Void) {
-        databaseService.performAsync { [weak self] (optionalContext, optionalError) in
+    func deleteAll(
+        runCompletionIn queue: DispatchQueue?,
+        executing block: @escaping (Error?) -> Void
+    ) {
+        databaseService.performAsync { [weak self] optionalContext, optionalError in
             guard let strongSelf = self else {
                 return
             }

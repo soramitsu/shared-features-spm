@@ -1,7 +1,7 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 
@@ -12,7 +12,6 @@ import Foundation
  */
 
 public class CompoundOperationWrapper<ResultType> {
-
     /**
      *  Returns a list which consists of dependencies and target operation.
      */

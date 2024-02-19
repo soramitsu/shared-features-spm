@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 
 // MARK: - Protocol
 
@@ -15,8 +15,8 @@ public protocol RuntimeModuleMetadata {
 
 // MARK: - ModuleMetadata V1
 
-extension RuntimeMetadataV1 {
-    public struct ModuleMetadata: ScaleCodable {
+public extension RuntimeMetadataV1 {
+    struct ModuleMetadata: ScaleCodable {
         public let name: String
 
         private let _storage: StorageMetadata?
@@ -75,17 +75,17 @@ extension RuntimeMetadataV1 {
 
 extension RuntimeMetadataV1.ModuleMetadata: RuntimeModuleMetadata {
     public var storage: RuntimeStorageMetadata? { _storage }
-    public func calls(using schemaResolver: Schema.Resolver) throws -> [RuntimeFunctionMetadata]? { _calls }
-    public func events(using schemaResolver: Schema.Resolver) throws -> [RuntimeEventMetadata]? { _events }
+    public func calls(using _: Schema.Resolver) throws -> [RuntimeFunctionMetadata]? { _calls }
+    public func events(using _: Schema.Resolver) throws -> [RuntimeEventMetadata]? { _events }
     public var events: [RuntimeEventMetadata]? { _events }
     public var constants: [RuntimeModuleConstantMetadata] { _constants }
-    public func errors(using schemaResolver: Schema.Resolver) throws -> [RuntimeErrorMetadata]? { _errors }
+    public func errors(using _: Schema.Resolver) throws -> [RuntimeErrorMetadata]? { _errors }
 }
 
 // MARK: - ModuleMetadata V14
 
-extension RuntimeMetadataV14 {
-    public struct ModuleMetadata: ScaleCodable {
+public extension RuntimeMetadataV14 {
+    struct ModuleMetadata: ScaleCodable {
         public let name: String
 
         private let _storage: StorageMetadata?
@@ -107,10 +107,10 @@ extension RuntimeMetadataV14 {
         ) {
             self.name = name
 
-            self._storage = storage
+            _storage = storage
             self.callsIndex = callsIndex
             self.eventsIndex = eventsIndex
-            self._constants = constants
+            _constants = constants
             self.errorsIndex = errorsIndex
 
             self.index = index
@@ -181,7 +181,7 @@ extension RuntimeMetadataV14.ModuleMetadata: RuntimeModuleMetadata {
         switch typeMetadata.def {
         case let .variant(variant):
             return variant.variants.map {
-                RuntimeMetadataV14.ErrorMetadata.init(name: $0.name, documentation: $0.docs)
+                RuntimeMetadataV14.ErrorMetadata(name: $0.name, documentation: $0.docs)
             }
         default:
             throw Schema.Resolver.Error.wrongData

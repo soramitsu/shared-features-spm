@@ -1,7 +1,7 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 
@@ -10,7 +10,6 @@ import Foundation
  */
 
 public protocol Identifiable {
-
     /// Unique identifier of the instance.
 
     var identifier: String { get }
@@ -37,9 +36,9 @@ public enum DataProviderChange<T> {
 
     var item: T? {
         switch self {
-        case .insert(let newItem):
+        case let .insert(newItem):
             return newItem
-        case .update(let newItem):
+        case let .update(newItem):
             return newItem
         default:
             return nil
@@ -57,23 +56,32 @@ public struct DataProviderObserverOptions {
     /// there are changes after synchronization.
     public var alwaysNotifyOnRefresh: Bool
 
-    /// Asks data provider to wait until any in progress synchronization completes before adding the observer.
+    /// Asks data provider to wait until any in progress synchronization completes before adding the
+    /// observer.
     /// By default the value is `true`.
-    /// - note: Passing `false` may significantly improve performance however may also introduce inconsitency between
-    /// observer's local data and persistent data if a repository doesn't have any synchronization mechanism.
+    /// - note: Passing `false` may significantly improve performance however may also introduce
+    /// inconsitency between
+    /// observer's local data and persistent data if a repository doesn't have any synchronization
+    /// mechanism.
     public var waitsInProgressSyncOnAdd: Bool
 
     /// - parameters:
-    ///    - alwaysNotifyOnRefresh: Asks data provider to notify observer in any case after synchronization completes.
+    ///    - alwaysNotifyOnRefresh: Asks data provider to notify observer in any case after
+    /// synchronization completes.
     ///    Default value is `false`.
     ///
-    ///    - waitsInProgressSyncOnAdd: Asks data provider to wait until any in progress synchronization
-    ///    completes before adding the observer. Default value is `true`. Passing `false` may significantly
-    ///    improve performance however may also introduce inconsitency between observer's local data and
+    ///    - waitsInProgressSyncOnAdd: Asks data provider to wait until any in progress
+    /// synchronization
+    ///    completes before adding the observer. Default value is `true`. Passing `false` may
+    /// significantly
+    ///    improve performance however may also introduce inconsitency between observer's local data
+    /// and
     ///    persistent data if a repository doesn't have any synchronization mechanism.
 
-    public init(alwaysNotifyOnRefresh: Bool = false,
-                waitsInProgressSyncOnAdd: Bool = true) {
+    public init(
+        alwaysNotifyOnRefresh: Bool = false,
+        waitsInProgressSyncOnAdd: Bool = true
+    ) {
         self.alwaysNotifyOnRefresh = alwaysNotifyOnRefresh
         self.waitsInProgressSyncOnAdd = waitsInProgressSyncOnAdd
     }
@@ -90,9 +98,11 @@ public struct StreamableProviderObserverOptions {
     /// there are changes after synchronization.
     public var alwaysNotifyOnRefresh: Bool
 
-    /// Asks data provider to wait until any in progress synchronization completes before adding the observer.
+    /// Asks data provider to wait until any in progress synchronization completes before adding the
+    /// observer.
     /// By default the value is `true`.
-    /// - note: Passing `false` may significantly improve performance however may also introduce inconsitency
+    /// - note: Passing `false` may significantly improve performance however may also introduce
+    /// inconsitency
     /// between observer's local data and persistent data if a repository
     /// doesn't have any synchronization mechanism.
     public var waitsInProgressSyncOnAdd: Bool
@@ -112,22 +122,29 @@ public struct StreamableProviderObserverOptions {
     ///    after synchronization completes.
     ///    Default value is `false`.
     ///
-    ///    - waitsInProgressSyncOnAdd: Asks data provider to wait until any in progress synchronization
-    ///    completes before adding the observer. Default value is `true`. Passing `false` may significantly
-    ///    improve performance however may also introduce inconsitency between observer's local data and
+    ///    - waitsInProgressSyncOnAdd: Asks data provider to wait until any in progress
+    /// synchronization
+    ///    completes before adding the observer. Default value is `true`. Passing `false` may
+    /// significantly
+    ///    improve performance however may also introduce inconsitency between observer's local data
+    /// and
     ///    persistent data if a repository doesn't have any synchronization mechanism.
     ///
-    ///    - initialSize: Number of items to fetch from local store and return in update block call after
+    ///    - initialSize: Number of items to fetch from local store and return in update block call
+    /// after
     ///     observer successfully added. If the value is less or equal to zero than all
     ///     existing objects are fetched.
     ///
-    ///    - refreshWhenEmpty: Calls refresh from data source when list fetched from repository is empty.
+    ///    - refreshWhenEmpty: Calls refresh from data source when list fetched from repository is
+    /// empty.
     ///    Default value is ```true```.
 
-    public init(alwaysNotifyOnRefresh: Bool = false,
-                waitsInProgressSyncOnAdd: Bool = true,
-                initialSize: Int = 0,
-                refreshWhenEmpty: Bool = true) {
+    public init(
+        alwaysNotifyOnRefresh: Bool = false,
+        waitsInProgressSyncOnAdd: Bool = true,
+        initialSize: Int = 0,
+        refreshWhenEmpty: Bool = true
+    ) {
         self.alwaysNotifyOnRefresh = alwaysNotifyOnRefresh
         self.waitsInProgressSyncOnAdd = waitsInProgressSyncOnAdd
         self.initialSize = initialSize
@@ -169,8 +186,8 @@ public extension RepositoryFetchOptions {
     }
 
     /**
-    *  Creates options to prevent including subentities to the fetch request.
-    */
+     *  Creates options to prevent including subentities to the fetch request.
+     */
     static var onlyProperties: RepositoryFetchOptions {
         RepositoryFetchOptions(includesProperties: true, includesSubentities: false)
     }

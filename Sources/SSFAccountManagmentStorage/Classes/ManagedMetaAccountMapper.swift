@@ -1,6 +1,6 @@
+import CoreData
 import Foundation
 import RobinHood
-import CoreData
 import SSFModels
 
 public final class ManagedMetaAccountMapper {
@@ -10,8 +10,8 @@ public final class ManagedMetaAccountMapper {
     public typealias CoreDataEntity = CDMetaAccount
 
     private lazy var metaAccountMapper = MetaAccountMapper()
-    
-    public init() { }
+
+    public init() {}
 }
 
 extension ManagedMetaAccountMapper: CoreDataMapperProtocol {
@@ -42,7 +42,10 @@ extension ManagedMetaAccountMapper: CoreDataMapperProtocol {
             let fetchRequest: NSFetchRequest<CDMetaAccount> = CDMetaAccount.fetchRequest()
             fetchRequest.includesPendingChanges = true
             fetchRequest.includesSubentities = false
-            let sortDescriptor = NSSortDescriptor(key: #keyPath(CDMetaAccount.order), ascending: false)
+            let sortDescriptor = NSSortDescriptor(
+                key: #keyPath(CDMetaAccount.order),
+                ascending: false
+            )
             fetchRequest.sortDescriptors = [sortDescriptor]
             fetchRequest.predicate = NSPredicate(format: "%K > 0", #keyPath(CDMetaAccount.order))
             fetchRequest.fetchLimit = 1

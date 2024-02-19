@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 import SSFUtils
 
 enum XcmV1MultiassetFungibility: Codable {
@@ -19,7 +19,7 @@ enum XcmV1MultiassetFungibility: Codable {
 extension XcmV1MultiassetFungibility: Equatable {
     static func == (lhs: XcmV1MultiassetFungibility, rhs: XcmV1MultiassetFungibility) -> Bool {
         switch (lhs, rhs) {
-        case (let .fungible(lhsValue), let .fungible(rhsValue)):
+        case let (.fungible(lhsValue), .fungible(rhsValue)):
             return lhsValue == rhsValue
         }
     }

@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 
 public protocol RuntimeMetadataProtocol: ScaleCodable {
     var schema: Schema? { get }
@@ -20,11 +20,14 @@ public final class RuntimeMetadata {
     ) throws {
         self.metaReserved = metaReserved
         self.version = version
-        self.wrapped = runtimeMetadata
-        self.schemaResolver = try Schema.Resolver(schema: wrapped.schema)
+        wrapped = runtimeMetadata
+        schemaResolver = try Schema.Resolver(schema: wrapped.schema)
     }
 
-    public func getFunction(from module: String, with name: String) throws -> RuntimeFunctionMetadata? {
+    public func getFunction(
+        from module: String,
+        with name: String
+    ) throws -> RuntimeFunctionMetadata? {
         try wrapped.modules
             .first { $0.name.lowercased() == module.lowercased() }?
             .calls(using: schemaResolver)?
@@ -39,20 +42,26 @@ public final class RuntimeMetadata {
         guard let index = try wrapped.modules
             .first(where: { $0.name.lowercased() == moduleName.lowercased() })?
             .calls(using: schemaResolver)?
-            .firstIndex(where: { $0.name.lowercased() == callName.lowercased() })
-        else {
+            .firstIndex(where: { $0.name.lowercased() == callName.lowercased() }) else
+        {
             return nil
         }
 
         return UInt8(index)
     }
 
-    public func getStorageMetadata(in moduleName: String, storageName: String) -> RuntimeStorageEntryMetadata? {
+    public func getStorageMetadata(
+        in moduleName: String,
+        storageName: String
+    ) -> RuntimeStorageEntryMetadata? {
         wrapped.modules.first(where: { $0.name.lowercased() == moduleName.lowercased() })?
             .storage?.entries.first(where: { $0.name.lowercased() == storageName.lowercased() })
     }
 
-    public func getConstant(in moduleName: String, constantName: String) -> RuntimeModuleConstantMetadata? {
+    public func getConstant(
+        in moduleName: String,
+        constantName: String
+    ) -> RuntimeModuleConstantMetadata? {
         wrapped.modules.first(where: { $0.name.lowercased() == moduleName.lowercased() })?
             .constants.first(where: { $0.name.lowercased() == constantName.lowercased() })
     }
@@ -74,20 +83,20 @@ extension RuntimeMetadata: ScaleCodable {
     public convenience init(scaleDecoder: ScaleDecoding) throws {
         let metaReserved = try UInt32(scaleDecoder: scaleDecoder)
         let version = try UInt8(scaleDecoder: scaleDecoder)
-        
+
         let wrapped: RuntimeMetadataProtocol
         if version >= 14 {
             wrapped = try RuntimeMetadataV14(scaleDecoder: scaleDecoder)
         } else {
             wrapped = try RuntimeMetadataV1(scaleDecoder: scaleDecoder)
         }
-        
+
         try self.init(wrapping: wrapped, metaReserved: metaReserved, version: version)
     }
 }
 
-extension RuntimeMetadata {
-    public static func v1(
+public extension RuntimeMetadata {
+    static func v1(
         modules: [RuntimeMetadataV1.ModuleMetadata],
         extrinsic: RuntimeMetadataV1.ExtrinsicMetadata
     ) throws -> RuntimeMetadata {
@@ -98,7 +107,7 @@ extension RuntimeMetadata {
         )
     }
 
-    public static func v14(
+    static func v14(
         types: [SchemaItem],
         modules: [RuntimeMetadataV14.ModuleMetadata],
         extrinsic: RuntimeMetadataV14.ExtrinsicMetadata
@@ -155,7 +164,7 @@ public struct RuntimeMetadataV14: RuntimeMetadataProtocol, ScaleCodable {
 
     private let _extrinsic: ExtrinsicMetadata
     public var extrinsic: RuntimeExtrinsicMetadata { _extrinsic }
-    
+
     private let type: BigUInt
 
     init(
@@ -164,9 +173,9 @@ public struct RuntimeMetadataV14: RuntimeMetadataProtocol, ScaleCodable {
         extrinsic: ExtrinsicMetadata,
         type: BigUInt
     ) {
-        self._schema = Schema(types: types)
-        self._modules = modules
-        self._extrinsic = extrinsic
+        _schema = Schema(types: types)
+        _modules = modules
+        _extrinsic = extrinsic
         self.type = type
     }
 

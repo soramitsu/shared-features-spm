@@ -1,6 +1,6 @@
 import Foundation
 
-public struct BasisNodes {
+public enum BasisNodes {
     public static func allNodes(for runtimeMetadata: RuntimeMetadata) -> [Node] {
         supportedBaseNodes() + supportedGenericNodes(for: runtimeMetadata)
     }
@@ -14,7 +14,7 @@ public struct BasisNodes {
             U128Node(),
             U256Node(),
             BoolNode(),
-            StringNode()
+            StringNode(),
         ]
     }
 
@@ -53,8 +53,10 @@ public struct BasisNodes {
             MappingNode.seal,
             MappingNode.sealv0,
             MappingNode.preRuntime,
-            AliasNode(typeName: GenericType.voteWeight.rawValue, underlyingTypeName: PrimitiveType.u64.rawValue)
+            AliasNode(
+                typeName: GenericType.voteWeight.rawValue,
+                underlyingTypeName: PrimitiveType.u64.rawValue
+            ),
         ]
     }
-
 }

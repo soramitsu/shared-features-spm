@@ -12,7 +12,7 @@ public struct JSONRPCInfo<P: Encodable>: Encodable {
     public let jsonrpc: String
     public let method: String
     public let params: P
-    
+
     public init(identifier: UInt16, jsonrpc: String, method: String, params: P) {
         self.identifier = identifier
         self.jsonrpc = jsonrpc

@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 
 public enum BitVecNodeError: Error {
     case expectedArrayOfBools(json: JSON)
@@ -29,9 +29,9 @@ public class BitVecNode: Node {
 
         try encoder.append(encodable: BigUInt(length))
 
-        let value = bits.enumerated().reduce(BigUInt(0)) { (result, item) in
+        let value = bits.enumerated().reduce(BigUInt(0)) { result, item in
             if item.element {
-                return (result | (BigUInt(1) << item.offset))
+                return result | (BigUInt(1) << item.offset)
             } else {
                 return result
             }
@@ -49,9 +49,9 @@ public class BitVecNode: Node {
     }
 
     public func accept(decoder: DynamicScaleDecoding) throws -> JSON {
-        guard
-            let bytesCountStr = try decoder.readCompact(type: PrimitiveType.u32.name).stringValue,
-            let bitCount = Int(bytesCountStr) else {
+        guard let bytesCountStr = try decoder.readCompact(type: PrimitiveType.u32.name).stringValue,
+              let bitCount = Int(bytesCountStr) else
+        {
             throw BitVecNodeError.expectedCompactBitLength
         }
 
@@ -64,7 +64,7 @@ public class BitVecNode: Node {
         let data = try Data(hexStringSSF: hex)
         let value = BigUInt(Data(data.reversed()))
 
-        let bits: [JSON] = (0..<bitCount).map { index in
+        let bits: [JSON] = (0 ..< bitCount).map { index in
             let mask = BigUInt(1) << index
 
             if (value & mask) == 0 {

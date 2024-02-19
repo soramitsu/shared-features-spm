@@ -6,13 +6,14 @@ enum XcmChainType {
     case nativeParachain
     case parachain
     case soraMainnet
-    
+
     static func determineChainType(for chain: ChainModel) throws -> XcmChainType {
         guard let paraId = UInt32(chain.paraId ?? "") else {
             if chain.knownChainEquivalent == .soraMain || chain.knownChainEquivalent == .soraTest {
                 return .soraMainnet
             }
-            return .relaychain // we don't have path for parachainId in relaychain and snapshot throw error
+            return .relaychain // we don't have path for parachainId in relaychain and snapshot
+            // throw error
         }
 
         switch paraId {

@@ -1,6 +1,6 @@
 import Foundation
-import SSFUtils
 import RobinHood
+import SSFUtils
 
 public typealias RuntimeMetadataClosure = () throws -> RuntimeMetadata
 

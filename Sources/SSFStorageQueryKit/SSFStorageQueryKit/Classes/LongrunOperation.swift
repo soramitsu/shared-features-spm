@@ -2,7 +2,10 @@ import Foundation
 import RobinHood
 
 class LongrunOperation<T>: BaseOperation<T> {
-    private let lockQueue = DispatchQueue(label: "co.jp.soramitsu.ssfStorageQueryKit.longrunOperation", attributes: .concurrent)
+    private let lockQueue = DispatchQueue(
+        label: "co.jp.soramitsu.ssfStorageQueryKit.longrunOperation",
+        attributes: .concurrent
+    )
 
     override var isAsynchronous: Bool {
         true

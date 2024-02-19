@@ -1,16 +1,15 @@
-import XCTest
-import SSFUtils
-import SSFModels
-import SSFSigner
-import SSFExtrinsicKit
-import SSFRuntimeCodingService
-import RobinHood
 import BigInt
+import RobinHood
+import SSFExtrinsicKit
+import SSFModels
+import SSFRuntimeCodingService
+import SSFSigner
+import SSFUtils
+import XCTest
 
 @testable import SSFXCM
 
 final class XcmExtrinsicServiceTests: XCTestCase {
-    
     var service: XcmExtrinsicServiceProtocol?
     var extrinsicBuilder: XcmExtrinsicBuilderProtocolMock?
     var versionFetcher: XcmVersionFetchingMock?
@@ -18,36 +17,42 @@ final class XcmExtrinsicServiceTests: XCTestCase {
     var depsContainer: XcmDependencyContainerProtocolMock?
     var determiner: CallPathDeterminerMock?
     var feeFetcher: XcmDestinationFeeFetchingMock?
-    
+
     override func setUp() {
         super.setUp()
-        
-        let signingWrapper = TransactionSigner(publicKeyData: Data(), secretKeyData: Data(), cryptoType: .sr25519)
+
+        let signingWrapper = TransactionSigner(
+            publicKeyData: Data(),
+            secretKeyData: Data(),
+            cryptoType: .sr25519
+        )
         let extrinsicBuilder = XcmExtrinsicBuilderProtocolMock()
         let versionFetcher = XcmVersionFetchingMock()
         let chainRegistry = ChainRegistryProtocolMock()
         let depsContainer = XcmDependencyContainerProtocolMock()
         let determiner = CallPathDeterminerMock()
         let feeFetcher = XcmDestinationFeeFetchingMock()
-        
+
         self.extrinsicBuilder = extrinsicBuilder
         self.versionFetcher = versionFetcher
         self.chainRegistry = chainRegistry
         self.depsContainer = depsContainer
         self.determiner = determiner
         self.feeFetcher = feeFetcher
-        
+
         setupDependencies()
-        
-        service = XcmExtrinsicService(signingWrapper: signingWrapper,
-                                      extrinsicBuilder: extrinsicBuilder,
-                                      xcmVersionFetcher: versionFetcher,
-                                      chainRegistry: chainRegistry,
-                                      depsContainer: depsContainer,
-                                      callPathDeterminer: determiner,
-                                      xcmFeeFetcher: feeFetcher)
+
+        service = XcmExtrinsicService(
+            signingWrapper: signingWrapper,
+            extrinsicBuilder: extrinsicBuilder,
+            xcmVersionFetcher: versionFetcher,
+            chainRegistry: chainRegistry,
+            depsContainer: depsContainer,
+            callPathDeterminer: determiner,
+            xcmFeeFetcher: feeFetcher
+        )
     }
-    
+
     override func tearDown() {
         super.tearDown()
         extrinsicBuilder = nil
@@ -58,63 +63,73 @@ final class XcmExtrinsicServiceTests: XCTestCase {
         feeFetcher = nil
         service = nil
     }
-    
+
     func testEstimateOriginalFee() async {
         // arrange
-        let fromChainId: String = "0"
-        let assetSymbol: String = "0"
-        let destChainId: String = "0"
+        let fromChainId = "0"
+        let assetSymbol = "0"
+        let destChainId = "0"
         let destAccountId: AccountId = Data()
-        let amount: BigUInt = BigUInt()
-        
+        let amount = BigUInt()
+
         for path in TestData.paths {
             determiner?.determineCallPathFromDestReturnValue = path
-            
+
             // act
-            let result = await service?.estimateOriginalFee(fromChainId: fromChainId,
-                                                            assetSymbol: assetSymbol,
-                                                            destChainId: destChainId,
-                                                            destAccountId: destAccountId,
-                                                            amount: amount)
+            let result = await service?.estimateOriginalFee(
+                fromChainId: fromChainId,
+                assetSymbol: assetSymbol,
+                destChainId: destChainId,
+                destAccountId: destAccountId,
+                amount: amount
+            )
             // assert
             XCTAssertNotNil(result)
-            
+
             switch result {
-            case .success(let info):
+            case let .success(info):
                 XCTAssertEqual(info.fee, "0")
-            case .failure(let error):
-                XCTAssertEqual(error.localizedDescription, XcmError.caseNotProcessed.localizedDescription)
+            case let .failure(error):
+                XCTAssertEqual(
+                    error.localizedDescription,
+                    XcmError.caseNotProcessed.localizedDescription
+                )
             case .none:
                 XCTFail()
             }
         }
     }
-    
+
     func testTransfer() async {
         // arrange
-        let fromChainId: String = "0"
-        let assetSymbol: String = "0"
-        let destChainId: String = "0"
+        let fromChainId = "0"
+        let assetSymbol = "0"
+        let destChainId = "0"
         let destAccountId: AccountId = Data()
-        let amount: BigUInt = BigUInt()
-        
+        let amount = BigUInt()
+
         for path in TestData.paths {
             determiner?.determineCallPathFromDestReturnValue = path
-            
+
             // act
-            let result = await service?.transfer(fromChainId: fromChainId,
-                                                 assetSymbol: assetSymbol,
-                                                 destChainId: destChainId,
-                                                 destAccountId: destAccountId,
-                                                 amount: amount)
+            let result = await service?.transfer(
+                fromChainId: fromChainId,
+                assetSymbol: assetSymbol,
+                destChainId: destChainId,
+                destAccountId: destAccountId,
+                amount: amount
+            )
             // assert
             XCTAssertNotNil(result)
-            
+
             switch result {
-            case .success(let value):
+            case let .success(value):
                 XCTAssertEqual(value, "success")
-            case .failure(let error):
-                XCTAssertEqual(error.localizedDescription, XcmError.caseNotProcessed.localizedDescription)
+            case let .failure(error):
+                XCTAssertEqual(
+                    error.localizedDescription,
+                    XcmError.caseNotProcessed.localizedDescription
+                )
             case .none:
                 XCTFail()
             }
@@ -124,86 +139,128 @@ final class XcmExtrinsicServiceTests: XCTestCase {
 
 private extension XcmExtrinsicServiceTests {
     private enum TestData {
-        static let fromChainData = XcmAssembly.FromChainData(chainId: "1",
-                                                             cryptoType: .ed25519,
-                                                             chainMetadata: nil,
-                                                             accountId: Data(),
-                                                             signingWrapperData: .init(publicKeyData: Data(), secretKeyData: Data()))
-        
-        static let fromChain = ChainModel(rank: 0,
-                                          disabled: false,
-                                          chainId: "0",
-                                          paraId: "1001",
-                                          name: "test1",
-                                          assets: Set([.init(id: "0",
-                                                             name: "0",
-                                                             symbol: "0",
-                                                             precision: 0,
-                                                             currencyId: "0",
-                                                             existentialDeposit: "0",
-                                                             color: "0",
-                                                             isUtility: true,
-                                                             isNative: true,
-                                                             staking: .paraChain)]),
-                                          xcm: XcmChain(xcmVersion: .V3,
-                                                        destWeightIsPrimitive: true,
-                                                        availableAssets: [.init(id: "0", symbol: "0")],
-                                                        availableDestinations: [.init(chainId: "0",
-                                                                                      bridgeParachainId: "2",
-                                                                                      assets: [.init(id: "1", symbol: "1")])]),
-                                          nodes: Set([ChainNodeModel(url: XcmConfig.shared.tokenLocationsSourceUrl,
-                                                                     name: "test1")]),
-                                          addressPrefix: 0,
-                                          icon: nil,
-                                          iosMinAppVersion: nil)
-        
-        static let paths: [XcmCallPath] = [.xcmPalletLimitedTeleportAssets,
-                                           .xcmPalletLimitedReserveTransferAssets,
-                                           .polkadotXcmLimitedTeleportAssets,
-                                           .polkadotXcmLimitedReserveTransferAssets,
-                                           .polkadotXcmLimitedReserveWithdrawAssets,
-                                           .xTokensTransferMultiasset,
-                                           .bridgeProxyBurn,
-                                           .parachainId]
-        
-        static let runtimeProvider = RuntimeProvider(operationQueue: OperationQueue(),
-                                                     usedRuntimePaths: [:],
-                                                     chainMetadata: RuntimeMetadataItem(chain: "0",
-                                                                                        version: 0,
-                                                                                        txVersion: 0,
-                                                                                        metadata: Data()),
-                                                     chainTypes: Data())
-        
-        static let connectionChain = WebSocketEngine(connectionName: "test", url: XcmConfig.shared.chainsSourceUrl)
+        static let fromChainData = XcmAssembly.FromChainData(
+            chainId: "1",
+            cryptoType: .ed25519,
+            chainMetadata: nil,
+            accountId: Data(),
+            signingWrapperData: .init(
+                publicKeyData: Data(),
+                secretKeyData: Data()
+            )
+        )
+
+        static let fromChain = ChainModel(
+            rank: 0,
+            disabled: false,
+            chainId: "0",
+            paraId: "1001",
+            name: "test1",
+            assets: Set([.init(
+                id: "0",
+                name: "0",
+                symbol: "0",
+                precision: 0,
+                currencyId: "0",
+                existentialDeposit: "0",
+                color: "0",
+                isUtility: true,
+                isNative: true,
+                staking: .paraChain
+            )]),
+            xcm: XcmChain(
+                xcmVersion: .V3,
+                destWeightIsPrimitive: true,
+                availableAssets: [.init(
+                    id: "0",
+                    symbol: "0"
+                )],
+                availableDestinations: [.init(
+                    chainId: "0",
+                    bridgeParachainId: "2",
+                    assets: [.init(
+                        id: "1",
+                        symbol: "1"
+                    )]
+                )]
+            ),
+            nodes: Set([ChainNodeModel(
+                url: XcmConfig.shared.tokenLocationsSourceUrl,
+                name: "test1"
+            )]),
+            addressPrefix: 0,
+            icon: nil,
+            iosMinAppVersion: nil
+        )
+
+        static let paths: [XcmCallPath] = [
+            .xcmPalletLimitedTeleportAssets,
+            .xcmPalletLimitedReserveTransferAssets,
+            .polkadotXcmLimitedTeleportAssets,
+            .polkadotXcmLimitedReserveTransferAssets,
+            .polkadotXcmLimitedReserveWithdrawAssets,
+            .xTokensTransferMultiasset,
+            .bridgeProxyBurn,
+            .parachainId,
+        ]
+
+        static let runtimeProvider = RuntimeProvider(
+            operationQueue: OperationQueue(),
+            usedRuntimePaths: [:],
+            chainMetadata: RuntimeMetadataItem(
+                chain: "0",
+                version: 0,
+                txVersion: 0,
+                metadata: Data()
+            ),
+            chainTypes: Data()
+        )
+
+        static let connectionChain = WebSocketEngine(
+            connectionName: "test",
+            url: XcmConfig.shared.chainsSourceUrl
+        )
     }
-    
+
     func setupDependencies() {
         chainRegistry?.getChainForReturnValue = TestData.fromChain
         feeFetcher?.estimateWeightForReturnValue = BigUInt()
         versionFetcher?.getVersionForReturnValue = .V1
-        
+
         let closure: ExtrinsicBuilderClosure = { $0 }
-        extrinsicBuilder?.buildReserveNativeTokenExtrinsicBuilderClosureVersionFromChainModelDestChainModelDestAccountIdAmountWeightLimitPathReturnValue = closure
-        extrinsicBuilder?.buildXTokensTransferExtrinsicBuilderClosureVersionAccountIdCurrencyIdDestChainModelAmountWeightLimitPathReturnValue = closure
-        extrinsicBuilder?.buildXTokensTransferMultiassetExtrinsicBuilderClosureAssetSymbolVersionAccountIdFromChainModelDestChainModelAmountWeightLimitPathDestWeightIsPrimitiveReturnValue = closure
-        extrinsicBuilder?.buildPolkadotXcmLimitedReserveTransferAssetsExtrinsicBuilderClosureFromChainModelVersionAssetSymbolAccountIdDestChainModelAmountWeightLimitPathReturnValue = closure
-        extrinsicBuilder?.buildBridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathReturnValue = closure
+        extrinsicBuilder?
+            .buildReserveNativeTokenExtrinsicBuilderClosureVersionFromChainModelDestChainModelDestAccountIdAmountWeightLimitPathReturnValue =
+            closure
+        extrinsicBuilder?
+            .buildXTokensTransferExtrinsicBuilderClosureVersionAccountIdCurrencyIdDestChainModelAmountWeightLimitPathReturnValue =
+            closure
+        extrinsicBuilder?
+            .buildXTokensTransferMultiassetExtrinsicBuilderClosureAssetSymbolVersionAccountIdFromChainModelDestChainModelAmountWeightLimitPathDestWeightIsPrimitiveReturnValue =
+            closure
+        extrinsicBuilder?
+            .buildPolkadotXcmLimitedReserveTransferAssetsExtrinsicBuilderClosureFromChainModelVersionAssetSymbolAccountIdDestChainModelAmountWeightLimitPathReturnValue =
+            closure
+        extrinsicBuilder?
+            .buildBridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathReturnValue =
+            closure
         depsContainer?.prepareDepsReturnValue = XcmDeps(extrinsicService: extrinsicService())
     }
-    
+
     private func extrinsicService() -> ExtrinsicServiceProtocol {
         let extrinsicService = ExtrinsicServiceProtocolMock()
         extrinsicService.estimateFeeRunningInCompletionClosure = { _, _, completion in
-            let info = RuntimeDispatchInfo(inclusionFee: .init(baseFee: BigUInt(),
-                                                               lenFee: BigUInt(),
-                                                               adjustedWeightFee: BigUInt()))
+            let info = RuntimeDispatchInfo(inclusionFee: .init(
+                baseFee: BigUInt(),
+                lenFee: BigUInt(),
+                adjustedWeightFee: BigUInt()
+            ))
             completion(.success(info))
         }
-        
+
         extrinsicService.submitSignerRunningInCompletionClosure = { _, _, _, completion in
             completion(.success("success"))
         }
-        
+
         return extrinsicService
     }
 }

@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 import IrohaCrypto
 
 public enum BIP32JunctionFactoryError: Error {
@@ -7,17 +7,18 @@ public enum BIP32JunctionFactoryError: Error {
     case invalidBIP32HardJunction
 }
 
-final public class BIP32JunctionFactory: JunctionFactory {
-    static let hardKeyFlag: UInt32 = 0x80000000
+public final class BIP32JunctionFactory: JunctionFactory {
+    static let hardKeyFlag: UInt32 = 0x8000_0000
 
-    public override init() {
+    override public init() {
         super.init()
     }
 
-    internal override func createChaincodeFromJunction(_ junction: String, type: ChaincodeType) throws -> Chaincode {
-        guard
-            var numericJunction = UInt32(junction)
-        else {
+    override func createChaincodeFromJunction(
+        _ junction: String,
+        type: ChaincodeType
+    ) throws -> Chaincode {
+        guard var numericJunction = UInt32(junction) else {
             throw BIP32JunctionFactoryError.invalidBIP32Junction
         }
 

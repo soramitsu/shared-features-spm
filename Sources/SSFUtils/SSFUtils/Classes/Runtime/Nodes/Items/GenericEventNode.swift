@@ -22,11 +22,11 @@ public class GenericEventNode: Node {
             throw DynamicScaleEncoderError.arrayExpected(json: value)
         }
 
-        guard
-            input.count == 3,
-            let eventModule = input[0].unsignedIntValue,
-            let eventIndex = input[1].unsignedIntValue,
-            let params = input[2].arrayValue else {
+        guard input.count == 3,
+              let eventModule = input[0].unsignedIntValue,
+              let eventIndex = input[1].unsignedIntValue,
+              let params = input[2].arrayValue else
+        {
             throw GenericEventNodeError.unexpectedParams
         }
 
@@ -34,33 +34,39 @@ public class GenericEventNode: Node {
             throw GenericEventNodeError.unexpectedEventModule(value: eventModule)
         }
 
-        guard let events = try module.events(using: runtimeMetadata.schemaResolver), events.count > eventIndex else {
+        guard let events = try module.events(using: runtimeMetadata.schemaResolver),
+              events.count > eventIndex else
+        {
             throw GenericEventNodeError.unexpectedEventIndex(value: eventIndex)
         }
 
         let arguments = events[Int(eventIndex)].arguments
 
         guard arguments.count == params.count else {
-            throw GenericEventNodeError.argumentsNotMatchingParams(arguments: arguments,
-                                                                   params: params)
+            throw GenericEventNodeError.argumentsNotMatchingParams(
+                arguments: arguments,
+                params: params
+            )
         }
 
         try encoder.appendU8(json: .stringValue(String(eventModule)))
         try encoder.appendU8(json: .stringValue(String(eventIndex)))
 
-        for index in 0..<arguments.count {
+        for index in 0 ..< arguments.count {
             try encoder.append(json: params[index], type: arguments[index])
         }
     }
 
     public func accept(decoder: DynamicScaleDecoding) throws -> JSON {
-        guard let eventModuleString = (try decoder.readU8()).stringValue,
-              let eventModule = UInt8(eventModuleString) else {
+        guard let eventModuleString = try (decoder.readU8()).stringValue,
+              let eventModule = UInt8(eventModuleString) else
+        {
             throw GenericEventNodeError.unexpectedDecodedModule
         }
 
-        guard let eventString = (try decoder.readU8()).stringValue,
-              let eventIndex = UInt8(eventString) else {
+        guard let eventString = try (decoder.readU8()).stringValue,
+              let eventIndex = UInt8(eventString) else
+        {
             throw GenericEventNodeError.unexpectedDecodedEventIndex
         }
 
@@ -68,18 +74,20 @@ public class GenericEventNode: Node {
             throw GenericEventNodeError.unexpectedEventModule(value: UInt64(eventModule))
         }
 
-        guard let events = try module.events(using: runtimeMetadata.schemaResolver), events.count > eventIndex else {
+        guard let events = try module.events(using: runtimeMetadata.schemaResolver),
+              events.count > eventIndex else
+        {
             throw GenericEventNodeError.unexpectedEventIndex(value: UInt64(eventIndex))
         }
 
         let arguments = events[Int(eventIndex)].arguments
 
-        let params: [JSON] = try arguments.map { try decoder.read(type: $0)}
+        let params: [JSON] = try arguments.map { try decoder.read(type: $0) }
 
         return .arrayValue([
             .unsignedIntValue(UInt64(eventModule)),
             .unsignedIntValue(UInt64(eventIndex)),
-            .arrayValue(params)
+            .arrayValue(params),
         ])
     }
 }

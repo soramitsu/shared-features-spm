@@ -6,10 +6,12 @@ public struct KeystoreDefinition: Codable {
     public let encoding: KeystoreEncoding
     public let meta: KeystoreMeta?
 
-    public init(address: String?,
-                encoded: String,
-                encoding: KeystoreEncoding,
-                meta: KeystoreMeta?) {
+    public init(
+        address: String?,
+        encoded: String,
+        encoding: KeystoreEncoding,
+        meta: KeystoreMeta?
+    ) {
         self.address = address
         self.encoded = encoded
         self.encoding = encoding
@@ -27,15 +29,15 @@ public struct KeystoreEncoding: Codable {
         self.type = type
         self.version = version
     }
-    
+
     public init(from decoder: Decoder) throws {
         let data = try decoder.container(keyedBy: CodingKeys.self)
-        self.content = try data.decode([String].self, forKey: .content)
-        self.type = try data.decode([String].self, forKey: .type)
+        content = try data.decode([String].self, forKey: .content)
+        type = try data.decode([String].self, forKey: .type)
         if let stringVersion = try? data.decode(String.self, forKey: .version) {
-            self.version = stringVersion
+            version = stringVersion
         } else if let numberVersion = try? data.decode(Int.self, forKey: .version) {
-            self.version = String(numberVersion)
+            version = String(numberVersion)
         } else {
             throw DecodingError.typeMismatch(
                 Self.self,

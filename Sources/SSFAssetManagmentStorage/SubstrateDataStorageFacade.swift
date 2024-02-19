@@ -1,12 +1,15 @@
-import RobinHood
 import CoreData
+import RobinHood
 import SSFUtils
 
 public enum SubstrateStorageParams {
     static let modelVersion: SubstrateStorageVersion = .version5
     static let modelDirectory: String = "SubstrateDataModel.momd"
     static let databaseName = "SubstrateDataModel.sqlite"
-    public static let momURL = Bundle.module.url(forResource: "SubstrateDataModel", withExtension: "momd")
+    public static let momURL = Bundle.module.url(
+        forResource: "SubstrateDataModel",
+        withExtension: "momd"
+    )
 
     static let storageDirectoryURL: URL = {
         let baseURL = FileManager.default.urls(
@@ -39,7 +42,7 @@ class SubstrateDataStorageFacade: StorageFacadeProtocol {
 
         let options = [
             NSMigratePersistentStoresAutomaticallyOption: true,
-            NSInferMappingModelAutomaticallyOption: true
+            NSInferMappingModelAutomaticallyOption: true,
         ]
 
         let persistentSettings = CoreDataPersistentSettings(

@@ -14,7 +14,7 @@ extension KeystoreBuilder: KeystoreBuilding {
     enum Constants {
         static let ethereum = "ethereum"
     }
-    
+
     public func with(name: String) -> Self {
         self.name = name
         return self
@@ -30,7 +30,11 @@ extension KeystoreBuilder: KeystoreBuilding {
         return self
     }
 
-    public func build(from data: KeystoreData, password: String?, isEthereum: Bool) throws -> KeystoreDefinition {
+    public func build(
+        from data: KeystoreData,
+        password: String?,
+        isEthereum: Bool
+    ) throws -> KeystoreDefinition {
         let scryptParameters = try ScryptParameters()
 
         let scryptData: Data
@@ -46,12 +50,14 @@ extension KeystoreBuilder: KeystoreBuilding {
         }
 
         let encryptionKey = try IRScryptKeyDeriviation()
-            .deriveKey(from: scryptData,
-                       salt: scryptParameters.salt,
-                       scryptN: UInt(scryptParameters.scryptN),
-                       scryptP: UInt(scryptParameters.scryptP),
-                       scryptR: UInt(scryptParameters.scryptR),
-                       length: UInt(KeystoreConstants.encryptionKeyLength))
+            .deriveKey(
+                from: scryptData,
+                salt: scryptParameters.salt,
+                scryptN: UInt(scryptParameters.scryptN),
+                scryptP: UInt(scryptParameters.scryptP),
+                scryptR: UInt(scryptParameters.scryptR),
+                length: UInt(KeystoreConstants.encryptionKeyLength)
+            )
 
         let nonce = try Data.generateRandomBytes(of: KeystoreConstants.nonceLength)
 
@@ -67,28 +73,41 @@ extension KeystoreBuilder: KeystoreBuilding {
 
         let pcksData = KeystoreConstants.pkcs8Header + secretKeyData +
             KeystoreConstants.pkcs8Divider + data.publicKeyData
-        let encrypted = try NaclSecretBox.secretBox(message: pcksData, nonce: nonce, key: encryptionKey)
+        let encrypted = try NaclSecretBox.secretBox(
+            message: pcksData,
+            nonce: nonce,
+            key: encryptionKey
+        )
 
         let encoded = scryptParameters.encode() + nonce + encrypted
 
         let cryptoType = isEthereum ? Constants.ethereum : data.cryptoType.stringValue
-        let encodingType = [KeystoreEncodingType.scrypt.rawValue, KeystoreEncodingType.xsalsa.rawValue]
+        let encodingType = [
+            KeystoreEncodingType.scrypt.rawValue,
+            KeystoreEncodingType.xsalsa.rawValue,
+        ]
         let encodingContent = [KeystoreEncodingContent.pkcs8.rawValue, cryptoType]
-        let keystoreEncoding = KeystoreEncoding(content: encodingContent,
-                                                type: encodingType,
-                                                version: String(KeystoreConstants.version))
+        let keystoreEncoding = KeystoreEncoding(
+            content: encodingContent,
+            type: encodingType,
+            version: String(KeystoreConstants.version)
+        )
 
         let isHardware: Bool? = isEthereum ? false : nil
         let tags: [String]? = isEthereum ? [] : nil
-        let meta = KeystoreMeta(name: name,
-                                createdAt: Int64(creationDate.timeIntervalSince1970),
-                                genesisHash: genesisHash,
-                                isHardware: isHardware,
-                                tags: tags)
+        let meta = KeystoreMeta(
+            name: name,
+            createdAt: Int64(creationDate.timeIntervalSince1970),
+            genesisHash: genesisHash,
+            isHardware: isHardware,
+            tags: tags
+        )
 
-        return KeystoreDefinition(address: data.address,
-                                  encoded: encoded.base64EncodedString(),
-                                  encoding: keystoreEncoding,
-                                  meta: meta)
+        return KeystoreDefinition(
+            address: data.address,
+            encoded: encoded.base64EncodedString(),
+            encoding: keystoreEncoding,
+            meta: meta
+        )
     }
 }

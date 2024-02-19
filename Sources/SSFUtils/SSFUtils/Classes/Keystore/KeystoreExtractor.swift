@@ -5,8 +5,10 @@ import TweetNacl
 public class KeystoreExtractor: KeystoreExtracting {
     public init() {}
 
-    public func extractFromDefinition(_ info: KeystoreDefinition,
-                                      password: String?) throws -> KeystoreData {
+    public func extractFromDefinition(
+        _ info: KeystoreDefinition,
+        password: String?
+    ) throws -> KeystoreData {
         guard let data = Data(base64Encoded: info.encoded) else {
             throw KeystoreExtractorError.invalidBase64
         }
@@ -18,9 +20,9 @@ public class KeystoreExtractor: KeystoreExtracting {
 
         if keyDerivationName == nil, cipherType == nil {
             encodedData = data
-        } else if
-            keyDerivationName == KeystoreEncodingType.scrypt.rawValue,
-            cipherType == KeystoreEncodingType.xsalsa.rawValue {
+        } else if keyDerivationName == KeystoreEncodingType.scrypt.rawValue,
+                  cipherType == KeystoreEncodingType.xsalsa.rawValue
+        {
             let scryptParameters = try ScryptParameters(data: data)
 
             let scryptData: Data
@@ -36,19 +38,25 @@ public class KeystoreExtractor: KeystoreExtracting {
             }
 
             let encryptionKey = try IRScryptKeyDeriviation()
-                .deriveKey(from: scryptData,
-                           salt: scryptParameters.salt,
-                           scryptN: UInt(scryptParameters.scryptN),
-                           scryptP: UInt(scryptParameters.scryptP),
-                           scryptR: UInt(scryptParameters.scryptR),
-                           length: UInt(KeystoreConstants.encryptionKeyLength))
+                .deriveKey(
+                    from: scryptData,
+                    salt: scryptParameters.salt,
+                    scryptN: UInt(scryptParameters.scryptN),
+                    scryptP: UInt(scryptParameters.scryptP),
+                    scryptR: UInt(scryptParameters.scryptR),
+                    length: UInt(KeystoreConstants.encryptionKeyLength)
+                )
 
             let nonceStart = ScryptParameters.encodedLength
             let nonceEnd = ScryptParameters.encodedLength + KeystoreConstants.nonceLength
-            let nonce = Data(data[nonceStart..<nonceEnd])
+            let nonce = Data(data[nonceStart ..< nonceEnd])
             let encryptedData = Data(data[nonceEnd...])
 
-            encodedData = try NaclSecretBox.open(box: encryptedData, nonce: nonce, key: encryptionKey)
+            encodedData = try NaclSecretBox.open(
+                box: encryptedData,
+                nonce: nonce,
+                key: encryptionKey
+            )
         } else {
             throw KeystoreExtractorError.unsupportedEncoding
         }
@@ -59,7 +67,8 @@ public class KeystoreExtractor: KeystoreExtracting {
     private func decodePkcs8(data: Data, definition: KeystoreDefinition) throws -> KeystoreData {
         let info = try KeystoreInfoFactory().createInfo(from: definition)
 
-        let contentType = definition.encoding.content.count > 0 ? definition.encoding.content[0] : nil
+        let contentType = definition.encoding.content.count > 0 ? definition.encoding
+            .content[0] : nil
 
         guard contentType == KeystoreEncodingContent.pkcs8.rawValue else {
             throw KeystoreExtractorError.unsupportedContent
@@ -76,7 +85,7 @@ public class KeystoreExtractor: KeystoreExtracting {
         let secretStart = KeystoreConstants.pkcs8Header.count
         let secretEnd = dividerRange.startIndex
 
-        let importedSecretData = Data(data[secretStart..<secretEnd])
+        let importedSecretData = Data(data[secretStart ..< secretEnd])
 
         let secretKeyData: Data
         switch info.cryptoType {
@@ -91,9 +100,11 @@ public class KeystoreExtractor: KeystoreExtracting {
         let publicStart = dividerRange.endIndex
         let publicKeyData = Data(data[publicStart...])
 
-        return KeystoreData(address: definition.address,
-                            secretKeyData: secretKeyData,
-                            publicKeyData: publicKeyData,
-                            cryptoType: info.cryptoType)
+        return KeystoreData(
+            address: definition.address,
+            secretKeyData: secretKeyData,
+            publicKeyData: publicKeyData,
+            cryptoType: info.cryptoType
+        )
     }
 }

@@ -1,14 +1,17 @@
+import CoreData
 import Foundation
 import RobinHood
-import CoreData
 import SSFUtils
 
 public enum UserStorageParams {
     static let modelVersion: UserStorageVersion = .version11
     static let modelDirectory: String = "UserDataModel.momd"
     static let databaseName = "UserDataModel.sqlite"
-    public static let momURL = Bundle.module.url(forResource: "UserDataModel", withExtension: "momd")
-    
+    public static let momURL = Bundle.module.url(
+        forResource: "UserDataModel",
+        withExtension: "momd"
+    )
+
     static let storageDirectoryURL: URL = {
         let baseURL = FileManager.default.urls(
             for: .documentDirectory,
@@ -90,7 +93,7 @@ public class UserDataStorageFacade: StorageFacadeProtocol {
             predicate: { _ in true }
         )
 
-        observer.start { error in }
+        observer.start { _ in }
 
         return StreamableProvider(
             source: AnyStreamableSource(EmptyStreamableSource<T>()),

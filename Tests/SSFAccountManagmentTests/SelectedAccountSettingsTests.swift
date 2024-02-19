@@ -1,8 +1,8 @@
-import XCTest
 import RobinHood
 import SSFAccountManagmentStorage
-import SSFModels
 import SSFHelpers
+import SSFModels
+import XCTest
 
 @testable import SSFAccountManagment
 
@@ -27,11 +27,12 @@ class SelectedAccountSettingsTests: XCTestCase {
 
         // act
 
-        selectedAccountSettings.setup(runningCompletionIn: .global()) { _ in}
+        selectedAccountSettings.setup(runningCompletionIn: .global()) { _ in }
 
         XCTAssertNil(selectedAccountSettings.value)
 
-        selectedAccountSettings.save(value: selectedAccount.info, runningCompletionIn: .global()) { _ in }
+        selectedAccountSettings
+            .save(value: selectedAccount.info, runningCompletionIn: .global()) { _ in }
 
         // assert
 
@@ -72,11 +73,12 @@ class SelectedAccountSettingsTests: XCTestCase {
 
         // when
 
-        selectedAccountSettings.setup(runningCompletionIn: .global()) { _ in}
+        selectedAccountSettings.setup(runningCompletionIn: .global()) { _ in }
 
         XCTAssertEqual(selectedAccountSettings.value, initialSelectedAccount.info)
 
-        selectedAccountSettings.save(value: nextSelectedAccount, runningCompletionIn: .global()) { _ in }
+        selectedAccountSettings
+            .save(value: nextSelectedAccount, runningCompletionIn: .global()) { _ in }
 
         // then
 
@@ -93,9 +95,10 @@ class SelectedAccountSettingsTests: XCTestCase {
             result[account.metaId] = account
         }
 
-        let actualAccounts = allMetaAccounts.reduce(into: [String: MetaAccountModel]()) { result, account in
-            result[account.identifier] = account.info
-        }
+        let actualAccounts = allMetaAccounts
+            .reduce(into: [String: MetaAccountModel]()) { result, account in
+                result[account.identifier] = account.info
+            }
 
         XCTAssertEqual(expectedAccounts, actualAccounts)
     }

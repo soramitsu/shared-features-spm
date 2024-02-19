@@ -2,7 +2,7 @@ import Foundation
 
 public struct ConvenienceError: Error {
     let error: String
-    
+
     public init(error: String) {
         self.error = error
     }

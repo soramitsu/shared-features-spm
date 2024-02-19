@@ -1,29 +1,35 @@
-import XCTest
 import SSFModels
+import XCTest
 
 @testable import SSFAccountManagment
 
 final class JSONExportServiceTests: XCTestCase {
-
     var service: JSONExportServiceProtocol?
-    
+
     override func setUpWithError() throws {
         try super.setUpWithError()
-        
+
         let genesisService = GenesisBlockHashWorkerProtocolMock()
         genesisService.getGenesisHashReturnValue = "123"
 
         let fileURL = URL(string: "https://github.com")!
-        let data = JSONExportData(data: "test", chain: TestData.chain, cryptoType: nil, fileURL: fileURL)
+        let data = JSONExportData(
+            data: "test",
+            chain: TestData.chain,
+            cryptoType: nil,
+            fileURL: fileURL
+        )
         let factory = JSONExportDataFactoryProtocolMock()
-        factory.createJSONExportDataMetaIdAccountIdChainAccountChainPasswordAddressGenesisHashReturnValue = data
-        
+        factory
+            .createJSONExportDataMetaIdAccountIdChainAccountChainPasswordAddressGenesisHashReturnValue =
+            data
+
         service = JSONExportService(
             genesisService: genesisService,
             factory: factory
         )
     }
-    
+
     override func tearDown() {
         super.tearDown()
         service = nil
@@ -32,15 +38,19 @@ final class JSONExportServiceTests: XCTestCase {
     func testExportWallet() async {
         // arrange
         let account = ChainAccountInfo(chain: TestData.chain, account: TestData.response)
-        
+
         // act
-        let data = await service?.export(wallet: TestData.account, accounts: [account], password: "123")
-        
+        let data = await service?.export(
+            wallet: TestData.account,
+            accounts: [account],
+            password: "123"
+        )
+
         // assert
         XCTAssertNotNil(data)
     }
-    
-    func testExportAccount() async throws  {
+
+    func testExportAccount() async throws {
         // act
         let data = try await service?.exportAccount(
             address: "77TsMPwQq1UjycY3xZ5AJGRfCTjYS6hR7JypCsC7gUjsQSe",
@@ -48,7 +58,7 @@ final class JSONExportServiceTests: XCTestCase {
             chain: TestData.chain,
             wallet: TestData.account
         )
-        
+
         // assert
         XCTAssertNotNil(data)
     }
@@ -63,7 +73,7 @@ extension JSONExportServiceTests {
             cryptoType: 23,
             ethereumBased: false
         )
-        
+
         static let account = MetaAccountModel(
             metaId: "1",
             name: "test",
@@ -84,7 +94,7 @@ extension JSONExportServiceTests {
             hasBackup: false,
             favouriteChainIds: []
         )
-        
+
         static let chain = ChainModel(
             rank: 1,
             disabled: true,
@@ -104,7 +114,7 @@ extension JSONExportServiceTests {
             customNodes: [],
             iosMinAppVersion: nil
         )
-        
+
         static let response = ChainAccountResponse(
             chainId: TestData.chain.chainId,
             accountId: Data(),

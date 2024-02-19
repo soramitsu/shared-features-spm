@@ -3,13 +3,12 @@ import XCTest
 @testable import SSFQRService
 
 final class QRDecoderTests: XCTestCase {
-
     func testBokoloCashDecoder() async throws {
-
         // arrange
         let address = "ivan_ivan@auki"
         let assetId = "090"
-        let bokoloQRCodeString = "https://bokolodemo.page.link/data?qr=00020101021129180014\(address)520459995303\(assetId)5802LA5909Ivan%20Ivan6010Phnom%20Penh6304DCAF"
+        let bokoloQRCodeString =
+            "https://bokolodemo.page.link/data?qr=00020101021129180014\(address)520459995303\(assetId)5802LA5909Ivan%20Ivan6010Phnom%20Penh6304DCAF"
         let data = bokoloQRCodeString.data(using: .utf8)!
         let decoder = BokoloCashDecoder()
 
@@ -20,7 +19,7 @@ final class QRDecoderTests: XCTestCase {
         XCTAssertNotNil(qrType)
 
         switch qrType {
-        case .bokoloCash(let bokoloCashQRInfo):
+        case let .bokoloCash(bokoloCashQRInfo):
             XCTAssertEqual(bokoloCashQRInfo.address, address)
             XCTAssertEqual(bokoloCashQRInfo.assetId, assetId)
             XCTAssertNil(bokoloCashQRInfo.transactionAmount)
@@ -30,12 +29,12 @@ final class QRDecoderTests: XCTestCase {
     }
 
     func testBokoloCashDecoderWithAmount() async throws {
-
         // arrange
         let address = "ivan_ivan@auki"
         let assetId = "090"
         let amount = "1.5"
-        let bokoloQRCodeString =  "https://bokolodemo.page.link/data?qr=00020101021229180014\(address)520459995303\(assetId)5403\(amount)5802LA5909Ivan%20Ivan6010Phnom%20Penh6304A2CA"
+        let bokoloQRCodeString =
+            "https://bokolodemo.page.link/data?qr=00020101021229180014\(address)520459995303\(assetId)5403\(amount)5802LA5909Ivan%20Ivan6010Phnom%20Penh6304A2CA"
         let data = bokoloQRCodeString.data(using: .utf8)
         XCTAssertNotNil(data)
         let decoder = BokoloCashDecoder()
@@ -47,7 +46,7 @@ final class QRDecoderTests: XCTestCase {
         XCTAssertNotNil(qrType)
 
         switch qrType {
-        case .bokoloCash(let bokoloCashQRInfo):
+        case let .bokoloCash(bokoloCashQRInfo):
             XCTAssertEqual(bokoloCashQRInfo.address, address)
             XCTAssertEqual(bokoloCashQRInfo.assetId, assetId)
             XCTAssertEqual(bokoloCashQRInfo.transactionAmount, amount)
@@ -77,7 +76,7 @@ final class QRDecoderTests: XCTestCase {
         XCTAssertNotNil(qrType)
 
         switch qrType {
-        case .sora(let info):
+        case let .sora(info):
             XCTAssertEqual(info.prefix, prefix)
             XCTAssertEqual(info.address, address)
             XCTAssertEqual(info.rawPublicKey, rawPublicKeyData)
@@ -110,7 +109,7 @@ final class QRDecoderTests: XCTestCase {
         XCTAssertNotNil(qrType)
 
         switch qrType {
-        case .sora(let info):
+        case let .sora(info):
             XCTAssertEqual(info.prefix, prefix)
             XCTAssertEqual(info.address, address)
             XCTAssertEqual(info.rawPublicKey, rawPublicKeyData)
@@ -123,7 +122,6 @@ final class QRDecoderTests: XCTestCase {
     }
 
     func testQRDecoderMock() async throws {
-
         // arrange
         let decoder = QRDecoderMock()
         decoder.decodeDataReturnValue = .cex(.init(address: ""))

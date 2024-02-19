@@ -1,12 +1,12 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 
 public class SettingsManager: SettingsManagerProtocol {
-    public static let shared: SettingsManager = SettingsManager()
+    public static let shared: SettingsManager = .init()
 
     private init() {}
 

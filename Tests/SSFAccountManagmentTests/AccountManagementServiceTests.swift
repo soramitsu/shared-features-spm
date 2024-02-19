@@ -1,24 +1,23 @@
-import XCTest
 import RobinHood
+import SSFAccountManagmentStorage
 import SSFHelpers
 import SSFModels
 import SSFUtils
-import SSFAccountManagmentStorage
+import XCTest
 
 @testable import SSFAccountManagment
 
 final class AccountManagementServiceTests: XCTestCase {
-
     var service: AccountManageble?
     var accountManagementWorker: AccountManagementWorkerProtocolMock?
-    
+
     override func setUp() {
         super.setUp()
         let storageFacade = AccountStorageTestFacade()
-        
+
         let accountManagementWorker = AccountManagementWorkerProtocolMock()
         self.accountManagementWorker = accountManagementWorker
-        
+
         let selectedWallet = SelectedWalletSettings(storageFacade: storageFacade)
 
         service = AccountManagementService(
@@ -26,7 +25,7 @@ final class AccountManagementServiceTests: XCTestCase {
             selectedWallet: selectedWallet
         )
     }
-    
+
     override func tearDown() {
         super.tearDown()
         service = nil
@@ -40,45 +39,48 @@ final class AccountManagementServiceTests: XCTestCase {
         // assert
         XCTAssertNil(result)
     }
-    
+
     func testSetCurrentAccount() throws {
         // act
-        service?.setCurrentAccount(account: TestData.account, completionClosure: { [weak self] result in
+        service?.setCurrentAccount(account: TestData.account, completionClosure: { [weak self] _ in
             let currentAccount = self?.service?.getCurrentAccount()
-            
+
             // assert
             XCTAssertEqual(currentAccount, TestData.account)
         })
     }
-    
+
     func testUpdateVisability() throws {
         // arrange
-        service?.setCurrentAccount(account: TestData.account, completionClosure: { [weak self] result in
-            
+        service?.setCurrentAccount(account: TestData.account, completionClosure: { [weak self] _ in
+
             // act
             let chain = TestData.chain
             let asset = TestData.asset
-            
+
             let chainAsset = ChainAsset(chain: chain, asset: asset)
 
             do {
                 try self?.service?.update(visible: true, for: chainAsset, completion: {})
                 DispatchQueue.main.async {
-                    XCTAssertEqual(self?.accountManagementWorker?.saveAccountCompletionCallsCount, 1)
+                    XCTAssertEqual(
+                        self?.accountManagementWorker?.saveAccountCompletionCallsCount,
+                        1
+                    )
                 }
             } catch {
                 XCTFail("UpdateVisability test failed with error - \(error)")
             }
         })
     }
-    
+
     func testLogout() throws {
         // act
-        service?.setCurrentAccount(account: TestData.account, completionClosure: { [weak self] result in
+        service?.setCurrentAccount(account: TestData.account, completionClosure: { [weak self] _ in
             Task { [weak self] in
                 try await self?.service?.logout()
                 let currentAccount = self?.service?.getCurrentAccount()
-                
+
                 // assert
                 XCTAssertNil(currentAccount)
             }
@@ -107,7 +109,7 @@ private extension AccountManagementServiceTests {
             customNodes: [],
             iosMinAppVersion: nil
         )
-        
+
         static let asset = AssetModel(
             id: "2",
             name: "test",
@@ -128,7 +130,7 @@ private extension AccountManagementServiceTests {
             priceProvider: nil,
             coingeckoPriceId: nil
         )
-        
+
         static let chainAccounts = ChainAccountModel(
             chainId: "Kusama",
             accountId: Data(),
@@ -136,7 +138,7 @@ private extension AccountManagementServiceTests {
             cryptoType: 2,
             ethereumBased: false
         )
-        
+
         static let account = MetaAccountModel(
             metaId: "1",
             name: "test",
@@ -159,4 +161,3 @@ private extension AccountManagementServiceTests {
         )
     }
 }
-

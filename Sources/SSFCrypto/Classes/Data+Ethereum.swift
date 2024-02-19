@@ -48,7 +48,13 @@ private enum EthereumUtil {
         let serializeResult = serializedPublicKey.withUnsafeMutableBytes { serializedPublicKeyPtr in
             withUnsafeMutablePointer(to: &keyLength) { keyLengthPtr in
                 withUnsafeMutablePointer(to: &publicKey) { publicKeyPtr in
-                    secp256k1_ec_pubkey_serialize(context, serializedPublicKeyPtr, keyLengthPtr, publicKeyPtr, flags)
+                    secp256k1_ec_pubkey_serialize(
+                        context,
+                        serializedPublicKeyPtr,
+                        keyLengthPtr,
+                        publicKeyPtr,
+                        flags
+                    )
                 }
             }
         }

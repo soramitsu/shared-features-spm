@@ -25,9 +25,9 @@ public protocol RuntimeProviderPoolProtocol {
 public final class RuntimeProviderPool: RuntimeProviderPoolProtocol {
     private var runtimeProviders: [ChainModel.Id: RuntimeProviderProtocol] = [:]
     private let mutex = NSLock()
-    
+
     public init() {}
-    
+
     @discardableResult
     public func setupRuntimeProvider(
         for chainMetadata: RuntimeMetadataItemProtocol,
@@ -45,7 +45,7 @@ public final class RuntimeProviderPool: RuntimeProviderPoolProtocol {
         } else {
             let operationQueue = OperationQueue()
             operationQueue.qualityOfService = .userInitiated
-            let runtimeProvider =  RuntimeProvider(
+            let runtimeProvider = RuntimeProvider(
                 operationQueue: operationQueue,
                 usedRuntimePaths: usedRuntimePaths,
                 chainMetadata: chainMetadata,
@@ -57,7 +57,7 @@ public final class RuntimeProviderPool: RuntimeProviderPoolProtocol {
             return runtimeProvider
         }
     }
-    
+
     public func readySnaphot(
         for chainMetadata: RuntimeMetadataItemProtocol,
         chainTypes: Data,
@@ -68,7 +68,7 @@ public final class RuntimeProviderPool: RuntimeProviderPoolProtocol {
         } else {
             let operationQueue = OperationQueue()
             operationQueue.qualityOfService = .userInitiated
-            let runtimeProvider =  RuntimeProvider(
+            let runtimeProvider = RuntimeProvider(
                 operationQueue: operationQueue,
                 usedRuntimePaths: usedRuntimePaths,
                 chainMetadata: chainMetadata,

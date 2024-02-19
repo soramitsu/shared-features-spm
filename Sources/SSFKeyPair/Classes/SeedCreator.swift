@@ -1,12 +1,12 @@
 import Foundation
 import IrohaCrypto
 import SSFCrypto
-import SSFUtils
 import SSFModels
+import SSFUtils
 
 public typealias SeedCreatorResult = (seed: Data, mnemonic: IRMnemonicProtocol)
 
-//sourcery: AutoMockable
+// sourcery: AutoMockable
 public protocol SeedCreator {
     func createSeed(
         derivationPath: String,
@@ -23,29 +23,22 @@ public protocol SeedCreator {
     ) throws -> SeedCreatorResult
 }
 
-final public class SeedCreatorImpl: SeedCreator {
-    
-    private lazy var mnemonicCreator: IRMnemonicCreatorProtocol = {
-        IRMnemonicCreator()
-    }()
-    
-    private lazy var seedCreator: SNBIP39SeedCreatorProtocol = {
-        SNBIP39SeedCreator()
-    }()
-    
-    private lazy var commonCrypto: CommonCrypto = {
-        CommonCryptoImpl()
-    }()
-    
+public final class SeedCreatorImpl: SeedCreator {
+    private lazy var mnemonicCreator: IRMnemonicCreatorProtocol = IRMnemonicCreator()
+
+    private lazy var seedCreator: SNBIP39SeedCreatorProtocol = SNBIP39SeedCreator()
+
+    private lazy var commonCrypto: CommonCrypto = CommonCryptoImpl()
+
     public init() {}
-    
+
     convenience init(commonCrypto: CommonCrypto) {
         self.init()
         self.commonCrypto = commonCrypto
     }
-    
+
     // MARK: - Public methods
-    
+
     public func createSeed(
         derivationPath: String,
         strength: IRMnemonicStrength,
@@ -56,17 +49,17 @@ final public class SeedCreatorImpl: SeedCreator {
             from: derivationPath,
             ethereumBased: ethereumBased
         )
-        
+
         let password = junctionResult?.password ?? ""
-        
+
         return ethereumBased
-        ? try createSeedWithNormalizedPassphras(
-            from: password,
-            strength: strength,
-            derivationPath: derivationPath,
-            cryptoType: .ecdsa
-        )
-        : try createSeed(from: password, strength: strength)
+            ? try createSeedWithNormalizedPassphras(
+                from: password,
+                strength: strength,
+                derivationPath: derivationPath,
+                cryptoType: .ecdsa
+            )
+            : try createSeed(from: password, strength: strength)
     }
 
     public func deriveSeed(
@@ -83,17 +76,17 @@ final public class SeedCreatorImpl: SeedCreator {
         let password = junctionResult?.password ?? ""
 
         return ethereumBased
-        ? try deriveSeedWithNormalizedPassphras(
-            from: mnemonicWords,
-            password: password,
-            derivationPath: derivationPath,
-            cryptoType: .ecdsa
-        )
-        : try deriveSeed(from: mnemonicWords, password: password)
+            ? try deriveSeedWithNormalizedPassphras(
+                from: mnemonicWords,
+                password: password,
+                derivationPath: derivationPath,
+                cryptoType: .ecdsa
+            )
+            : try deriveSeed(from: mnemonicWords, password: password)
     }
-    
+
     // MARK: - Private methods
-    
+
     private func createSeed(
         from password: String,
         strength: IRMnemonicStrength
@@ -113,7 +106,7 @@ final public class SeedCreatorImpl: SeedCreator {
 
         return SeedCreatorResult(seed: seed.miniSeed, mnemonic: mnemonic)
     }
-    
+
     private func createSeedWithNormalizedPassphras(
         from password: String,
         strength: IRMnemonicStrength,
@@ -123,7 +116,7 @@ final public class SeedCreatorImpl: SeedCreator {
         let mnemonic = try mnemonicCreator.randomMnemonic(strength)
         let normalizedPassphrase = createNormalizedPassphraseFrom(mnemonic)
         let seed = try seedCreator.deriveSeed(from: normalizedPassphrase, passphrase: password)
-        
+
         let query = try commonCrypto.getQuery(
             seed: seed,
             derivationPath: derivationPath,
@@ -143,7 +136,7 @@ final public class SeedCreatorImpl: SeedCreator {
         let mnemonic = try mnemonicCreator.mnemonic(fromList: mnemonicWords)
         let normalizedPassphrase = createNormalizedPassphraseFrom(mnemonic)
         let seed = try seedCreator.deriveSeed(from: normalizedPassphrase, passphrase: password)
-        
+
         let query = try commonCrypto.getQuery(
             seed: seed,
             derivationPath: derivationPath,

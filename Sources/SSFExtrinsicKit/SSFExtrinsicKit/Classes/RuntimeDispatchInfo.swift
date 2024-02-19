@@ -2,15 +2,15 @@ import BigInt
 
 public struct RuntimeDispatchInfo: Codable, Equatable {
     let inclusionFee: FeeDetails
-    
+
     public init(inclusionFee: FeeDetails) {
         self.inclusionFee = inclusionFee
     }
-    
+
     public var fee: String {
         "\(inclusionFee.baseFee + inclusionFee.lenFee + inclusionFee.adjustedWeightFee)"
     }
-    
+
     public var feeValue: BigUInt {
         BigUInt(stringLiteral: fee)
     }

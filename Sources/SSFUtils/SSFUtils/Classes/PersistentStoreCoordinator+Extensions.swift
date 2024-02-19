@@ -1,5 +1,5 @@
-import Foundation
 import CoreData
+import Foundation
 
 public extension NSPersistentStoreCoordinator {
     static func destroyStore(at storeURL: URL) throws {
@@ -36,7 +36,10 @@ public extension NSPersistentStoreCoordinator {
         )
     }
 
-    func addPersistentStore(at storeURL: URL, options: [AnyHashable: Any]) throws -> NSPersistentStore {
+    func addPersistentStore(
+        at storeURL: URL,
+        options: [AnyHashable: Any]
+    ) throws -> NSPersistentStore {
         try addPersistentStore(
             ofType: NSSQLiteStoreType,
             configurationName: nil,

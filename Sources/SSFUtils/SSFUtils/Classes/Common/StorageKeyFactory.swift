@@ -18,7 +18,7 @@ public protocol StorageKeyFactoryProtocol: AnyObject {
         key2: Data,
         hasher2: StorageHasher
     ) throws -> Data
-    
+
     func createStorageKey(
         moduleName: String,
         storageName: String,
@@ -52,7 +52,12 @@ public final class StorageKeyFactory: StorageKeyFactoryProtocol {
         key: Data,
         hasher: StorageHasher
     ) throws -> Data {
-        try createStorageKey(moduleName: moduleName, storageName: storageName, keys: [key], hashers: [hasher])
+        try createStorageKey(
+            moduleName: moduleName,
+            storageName: storageName,
+            keys: [key],
+            hashers: [hasher]
+        )
     }
 
     public func createStorageKey(
@@ -63,26 +68,31 @@ public final class StorageKeyFactory: StorageKeyFactoryProtocol {
         key2: Data,
         hasher2: StorageHasher
     ) throws -> Data {
-        try createStorageKey(moduleName: moduleName, storageName: storageName, keys: [key1, key2], hashers: [hasher1, hasher2])
+        try createStorageKey(
+            moduleName: moduleName,
+            storageName: storageName,
+            keys: [key1, key2],
+            hashers: [hasher1, hasher2]
+        )
     }
-    
+
     public func createStorageKey(
         moduleName: String,
         storageName: String,
         keys: [Data],
         hashers: [StorageHasher]
     ) throws -> Data {
-        guard keys.count > 0, hashers.count > 0, keys.count == hashers.count else {
+        guard !keys.isEmpty, !hashers.isEmpty, keys.count == hashers.count else {
             throw StorageKeyFactoryError.badSerialization
         }
-        
+
         var data = try createStorageKey(moduleName: moduleName, storageName: storageName)
         for (index, key) in keys.enumerated() {
             let hasher = hashers[index]
             let hash = try hasher.hash(data: key)
             data += hash
         }
-        
+
         return data
     }
 }

@@ -61,7 +61,7 @@ public protocol DynamicScaleDecodable {
     func accept(decoder: DynamicScaleDecoding) throws -> JSON
 }
 
-public typealias DynamicScaleCodable = DynamicScaleEncodable & DynamicScaleDecodable
+public typealias DynamicScaleCodable = DynamicScaleDecodable & DynamicScaleEncodable
 
 enum ScaleCodingModifier {
     case compact

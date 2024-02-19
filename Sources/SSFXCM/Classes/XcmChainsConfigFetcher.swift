@@ -1,9 +1,9 @@
 import Foundation
-import SSFUtils
-import SSFModels
-import SSFNetwork
 import RobinHood
 import SSFChainRegistry
+import SSFModels
+import SSFNetwork
+import SSFUtils
 
 public protocol XcmChainsConfigFetching {
     func getAvailableOriginalChains(
@@ -21,13 +21,12 @@ public protocol XcmChainsConfigFetching {
         assetSymbol: String?
     ) async throws -> [ChainModel.Id]
 }
-//sourcery: AutoMockable
+// sourcery: AutoMockable
 protocol XcmVersionFetching {
     func getVersion(for chainId: String) async throws -> XcmCallFactoryVersion
 }
 
 final class XcmChainsConfigFetcher: XcmChainsConfigFetching, XcmVersionFetching {
-
     private let chainRegistry: ChainRegistryProtocol
 
     init(chainRegistry: ChainRegistryProtocol) {
@@ -45,24 +44,27 @@ final class XcmChainsConfigFetcher: XcmChainsConfigFetching, XcmVersionFetching 
             .filter { $0.xcm != nil }
 
         if let assetSymbol = assetSymbol {
-            chains = chains.filter({ chainModel in
+            chains = chains.filter { chainModel in
                 chainModel.xcm?.availableDestinations.contains(where: { destChain in
-                    if destChain.assets.map({ $0.symbol.lowercased() }).contains(assetSymbol.lowercased()) {
+                    if destChain.assets.map({ $0.symbol.lowercased() })
+                        .contains(assetSymbol.lowercased())
+                    {
                         return true
                     } else if assetSymbol.lowercased().hasPrefix("xc") {
                         let modifySymbol = String(assetSymbol.dropFirst(2)).lowercased()
-                        return destChain.assets.map { $0.symbol.lowercased() }.contains(modifySymbol)
+                        return destChain.assets.map { $0.symbol.lowercased() }
+                            .contains(modifySymbol)
                     }
                     return false
                 }) == true
-            })
+            }
         }
         if let destinationChainId = destinationChainId {
-            chains = chains.filter({ chainModel in
+            chains = chains.filter { chainModel in
                 chainModel.xcm?.availableDestinations.contains(where: { destChain in
                     destChain.chainId == destinationChainId
                 }) == true
-            })
+            }
         }
         return chains.map { $0.chainId }
     }
@@ -76,9 +78,9 @@ final class XcmChainsConfigFetcher: XcmChainsConfigFetching, XcmVersionFetching 
             .filter { $0.xcm != nil }
         var originAssets: [String] = []
         var destAssets: [String] = []
-        
+
         if let originalChainId = originalChainId {
-            originAssets = chains.first { $0.chainId == originalChainId}?
+            originAssets = chains.first { $0.chainId == originalChainId }?
                 .xcm?
                 .availableDestinations
                 .map { $0.assets.map { $0.symbol }}
@@ -88,7 +90,7 @@ final class XcmChainsConfigFetcher: XcmChainsConfigFetching, XcmVersionFetching 
             }
         }
         if let destinationChainId = destinationChainId {
-            destAssets = chains.first { $0.chainId == destinationChainId}?
+            destAssets = chains.first { $0.chainId == destinationChainId }?
                 .xcm?
                 .availableAssets
                 .map { $0.symbol } ?? []
@@ -96,16 +98,16 @@ final class XcmChainsConfigFetcher: XcmChainsConfigFetching, XcmVersionFetching 
                 return Array(Set(destAssets))
             }
         }
-        
+
         if originalChainId == nil, destinationChainId == nil {
-            chains.forEach { chainModel in
-                chainModel.xcm?.availableDestinations.forEach({ availableDestination in
+            for chainModel in chains {
+                chainModel.xcm?.availableDestinations.forEach { availableDestination in
                     originAssets += availableDestination.assets.map { $0.symbol }
-                })
+                }
                 destAssets += chainModel.xcm?.availableAssets.map { $0.symbol } ?? []
             }
         }
-        
+
         return Array(Set(originAssets).intersection(Set(destAssets)))
     }
 
@@ -127,7 +129,9 @@ final class XcmChainsConfigFetcher: XcmChainsConfigFetching, XcmVersionFetching 
             let destinations = chains.map { $0.xcm?.availableDestinations ?? [] }.reduce([], +)
             destChainIds = destinations
                 .filter {
-                    if $0.assets.map({ $0.symbol.lowercased() }).contains(assetSymbol.lowercased()) {
+                    if $0.assets.map({ $0.symbol.lowercased() })
+                        .contains(assetSymbol.lowercased())
+                    {
                         return true
                     } else if assetSymbol.hasPrefix("xc") {
                         let modifySymbol = String(assetSymbol.dropFirst(2)).lowercased()
@@ -150,11 +154,10 @@ final class XcmChainsConfigFetcher: XcmChainsConfigFetching, XcmVersionFetching 
         let chains = try await chainRegistry
             .getChains()
             .filter { $0.xcm != nil }
-        
+
         guard let version = chains.first(where: {
             $0.chainId == chainId
-        })?.xcm?.xcmVersion
-        else {
+        })?.xcm?.xcmVersion else {
             throw XcmError.missingRemoteXcmVersion
         }
         return version

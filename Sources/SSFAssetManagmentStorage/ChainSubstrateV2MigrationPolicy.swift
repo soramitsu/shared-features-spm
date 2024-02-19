@@ -1,5 +1,5 @@
-import Foundation
 import CoreData
+import Foundation
 import IrohaCrypto
 
 class ChainSubstrateV2MigrationPolicy: NSEntityMigrationPolicy {
@@ -11,7 +11,8 @@ class ChainSubstrateV2MigrationPolicy: NSEntityMigrationPolicy {
         try super.createRelationships(forDestination: chainModel, in: mapping, manager: manager)
 
         guard let nodes = chainModel.value(forKey: "nodes") as? Set<NSManagedObject>,
-              let node = nodes.first else {
+              let node = nodes.first else
+        {
             return
         }
 

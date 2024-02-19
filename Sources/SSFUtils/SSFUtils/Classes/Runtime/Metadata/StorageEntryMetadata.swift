@@ -12,8 +12,8 @@ public protocol RuntimeStorageEntryMetadata {
 
 // MARK: - V1
 
-extension RuntimeMetadataV1 {
-    public struct StorageEntryMetadata: RuntimeStorageEntryMetadata, ScaleCodable {
+public extension RuntimeMetadataV1 {
+    struct StorageEntryMetadata: RuntimeStorageEntryMetadata, ScaleCodable {
         public let name: String
         public let modifier: RuntimeStorageEntryModifier
         public let type: StorageEntryType
@@ -54,8 +54,8 @@ extension RuntimeMetadataV1 {
 
 // MARK: - V14
 
-extension RuntimeMetadataV14 {
-    public struct StorageEntryMetadata: RuntimeStorageEntryMetadata, ScaleCodable {
+public extension RuntimeMetadataV14 {
+    struct StorageEntryMetadata: RuntimeStorageEntryMetadata, ScaleCodable {
         public let name: String
         public let modifier: RuntimeStorageEntryModifier
         public let type: StorageEntryType

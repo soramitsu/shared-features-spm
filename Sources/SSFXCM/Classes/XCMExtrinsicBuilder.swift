@@ -1,8 +1,9 @@
+import BigInt
 import Foundation
 import SSFExtrinsicKit
 import SSFModels
-import BigInt
-//sourcery: AutoMockable
+
+// sourcery: AutoMockable
 protocol XcmExtrinsicBuilderProtocol {
     func buildReserveNativeTokenExtrinsicBuilderClosure(
         version: XcmCallFactoryVersion,
@@ -13,7 +14,7 @@ protocol XcmExtrinsicBuilderProtocol {
         weightLimit: BigUInt?,
         path: XcmCallPath
     ) -> ExtrinsicBuilderClosure
-    
+
     func buildXTokensTransferExtrinsicBuilderClosure(
         version: XcmCallFactoryVersion,
         accountId: AccountId?,
@@ -23,7 +24,7 @@ protocol XcmExtrinsicBuilderProtocol {
         weightLimit: BigUInt,
         path: XcmCallPath
     ) -> ExtrinsicBuilderClosure
-    
+
     func buildXTokensTransferMultiassetExtrinsicBuilderClosure(
         assetSymbol: String,
         version: XcmCallFactoryVersion,
@@ -35,7 +36,7 @@ protocol XcmExtrinsicBuilderProtocol {
         path: XcmCallPath,
         destWeightIsPrimitive: Bool?
     ) async throws -> ExtrinsicBuilderClosure
-    
+
     func buildPolkadotXcmLimitedReserveTransferAssetsExtrinsicBuilderClosure(
         fromChainModel: ChainModel,
         version: XcmCallFactoryVersion,
@@ -46,7 +47,7 @@ protocol XcmExtrinsicBuilderProtocol {
         weightLimit: BigUInt,
         path: XcmCallPath
     ) async throws -> ExtrinsicBuilderClosure
-    
+
     func buildBridgeProxyBurn(
         fromChainModel: ChainModel,
         currencyId: String,
@@ -58,14 +59,14 @@ protocol XcmExtrinsicBuilderProtocol {
 }
 
 final class XcmExtrinsicBuilder: XcmExtrinsicBuilderProtocol {
-    
     private var callFactory: XcmCallFactoryProtocol
-    
+
     public init(callFactory: XcmCallFactoryProtocol? = nil) {
         self.callFactory = callFactory ?? XcmCallFactory()
     }
 
     // MARK: - Public methods
+
     func buildReserveNativeTokenExtrinsicBuilderClosure(
         version: XcmCallFactoryVersion,
         fromChainModel: ChainModel,
@@ -84,12 +85,12 @@ final class XcmExtrinsicBuilder: XcmExtrinsicBuilderProtocol {
             weightLimit: weightLimit,
             path: path
         )
-        
+
         return { builder in
             try builder.adding(call: call)
         }
     }
-    
+
     func buildXTokensTransferExtrinsicBuilderClosure(
         version: XcmCallFactoryVersion,
         accountId: AccountId?,
@@ -108,12 +109,12 @@ final class XcmExtrinsicBuilder: XcmExtrinsicBuilderProtocol {
             weightLimit: weightLimit,
             path: path
         )
-        
+
         return { builder in
             try builder.adding(call: call)
         }
     }
-    
+
     func buildXTokensTransferMultiassetExtrinsicBuilderClosure(
         assetSymbol: String,
         version: XcmCallFactoryVersion,
@@ -136,12 +137,12 @@ final class XcmExtrinsicBuilder: XcmExtrinsicBuilderProtocol {
             path: path,
             destWeightIsPrimitive: destWeightIsPrimitive
         )
-        
+
         return { builder in
             try builder.adding(call: call)
         }
     }
-    
+
     func buildPolkadotXcmLimitedReserveTransferAssetsExtrinsicBuilderClosure(
         fromChainModel: ChainModel,
         version: XcmCallFactoryVersion,
@@ -162,12 +163,12 @@ final class XcmExtrinsicBuilder: XcmExtrinsicBuilderProtocol {
             weightLimit: weightLimit,
             path: path
         )
-        
+
         return { builder in
             try builder.adding(call: call)
         }
     }
-    
+
     func buildBridgeProxyBurn(
         fromChainModel: ChainModel,
         currencyId: String,
@@ -184,10 +185,9 @@ final class XcmExtrinsicBuilder: XcmExtrinsicBuilderProtocol {
             amount: amount,
             path: path
         )
-        
+
         return { builder in
             try builder.adding(call: call)
         }
     }
-
 }

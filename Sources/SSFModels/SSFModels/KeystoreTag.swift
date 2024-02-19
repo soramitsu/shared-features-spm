@@ -3,9 +3,18 @@ import Foundation
 public enum KeystoreTag: String, CaseIterable {
     case pincode
 
-    public static func secretKeyTagForAddress(_ address: String) -> String { address + "-" + "secretKey" }
-    public static func entropyTagForAddress(_ address: String) -> String { address + "-" + "entropy" }
-    public static func deriviationTagForAddress(_ address: String) -> String { address + "-" + "deriv" }
+    public static func secretKeyTagForAddress(_ address: String) -> String { address + "-" +
+        "secretKey"
+    }
+
+    public static func entropyTagForAddress(_ address: String) -> String { address + "-" +
+        "entropy"
+    }
+
+    public static func deriviationTagForAddress(_ address: String) -> String { address + "-" +
+        "deriv"
+    }
+
     public static func seedTagForAddress(_ address: String) -> String { address + "-" + "seed" }
 }
 
