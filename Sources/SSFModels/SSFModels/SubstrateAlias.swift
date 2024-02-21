@@ -21,7 +21,7 @@ public extension AccountId {
             return nil
         }
 
-         let accountIdLength = value.hasPrefix("0x")
+        let accountIdLength = value.hasPrefix("0x")
             ? EthereumConstants.accountIdLength
             : SubstrateConstants.accountIdLength
 
