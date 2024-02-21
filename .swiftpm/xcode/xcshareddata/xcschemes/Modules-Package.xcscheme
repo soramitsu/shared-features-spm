@@ -10,7 +10,7 @@
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Run Sourcery"
-               scriptText = "if [[ -z &quot;${JENKINS_HOME}&quot; ]]; then&#10;    sh &quot;${WORKSPACE_PATH}/../../../tools/sourcery.sh&quot;&#10;else&#10;    sh &quot;tools/sourcery.sh&quot;&#10;fi&#10;&#10;&#10;">
+               scriptText = "if [[ -z &quot;${JENKINS_HOME}&quot; ]]; then&#10;    sh &quot;${WORKSPACE_PATH}/../../../tools/sourcery.sh&quot;&#10;else&#10;    cd &quot;${WORKSPACE_PATH}/../../..&quot;&#10;    sh &quot;./tools/sourcery.sh&quot;&#10;fi&#10;&#10;&#10;">
             </ActionContent>
          </ExecutionAction>
       </PreActions>
