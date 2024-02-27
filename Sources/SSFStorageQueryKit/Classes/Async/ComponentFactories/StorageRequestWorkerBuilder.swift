@@ -7,7 +7,7 @@ protocol StorageRequestWorkerBuilder {
         runtimeService: RuntimeCodingServiceProtocol,
         connection: JSONRPCEngine,
         storageRequestFactory: AsyncStorageRequestFactory,
-        request: some StorageRequest
+        request: StorageRequest
     ) -> StorageRequestWorker
 }
 
@@ -16,7 +16,7 @@ final class StorageRequestWorkerBuilderDefault<T: Decodable>: StorageRequestWork
         runtimeService: RuntimeCodingServiceProtocol,
         connection: JSONRPCEngine,
         storageRequestFactory: AsyncStorageRequestFactory,
-        request: some StorageRequest
+        request: StorageRequest
     ) -> StorageRequestWorker {
         switch request.parametersType {
         case .nMap:

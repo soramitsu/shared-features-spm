@@ -22,14 +22,14 @@ final class SimpleStorageRequestWorker<P: Decodable>: StorageRequestWorker {
             throw StorageRequestWorkerError.invalidParameters
         }
 
-        let keys = try StorageKeyFactory().createStorageKey(
+        let key = try StorageKeyFactory().createStorageKey(
             moduleName: request.storagePath.moduleName,
             storageName: request.storagePath.itemName
         )
         let coderFactory = try await runtimeService.fetchCoderFactory()
         let response: [StorageResponse<T>] = try await storageRequestFactory.queryItems(
             engine: connection,
-            keys: [keys],
+            keys: [key],
             factory: coderFactory,
             storagePath: request.storagePath
         )

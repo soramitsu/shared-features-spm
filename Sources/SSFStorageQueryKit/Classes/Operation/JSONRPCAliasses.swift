@@ -13,6 +13,4 @@ public typealias IdentityWrapper = CompoundOperationWrapper<[StorageResponse<Ide
 public typealias SlashingSpansWrapper = CompoundOperationWrapper<[StorageResponse<SlashingSpans>]>
 public typealias UnappliedSlashesOperation = BaseOperation<[StorageResponse<[UnappliedSlash]>]>
 public typealias UnappliedSlashesWrapper = CompoundOperationWrapper<[StorageResponse<[UnappliedSlash]>]>
-
-
 typealias JSONRPCQueryWorker = JSONRPCWorker<StorageQuery, [StorageUpdate]>

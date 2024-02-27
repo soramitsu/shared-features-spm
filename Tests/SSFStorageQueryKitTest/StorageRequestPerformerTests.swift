@@ -119,6 +119,36 @@ final class StorageRequestPerformerTests: XCTestCase {
         XCTAssertEqual(streamValueCount, 2)
     }
     
+    func testCashWithAllOptionsByManual() async throws {
+        let expectedTimespamp = "1707982452001"
+        let storageUpdate = StorageUpdate(
+            blockHash: nil,
+            changes: [["0x21f5afab8d010000", "0x21f5afab8d010000"]]// key, value
+        )
+        let performer = StorageRequestPerformerDefault(
+            runtimeService: polkadotRuntimeService,
+            connection: createConnection(with: [storageUpdate])
+        )
+        let request = StorageRequestMock(
+            parametersType: .simple,
+            storagePath: StoragePathMock.custom(moduleName: "timestamp", itemName: "now")
+        )
+        // fetch remote and save
+        let _: String? = try await performer.performRequest(request)
+        
+        let stream: AsyncThrowingStream<String?, Error> = await performer.performRequest(
+            request,
+            withCacheOptions: [.onPerform, .onCache]
+        )
+        
+        var streamValueCount = 0
+        for try await value in stream {
+            XCTAssertEqual(value, expectedTimespamp)
+            streamValueCount += 1
+        }
+        XCTAssertEqual(streamValueCount, 2)
+    }
+    
     func testCashOnCache() async throws {
         let expectedTimespamp = "1707982452001"
         let storageUpdate = StorageUpdate(
@@ -193,6 +223,7 @@ final class StorageRequestPerformerTests: XCTestCase {
     }
 }
 
+// TODO: - Transfer this model to staking package
 struct ValidatorPrefs: Codable, Equatable {
     @StringCodable var commission: BigUInt
     let blocked: Bool
