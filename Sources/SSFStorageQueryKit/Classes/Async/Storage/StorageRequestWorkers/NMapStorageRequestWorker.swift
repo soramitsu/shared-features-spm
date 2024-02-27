@@ -1,6 +1,7 @@
 import Foundation
 import SSFUtils
 import SSFRuntimeCodingService
+import SSFModels
 
 final class NMapStorageRequestWorker<P: Decodable>: StorageRequestWorker {
     private let runtimeService: RuntimeCodingServiceProtocol
@@ -17,8 +18,11 @@ final class NMapStorageRequestWorker<P: Decodable>: StorageRequestWorker {
         self.storageRequestFactory = storageRequestFactory
     }
     
-    func perform<T: Decodable>(request: some StorageRequest) async throws -> [StorageResponse<T>] {
-        guard case let StorageRequestParametersType.nMap(params: params) = request.parametersType else {
+    func perform<T: Decodable>(
+        params: StorageRequestWorkerType,
+        storagePath: any StorageCodingPathProtocol
+    ) async throws -> [StorageResponse<T>] {
+        guard case let StorageRequestWorkerType.nMap(params: params) = params else {
             throw StorageRequestWorkerError.invalidParameters
         }
         
@@ -27,7 +31,7 @@ final class NMapStorageRequestWorker<P: Decodable>: StorageRequestWorker {
             engine: connection,
             keyParams: params,
             factory: coderFactoryOperation,
-            storagePath: request.storagePath
+            storagePath: storagePath
         )
         return response
     }

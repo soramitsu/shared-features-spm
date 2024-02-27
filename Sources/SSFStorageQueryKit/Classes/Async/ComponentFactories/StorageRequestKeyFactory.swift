@@ -1,8 +1,12 @@
 import Foundation
 import SSFUtils
+import SSFModels
 
 protocol StorageRequestKeyFactory {
-    func createKeyFor(_ request: StorageRequest) throws -> Data
+    func createKeyFor(
+        params: StorageRequestWorkerType,
+        storagePath: any StorageCodingPathProtocol
+    ) throws -> Data
 }
 
 final class StorageRequestKeyFactoryDefault: StorageRequestKeyFactory {
@@ -12,31 +16,37 @@ final class StorageRequestKeyFactoryDefault: StorageRequestKeyFactory {
     
     private lazy var encoder = JSONEncoder()
     
-    func createKeyFor(_ request: StorageRequest) throws -> Data {
+    func createKeyFor(
+        params: StorageRequestWorkerType,
+        storagePath: any StorageCodingPathProtocol
+    ) throws -> Data {
         let storagePathKey = try storageKeyFactory.createStorageKey(
-            moduleName: request.storagePath.moduleName,
-            storageName: request.storagePath.itemName
+            moduleName: storagePath.moduleName,
+            storageName: storagePath.itemName
         )
         
-        switch request.parametersType {
+        switch params {
         case .nMap(let params):
             let keys = try params.reduce([], +).map { try encoder.encode($0.value )}
             let storageKey = try keys.map {
                 try storageKeyFactory.createStorageKey(
-                    moduleName: request.storagePath.moduleName,
-                    storageName: request.storagePath.itemName,
+                    moduleName: storagePath.moduleName,
+                    storageName: storagePath.itemName,
                     key: $0,
                     hasher: .blake128
                 )
             }.joined()
             return storagePathKey + storageKey
-        case .encodable(let param):
-            let storageKey = try storageKeyFactory.createStorageKey(
-                moduleName: request.storagePath.moduleName,
-                storageName: request.storagePath.itemName,
-                key: try encoder.encode(param),
-                hasher: .blake128
-            )
+        case .encodable(let params):
+            let keys = try params.map { try encoder.encode($0)}
+            let storageKey = try keys.map {
+                try storageKeyFactory.createStorageKey(
+                    moduleName: storagePath.moduleName,
+                    storageName: storagePath.itemName,
+                    key: $0,
+                    hasher: .blake128
+                )
+            }.joined()
             return storagePathKey + storageKey
         case .simple:
             return storagePathKey

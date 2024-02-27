@@ -6,14 +6,23 @@ import RobinHood
 import SSFModels
 
 public protocol StorageRequestPerformer {
-    func performRequest<T: Decodable>(
-        _ request: any StorageRequest
+    func performSingle<T: Decodable>(
+        _ request: StorageRequest
     ) async throws -> T?
     
-    func performRequest<T: Decodable>(
-        _ request: any StorageRequest,
+    func performSingle<T: Decodable>(
+        _ request: StorageRequest,
         withCacheOptions: CachedStorageRequestTrigger
     ) async -> AsyncThrowingStream<T?, Error>
+    
+    func performMultiple<T: Decodable>(
+        _ request: MultipleRequest
+    ) async throws -> [T?]
+    
+    func performMultiple<T: Decodable>(
+        _ request: MultipleRequest,
+        withCacheOptions: CachedStorageRequestTrigger
+    ) async -> AsyncThrowingStream<[T?], Error>
 }
 
 public final class StorageRequestPerformerDefault: StorageRequestPerformer {
@@ -43,44 +52,101 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
     
     // MARK: - StorageRequestPerformer
     
-    public func performRequest<T: Decodable>(_ request: any StorageRequest) async throws -> T? {
+    public func performSingle<T: Decodable>(_ request: StorageRequest) async throws -> T? {
         let worker = StorageRequestWorkerBuilderDefault<T>().buildWorker(
             runtimeService: runtimeService,
             connection: connection,
             storageRequestFactory: storageRequestFactory,
-            request: request
+            type: request.parametersType.workerType
         )
 
         let valueExtractor = SingleStorageResponseValueExtractor()
-        let response: [StorageResponse<T>] = try await worker.perform(request: request)
+        let response: [StorageResponse<T>] = try await worker.perform(
+            params: request.parametersType.workerType,
+            storagePath: request.storagePath
+        )
         let value = try valueExtractor.extractValue(storageResponse: response)
-        if let data = response.first?.data {
-            save(data: data, for: request)
-        }
-
+        save(
+            response: response,
+            params: request.parametersType.workerType,
+            storagePath: request.storagePath
+        )
         return value
     }
     
-    public func performRequest<T: Decodable>(
-        _ request: any StorageRequest,
+    public func performSingle<T: Decodable>(
+        _ request: StorageRequest,
         withCacheOptions: CachedStorageRequestTrigger
     ) async -> AsyncThrowingStream<T?, Error> {
         AsyncThrowingStream<T?, Error> { continuation in
             Task {
                 if withCacheOptions == .onAll || withCacheOptions.isEmpty {
-                    try await getCacheValue(for: request, with: continuation)
-                    let value: T? = try await performRequest(request)
+                    try await getCacheSingleValue(for: request, with: continuation)
+                    let value: T? = try await performSingle(request)
                     continuation.yield(value)
                     continuation.finish()
                     return
                 }
                 if withCacheOptions.contains(.onCache) {
-                    try await getCacheValue(for: request, with: continuation)
+                    try await getCacheSingleValue(for: request, with: continuation)
                     continuation.finish()
                     return
                 }
                 if withCacheOptions.contains(.onPerform) {
-                    let value: T? = try await performRequest(request)
+                    let value: T? = try await performSingle(request)
+                    continuation.yield(value)
+                    continuation.finish()
+                    return
+                }
+            }
+        }
+    }
+    
+    public func performMultiple<T: Decodable>(
+        _ request: MultipleRequest
+    ) async throws -> [T?] {
+        let worker = StorageRequestWorkerBuilderDefault<T>().buildWorker(
+            runtimeService: runtimeService,
+            connection: connection,
+            storageRequestFactory: storageRequestFactory,
+            type: request.parametersType.workerType
+        )
+        
+        let valueExtractor = MultipleSingleStorageResponseValueExtractor()
+        let response: [StorageResponse<T>] = try await worker.perform(
+            params: request.parametersType.workerType,
+            storagePath: request.storagePath
+        )
+        let values = try valueExtractor.extractValue(storageResponse: response)
+        save(
+            response: response,
+            params: request.parametersType.workerType,
+            storagePath: request.storagePath
+        )
+        
+        return values
+    }
+    
+    public func performMultiple<T: Decodable>(
+        _ request: MultipleRequest,
+        withCacheOptions: CachedStorageRequestTrigger
+    ) async -> AsyncThrowingStream<[T?], Error> {
+        AsyncThrowingStream<[T?], Error> { continuation in
+            Task {
+                if withCacheOptions == .onAll || withCacheOptions.isEmpty {
+                    try await getCacheMultipleValue(for: request, with: continuation)
+                    let value: [T?] = try await performMultiple(request)
+                    continuation.yield(value)
+                    continuation.finish()
+                    return
+                }
+                if withCacheOptions.contains(.onCache) {
+                    try await getCacheMultipleValue(for: request, with: continuation)
+                    continuation.finish()
+                    return
+                }
+                if withCacheOptions.contains(.onPerform) {
+                    let value: [T?] = try await performMultiple(request)
                     continuation.yield(value)
                     continuation.finish()
                     return
@@ -91,52 +157,83 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
 
     // MARK: - Private methods
 
-    private func getCacheValue<T: Decodable>(
-        for request: any StorageRequest,
+    private func getCacheSingleValue<T: Decodable>(
+        for request: StorageRequest,
         with continuation: AsyncThrowingStream<T?, Error>.Continuation
     ) async throws {
-        let key = try storageRequestKeyFactory.createKeyFor(request)
-        let cache = try await cacheStorage.fetch(by: key.toHex())
-        let codingFactory = try await runtimeService.fetchCoderFactory()
-        let decoded: T? = try decode(
-            data: cache?.payload,
-            codingFactory: codingFactory,
-            path: request.storagePath
+        let cache: [T?]? = try await getCache(
+            params: request.parametersType.workerType,
+            storagePath: request.storagePath
         )
-        guard let decoded = decoded else {
+        guard let decoded = cache?.first else {
             return
         }
         continuation.yield(decoded)
     }
-
-    private func decode<T: Decodable>(
-        data: Data?,
-        codingFactory: RuntimeCoderFactoryProtocol,
-        path: any StorageCodingPathProtocol
-    ) throws -> T? {
-        guard let data = data else {
+    
+    private func getCacheMultipleValue<T: Decodable>(
+        for request: MultipleRequest,
+        with continuation: AsyncThrowingStream<[T?], Error>.Continuation
+    ) async throws {
+        let cache: [T?]? = try await getCache(
+            params: request.parametersType.workerType,
+            storagePath: request.storagePath
+        )
+        guard let cache = cache else {
+            return
+        }
+        continuation.yield(cache)
+    }
+    
+    private func getCache<T: Decodable>(
+        params: StorageRequestWorkerType,
+        storagePath: any StorageCodingPathProtocol
+    ) async throws -> [T?]? {
+        let key = try storageRequestKeyFactory.createKeyFor(
+            params: params,
+            storagePath: storagePath
+        )
+        let cache = try await cacheStorage.fetch(by: key.toHex())
+        guard let payload = cache?.payload else {
             return nil
         }
+        let codingFactory = try await runtimeService.fetchCoderFactory()
+        let decoded: [T?] = try decode(
+            payload: payload,
+            codingFactory: codingFactory,
+            path: storagePath
+        )
+        return decoded
+    }
+
+    private func decode<T: Decodable>(
+        payload: Data,
+        codingFactory: RuntimeCoderFactoryProtocol,
+        path: any StorageCodingPathProtocol
+    ) throws -> [T?] {
+        let data = try JSONDecoder().decode([Data].self, from: payload)
         let decoder = StorageFallbackDecodingListWorker<T>(
             codingFactory: codingFactory,
             path: path,
-            dataList: [data]
+            dataList: data
         )
-        guard let decoded = try decoder.performDecoding().first else {
-            return nil
-        }
-        return decoded
+        return try decoder.performDecoding()
     }
     
-    private func save(
-        data: Data,
-        for request: StorageRequest
+    private func save<T: Decodable>(
+        response: [StorageResponse<T>],
+        params: StorageRequestWorkerType,
+        storagePath: any StorageCodingPathProtocol
     ) {
         Task {
-            let key = try storageRequestKeyFactory.createKeyFor(request)
+            let key = try storageRequestKeyFactory.createKeyFor(
+                params: params,
+                storagePath: storagePath
+            )
+            let payload = response.map { $0.data }.compactMap { $0 }
             let singleValueObject = SingleValueProviderObject(
                 identifier: key.toHex(),
-                payload: data
+                payload: try JSONEncoder().encode(payload)
             )
             try await cacheStorage.save(models: [singleValueObject])
         }

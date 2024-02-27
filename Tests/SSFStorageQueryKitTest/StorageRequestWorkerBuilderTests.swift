@@ -12,10 +12,7 @@ final class StorageRequestWorkerBuilderTests: XCTestCase {
             runtimeService: RuntimeCodingServiceProtocolMock(),
             connection: JSONRPCEngineMock(),
             storageRequestFactory: AsyncStorageRequestDefault(),
-            request: StorageRequestMock(
-                parametersType: .simple,
-                storagePath: StorageCodingPath.account
-            )
+            type: .simple
         )
         XCTAssertTrue(simpleWorker is SimpleStorageRequestWorker<String>)
     }
@@ -26,10 +23,7 @@ final class StorageRequestWorkerBuilderTests: XCTestCase {
             runtimeService: RuntimeCodingServiceProtocolMock(),
             connection: JSONRPCEngineMock(),
             storageRequestFactory: AsyncStorageRequestDefault(),
-            request: StorageRequestMock(
-                parametersType: .nMap(params: []),
-                storagePath: StorageCodingPath.account
-            )
+            type: .nMap(params: [])
         )
         XCTAssertTrue(simpleWorker is NMapStorageRequestWorker<String>)
     }
@@ -40,10 +34,7 @@ final class StorageRequestWorkerBuilderTests: XCTestCase {
             runtimeService: RuntimeCodingServiceProtocolMock(),
             connection: JSONRPCEngineMock(),
             storageRequestFactory: AsyncStorageRequestDefault(),
-            request: StorageRequestMock(
-                parametersType: .encodable(param: ""),
-                storagePath: StorageCodingPath.account
-            )
+            type: .encodable(params: [])
         )
         XCTAssertTrue(simpleWorker is EncodableStorageRequestWorker<String>)
     }

@@ -32,7 +32,7 @@ final class StorageRequestPerformerTests: XCTestCase {
             parametersType: .simple,
             storagePath: StoragePathMock.custom(moduleName: "timestamp", itemName: "now")
         )
-        let timestamp: String? = try await performer.performRequest(request)
+        let timestamp: String? = try await performer.performSingle(request)
         
         XCTAssertEqual(expectedTimespamp, timestamp)
     }
@@ -54,7 +54,7 @@ final class StorageRequestPerformerTests: XCTestCase {
             parametersType: .encodable(param: expectedAccount),
             storagePath: StoragePathMock.custom(moduleName: "staking", itemName: "bonded")
         )
-        let account: AccountId? = try await performer.performRequest(request)
+        let account: AccountId? = try await performer.performSingle(request)
         
         XCTAssertEqual(account, expectedAccount)
     }
@@ -79,7 +79,7 @@ final class StorageRequestPerformerTests: XCTestCase {
             ]),
             storagePath: StoragePathMock.custom(moduleName: "staking", itemName: "erasValidatorPrefs")
         )
-        let result: ValidatorPrefs? = try await performer.performRequest(request)
+        let result: ValidatorPrefs? = try await performer.performSingle(request)
         let extectedResult = ValidatorPrefs(
             commission: BigUInt(stringLiteral: "77000000"),
             blocked: false
@@ -104,9 +104,9 @@ final class StorageRequestPerformerTests: XCTestCase {
             storagePath: StoragePathMock.custom(moduleName: "timestamp", itemName: "now")
         )
         // fetch remote and save
-        let _: String? = try await performer.performRequest(request)
+        let _: String? = try await performer.performSingle(request)
         
-        let stream: AsyncThrowingStream<String?, Error> = await performer.performRequest(
+        let stream: AsyncThrowingStream<String?, Error> = await performer.performSingle(
             request,
             withCacheOptions: [.onAll]
         )
@@ -134,9 +134,9 @@ final class StorageRequestPerformerTests: XCTestCase {
             storagePath: StoragePathMock.custom(moduleName: "timestamp", itemName: "now")
         )
         // fetch remote and save
-        let _: String? = try await performer.performRequest(request)
+        let _: String? = try await performer.performSingle(request)
         
-        let stream: AsyncThrowingStream<String?, Error> = await performer.performRequest(
+        let stream: AsyncThrowingStream<String?, Error> = await performer.performSingle(
             request,
             withCacheOptions: [.onPerform, .onCache]
         )
@@ -164,9 +164,9 @@ final class StorageRequestPerformerTests: XCTestCase {
             storagePath: StoragePathMock.custom(moduleName: "timestamp", itemName: "now")
         )
         // fetch remote and save
-        let _: String? = try await performer.performRequest(request)
+        let _: String? = try await performer.performSingle(request)
         
-        let stream: AsyncThrowingStream<String?, Error> = await performer.performRequest(
+        let stream: AsyncThrowingStream<String?, Error> = await performer.performSingle(
             request,
             withCacheOptions: [.onCache]
         )
@@ -194,7 +194,7 @@ final class StorageRequestPerformerTests: XCTestCase {
             storagePath: StoragePathMock.custom(moduleName: "timestamp", itemName: "now")
         )
         
-        let stream: AsyncThrowingStream<String?, Error> = await performer.performRequest(
+        let stream: AsyncThrowingStream<String?, Error> = await performer.performSingle(
             request,
             withCacheOptions: [.onPerform]
         )

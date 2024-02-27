@@ -7,8 +7,14 @@ protocol StorageRequestWorkerBuilder {
         runtimeService: RuntimeCodingServiceProtocol,
         connection: JSONRPCEngine,
         storageRequestFactory: AsyncStorageRequestFactory,
-        request: StorageRequest
+        type: StorageRequestWorkerType
     ) -> StorageRequestWorker
+}
+
+enum StorageRequestWorkerType {
+    case nMap(params: [[any NMapKeyParamProtocol]])
+    case encodable(params: [any Encodable])
+    case simple
 }
 
 final class StorageRequestWorkerBuilderDefault<T: Decodable>: StorageRequestWorkerBuilder {
@@ -16,9 +22,9 @@ final class StorageRequestWorkerBuilderDefault<T: Decodable>: StorageRequestWork
         runtimeService: RuntimeCodingServiceProtocol,
         connection: JSONRPCEngine,
         storageRequestFactory: AsyncStorageRequestFactory,
-        request: StorageRequest
+        type: StorageRequestWorkerType
     ) -> StorageRequestWorker {
-        switch request.parametersType {
+        switch type {
         case .nMap:
             return NMapStorageRequestWorker<T>(
                 runtimeService: runtimeService,
