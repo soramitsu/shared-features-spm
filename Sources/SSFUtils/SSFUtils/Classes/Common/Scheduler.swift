@@ -65,7 +65,8 @@ public final class Scheduler: NSObject, SchedulerProtocol {
         timer = nil
     }
 
-    @objc private func handleTrigger() {
+    @objc
+    private func handleTrigger() {
         lock.lock()
 
         defer {

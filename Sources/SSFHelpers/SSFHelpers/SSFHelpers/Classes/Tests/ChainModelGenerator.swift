@@ -13,7 +13,7 @@ public enum ChainModelGenerator {
         hasCrowdloans: Bool = false,
         isEthereumBased: Bool = false
     ) -> [ChainModel] {
-        (0..<count).map { index in
+        (0 ..< count).map { index in
             let chainId = chainId ?? Data.random(of: 32)!.toHex()
 
             let node = ChainNodeModel(
@@ -41,13 +41,13 @@ public enum ChainModelGenerator {
                 staking: staking,
                 hasCrowdloans: hasCrowdloans
             )
-            
+
             let availableDestinations = XcmAvailableDestination(
                 chainId: Data.random(of: 32)!.toHex(),
                 bridgeParachainId: nil,
                 assets: []
             )
-            
+
             let xcm = XcmChain(
                 xcmVersion: .V3,
                 destWeightIsPrimitive: nil,
@@ -80,9 +80,12 @@ public enum ChainModelGenerator {
             return chain
         }
     }
-    
-    public static func withAvailableXcmAssets(for chain: ChainModel, availableAssets: [XcmAvailableAsset]) -> ChainModel {
-        return ChainModel(
+
+    public static func withAvailableXcmAssets(
+        for chain: ChainModel,
+        availableAssets: [XcmAvailableAsset]
+    ) -> ChainModel {
+        ChainModel(
             rank: nil,
             disabled: chain.disabled,
             chainId: chain.chainId,
@@ -111,7 +114,7 @@ public enum ChainModelGenerator {
     public static func generateChain(
         generatingAssets count: Int,
         addressPrefix: UInt16,
-        assetPresicion: UInt16 = (9...18).randomElement()!,
+        assetPresicion: UInt16 = (9 ... 18).randomElement()!,
         staking: StakingType? = nil,
         hasCrowdloans: Bool = false
     ) -> ChainModel {
@@ -136,13 +139,13 @@ public enum ChainModelGenerator {
             staking: staking,
             hasCrowdloans: hasCrowdloans
         )
-        
+
         let availableDestinations = XcmAvailableDestination(
             chainId: Data.random(of: 32)!.toHex(),
             bridgeParachainId: nil,
             assets: []
         )
-        
+
         let xcm = XcmChain(
             xcmVersion: .V3,
             destWeightIsPrimitive: nil,
@@ -168,7 +171,7 @@ public enum ChainModelGenerator {
             customNodes: nil,
             iosMinAppVersion: nil
         )
-        let chainAssetsArray: [AssetModel] = (0..<count).map { index in
+        let chainAssetsArray: [AssetModel] = (0 ..< count).map { index in
             generateAssetWithId(
                 AssetModel.Id(index),
                 symbol: "\(index)",
@@ -236,10 +239,14 @@ public enum ChainModelGenerator {
         } else {
             stakingApi = nil
         }
-        
 
         if crowdloanApi != nil || stakingApi != nil {
-            return ChainModel.ExternalApiSet(staking: stakingApi, history: nil, crowdloans: crowdloanApi, explorers: nil)
+            return ChainModel.ExternalApiSet(
+                staking: stakingApi,
+                history: nil,
+                crowdloans: crowdloanApi,
+                explorers: nil
+            )
         } else {
             return nil
         }

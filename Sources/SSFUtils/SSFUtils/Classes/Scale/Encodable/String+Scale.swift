@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 
 enum ScaleStringError: Error {
     case unexpectedEncoding
@@ -17,7 +17,7 @@ extension String: ScaleCodable {
     }
 
     public init(scaleDecoder: ScaleDecoding) throws {
-        let count = Int(try BigUInt(scaleDecoder: scaleDecoder))
+        let count = try Int(BigUInt(scaleDecoder: scaleDecoder))
         let data = try scaleDecoder.read(count: count)
         try scaleDecoder.confirm(count: count)
 

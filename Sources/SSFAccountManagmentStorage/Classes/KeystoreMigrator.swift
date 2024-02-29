@@ -68,7 +68,7 @@ extension KeystoreMigrator: KeystoreMigrating {
             throw KeystoreMigratingError.destinationNotReached
         }
 
-        try identifiersToRemoveOnFinalize.forEach { identifier in
+        for identifier in identifiersToRemoveOnFinalize {
             try keystore.deleteKeyIfExists(for: identifier)
         }
 

@@ -1,8 +1,7 @@
 import Foundation
-import SSFModels
 import IrohaCrypto
-import SSFUtils
 import SSFModels
+import SSFUtils
 
 public enum AddressFactory {
     private static let substrateFactory = SS58AddressFactory()
@@ -15,7 +14,10 @@ public enum AddressFactory {
         try accountId.toAddress(using: chainFormat)
     }
 
-    public static func accountId(from address: AccountAddress, chainFormat: SFChainFormat) throws -> AccountId {
+    public static func accountId(
+        from address: AccountAddress,
+        chainFormat: SFChainFormat
+    ) throws -> AccountId {
         try address.toAccountId(using: chainFormat)
     }
     
@@ -42,7 +44,7 @@ public extension AccountAddress {
             return try SS58AddressFactory().accountId(fromAddress: self, type: prefix)
         }
     }
-    
+
     func toAccountIdWithTryExtractPrefix() throws -> AccountId {
         if hasPrefix("0x") {
             return try AccountId(hexStringSSF: self)

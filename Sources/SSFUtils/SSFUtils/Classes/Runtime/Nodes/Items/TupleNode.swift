@@ -18,7 +18,8 @@ public class TupleNode: Node {
                     components = dictValue.values.map { $0 }
                 }
             } else if innerNodes.count == 1 {
-                // accept single value JSON if tuple fields count is the 1 (backward compatibility for <= V13 for some types)
+                // accept single value JSON if tuple fields count is the 1 (backward compatibility
+                // for <= V13 for some types)
                 switch value {
                 case .unsignedIntValue, .signedIntValue, .stringValue, .boolValue, .null:
                     components = [value]
@@ -27,23 +28,25 @@ public class TupleNode: Node {
                 }
             }
         }
-        
+
         guard let components = components else {
             throw DynamicScaleEncoderError.unexpectedTupleJSON(json: value)
         }
 
         guard components.count == innerNodes.count else {
-            throw DynamicScaleEncoderError.unexpectedTupleComponents(count: components.count,
-                                                                     actual: innerNodes.count)
+            throw DynamicScaleEncoderError.unexpectedTupleComponents(
+                count: components.count,
+                actual: innerNodes.count
+            )
         }
 
-        for index in 0..<innerNodes.count {
+        for index in 0 ..< innerNodes.count {
             try encoder.append(json: components[index], type: innerNodes[index].typeName)
         }
     }
 
     public func accept(decoder: DynamicScaleDecoding) throws -> JSON {
-        let jsons = try innerNodes.reduce([JSON]()) { (result, item) in
+        let jsons = try innerNodes.reduce([JSON]()) { result, item in
             let json = try decoder.read(type: item.typeName)
             return result + [json]
         }

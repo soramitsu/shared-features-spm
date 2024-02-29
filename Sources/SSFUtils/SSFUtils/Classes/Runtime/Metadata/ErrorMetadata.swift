@@ -9,8 +9,8 @@ public protocol RuntimeErrorMetadata {
 
 // MARK: - V1
 
-extension RuntimeMetadataV1 {
-    public struct ErrorMetadata: RuntimeErrorMetadata {
+public extension RuntimeMetadataV1 {
+    struct ErrorMetadata: RuntimeErrorMetadata {
         public let name: String
         public let documentation: [String]
 
@@ -35,6 +35,6 @@ extension RuntimeMetadataV1.ErrorMetadata: ScaleCodable {
 
 // MARK: - V14
 
-extension RuntimeMetadataV14 {
-    public typealias ErrorMetadata = RuntimeMetadataV1.ErrorMetadata
+public extension RuntimeMetadataV14 {
+    typealias ErrorMetadata = RuntimeMetadataV1.ErrorMetadata
 }

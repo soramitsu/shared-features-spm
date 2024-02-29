@@ -21,7 +21,7 @@ public class JSONRPCOperation<P: Encodable, T: Decodable>: BaseOperation<T> {
         super.init()
     }
 
-    public override func main() {
+    override public func main() {
         super.main()
 
         if isCancelled {
@@ -37,7 +37,10 @@ public class JSONRPCOperation<P: Encodable, T: Decodable>: BaseOperation<T> {
 
             var optionalCallResult: Result<T, Error>?
 
-            requestId = try engine.callMethod(method, params: parameters) { (result: Result<T, Error>) in
+            requestId = try engine.callMethod(method, params: parameters) { (result: Result<
+                T,
+                Error
+            >) in
                 optionalCallResult = result
 
                 semaphore.signal()
@@ -54,10 +57,10 @@ public class JSONRPCOperation<P: Encodable, T: Decodable>: BaseOperation<T> {
                 return
             }
 
-            if
-                case let .failure(error) = callResult,
-                let jsonRPCEngineError = error as? JSONRPCEngineError,
-                jsonRPCEngineError == .clientCancelled {
+            if case let .failure(error) = callResult,
+               let jsonRPCEngineError = error as? JSONRPCEngineError,
+               jsonRPCEngineError == .clientCancelled
+            {
                 return
             }
 
@@ -73,7 +76,7 @@ public class JSONRPCOperation<P: Encodable, T: Decodable>: BaseOperation<T> {
         }
     }
 
-    public override func cancel() {
+    override public func cancel() {
         if let requestId = requestId {
             engine.cancelForIdentifier(requestId)
         }

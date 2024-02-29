@@ -26,7 +26,7 @@ public struct Currency: Codable, Equatable, Hashable {
             isSelected: false
         )
     }
-    
+
     public init(id: String, symbol: String, name: String, icon: String, isSelected: Bool? = nil) {
         self.id = id
         self.symbol = symbol

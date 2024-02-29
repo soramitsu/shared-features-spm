@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 
 public enum TypeRegistryError: Error {
     case unexpectedJson
@@ -9,8 +9,13 @@ public enum TypeRegistryError: Error {
 public struct ConstantPath: Hashable {
     let moduleName: String
     let constantName: String
-}
 
+    public init(moduleName: String, constantName: String) {
+        self.moduleName = moduleName
+        self.constantName = constantName
+    }
+}
+// sourcery: AutoMockable
 public protocol TypeRegistryProtocol {
     var registeredTypes: [Node] { get }
     var registeredTypeNames: Set<String> { get }
@@ -54,9 +59,9 @@ public class TypeRegistry: TypeRegistryProtocol {
     private var resolutionCache: [String: String] = [:]
     private var allKeys: Set<String> = []
     private var allOverrides: Set<ConstantPath> = []
-    
+
     private var overrides: [ConstantPath: String] = [:]
-    
+
     private let json: JSON
     private let overridesJson: [JSON]?
     private let additionalNodes: [Node]
@@ -65,12 +70,12 @@ public class TypeRegistry: TypeRegistryProtocol {
         resolveJsons()
         return graph.keys.compactMap { graph[$0] }
     }()
-    
+
     public lazy var registeredTypeNames: Set<String> = {
         resolveJsons()
         return allKeys
     }()
-    
+
     public lazy var registeredOverrides: Set<ConstantPath> = {
         resolveJsons()
         return allOverrides
@@ -86,13 +91,13 @@ public class TypeRegistry: TypeRegistryProtocol {
         self.nodeFactory = nodeFactory
         self.typeResolver = typeResolver
         self.json = json
-        self.overridesJson = overrides
+        overridesJson = overrides
         self.additionalNodes = additionalNodes
     }
 
     public func node(for key: String) -> Node? {
         resolveJsons()
-        
+
         if let node = graph[key] {
             return node
         }
@@ -106,20 +111,24 @@ public class TypeRegistry: TypeRegistryProtocol {
             if let node = graph[resolvedKey] {
                 return node
             }
-            
-            return try? nodeFactory.buildNode(from: .stringValue(key), typeName: key, mediator: self)
+
+            return try? nodeFactory.buildNode(
+                from: .stringValue(key),
+                typeName: key,
+                mediator: self
+            )
         }
 
         return nil
     }
-    
+
     public func override(for moduleName: String, constantName: String) -> String? {
         resolveJsons()
         return overrides[.init(moduleName: moduleName, constantName: constantName)]
     }
 
     // MARK: Private
-    
+
     private func resolveJsons() {
         guard graph.keys.isEmpty else {
             return
@@ -130,7 +139,7 @@ public class TypeRegistry: TypeRegistryProtocol {
         resolveGenerics()
 
         allKeys = Set(graph.keys)
-        allOverrides = Set(self.overrides.keys)
+        allOverrides = Set(overrides.keys)
     }
 
     private func override(nodes: [Node]) {
@@ -138,18 +147,18 @@ public class TypeRegistry: TypeRegistryProtocol {
             graph[node.typeName] = node
         }
     }
-    
+
     private func parse(overrides: [JSON]?) {
         guard let modules = overrides else { return }
 
         for module in modules {
             guard let moduleName = module["module"]?.stringValue else { continue }
             guard let constants = module["constants"]?.arrayValue else { continue }
-            
+
             for constant in constants {
                 guard let constantName = constant["name"]?.stringValue else { continue }
                 guard let value = constant["value"]?.stringValue else { continue }
-                
+
                 self.overrides[.init(moduleName: moduleName, constantName: constantName)] = value
             }
         }
@@ -162,7 +171,7 @@ public class TypeRegistry: TypeRegistryProtocol {
 
         let keyParser = TermParser.generic()
 
-        let refinedDict = dict.reduce(into: [String: JSON]()) { (result, item) in
+        let refinedDict = dict.reduce(into: [String: JSON]()) { result, item in
             if let type = keyParser.parse(json: .stringValue(item.key))?.first?.stringValue {
                 result[type] = item.value
             }
@@ -173,7 +182,11 @@ public class TypeRegistry: TypeRegistryProtocol {
         }
 
         for item in refinedDict {
-            if let node = try? nodeFactory.buildNode(from: item.value, typeName: item.key, mediator: self) {
+            if let node = try? nodeFactory.buildNode(
+                from: item.value,
+                typeName: item.key,
+                mediator: self
+            ) {
                 graph[item.key] = node
             }
         }
@@ -186,7 +199,10 @@ public class TypeRegistry: TypeRegistryProtocol {
         let nonGenericTypeNames = allTypeNames.subtracting(genericTypeNames)
 
         for genericTypeName in genericTypeNames {
-            if let resolvedKey = typeResolver.resolve(typeName: genericTypeName, using: nonGenericTypeNames) {
+            if let resolvedKey = typeResolver.resolve(
+                typeName: genericTypeName,
+                using: nonGenericTypeNames
+            ) {
                 graph[genericTypeName] = ProxyNode(typeName: resolvedKey, resolver: self)
             }
         }
@@ -209,7 +225,7 @@ extension TypeRegistry: TypeRegistering {
 
         return proxy
     }
-    
+
     func register(typeName: String, node: Node) -> Node {
         graph[typeName] = node
         return ProxyNode(typeName: typeName, resolver: self)

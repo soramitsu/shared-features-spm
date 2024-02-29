@@ -1,7 +1,7 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 
@@ -110,11 +110,14 @@ public final class EndpointBuilder {
         self.urlTemplate = urlTemplate
     }
 
-    private func process(urlTemplate: String, replacement block: (String) throws -> String) throws -> String {
+    private func process(
+        urlTemplate: String,
+        replacement block: (String) throws -> String
+    ) throws -> String {
         var result = String()
         var paramStartIndex: String.Index?
 
-        for index in 0..<urlTemplate.count {
+        for index in 0 ..< urlTemplate.count {
             let stringIndex = urlTemplate.index(urlTemplate.startIndex, offsetBy: index)
 
             if urlTemplate[stringIndex] == EndpointBuilder.paramStart {
@@ -131,7 +134,7 @@ public final class EndpointBuilder {
                 let paramNameStart = urlTemplate.index(after: startIndex)
                 let paramNameEnd = urlTemplate.index(before: stringIndex)
 
-                let paramName = String(urlTemplate[paramNameStart...paramNameEnd])
+                let paramName = String(urlTemplate[paramNameStart ... paramNameEnd])
 
                 let replacement = try block(paramName)
                 result.append(replacement)
@@ -152,8 +155,9 @@ public final class EndpointBuilder {
         }
 
         guard let encodedString = string
-            .addingPercentEncoding(withAllowedCharacters: encodingCharset) else {
-                throw EndpointBuilderError.invalidUrlEncoding
+            .addingPercentEncoding(withAllowedCharacters: encodingCharset) else
+        {
+            throw EndpointBuilderError.invalidUrlEncoding
         }
 
         return encodedString
@@ -162,12 +166,12 @@ public final class EndpointBuilder {
 
 extension EndpointBuilder: EndpointBuilderProtocol {
     public func withUrlEncoding(allowedCharset: CharacterSet) -> Self {
-        self.allowedUrlEncodingCharset = allowedCharset
+        allowedUrlEncodingCharset = allowedCharset
         return self
     }
 
     public func buildParameterURL(_ value: String) throws -> URL {
-        var alreadyFilledParam: Bool = false
+        var alreadyFilledParam = false
 
         let urlString = try process(urlTemplate: urlTemplate) { _ in
             guard !alreadyFilledParam else {
@@ -213,8 +217,10 @@ extension EndpointBuilder: EndpointBuilderProtocol {
     }
 
     public func buildRegex() throws -> String {
-        let regexTemplate = urlTemplate.reduce(into: "") { (result, character) in
-            if let scalar = character.unicodeScalars.first, EndpointBuilder.regexSpecialCharacters.contains(scalar) {
+        let regexTemplate = urlTemplate.reduce(into: "") { result, character in
+            if let scalar = character.unicodeScalars.first,
+               EndpointBuilder.regexSpecialCharacters.contains(scalar)
+            {
                 result.append(EndpointBuilder.regexSkipString)
             }
 
@@ -222,7 +228,7 @@ extension EndpointBuilder: EndpointBuilderProtocol {
         }
 
         return try process(urlTemplate: regexTemplate) { _ in
-            return EndpointBuilder.regexReplacement
+            EndpointBuilder.regexReplacement
         }
     }
 }

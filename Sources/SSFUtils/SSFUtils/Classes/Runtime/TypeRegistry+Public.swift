@@ -36,7 +36,7 @@ public extension TypeRegistry {
             VectorNodeFactory(parser: RegexParser.vector()),
             OptionNodeFactory(parser: RegexParser.option()),
             CompactNodeFactory(parser: RegexParser.compact()),
-            AliasNodeFactory(parser: TermParser.generic())
+            AliasNodeFactory(parser: TermParser.generic()),
         ]
 
         let resolvers: [TypeResolving] = [
@@ -44,7 +44,7 @@ public extension TypeRegistry {
             CaseInsensitiveResolver(),
             TableResolver.noise(),
             RegexReplaceResolver.noise(),
-            RegexReplaceResolver.genericsFilter()
+            RegexReplaceResolver.genericsFilter(),
         ]
 
         return try TypeRegistry(

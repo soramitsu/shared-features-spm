@@ -1,10 +1,10 @@
 import Foundation
-import SSFModels
-import SSFUtils
 import RobinHood
 import SSFAccountManagmentStorage
+import SSFModels
+import SSFUtils
 
-//sourcery: AutoMockable
+// sourcery: AutoMockable
 public protocol AccountManagementWorkerProtocol {
     func save(account: ManagedMetaAccountModel, completion: @escaping () -> Void)
     func fetchAll() async throws -> [MetaAccountModel]
@@ -19,7 +19,7 @@ public final class AccountManagementWorker: AccountManagementWorkerProtocol {
     private let metaAccountRepository: AnyDataProviderRepository<MetaAccountModel>
     private let managedAccountRepository: AnyDataProviderRepository<ManagedMetaAccountModel>
     private let operationQueue: OperationQueue
-    
+
     public init(
         metaAccountRepository: AnyDataProviderRepository<MetaAccountModel>,
         managedAccountRepository: AnyDataProviderRepository<ManagedMetaAccountModel>,
@@ -29,17 +29,17 @@ public final class AccountManagementWorker: AccountManagementWorkerProtocol {
         self.metaAccountRepository = metaAccountRepository
         self.managedAccountRepository = managedAccountRepository
     }
-    
+
     deinit {
         operationQueue.cancelAllOperations()
     }
-    
+
     public func save(account: ManagedMetaAccountModel, completion: @escaping () -> Void) {
-        let saveOperation = managedAccountRepository.saveOperation { [ account ] } _: { [] }
+        let saveOperation = managedAccountRepository.saveOperation { [account] } _: { [] }
         saveOperation.completionBlock = completion
         operationQueue.addOperations([saveOperation], waitUntilFinished: true)
     }
-    
+
     public func fetchAll() async throws -> [MetaAccountModel] {
         let fetchOperation = metaAccountRepository.fetchAllOperation(with: RepositoryFetchOptions())
         operationQueue.addOperation(fetchOperation)
@@ -55,7 +55,7 @@ public final class AccountManagementWorker: AccountManagementWorkerProtocol {
             }
         }
     }
-        
+
     public func deleteAll(completion: @escaping () -> Void) {
         let deleteAllOperation = managedAccountRepository.deleteAllOperation()
         deleteAllOperation.completionBlock = completion

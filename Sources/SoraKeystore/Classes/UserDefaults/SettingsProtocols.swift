@@ -1,7 +1,7 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 
@@ -22,9 +22,9 @@ public protocol SettingsManagerProtocol: AnyObject {
     func removeAll()
 }
 
-extension SettingsManagerProtocol {
+public extension SettingsManagerProtocol {
     @discardableResult
-    public func set<T: Encodable>(value: T, for key: String) -> Bool {
+    func set<T: Encodable>(value: T, for key: String) -> Bool {
         guard let data = try? JSONEncoder().encode(value) else {
             return false
         }
@@ -34,7 +34,7 @@ extension SettingsManagerProtocol {
         return true
     }
 
-    public func value<T>(of type: T.Type, for key: String) -> T? where T: Decodable {
+    func value<T>(of type: T.Type, for key: String) -> T? where T: Decodable {
         guard let data = data(for: key) else {
             return nil
         }

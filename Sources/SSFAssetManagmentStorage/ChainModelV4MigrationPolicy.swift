@@ -1,5 +1,5 @@
-import Foundation
 import CoreData
+import Foundation
 import SSFUtils
 
 class ChainModelV4MigrationPolicy: NSEntityMigrationPolicy {
@@ -22,12 +22,11 @@ class ChainModelV4MigrationPolicy: NSEntityMigrationPolicy {
         }
 
         let assetModels: [NSManagedObject] = chainAssetsModels.compactMap {
-            guard
-                let assetModel = $0.value(forKey: "asset") as? NSManagedObject,
-                let id = assetModel.value(forKey: "id") as? String,
-                let symbol = assetModel.value(forKey: "symbol") as? String,
-                let precision = assetModel.value(forKey: "precision") as? UInt16
-            else {
+            guard let assetModel = $0.value(forKey: "asset") as? NSManagedObject,
+                  let id = assetModel.value(forKey: "id") as? String,
+                  let symbol = assetModel.value(forKey: "symbol") as? String,
+                  let precision = assetModel.value(forKey: "precision") as? UInt16 else
+            {
                 return nil
             }
             let icon = assetModel.value(forKey: "icon") as? URL

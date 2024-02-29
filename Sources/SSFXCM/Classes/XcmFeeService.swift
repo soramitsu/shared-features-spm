@@ -1,9 +1,10 @@
-import Foundation
-import SSFNetwork
-import RobinHood
 import BigInt
+import Foundation
+import RobinHood
 import SSFModels
+import SSFNetwork
 
+// sourcery: AutoMockable
 public protocol XcmDestinationFeeFetching {
     func estimateFee(
         destinationChainId: String,
@@ -20,9 +21,9 @@ public final class XcmDestinationFeeFetcher: XcmDestinationFeeFetching {
     private let operationQueue: OperationQueue
     private let useCache: Bool
     private var fees: [XcmFee]?
-    
+
     private let defaultWeight: BigUInt = 500_000_000_000
-    
+
     public init(
         sourceUrl: URL,
         networkOperationFactory: NetworkOperationFactoryProtocol,
@@ -34,7 +35,7 @@ public final class XcmDestinationFeeFetcher: XcmDestinationFeeFetching {
         self.operationQueue = operationQueue
         self.useCache = useCache
     }
-    
+
     public func estimateFee(
         destinationChainId: String,
         token: String
@@ -47,28 +48,28 @@ public final class XcmDestinationFeeFetcher: XcmDestinationFeeFetching {
         )
         return fee
     }
-    
+
     public func estimateWeight(
         for chainId: String
     ) async throws -> BigUInt {
         let remoteData = await fetchRemoteData()
         switch remoteData {
-        case .success(let list):
+        case let .success(list):
             guard let xcmFee = list.first(where: {
                 $0.chainId == chainId
             }) else {
                 return defaultWeight
             }
             return xcmFee.weight
-        case .failure(let failure):
+        case let .failure(failure):
             throw failure
         case .none:
             throw XcmError.missingRemoteFeeResult
         }
     }
-    
+
     // MARK: - Private methods
-    
+
     private func fetchFee(
         from remoteData: Result<[XcmFee], Error>?,
         destinationChainId: String,
@@ -85,11 +86,11 @@ public final class XcmDestinationFeeFetcher: XcmDestinationFeeFetching {
                           return $0.symbol.lowercased() == modifySymbol.lowercased()
                       }
                       return false
-                  })
-            else {
+                  }) else
+            {
                 return .failure(XcmError.noFee(chainId: destinationChainId))
             }
-            
+
             return .success(destXcmFee)
         case let .failure(error):
             return .failure(error)
@@ -97,13 +98,14 @@ public final class XcmDestinationFeeFetcher: XcmDestinationFeeFetching {
             return .failure(XcmError.missingRemoteFeeResult)
         }
     }
-    
+
     private func fetchRemoteData() async -> Result<[XcmFee], Error>? {
         if let fees = fees, useCache {
             return .success(fees)
         }
-        
-        let networkOperation: BaseOperation<[XcmFee]> = networkOperationFactory.fetchData(from: sourceUrl)
+
+        let networkOperation: BaseOperation<[XcmFee]> = networkOperationFactory
+            .fetchData(from: sourceUrl)
         operationQueue.addOperation(networkOperation)
 
         return await withCheckedContinuation { continuation in

@@ -1,10 +1,10 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
-import Foundation
 import CoreData
+import Foundation
 
 /**
  *  Enum is defining errors which can occur during
@@ -57,14 +57,16 @@ public class CoreDataService {
     private let lock = NSLock()
 
     func databaseURL(with fileManager: FileManager) -> URL? {
-        guard case .persistent(let settings) = configuration.storageType else {
+        guard case let .persistent(settings) = configuration.storageType else {
             return nil
         }
 
         var dabaseDirectory = settings.databaseDirectory
 
         var isDirectory: ObjCBool = false
-        if fileManager.fileExists(atPath: dabaseDirectory.path, isDirectory: &isDirectory), isDirectory.boolValue {
+        if fileManager.fileExists(atPath: dabaseDirectory.path, isDirectory: &isDirectory),
+           isDirectory.boolValue
+        {
             return dabaseDirectory.appendingPathComponent(settings.databaseName)
         }
 
@@ -83,8 +85,12 @@ public class CoreDataService {
 }
 
 // MARK: Internal Invocations logic
+
 extension CoreDataService {
-    func invoke(block: @escaping CoreDataContextInvocationBlock, in context: NSManagedObjectContext) {
+    func invoke(
+        block: @escaping CoreDataContextInvocationBlock,
+        in context: NSManagedObjectContext
+    ) {
         context.perform {
             block(context, nil)
         }
@@ -92,10 +98,11 @@ extension CoreDataService {
 }
 
 // MARK: Internal Setup Logic
+
 extension CoreDataService {
     func setup() throws -> NSManagedObjectContext {
         let fileManager = FileManager.default
-        let optionalDatabaseURL = self.databaseURL(with: fileManager)
+        let optionalDatabaseURL = databaseURL(with: fileManager)
         let storageType: String
 
         guard let model = NSManagedObjectModel(contentsOf: configuration.modelURL) else {
@@ -109,17 +116,17 @@ extension CoreDataService {
         var options: [AnyHashable: Any]?
 
         switch configuration.storageType {
-        case .persistent(let settings):
-            guard let databaseURL = optionalDatabaseURL  else {
+        case let .persistent(settings):
+            guard let databaseURL = optionalDatabaseURL else {
                 throw CoreDataServiceError.databaseURLInvalid
             }
 
             if settings.incompatibleModelStrategy != .ignore &&
-                !checkCompatibility(of: model, with: databaseURL, using: fileManager) {
-
+                !checkCompatibility(of: model, with: databaseURL, using: fileManager)
+            {
                 try fileManager.removeItem(at: databaseURL)
             }
-            
+
             options = settings.options
 
             storageType = NSSQLiteStoreType
@@ -141,18 +148,23 @@ extension CoreDataService {
 }
 
 // MARK: Model Compatability
+
 extension CoreDataService {
-    func checkCompatibility(of model: NSManagedObjectModel,
-                            with databaseURL: URL,
-                            using fileManager: FileManager) -> Bool {
+    func checkCompatibility(
+        of model: NSManagedObjectModel,
+        with databaseURL: URL,
+        using fileManager: FileManager
+    ) -> Bool {
         guard fileManager.fileExists(atPath: databaseURL.path) else {
             return true
         }
 
         do {
-            let storeMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(ofType: NSSQLiteStoreType,
-                                                                                            at: databaseURL,
-                                                                                            options: nil)
+            let storeMetadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(
+                ofType: NSSQLiteStoreType,
+                at: databaseURL,
+                options: nil
+            )
             return model.isConfiguration(withName: nil, compatibleWithStoreMetadata: storeMetadata)
         } catch {
             return false
@@ -211,17 +223,22 @@ extension CoreDataService: CoreDataServiceProtocol {
             throw CoreDataServiceError.unexpectedDropWhenOpen
         }
 
-        guard case .persistent(let settings) = configuration.storageType else {
+        guard case let .persistent(settings) = configuration.storageType else {
             return
         }
 
         try removeDatabaseFile(using: FileManager.default, settings: settings)
     }
 
-    private func removeDatabaseFile(using fileManager: FileManager, settings: CoreDataPersistentSettings) throws {
+    private func removeDatabaseFile(
+        using fileManager: FileManager,
+        settings: CoreDataPersistentSettings
+    ) throws {
         var isDirectory: ObjCBool = false
-        if fileManager.fileExists(atPath: settings.databaseDirectory.path,
-                                  isDirectory: &isDirectory), isDirectory.boolValue {
+        if fileManager.fileExists(
+            atPath: settings.databaseDirectory.path,
+            isDirectory: &isDirectory
+        ), isDirectory.boolValue {
             try fileManager.removeItem(at: settings.databaseDirectory)
         }
     }

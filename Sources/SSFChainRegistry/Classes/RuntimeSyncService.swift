@@ -1,9 +1,9 @@
 import Foundation
 import RobinHood
-import SSFUtils
-import SSFModels
 import SSFChainConnection
+import SSFModels
 import SSFNetwork
+import SSFUtils
 
 public protocol RuntimeSyncServiceProtocol {
     func register(chain: ChainModel, with connection: SubstrateConnection) async throws -> RuntimeMetadataItem
@@ -87,11 +87,11 @@ public final class RuntimeSyncService {
             targetOperation: processingOperation,
             dependencies: dependencies
         )
-        
+
         syncingChains[chainId] = wrapper
-        
+
         operationQueue.addOperations(wrapper.allOperations, waitUntilFinished: false)
-        
+
         return try await withUnsafeThrowingContinuation { continuation in
             processingOperation.completionBlock = { [weak self] in
                 guard let strongSelf = self else {
@@ -119,7 +119,7 @@ public final class RuntimeSyncService {
                         metadataSyncResult: .failure(error),
                         runtimeVersion: runtimeVersion
                     )
-                    
+
                     strongSelf.processSyncResult(result)
                     continuation.resume(throwing: error)
                 case .none:
@@ -127,7 +127,6 @@ public final class RuntimeSyncService {
                 }
             }
         }
-
     }
 
     private func processSyncResult(_ result: SyncResult) {
@@ -174,7 +173,8 @@ public final class RuntimeSyncService {
         }
 
         guard let maxAttempt = retryAttempts.max(by: { $0.value.attempt < $1.value.attempt })?
-            .value.attempt else {
+            .value.attempt else
+        {
             return
         }
 
@@ -185,9 +185,9 @@ public final class RuntimeSyncService {
     }
 
     private func notifyCompletion(for result: SyncResult) {
-        if
-            case .success = result.metadataSyncResult,
-            let metadata = try? result.metadataSyncResult?.get() {
+        if case .success = result.metadataSyncResult,
+           let metadata = try? result.metadataSyncResult?.get()
+        {
             metadataItems[result.chainId] = metadata
         }
     }
@@ -217,7 +217,8 @@ public final class RuntimeSyncService {
 
         let filterOperation = ClosureOperation<RuntimeMetadataItem?> {
             do {
-                let metadataItem = try buildRuntimeMetadataOperation.extractNoCancellableResultData()
+                let metadataItem = try buildRuntimeMetadataOperation
+                    .extractNoCancellableResultData()
                 return metadataItem
             } catch let error as RuntimeSyncServiceError where error == .skipMetadataUnchanged {
                 return nil
@@ -231,7 +232,7 @@ public final class RuntimeSyncService {
             targetOperation: filterOperation,
             dependencies: [
                 remoteMetadaOperation,
-                buildRuntimeMetadataOperation
+                buildRuntimeMetadataOperation,
             ]
         )
     }
@@ -241,11 +242,11 @@ public final class RuntimeSyncService {
             engine: connection,
             method: RPCMethod.getRuntimeVersion
         )
-        
+
         let operationQueue = OperationQueue()
         operationQueue.addOperation(remoteRuntimeVersionOperation)
-        
-        return try await withUnsafeThrowingContinuation({ continuation in
+
+        return try await withUnsafeThrowingContinuation { continuation in
             remoteRuntimeVersionOperation.completionBlock = {
                 let result = remoteRuntimeVersionOperation.result
                 switch result {
@@ -254,10 +255,11 @@ public final class RuntimeSyncService {
                 case let .failure(error):
                     continuation.resume(throwing: error)
                 case .none:
-                    continuation.resume(throwing: RuntimeSyncServiceError.missingRuntimeVersionResult)
+                    continuation
+                        .resume(throwing: RuntimeSyncServiceError.missingRuntimeVersionResult)
                 }
             }
-        })
+        }
     }
 
     private func clearOperations(for chainId: ChainModel.Id) {
@@ -298,11 +300,14 @@ extension RuntimeSyncService: RuntimeSyncServiceProtocol {
         if let runtimeMetadataItem = metadataItems[chain.chainId] {
             return runtimeMetadataItem
         }
-        
+
         knownChains[chain.chainId] = connection
 
         let runtimeVersion = try await getRemoteRuntimeVersion(with: connection)
-        let runtimeMetadataItem = try await performSync(for: chain.chainId, runtimeVersion: runtimeVersion)
+        let runtimeMetadataItem = try await performSync(
+            for: chain.chainId,
+            runtimeVersion: runtimeVersion
+        )
         return runtimeMetadataItem
     }
 
@@ -316,7 +321,7 @@ extension RuntimeSyncService: RuntimeSyncServiceProtocol {
         clearOperations(for: chainId)
         knownChains[chainId] = nil
     }
-    
+
     public func getRuntimeItem(chainId: ChainModel.Id) throws -> RuntimeMetadataItem {
         if let error = errors[chainId] {
             throw error

@@ -1,9 +1,9 @@
 import Foundation
-import SSFUtils
 import RobinHood
+import SSFLogger
 import SSFModels
 import SSFNetwork
-import SSFLogger
+import SSFUtils
 
 public protocol ChainSyncServiceProtocol {
     func getChainModel(for chainId: ChainModel.Id) async throws -> ChainModel
@@ -28,8 +28,8 @@ public final class ChainSyncService {
     private var retryAttempt: Int = 0
     private var isSyncing: Bool = false
     private let mutex = NSLock()
-    
-    private var remoteMapping: [ChainModel.Id : ChainModel] = [:]
+
+    private var remoteMapping: [ChainModel.Id: ChainModel] = [:]
 
     public init(
         chainsUrl: URL,
@@ -43,30 +43,32 @@ public final class ChainSyncService {
         self.retryStrategy = retryStrategy
     }
 
-    private func executeSync() async throws -> [ChainModel.Id : ChainModel] {
+    private func executeSync() async throws -> [ChainModel.Id: ChainModel] {
         retryAttempt += 1
         let chainsMap = try await fetchRemoteData(chainsUrl: chainsUrl)
         return chainsMap
     }
 
-    private func syncChanges(remoteChains: [ChainModel]) -> [ChainModel.Id : ChainModel] {
-        let remoteMapping = remoteChains.reduce(into: [ChainModel.Id: ChainModel]()) { mapping, item in
-            mapping[item.chainId] = item
-        }
+    private func syncChanges(remoteChains: [ChainModel]) -> [ChainModel.Id: ChainModel] {
+        let remoteMapping = remoteChains
+            .reduce(into: [ChainModel.Id: ChainModel]()) { mapping, item in
+                mapping[item.chainId] = item
+            }
         complete(result: .success(remoteMapping))
         return remoteMapping
     }
 
-    private func fetchRemoteData(chainsUrl: URL) async throws -> [ChainModel.Id : ChainModel] {
-        let remoteFetchChainsOperation: BaseOperation<[ChainModel]> = dataFetchFactory.fetchData(from: chainsUrl)
+    private func fetchRemoteData(chainsUrl: URL) async throws -> [ChainModel.Id: ChainModel] {
+        let remoteFetchChainsOperation: BaseOperation<[ChainModel]> = dataFetchFactory
+            .fetchData(from: chainsUrl)
 
         operationQueue.addOperations([remoteFetchChainsOperation], waitUntilFinished: false)
-        
-        return try await withUnsafeThrowingContinuation({ continuation in
+
+        return try await withUnsafeThrowingContinuation { continuation in
             remoteFetchChainsOperation.completionBlock = { [weak self] in
-                guard
-                    let strongSelf = self,
-                    let result = remoteFetchChainsOperation.result else {
+                guard let strongSelf = self,
+                      let result = remoteFetchChainsOperation.result else
+                {
                     return
                 }
 
@@ -79,10 +81,10 @@ public final class ChainSyncService {
                     return continuation.resume(throwing: error)
                 }
             }
-        })
+        }
     }
 
-    private func complete(result: Result<[ChainModel.Id : ChainModel], Error>?) {
+    private func complete(result: Result<[ChainModel.Id: ChainModel], Error>?) {
         mutex.lock()
 
         defer {
@@ -114,23 +116,23 @@ extension ChainSyncService: ChainSyncServiceProtocol {
         if let chainModel = remoteMapping[chainId] {
             return chainModel
         }
-        
+
         let remoteMap = try await executeSync()
         guard let remoteChainModel = remoteMap[chainId] else {
             throw ChainSyncServiceError.missingChainModel
         }
         return remoteChainModel
     }
-    
+
     public func getChainModels() async throws -> [ChainModel] {
         if !remoteMapping.isEmpty {
             return Array(remoteMapping.values)
         }
-        
+
         let remoteMap = try await executeSync()
         return Array(remoteMap.values)
     }
-    
+
     public func syncUp() {
         Task { try await executeSync() }
     }
@@ -149,4 +151,3 @@ extension ChainSyncService: SchedulerDelegate {
         Task { try await executeSync() }
     }
 }
-

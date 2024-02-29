@@ -1,7 +1,7 @@
 import Foundation
-import SSFUtils
 import SSFChainConnection
 import SSFModels
+import SSFUtils
 
 public enum ConnectionPoolError: Error {
     case missingConnection

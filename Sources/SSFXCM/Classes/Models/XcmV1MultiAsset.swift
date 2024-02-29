@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 
 struct XcmV1MultiAsset: Codable {
     enum CodingKeys: String, CodingKey {
@@ -14,7 +14,7 @@ struct XcmV1MultiAsset: Codable {
         assetId = .concrete(multilocation)
         fun = .fungible(amount: amount)
     }
-    
+
     init(assetId: XcmV1MultiassetAssetId, fun: XcmV1MultiassetFungibility) {
         self.assetId = assetId
         self.fun = fun

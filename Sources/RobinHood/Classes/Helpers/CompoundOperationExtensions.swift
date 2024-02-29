@@ -1,7 +1,7 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 
@@ -17,10 +17,10 @@ public extension CompoundOperationWrapper {
         operation.result = .success(result)
         return CompoundOperationWrapper(targetOperation: operation)
     }
-    
+
     func addDependency(operations: [Operation]) {
-        allOperations.forEach { nextOperation in
-            operations.forEach { prevOperation in
+        for nextOperation in allOperations {
+            for prevOperation in operations {
                 nextOperation.addDependency(prevOperation)
             }
         }

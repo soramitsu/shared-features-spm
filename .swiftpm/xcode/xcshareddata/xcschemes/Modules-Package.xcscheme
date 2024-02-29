@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1430"
+   LastUpgradeVersion = "1500"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -15,34 +15,6 @@
          </ExecutionAction>
       </PreActions>
       <BuildActionEntries>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Modules_SSFAssetManagmentStorage"
-               BuildableName = "Modules_SSFAssetManagmentStorage"
-               BlueprintName = "Modules_SSFAssetManagmentStorage"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Modules_SSFAccountManagmentStorage"
-               BuildableName = "Modules_SSFAccountManagmentStorage"
-               BlueprintName = "Modules_SSFAccountManagmentStorage"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </BuildActionEntry>
          <BuildActionEntry
             buildForTesting = "YES"
             buildForRunning = "YES"
@@ -345,20 +317,6 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SSFTransferService"
-               BuildableName = "SSFTransferService"
-               BlueprintName = "SSFTransferService"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "SSFUtils"
                BuildableName = "SSFUtils"
                BlueprintName = "SSFUtils"
@@ -443,20 +401,6 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SSFKeyPairTests"
-               BuildableName = "SSFKeyPairTests"
-               BlueprintName = "SSFKeyPairTests"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "NO"
-            buildForArchiving = "NO"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "SSFQRServiceTests"
                BuildableName = "SSFQRServiceTests"
                BlueprintName = "SSFQRServiceTests"
@@ -471,9 +415,135 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Modules_SSFAccountManagmentStorage"
+               BuildableName = "Modules_SSFAccountManagmentStorage"
+               BlueprintName = "Modules_SSFAccountManagmentStorage"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Modules_SSFAssetManagmentStorage"
+               BuildableName = "Modules_SSFAssetManagmentStorage"
+               BlueprintName = "Modules_SSFAssetManagmentStorage"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFPolkaswap"
+               BuildableName = "SSFPolkaswap"
+               BlueprintName = "SSFPolkaswap"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFPools"
+               BuildableName = "SSFPools"
+               BlueprintName = "SSFPools"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFPoolsStorage"
+               BuildableName = "SSFPoolsStorage"
+               BlueprintName = "SSFPoolsStorage"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFSingleValueCache"
+               BuildableName = "SSFSingleValueCache"
+               BlueprintName = "SSFSingleValueCache"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Modules_MocksBasket"
+               BuildableName = "Modules_MocksBasket"
+               BlueprintName = "Modules_MocksBasket"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFIndexers"
+               BuildableName = "SSFIndexers"
+               BlueprintName = "SSFIndexers"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "Modules_SSFTransferServiceTests"
                BuildableName = "Modules_SSFTransferServiceTests"
                BlueprintName = "Modules_SSFTransferServiceTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFTransferService"
+               BuildableName = "SSFTransferService"
+               BlueprintName = "SSFTransferService"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -510,16 +580,6 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SSFKeyPairTests"
-               BuildableName = "SSFKeyPairTests"
-               BlueprintName = "SSFKeyPairTests"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "SSFQRServiceTests"
                BuildableName = "SSFQRServiceTests"
                BlueprintName = "SSFQRServiceTests"
@@ -530,9 +590,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SSFTransferServiceTests"
-               BuildableName = "SSFTransferServiceTests"
-               BlueprintName = "SSFTransferServiceTests"
+               BlueprintIdentifier = "MocksBasket"
+               BuildableName = "MocksBasket"
+               BlueprintName = "MocksBasket"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>
@@ -543,6 +603,56 @@
                BlueprintIdentifier = "SSFCloudStorageTests"
                BuildableName = "SSFCloudStorageTests"
                BlueprintName = "SSFCloudStorageTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFKeyPairTests"
+               BuildableName = "SSFKeyPairTests"
+               BlueprintName = "SSFKeyPairTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFSingleValueCacheTests"
+               BuildableName = "SSFSingleValueCacheTests"
+               BlueprintName = "SSFSingleValueCacheTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFStorageQueryKitTest"
+               BuildableName = "SSFStorageQueryKitTest"
+               BlueprintName = "SSFStorageQueryKitTest"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFXCMTests"
+               BuildableName = "SSFXCMTests"
+               BlueprintName = "SSFXCMTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFTransferServiceTests"
+               BuildableName = "SSFTransferServiceTests"
+               BlueprintName = "SSFTransferServiceTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>
@@ -568,9 +678,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "Modules_SSFAssetManagmentStorage"
-            BuildableName = "Modules_SSFAssetManagmentStorage"
-            BlueprintName = "Modules_SSFAssetManagmentStorage"
+            BlueprintIdentifier = "IrohaCrypto"
+            BuildableName = "IrohaCrypto"
+            BlueprintName = "IrohaCrypto"
             ReferencedContainer = "container:">
          </BuildableReference>
       </MacroExpansion>

@@ -1,5 +1,5 @@
-import Foundation
 import CoreData
+import Foundation
 import SoraKeystore
 import SSFUtils
 
@@ -30,9 +30,9 @@ final class SubstrateStorageMigrator {
             options: nil
         )
 
-        guard
-            let metadata = maybeMetadata,
-            let sourceVersion = compatibleVersionForStoreMetadata(metadata) else {
+        guard let metadata = maybeMetadata,
+              let sourceVersion = compatibleVersionForStoreMetadata(metadata) else
+        {
             fatalError("Unknown store version at URL \(storeURL)")
         }
 
@@ -43,7 +43,10 @@ final class SubstrateStorageMigrator {
                 isDirectory: true
             ).appendingPathComponent(migrationDirName)
 
-            try fileManager.createDirectory(at: tmpMigrationDirURL, withIntermediateDirectories: true)
+            try fileManager.createDirectory(
+                at: tmpMigrationDirURL,
+                withIntermediateDirectories: true
+            )
 
             try performMigration(
                 from: sourceVersion,
@@ -118,10 +121,15 @@ final class SubstrateStorageMigrator {
         return compatibleVersion != version
     }
 
-    private func compatibleVersionForStoreMetadata(_ metadata: [String: Any]) -> SubstrateStorageVersion? {
+    private func compatibleVersionForStoreMetadata(_ metadata: [String: Any])
+        -> SubstrateStorageVersion?
+    {
         let compatibleVersion = SubstrateStorageVersion.allCases.first {
             let model = createManagedObjectModel(forResource: $0.rawValue)
-            return model.isConfiguration(withName: $0.rawValue, compatibleWithStoreMetadata: metadata)
+            return model.isConfiguration(
+                withName: $0.rawValue,
+                compatibleWithStoreMetadata: metadata
+            )
         }
 
         return compatibleVersion
@@ -142,9 +150,9 @@ final class SubstrateStorageMigrator {
             subdirectory: modelDirectory
         )
 
-        guard
-            let modelURL = omoURL ?? momURL,
-            let model = NSManagedObjectModel(contentsOf: modelURL) else {
+        guard let modelURL = omoURL ?? momURL,
+              let model = NSManagedObjectModel(contentsOf: modelURL) else
+        {
             fatalError("Unable to load model in bundle for resource \(resource)")
         }
 
@@ -178,20 +186,24 @@ final class SubstrateStorageMigrator {
             options: nil
         )
 
-        guard
-            let metadata = maybeMetadata,
-            let currentModel = NSManagedObjectModel.mergedModel(
-                from: [Bundle.main],
-                forStoreMetadata: metadata
-            ) else {
+        guard let metadata = maybeMetadata,
+              let currentModel = NSManagedObjectModel.mergedModel(
+                  from: [Bundle.main],
+                  forStoreMetadata: metadata
+              ) else
+        {
             return
         }
 
         do {
-            let persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: currentModel)
+            let persistentStoreCoordinator =
+                NSPersistentStoreCoordinator(managedObjectModel: currentModel)
 
             let options = [NSSQLitePragmasOption: ["journal_mode": "DELETE"]]
-            let store = try persistentStoreCoordinator.addPersistentStore(at: storeURL, options: options)
+            let store = try persistentStoreCoordinator.addPersistentStore(
+                at: storeURL,
+                options: options
+            )
             try persistentStoreCoordinator.remove(store)
         } catch {
             fatalError("Failed to force WAL checkpointing, error: \(error)")

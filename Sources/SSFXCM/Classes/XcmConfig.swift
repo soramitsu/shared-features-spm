@@ -10,7 +10,7 @@ public protocol XcmConfigProtocol {
 final class XcmConfig: XcmConfigProtocol {
     static let shared = XcmConfig()
     private init() {}
-    
+
     var chainsSourceUrl: URL {
         #if DEBUG || F_DEV
             GitHubUrl.url(suffix: "chains/v4/chains_dev.json", branch: .rococo)
@@ -18,15 +18,15 @@ final class XcmConfig: XcmConfigProtocol {
             GitHubUrl.url(suffix: "chains/v2/chains.json")
         #endif
     }
-    
+
     var chainTypesSourceUrl: URL {
         GitHubUrl.url(suffix: "chains/all_chains_types.json", branch: .rococo)
     }
-    
+
     var destinationFeeSourceUrl: URL {
         GitHubUrl.url(suffix: "xcm/v2/xcm_fees.json", branch: .rococo)
     }
-    
+
     var tokenLocationsSourceUrl: URL {
         GitHubUrl.url(suffix: "xcm/v2/xcm_token_locations.json")
     }

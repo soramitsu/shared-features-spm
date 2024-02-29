@@ -1,22 +1,22 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 
 public class KeychainManager {
     fileprivate static let queueLabel = "keychain.concurrent"
-    
-    public static let shared: KeychainManager = KeychainManager(qos: .default)
-    
+
+    public static let shared: KeychainManager = .init(qos: .default)
+
     public static func shared(with qos: DispatchQoS) -> KeychainManager {
         KeychainManager(qos: qos)
     }
-    
-    fileprivate lazy var keystore: Keychain = Keychain()
-    fileprivate let qos: DispatchQoS
-    fileprivate lazy var concurentQueue: DispatchQueue = DispatchQueue(
+
+    private lazy var keystore: Keychain = .init()
+    private let qos: DispatchQoS
+    private lazy var concurentQueue: DispatchQueue = .init(
         label: KeychainManager.queueLabel,
         qos: qos,
         attributes: .concurrent
@@ -49,10 +49,9 @@ extension KeychainManager: SecretStoreManagerProtocol {
         completionBlock: @escaping (Bool) -> Void
     ) {
         concurentQueue.async {
-            guard
-                let secretExists = try? self.keystore.checkKey(for: identifier),
-                let secretData = secret.asSecretData()
-            else {
+            guard let secretExists = try? self.keystore.checkKey(for: identifier),
+                  let secretData = secret.asSecretData() else
+            {
                 completionQueue.async {
                     completionBlock(false)
                 }
@@ -84,23 +83,22 @@ extension KeychainManager: SecretStoreManagerProtocol {
         completionBlock: @escaping (Bool) -> Void
     ) {
         concurentQueue.async {
-            guard
-                let secretExists = try? self.keystore.checkKey(for: identifier),
-                secretExists
-            else {
+            guard let secretExists = try? self.keystore.checkKey(for: identifier),
+                  secretExists else
+            {
                 completionQueue.async {
                     completionBlock(false)
                 }
                 return
             }
-            
+
             do {
                 try self.keystore.deleteKey(for: identifier)
-                
+
                 completionQueue.async {
                     completionBlock(true)
                 }
-                
+
             } catch {
                 completionQueue.async {
                     completionBlock(false)
@@ -124,6 +122,6 @@ extension KeychainManager: SecretStoreManagerProtocol {
     }
 
     public func checkSecret(for identifier: String) -> Bool {
-        (try? self.keystore.checkKey(for: identifier)) ?? false
+        (try? keystore.checkKey(for: identifier)) ?? false
     }
 }

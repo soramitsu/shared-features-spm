@@ -1,11 +1,11 @@
 import Foundation
 
-struct RuntimeTypes {
+enum RuntimeTypes {
     static var known: Set<String> {
         [
             "Compact<Balance>",
             "Compact<Moment>",
-            "Compact<BlockNumber>"
+            "Compact<BlockNumber>",
         ]
     }
 }

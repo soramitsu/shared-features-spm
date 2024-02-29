@@ -1,6 +1,6 @@
 import Foundation
 
-public struct SoraAssetId: Codable {
+public struct SoraAssetId: Codable, Equatable {
     @ArrayCodable public var value: String
 
     public init(wrappedValue: String) {
@@ -16,9 +16,7 @@ public struct SoraAssetId: Codable {
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        guard
-            let bytes = try? Data(hexStringSSF: value).map({ StringScaleMapper(value: $0) })
-        else {
+        guard let bytes = try? Data(hexStringSSF: value).map({ StringCodable(wrappedValue: $0) }) else {
             let context = EncodingError.Context(
                 codingPath: container.codingPath,
                 debugDescription: "Invalid encoding"

@@ -49,7 +49,11 @@ public extension TypeRegistryCatalog {
         )
 
         let versionedRegistries = try versionedJsons.mapValues {
-            try TypeRegistry.createFromTypesDefinition(json: $0, additionalNodes: [], schemaResolver: runtimeMetadata.schemaResolver)
+            try TypeRegistry.createFromTypesDefinition(
+                json: $0,
+                additionalNodes: [],
+                schemaResolver: runtimeMetadata.schemaResolver
+            )
         }
 
         let typeResolver = OneOfTypeResolver(children: [
@@ -57,7 +61,7 @@ public extension TypeRegistryCatalog {
             CaseInsensitiveResolver(),
             TableResolver.noise(),
             RegexReplaceResolver.noise(),
-            RegexReplaceResolver.genericsFilter()
+            RegexReplaceResolver.genericsFilter(),
         ])
 
         let runtimeMetadataRegistry = try TypeRegistry.createFromRuntimeMetadata(
@@ -91,7 +95,7 @@ public extension TypeRegistryCatalog {
 
         let typeKey = "types"
         let overridesKey = "overrides"
-        
+
         var currentVersionDict = [typeKey: types]
         if let overrides = versionedDefinitionJson.overrides {
             currentVersionDict[overridesKey] = overrides
@@ -99,15 +103,15 @@ public extension TypeRegistryCatalog {
 
         let initDict = [currentVersion: JSON.dictionaryValue(currentVersionDict)]
 
-        return versioning.reduce(into: initDict) { (result, versionedJson) in
-            guard
-                let version = versionedJson.runtime_range?.arrayValue?.first?.unsignedIntValue,
-                let definitionDic = versionedJson.types?.dictValue else {
+        return versioning.reduce(into: initDict) { result, versionedJson in
+            guard let version = versionedJson.runtime_range?.arrayValue?.first?.unsignedIntValue,
+                  let definitionDic = versionedJson.types?.dictValue else
+            {
                 return
             }
 
             if let oldDefinitionDic = result[version]?.types?.dictValue {
-                let mapping = oldDefinitionDic.merging(definitionDic) { (v1, _) in v1 }
+                let mapping = oldDefinitionDic.merging(definitionDic) { v1, _ in v1 }
                 result[version] = .dictionaryValue([typeKey: .dictionaryValue(mapping)])
             } else {
                 result[version] = .dictionaryValue([typeKey: .dictionaryValue(definitionDic)])

@@ -20,7 +20,6 @@ public struct ChainNodeModel: Equatable, Codable, Hashable {
         self.name = name
         self.apikey = apikey
     }
-    
 }
 
 public extension ChainNodeModel {

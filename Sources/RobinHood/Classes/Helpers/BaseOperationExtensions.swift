@@ -1,7 +1,7 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 
@@ -15,18 +15,18 @@ public extension BaseOperation {
     }
 
     func extractResultData() throws -> ResultType? {
-        guard let result = self.result else {
+        guard let result = result else {
             return nil
         }
 
         switch result {
-        case .success(let data):
+        case let .success(data):
             return data
-        case .failure(let error):
+        case let .failure(error):
             throw error
         }
     }
-    
+
     static func createWithError(_ error: Error) -> BaseOperation<ResultType> {
         let operation = BaseOperation<ResultType>()
         operation.result = .failure(error)

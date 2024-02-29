@@ -1,9 +1,10 @@
-import Foundation
 import BigInt
+import Foundation
 import SSFUtils
 
 // MARK: - WelcomeElement
-public struct XcmFee: Codable {
+
+public struct XcmFee: Codable, Equatable {
     public let chainId: String
     public let destChain: String
     public let destXcmFee: [DestXcmFee]
@@ -11,7 +12,8 @@ public struct XcmFee: Codable {
 }
 
 // MARK: - DestXcmFee
-public struct DestXcmFee: Codable {
+
+public struct DestXcmFee: Codable, Equatable {
     @OptionStringCodable public var feeInPlanks: BigUInt?
     public let symbol: String
     public let precision: String?

@@ -1,7 +1,7 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 import Security
@@ -18,7 +18,7 @@ public class Keychain: KeystoreProtocol {
             kSecClass as String: kSecClassKey,
             kSecAttrApplicationTag as String: applicationTag,
             kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
-            kSecValueData as String: key
+            kSecValueData as String: key,
         ]
 
         let status = SecItemAdd(attributes as CFDictionary, nil)
@@ -34,11 +34,11 @@ public class Keychain: KeystoreProtocol {
 
         let query: [String: Any] = [
             kSecClass as String: kSecClassKey,
-            kSecAttrApplicationTag as String: applicationTag
+            kSecAttrApplicationTag as String: applicationTag,
         ]
 
         let attributesToUpdate: [String: Any] = [
-            kSecValueData as String: key
+            kSecValueData as String: key,
         ]
 
         let status = SecItemUpdate(query as CFDictionary, attributesToUpdate as CFDictionary)
@@ -55,7 +55,7 @@ public class Keychain: KeystoreProtocol {
         let query: [String: Any] = [
             kSecClass as String: kSecClassKey,
             kSecAttrApplicationTag as String: applicationTag,
-            kSecReturnData as String: kCFBooleanTrue as Any
+            kSecReturnData as String: kCFBooleanTrue as Any,
         ]
 
         var item: CFTypeRef?
@@ -77,7 +77,7 @@ public class Keychain: KeystoreProtocol {
         let query: [String: Any] = [
             kSecClass as String: kSecClassKey,
             kSecAttrApplicationTag as String: applicationTag,
-            kSecReturnData as String: kCFBooleanFalse as Any
+            kSecReturnData as String: kCFBooleanFalse as Any,
         ]
 
         let status = SecItemCopyMatching(query as CFDictionary, nil)
@@ -98,7 +98,7 @@ public class Keychain: KeystoreProtocol {
 
         let query: [String: Any] = [
             kSecClass as String: kSecClassKey,
-            kSecAttrApplicationTag as String: applicationTag
+            kSecAttrApplicationTag as String: applicationTag,
         ]
 
         let status = SecItemDelete(query as CFDictionary)

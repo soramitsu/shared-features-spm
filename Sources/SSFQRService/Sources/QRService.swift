@@ -1,22 +1,21 @@
 import Foundation
 import UIKit
 
-//sourcery: AutoMockable
+// sourcery: AutoMockable
 public protocol QRService: AnyObject {
     func extractQrCode(from image: UIImage) throws -> QRMatcherType
     func generate(with qrType: QRType, qrSize: CGSize) async throws -> UIImage
 }
 
-final public class QRServiceDefault: QRService {
-    
+public final class QRServiceDefault: QRService {
     // MARK: - Private properties
 
     private let encoder: QREncoder
     private let decoder: QRDecoder
     private let matchers: [QRMatcher]
-    
+
     // MARK: - Public constructor
-    
+
     public init(
         encoder: QREncoder? = nil,
         decoder: QRDecoder? = nil,
@@ -26,12 +25,12 @@ final public class QRServiceDefault: QRService {
         self.decoder = decoder ?? QRDecoderDefault()
         self.matchers = matchers ?? [
             QRInfoMatcher(decoder: self.decoder),
-            QRUriMatcherImpl(scheme: "ws")
+            QRUriMatcherImpl(scheme: "ws"),
         ]
     }
-    
+
     // MARK: - QRService
-    
+
     public func extractQrCode(from image: UIImage) throws -> QRMatcherType {
         let code = try proccess(image: image)
         let qrMatcherTypes = matchers.map { $0.match(code: code) }.compactMap { $0 }
@@ -43,14 +42,14 @@ final public class QRServiceDefault: QRService {
         }
         return qrType
     }
-    
+
     public func generate(with qrType: QRType, qrSize: CGSize) async throws -> UIImage {
         let payload = try encoder.encode(with: qrType)
         return try createQR(for: payload, qrSize: qrSize)
     }
-    
+
     // MARK: - Private methods
-    
+
     private func createQR(for payload: Data, qrSize: CGSize) throws -> UIImage {
         guard let filter = CIFilter(name: "CIQRCodeGenerator") else {
             throw QRCreationOperationError.generatorUnavailable
@@ -79,10 +78,10 @@ final public class QRServiceDefault: QRService {
         guard let cgImage = context.createCGImage(transformedImage, from: transformedImage.extent) else {
             throw QRCreationOperationError.bitmapImageCreationFailed
         }
-        
+
         return UIImage(cgImage: cgImage)
     }
-    
+
     private func proccess(image: UIImage) throws -> String {
         var optionalImage: CIImage?
 

@@ -21,9 +21,9 @@ enum XcmVersionedMultiAsset: Codable {
 extension XcmVersionedMultiAsset: Equatable {
     static func == (lhs: XcmVersionedMultiAsset, rhs: XcmVersionedMultiAsset) -> Bool {
         switch (lhs, rhs) {
-        case (let .V1(lhsValue), let .V1(rhsValue)):
+        case let (.V1(lhsValue), .V1(rhsValue)):
             return lhsValue == rhsValue
-        case (let .V3(lhsValue), let .V3(rhsValue)):
+        case let (.V3(lhsValue), .V3(rhsValue)):
             return lhsValue == rhsValue
         default:
             return false

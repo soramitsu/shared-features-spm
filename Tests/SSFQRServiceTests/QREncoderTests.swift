@@ -3,7 +3,6 @@ import XCTest
 @testable import SSFQRService
 
 final class QREncoderTests: XCTestCase {
-
     var qrService: QRService?
 
     override func setUpWithError() throws {
@@ -17,9 +16,9 @@ final class QREncoderTests: XCTestCase {
     }
 
     func testEncoderError() async throws {
-
         // arrange
-        let expectation = expectation(description: "expect call to throw QREncoderError.brokenData error")
+        let expectation =
+            expectation(description: "expect call to throw QREncoderError.brokenData error")
         let error = QREncoderError.brokenData
         let encoder = QREncoderMock()
         encoder.encodeWithThrowableError = error
@@ -28,7 +27,7 @@ final class QREncoderTests: XCTestCase {
         // act
         do {
             _ = try await qrService.generate(with: .address(""), qrSize: .zero)
-        } catch (let caughtError) {
+        } catch let caughtError {
             XCTAssertTrue(caughtError is QREncoderError)
             XCTAssertEqual(error, caughtError as! QREncoderError)
             expectation.fulfill()

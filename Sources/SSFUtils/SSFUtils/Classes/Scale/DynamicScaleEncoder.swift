@@ -1,8 +1,8 @@
-import Foundation
 import BigInt
+import Foundation
 
 public final class DynamicScaleEncoder {
-    private var encoder: ScaleEncoder = ScaleEncoder()
+    private var encoder: ScaleEncoder = .init()
 
     private var modifiers: [ScaleCodingModifier] = []
 
@@ -33,9 +33,9 @@ public final class DynamicScaleEncoder {
 
         try bigInt.encode(scaleEncoder: encoder)
     }
-    
+
     // MARK: - Signed
-    
+
     private func encodeFixedInt(value: JSON, byteLength: Int) throws {
         guard let str = value.stringValue, let intValue = BigInt(str) else {
             throw DynamicScaleEncoderError.expectedStringForInt(json: value)
@@ -49,7 +49,7 @@ public final class DynamicScaleEncoder {
 
         encoder.appendRaw(data: Data(encodedData))
     }
-    
+
     private func appendFixedSigned(json: JSON, byteLength: Int) throws {
         if modifiers.last == .compact {
             modifiers.removeLast()
@@ -59,7 +59,7 @@ public final class DynamicScaleEncoder {
             try encodeFixedUInt(value: json, byteLength: byteLength)
         }
     }
-    
+
     // MARK: - Unsigned
 
     private func encodeFixedUInt(value: JSON, byteLength: Int) throws {
@@ -80,7 +80,7 @@ public final class DynamicScaleEncoder {
         if modifiers.last == .compact {
             modifiers.removeLast()
 
-           try encodeCompact(value: json)
+            try encodeCompact(value: json)
         } else {
             try encodeFixedUInt(value: json, byteLength: byteLength)
         }
@@ -205,7 +205,7 @@ extension DynamicScaleEncoder: DynamicScaleEncoding {
         Log.write("DynamicScale", message: "append u256: \(json)")
         try appendFixedUnsigned(json: json, byteLength: 32)
     }
-    
+
     public func appendI8(json: JSON) throws {
         Log.write("DynamicScale", message: "append i8: \(json)")
         try appendFixedSigned(json: json, byteLength: 1)
@@ -240,7 +240,7 @@ extension DynamicScaleEncoder: DynamicScaleEncoding {
         guard let value = json.boolValue else {
             throw DynamicScaleEncoderError.expectedStringForBool(json: json)
         }
-        
+
         Log.write("DynamicScale", message: "append bool: \(value)")
         try value.encode(scaleEncoder: encoder)
     }

@@ -32,6 +32,46 @@ configurations:
       args:
         autoMockableTestableImports: ["SSFQRService"]
     - sources:
+      - ../Sources/SSFChainRegistry
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Tests/SSFXCMTests/Mocks
+      args:
+        autoMockableTestableImports: ["SSFXCM", "RobinHood", "SSFUtils", "SSFModels", "SSFChainConnection", "SSFRuntimeCodingService", "SSFChainRegistry"]
+    - sources:
+      - ../Sources/SSFUtils
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Tests/SSFXCMTests/Mocks
+      args:
+        autoMockableTestableImports: ["SSFUtils", "BigInt"]
+    - sources:
+      - ../Sources/SSFNetwork
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Tests/SSFXCMTests/Mocks
+      args:
+        autoMockableTestableImports: ["SSFNetwork", "RobinHood"]
+    - sources:
+      - ../Sources/SSFXCM
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Tests/SSFXCMTests/Mocks
+      args:
+        autoMockableTestableImports: ["SSFXCM", "SSFUtils", "SSFNetwork", "SSFModels", "RobinHood", "BigInt", "SSFExtrinsicKit", "SSFChainRegistry", "SSFRuntimeCodingService", "SSFSigner", "SSFChainConnection", "SSFStorageQueryKit"]
+    - sources:
+      - ../Sources/SSFExtrinsicKit
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Tests/SSFXCMTests/Mocks
+      args:
+        autoMockableTestableImports: ["SSFUtils", "SSFCrypto", "SSFModels", "RobinHood", "SSFExtrinsicKit", "IrohaCrypto", "SSFRuntimeCodingService", "SSFSigner"]
+    - sources:
       - ../Sources/SSFTransferService
       templates:
         - ./Templates/AutoMockable.stencil

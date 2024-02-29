@@ -1,28 +1,30 @@
 import Foundation
+import RobinHood
 import SSFAccountManagmentStorage
 import SSFModels
 import SSFUtils
-import RobinHood
 
 public final class SelectedWalletSettings: PersistentValueSettings<MetaAccountModel> {
-
     private let operationQueue: OperationQueue
     private let metaAccountMapper: AnyCoreDataMapper<MetaAccountModel, CDMetaAccount>
     private let managedAccountMapper: AnyCoreDataMapper<ManagedMetaAccountModel, CDMetaAccount>
-    
+
     public init(
         storageFacade: StorageFacadeProtocol = UserDataStorageFacade.shared,
         operationQueue: OperationQueue = OperationManagerFacade.sharedDefaultQueue,
-        metaAccountMapper: any CoreDataMapperProtocol = MetaAccountMapper(),
-        managedAccountMapper: any CoreDataMapperProtocol = ManagedMetaAccountMapper()
+        metaAccountMapper _: any CoreDataMapperProtocol = MetaAccountMapper(),
+        managedAccountMapper _: any CoreDataMapperProtocol = ManagedMetaAccountMapper()
     ) {
         self.operationQueue = operationQueue
-        self.metaAccountMapper = AnyCoreDataMapper(MetaAccountMapper())
-        self.managedAccountMapper = AnyCoreDataMapper(ManagedMetaAccountMapper())
+        metaAccountMapper = AnyCoreDataMapper(MetaAccountMapper())
+        managedAccountMapper = AnyCoreDataMapper(ManagedMetaAccountMapper())
         super.init(storageFacade: storageFacade)
     }
 
-    public override func performSetup(completionClosure: @escaping (Result<MetaAccountModel?, Error>) -> Void) {
+    override public func performSetup(completionClosure: @escaping (Result<
+        MetaAccountModel?,
+        Error
+    >) -> Void) {
         let repository = storageFacade.createRepository(
             filter: NSPredicate.selectedMetaAccount(),
             sortDescriptors: [],
@@ -44,7 +46,7 @@ public final class SelectedWalletSettings: PersistentValueSettings<MetaAccountMo
         operationQueue.addOperation(operation)
     }
 
-    public override func performSave(
+    override public func performSave(
         value: MetaAccountModel,
         completionClosure: @escaping (Result<MetaAccountModel, Error>) -> Void
     ) {
@@ -60,7 +62,9 @@ public final class SelectedWalletSettings: PersistentValueSettings<MetaAccountMo
         let saveOperation = repository.saveOperation({
             var accountsToSave: [ManagedMetaAccountModel] = []
 
-            if let currentAccount = try maybeCurrentAccountOperation?.extractNoCancellableResultData() {
+            if let currentAccount = try maybeCurrentAccountOperation?
+                .extractNoCancellableResultData()
+            {
                 accountsToSave.append(
                     ManagedMetaAccountModel(
                         info: currentAccount.info,

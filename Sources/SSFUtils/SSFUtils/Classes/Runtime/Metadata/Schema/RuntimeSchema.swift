@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 
 // MARK: - Schema
 
@@ -15,76 +15,80 @@ public struct Schema: ScaleCodable {
     }
 
     public init(scaleDecoder: ScaleDecoding) throws {
-        self.types = try [SchemaItem](scaleDecoder: scaleDecoder)
+        types = try [SchemaItem](scaleDecoder: scaleDecoder)
     }
 }
 
 extension Schema: Codable & Equatable {
     public static func == (lhs: Schema, rhs: Schema) -> Bool {
-        return lhs.types == rhs.types
+        lhs.types == rhs.types
     }
 }
 
 // MARK: - Resolver
 
-extension Schema {
-    public final class Resolver: Codable & Equatable {
-
+public extension Schema {
+    final class Resolver: Codable & Equatable {
         // MARK: - Private properties
-        
+
         private let schema: Schema?
         private var resolvedTypes: [String: TypeMetadata?] = [:]
-        
+
         enum CodingKeys: String, CodingKey {
             case schema
             case resolvedTypes
         }
-        
+
         // MARK: - Constructor
+
         public init(schema: Schema?) throws {
             self.schema = schema
             try mapSchemaToDictionary()
         }
-        
+
         public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
-            
-            self.schema = try container.decode(Schema.self, forKey: .schema)
-            self.resolvedTypes = try container.decode([String: TypeMetadata?].self, forKey: .resolvedTypes)
+
+            schema = try container.decode(Schema.self, forKey: .schema)
+            resolvedTypes = try container.decode(
+                [String: TypeMetadata?].self,
+                forKey: .resolvedTypes
+            )
         }
 
         public func encode(to encoder: Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
-            
+
             try container.encode(schema, forKey: .schema)
             try container.encode(resolvedTypes, forKey: .resolvedTypes)
         }
-        
+
         public static func == (lhs: Schema.Resolver, rhs: Schema.Resolver) -> Bool {
-            return lhs.schema == rhs.schema
-            && lhs.resolvedTypes == rhs.resolvedTypes
+            lhs.schema == rhs.schema
+                && lhs.resolvedTypes == rhs.resolvedTypes
         }
-        
+
         // MARK: - Public methods
+
         public func resolveType(json: JSON) throws -> TypeMetadata? {
             guard let string = json.stringValue else { return nil }
-            
+
             if let index = BigUInt(string) {
                 return try typeMetadata(for: index)
             }
-            
+
             return try resolveType(name: string)
         }
-        
+
         public func resolveType(name: String) throws -> TypeMetadata? {
             var metadata: TypeMetadata? = nil
             if let type = resolvedTypes[name] {
                 metadata = type
             }
-            
+
             return metadata
         }
-        
+
         public func typeMetadata(for index: BigUInt?) throws -> TypeMetadata {
             guard let schema = schema else {
                 throw Error.schemaNotProvided
@@ -100,31 +104,31 @@ extension Schema {
 
             return type
         }
-        
+
         public func typeName(for index: BigUInt?) throws -> String {
-            try typeName(for: try typeMetadata(for: index))
+            try typeName(for: typeMetadata(for: index))
         }
-        
+
         public func typeName(for type: TypeMetadata) throws -> String {
             let name = try _typeName(for: type)
             if resolvedTypes[name] == nil {
                 resolvedTypes[name] = type
             }
-            
+
             return name
         }
-        
+
         // MARK: - Private methods
-        
+
         private func mapSchemaToDictionary() throws {
             guard let items = schema?.types else {
                 return
             }
-            try items.forEach { schemaItem in
+            for schemaItem in items {
                 _ = try typeName(for: schemaItem.type)
             }
         }
-        
+
         private var ignoredGenericTypes: [String] {
             [KnownType.address.name] + ExtrinsicCheck.allCases.map { $0.rawValue }
         }
@@ -133,11 +137,11 @@ extension Schema {
         private func _typeName(for type: TypeMetadata) throws -> String {
             switch type.def {
             case .composite, .variant:
-                guard type.path.count > 0 else {
+                guard !type.path.isEmpty else {
                     throw Error.wrongData
                 }
                 var name = type.path.joined(separator: "::")
-                
+
                 if !type.params.isEmpty, !ignoredGenericTypes.contains(name) {
                     let paramNames = try type.params
                         .map {
@@ -156,10 +160,10 @@ extension Schema {
                 return name
 
             case let .sequence(value):
-                return "Vec<\(try typeName(for: value.type))>"
+                return try "Vec<\(typeName(for: value.type))>"
 
             case let .array(value):
-                return "[\(try typeName(for: value.type)); \(value.length)]"
+                return try "[\(typeName(for: value.type)); \(value.length)]"
 
             case let .tuple(value):
                 let paramNames = try value.map { try typeName(for: $0) }.joined(separator: ", ")
@@ -185,12 +189,12 @@ extension Schema {
                 }
 
             case let .compact(value):
-                return "Compact<\(try typeName(for: value.type))>"
+                return try "Compact<\(typeName(for: value.type))>"
 
             case let .bitSequence(value):
-                let paramNames = [
-                    try typeName(for: value.order),
-                    try typeName(for: value.store)
+                let paramNames = try [
+                    typeName(for: value.order),
+                    typeName(for: value.store),
                 ].joined(separator: ", ")
                 return "BitVec<\(paramNames)>"
             }
@@ -198,8 +202,8 @@ extension Schema {
     }
 }
 
-extension Schema.Resolver {
-    public enum Error: Swift.Error {
+public extension Schema.Resolver {
+    enum Error: Swift.Error {
         case schemaNotProvided
         case wrongData
         case keyNotFound
@@ -218,8 +222,8 @@ public struct SchemaItem: ScaleCodable {
     }
 
     public init(scaleDecoder: ScaleDecoding) throws {
-        self.id = try BigUInt(scaleDecoder: scaleDecoder)
-        self.type = try TypeMetadata(scaleDecoder: scaleDecoder)
+        id = try BigUInt(scaleDecoder: scaleDecoder)
+        type = try TypeMetadata(scaleDecoder: scaleDecoder)
     }
 }
 

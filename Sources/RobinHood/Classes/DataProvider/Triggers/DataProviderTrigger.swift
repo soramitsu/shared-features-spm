@@ -1,7 +1,7 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 
@@ -76,22 +76,32 @@ public struct DataProviderEventTrigger: OptionSet {
     public typealias RawValue = UInt8
 
     /// Never trigger
-    public static var onNone: DataProviderEventTrigger { return DataProviderEventTrigger(rawValue: 0) }
+    public static var onNone: DataProviderEventTrigger { DataProviderEventTrigger(rawValue: 0) }
 
     /// Trigger after data provider creation
-    public static var onInitialization: DataProviderEventTrigger { return DataProviderEventTrigger(rawValue: 1 << 0) }
+    public static var onInitialization: DataProviderEventTrigger {
+        DataProviderEventTrigger(rawValue: 1 << 0)
+    }
 
     /// Trigger after an object request by identifier
-    public static var onFetchById: DataProviderEventTrigger { return DataProviderEventTrigger(rawValue: 1 << 1) }
+    public static var onFetchById: DataProviderEventTrigger {
+        DataProviderEventTrigger(rawValue: 1 << 1)
+    }
 
     /// Trigger after a page of objects is requested
-    public static var onFetchPage: DataProviderEventTrigger { return DataProviderEventTrigger(rawValue: 1 << 2) }
+    public static var onFetchPage: DataProviderEventTrigger {
+        DataProviderEventTrigger(rawValue: 1 << 2)
+    }
 
     /// Trigger after an observer is added to data provider.
-    public static var onAddObserver: DataProviderEventTrigger { return DataProviderEventTrigger(rawValue: 1 << 3) }
+    public static var onAddObserver: DataProviderEventTrigger {
+        DataProviderEventTrigger(rawValue: 1 << 3)
+    }
 
     /// Trigger after an observer is removed from data provider.
-    public static var onRemoveObserver: DataProviderEventTrigger { return DataProviderEventTrigger(rawValue: 1 << 4) }
+    public static var onRemoveObserver: DataProviderEventTrigger {
+        DataProviderEventTrigger(rawValue: 1 << 4)
+    }
 
     /// Trigger after any event.
     public static var onAll: DataProviderEventTrigger {
@@ -133,15 +143,15 @@ extension DataProviderEventTrigger: DataProviderTriggerProtocol {
         }
 
         switch event {
-        case .initialization where self.contains(.onInitialization):
+        case .initialization where contains(.onInitialization):
             delegate.didTrigger()
-        case .fetchById where self.contains(.onFetchById):
+        case .fetchById where contains(.onFetchById):
             delegate.didTrigger()
-        case .fetchPage where self.contains(.onFetchPage):
+        case .fetchPage where contains(.onFetchPage):
             delegate.didTrigger()
-        case .addObserver where self.contains(.onAddObserver):
+        case .addObserver where contains(.onAddObserver):
             delegate.didTrigger()
-        case .removeObserver where self.contains(.onRemoveObserver):
+        case .removeObserver where contains(.onRemoveObserver):
             delegate.didTrigger()
         default:
             break

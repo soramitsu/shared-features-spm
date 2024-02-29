@@ -1,5 +1,6 @@
 import Foundation
 
+// sourcery: AutoMockable
 public protocol ReconnectionStrategyProtocol {
     func reconnectAfter(attempt: Int) -> TimeInterval?
 }

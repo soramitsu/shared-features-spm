@@ -1,15 +1,16 @@
 import Foundation
 import Web3
 import RobinHood
-import SSFUtils
-import SSFModels
 import SSFChainConnection
+import SSFModels
 import SSFRuntimeCodingService
+import SSFUtils
 
+// sourcery: AutoMockable
 public protocol ChainRegistryProtocol: AnyObject {
     func getRuntimeProvider(
         chainId: ChainModel.Id,
-        usedRuntimePaths: [String : [String]],
+        usedRuntimePaths: [String: [String]],
         runtimeItem: RuntimeMetadataItemProtocol?
     ) async throws -> RuntimeProviderProtocol
     func getSubstrateConnection(for chain: ChainModel) async throws -> SubstrateConnection
@@ -18,7 +19,7 @@ public protocol ChainRegistryProtocol: AnyObject {
     func getChains() async throws -> [ChainModel]
     func getReadySnapshot(
         chainId: ChainModel.Id,
-        usedRuntimePaths: [String : [String]],
+        usedRuntimePaths: [String: [String]],
         runtimeItem: RuntimeMetadataItemProtocol?
     ) async throws -> RuntimeSnapshot
 }
@@ -58,11 +59,11 @@ public final class ChainRegistry {
 extension ChainRegistry: ChainRegistryProtocol {
     public func getRuntimeProvider(
         chainId: ChainModel.Id,
-        usedRuntimePaths: [String : [String]],
+        usedRuntimePaths: [String: [String]],
         runtimeItem: RuntimeMetadataItemProtocol?
     ) async throws -> RuntimeProviderProtocol {
         let chainModel = try await chainSyncService.getChainModel(for: chainId)
-        
+
         let runtimeMetadataItem: RuntimeMetadataItemProtocol
         if let runtimeItem = runtimeItem {
             runtimeMetadataItem = runtimeItem
@@ -78,14 +79,14 @@ extension ChainRegistry: ChainRegistryProtocol {
         )
         return runtimeProvider
     }
-    
+
     public func getReadySnapshot(
         chainId: ChainModel.Id,
-        usedRuntimePaths: [String : [String]],
+        usedRuntimePaths: [String: [String]],
         runtimeItem: RuntimeMetadataItemProtocol?
     ) async throws -> RuntimeSnapshot {
         let chainModel = try await chainSyncService.getChainModel(for: chainId)
-        
+
         let runtimeMetadataItem: RuntimeMetadataItemProtocol
         if let runtimeItem = runtimeItem {
             runtimeMetadataItem = runtimeItem
@@ -97,7 +98,8 @@ extension ChainRegistry: ChainRegistryProtocol {
         let readySnaphot = try await runtimeProviderPool.readySnaphot(
             for: runtimeMetadataItem,
             chainTypes: chainTypes,
-            usedRuntimePaths: usedRuntimePaths)
+            usedRuntimePaths: usedRuntimePaths
+        )
         return readySnaphot
     }
     
@@ -110,11 +112,11 @@ extension ChainRegistry: ChainRegistryProtocol {
     ) async throws -> Web3EthConnection {
         try await connectionPool.setupWeb3EthereumConnection(for: chain)
     }
-    
+
     public func getChain(for chainId: ChainModel.Id) async throws -> ChainModel {
         try await chainSyncService.getChainModel(for: chainId)
     }
-    
+
     public func getChains() async throws -> [ChainModel] {
         try await chainSyncService.getChainModels()
     }

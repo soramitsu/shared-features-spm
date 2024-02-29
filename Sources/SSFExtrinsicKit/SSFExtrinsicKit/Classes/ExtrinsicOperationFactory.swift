@@ -1,15 +1,17 @@
 import Foundation
-import RobinHood
-import SSFUtils
 import IrohaCrypto
-import SSFSigner
-import SSFModels
+import RobinHood
 import SSFCrypto
 import SSFEraKit
+import SSFModels
 import SSFRuntimeCodingService
+import SSFSigner
+import SSFUtils
 
-public typealias ExtrinsicBuilderClosure = (ExtrinsicBuilderProtocol) throws -> (ExtrinsicBuilderProtocol)
-public typealias ExtrinsicBuilderIndexedClosure = (ExtrinsicBuilderProtocol, Int) throws -> (ExtrinsicBuilderProtocol)
+public typealias ExtrinsicBuilderClosure = (ExtrinsicBuilderProtocol) throws
+    -> (ExtrinsicBuilderProtocol)
+public typealias ExtrinsicBuilderIndexedClosure = (ExtrinsicBuilderProtocol, Int) throws
+    -> (ExtrinsicBuilderProtocol)
 
 public protocol ExtrinsicOperationFactoryProtocol {
     func estimateFeeOperation(
@@ -34,7 +36,8 @@ public protocol ExtrinsicOperationFactoryProtocol {
 
 extension ExtrinsicOperationFactoryProtocol {
     func estimateFeeOperation(_ closure: @escaping ExtrinsicBuilderClosure)
-        -> CompoundOperationWrapper<RuntimeDispatchInfo> {
+        -> CompoundOperationWrapper<RuntimeDispatchInfo>
+    {
         let wrapperClosure: ExtrinsicBuilderIndexedClosure = { builder, _ in
             try closure(builder)
         }
@@ -45,7 +48,9 @@ extension ExtrinsicOperationFactoryProtocol {
         )
 
         let resultMappingOperation = ClosureOperation<RuntimeDispatchInfo> {
-            guard let result = try feeOperation.targetOperation.extractNoCancellableResultData().first else {
+            guard let result = try feeOperation.targetOperation.extractNoCancellableResultData()
+                .first else
+            {
                 throw BaseOperationError.unexpectedDependentResult
             }
 
@@ -75,7 +80,9 @@ extension ExtrinsicOperationFactoryProtocol {
         )
 
         let resultMappingOperation = ClosureOperation<String> {
-            guard let result = try submitOperation.targetOperation.extractNoCancellableResultData().first else {
+            guard let result = try submitOperation.targetOperation.extractNoCancellableResultData()
+                .first else
+            {
                 throw BaseOperationError.unexpectedDependentResult
             }
 
@@ -238,7 +245,8 @@ extension ExtrinsicOperationFactory: ExtrinsicOperationFactoryProtocol {
         _ closure: @escaping ExtrinsicBuilderIndexedClosure,
         numberOfExtrinsics: Int
     )
-        -> CompoundOperationWrapper<[FeeExtrinsicResult]> {
+        -> CompoundOperationWrapper<[FeeExtrinsicResult]>
+    {
         let currentCryptoType = cryptoType
 
         let signingClosure: (Data) throws -> Data = { data in
@@ -260,7 +268,8 @@ extension ExtrinsicOperationFactory: ExtrinsicOperationFactoryProtocol {
 
                 infoOperation.configurationBlock = {
                     do {
-                        let extrinsics = try builderWrapper.targetOperation.extractNoCancellableResultData()
+                        let extrinsics = try builderWrapper.targetOperation
+                            .extractNoCancellableResultData()
                         let extrinsic = extrinsics[index].toHex(includePrefix: true)
                         infoOperation.parameters = [extrinsic]
                     } catch {
@@ -283,7 +292,7 @@ extension ExtrinsicOperationFactory: ExtrinsicOperationFactoryProtocol {
             }
         }
 
-        feeOperationList.forEach { feeOperation in
+        for feeOperation in feeOperationList {
             wrapperOperation.addDependency(feeOperation)
         }
 
@@ -323,8 +332,8 @@ extension ExtrinsicOperationFactory: ExtrinsicOperationFactoryProtocol {
                     .targetOperation
                     .extractNoCancellableResultData()
                     .first?
-                    .toHex(includePrefix: true)
-                else {
+                    .toHex(includePrefix: true) else
+                {
                     throw BaseOperationError.unexpectedDependentResult
                 }
 
@@ -376,7 +385,8 @@ extension ExtrinsicOperationFactory: ExtrinsicOperationFactoryProtocol {
 
                 submitOperation.configurationBlock = {
                     do {
-                        let extrinsics = try builderWrapper.targetOperation.extractNoCancellableResultData()
+                        let extrinsics = try builderWrapper.targetOperation
+                            .extractNoCancellableResultData()
                         let extrinsic = extrinsics[index].toHex(includePrefix: true)
 
                         submitOperation.parameters = [extrinsic]
@@ -400,7 +410,7 @@ extension ExtrinsicOperationFactory: ExtrinsicOperationFactoryProtocol {
             }
         }
 
-        submitOperationList.forEach { submitOperation in
+        for submitOperation in submitOperationList {
             wrapperOperation.addDependency(submitOperation)
         }
 

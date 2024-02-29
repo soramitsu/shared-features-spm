@@ -1,7 +1,7 @@
 /**
-* Copyright Soramitsu Co., Ltd. All Rights Reserved.
-* SPDX-License-Identifier: GPL-3.0
-*/
+ * Copyright Soramitsu Co., Ltd. All Rights Reserved.
+ * SPDX-License-Identifier: GPL-3.0
+ */
 
 import Foundation
 
@@ -12,11 +12,18 @@ import Foundation
 public final class AnyDataProvider<T: Identifiable & Equatable>: DataProviderProtocol {
     public typealias Model = T
 
-    private let _fetchById: (String, ((Result<T?, Error>?) -> Void)?) -> CompoundOperationWrapper<T?>
-    private let _fetchPage: (UInt, ((Result<[T], Error>?) -> Void)?) -> CompoundOperationWrapper<[T]>
+    private let _fetchById: (String, ((Result<T?, Error>?) -> Void)?)
+        -> CompoundOperationWrapper<T?>
+    private let _fetchPage: (UInt, ((Result<[T], Error>?) -> Void)?)
+        -> CompoundOperationWrapper<[T]>
 
-    private let _addObserver: (AnyObject, DispatchQueue?,
-    @escaping ([DataProviderChange<T>]) -> Void, @escaping (Error) -> Void, DataProviderObserverOptions) -> Void
+    private let _addObserver: (
+        AnyObject,
+        DispatchQueue?,
+        @escaping ([DataProviderChange<T>]) -> Void,
+        @escaping (Error) -> Void,
+        DataProviderObserverOptions
+    ) -> Void
 
     private let _removeObserver: (AnyObject) -> Void
 
@@ -37,25 +44,34 @@ public final class AnyDataProvider<T: Identifiable & Equatable>: DataProviderPro
         _addObserver = dataProvider.addObserver
         _removeObserver = dataProvider.removeObserver
         _refresh = dataProvider.refresh
-        self.executionQueue = dataProvider.executionQueue
+        executionQueue = dataProvider.executionQueue
     }
 
-    public func fetch(by modelId: String,
-                      completionBlock: ((Result<T?, Error>?) -> Void)?) -> CompoundOperationWrapper<T?> {
-        return _fetchById(modelId, completionBlock)
+    public func fetch(
+        by modelId: String,
+        completionBlock: ((Result<T?, Error>?) -> Void)?
+    )
+        -> CompoundOperationWrapper<T?>
+    {
+        _fetchById(modelId, completionBlock)
     }
 
-    public func fetch(page index: UInt,
-                      completionBlock: ((Result<[T], Error>?) -> Void)?) -> CompoundOperationWrapper<[T]> {
-        return _fetchPage(index, completionBlock)
+    public func fetch(
+        page index: UInt,
+        completionBlock: ((Result<[T], Error>?) -> Void)?
+    )
+        -> CompoundOperationWrapper<[T]>
+    {
+        _fetchPage(index, completionBlock)
     }
 
-    public func addObserver(_ observer: AnyObject,
-                            deliverOn queue: DispatchQueue?,
-                            executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void,
-                            failing failureBlock: @escaping (Error) -> Void,
-                            options: DataProviderObserverOptions) {
-
+    public func addObserver(
+        _ observer: AnyObject,
+        deliverOn queue: DispatchQueue?,
+        executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void,
+        failing failureBlock: @escaping (Error) -> Void,
+        options: DataProviderObserverOptions
+    ) {
         _addObserver(observer, queue, updateBlock, failureBlock, options)
     }
 

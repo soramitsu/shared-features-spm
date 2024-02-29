@@ -6,7 +6,7 @@ public class GenericMultiAddressNode: Node {
         [MultiAddress.indexField, "Compact<\(GenericType.accountIndex.name)>"],
         [MultiAddress.rawField, GenericType.bytes.name],
         [MultiAddress.address32Field, GenericType.h256.name],
-        [MultiAddress.address20Field, GenericType.h160.name]
+        [MultiAddress.address20Field, GenericType.h160.name],
     ]
 
     public var typeName: String { GenericType.multiAddress.name }
@@ -14,11 +14,11 @@ public class GenericMultiAddressNode: Node {
     public init() {}
 
     public func accept(encoder: DynamicScaleEncoding, value: JSON) throws {
-        guard
-            let enumValue = value.arrayValue,
-            enumValue.count == 2,
-            let caseValue = enumValue.first?.stringValue,
-            let assocValue = enumValue.last else {
+        guard let enumValue = value.arrayValue,
+              enumValue.count == 2,
+              let caseValue = enumValue.first?.stringValue,
+              let assocValue = enumValue.last else
+        {
             throw DynamicScaleEncoderError.unexpectedEnumJSON(json: value)
         }
 
@@ -32,12 +32,16 @@ public class GenericMultiAddressNode: Node {
 
     public func accept(decoder: DynamicScaleDecoding) throws -> JSON {
         guard let caseValueStr = try decoder.readU8().stringValue,
-              let caseValue = Int(caseValueStr) else {
+              let caseValue = Int(caseValueStr) else
+        {
             throw DynamicScaleDecoderError.unexpectedEnumCase
         }
 
         guard caseValue < Self.typeMapping.count else {
-            throw DynamicScaleDecoderError.invalidCustomEnumCase(value: caseValue, count: Self.typeMapping.count)
+            throw DynamicScaleDecoderError.invalidCustomEnumCase(
+                value: caseValue,
+                count: Self.typeMapping.count
+            )
         }
 
         let json = try decoder.read(type: Self.typeMapping[caseValue][1])

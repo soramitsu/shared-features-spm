@@ -36,56 +36,56 @@ public enum AssetBaseType: String, Codable {
 public enum ChainAssetType: Codable, Equatable {
     case substrate(substrateType: SubstrateAssetType)
     case ethereum(ethereumType: EthereumAssetType)
-    
+
     public var rawValue: String {
         switch self {
-        case .substrate(let substrateType):
+        case let .substrate(substrateType):
             return "substrate-\(substrateType.rawValue)"
-        case .ethereum(let ethereumType):
+        case let .ethereum(ethereumType):
             return "ethereum-\(ethereumType.rawValue)"
         }
     }
-    
+
     public init?(storageValue: String) {
         let components = storageValue.components(separatedBy: "-")
         guard let baseTypeValue = components.first, let subTypeValue = components.last else {
             return nil
         }
-        
+
         guard let baseType = AssetBaseType(rawValue: baseTypeValue) else {
             return nil
         }
-        
+
         switch baseType {
         case .substrate:
             guard let substrateAssetType = SubstrateAssetType(rawValue: subTypeValue) else {
                 return nil
             }
-            
+
             self = .substrate(substrateType: substrateAssetType)
         case .ethereum:
             guard let ethereumAssetType = EthereumAssetType(rawValue: subTypeValue) else {
                 return nil
             }
-            
+
             self = .ethereum(ethereumType: ethereumAssetType)
         }
     }
-    
+
     public var substrateAssetType: SubstrateAssetType? {
         switch self {
-        case .substrate(let substrateType):
+        case let .substrate(substrateType):
             return substrateType
         case .ethereum:
             return nil
         }
     }
-    
+
     public var ethereumAssetType: EthereumAssetType? {
         switch self {
         case .substrate:
             return nil
-        case .ethereum(let ethereumType):
+        case let .ethereum(ethereumType):
             return ethereumType
         }
     }

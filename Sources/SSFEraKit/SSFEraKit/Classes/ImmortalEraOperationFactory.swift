@@ -1,11 +1,11 @@
 import Foundation
 import RobinHood
-import SSFUtils
 import SSFRuntimeCodingService
+import SSFUtils
 
 public final class ImmortalEraOperationFactory: ExtrinsicEraOperationFactoryProtocol {
     public init() {}
-    
+
     public func createOperation(
         from _: JSONRPCEngine,
         runtimeService _: RuntimeCodingServiceProtocol
