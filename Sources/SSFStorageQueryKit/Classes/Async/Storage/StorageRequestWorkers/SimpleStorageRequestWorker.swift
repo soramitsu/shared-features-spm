@@ -23,7 +23,10 @@ final class SimpleStorageRequestWorker<P: Decodable>: StorageRequestWorker {
         storagePath: any StorageCodingPathProtocol
     ) async throws -> [StorageResponse<T>] where T : Decodable {
         guard case StorageRequestWorkerType.simple = params else {
-            throw StorageRequestWorkerError.invalidParameters
+            throw StorageRequestWorkerError.invalidParameters(
+                moduleName: storagePath.moduleName,
+                itemName: storagePath.itemName
+            )
         }
 
         let key = try StorageKeyFactory().createStorageKey(

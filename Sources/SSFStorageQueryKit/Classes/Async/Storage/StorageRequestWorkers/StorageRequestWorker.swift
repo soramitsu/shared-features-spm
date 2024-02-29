@@ -3,7 +3,7 @@ import SSFUtils
 import SSFModels
 
 enum StorageRequestWorkerError: Error {
-    case invalidParameters
+    case invalidParameters(moduleName: String, itemName: String)
 }
 
 protocol StorageRequestWorker: AnyObject {

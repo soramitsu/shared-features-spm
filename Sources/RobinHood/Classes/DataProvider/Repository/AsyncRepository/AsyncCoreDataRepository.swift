@@ -74,7 +74,7 @@ public final class AsyncCoreDataRepositoryDefault<T: Identifiable, U: NSManagedO
         )
         operationQueue.addOperation(operation)
         
-        let result: [Model] = try await extractModels(from: operation)
+        let result: [Model] = try await extract(from: operation)
         return result
     }
     
@@ -88,15 +88,7 @@ public final class AsyncCoreDataRepositoryDefault<T: Identifiable, U: NSManagedO
         )
         operationQueue.addOperation(operation)
         
-        let result: Model? = try await withCheckedThrowingContinuation { continuation in
-            operation.completionBlock = {
-                guard let result = operation.result else {
-                    continuation.resume(throwing: AsyncCoreDataRepositoryError.resultNotFetched)
-                    return
-                }
-                continuation.resume(with: result)
-            }
-        }
+        let result: Model? = try await extract(from: operation)
         return result
     }
     
@@ -106,7 +98,7 @@ public final class AsyncCoreDataRepositoryDefault<T: Identifiable, U: NSManagedO
         let operation = coreDataRepository.fetchAllOperation(with: options)
         operationQueue.addOperation(operation)
         
-        let result: [Model] = try await extractModels(from: operation)
+        let result: [Model] = try await extract(from: operation)
         return result
     }
     
@@ -130,10 +122,10 @@ public final class AsyncCoreDataRepositoryDefault<T: Identifiable, U: NSManagedO
     
     // MARK: - Private methods
     
-    private func extractModels(
-        from operation: BaseOperation<[Model]>
-    ) async throws -> [Model] {
-        let result: [Model] = try await withCheckedThrowingContinuation { continuation in
+    private func extract<ResultType>(
+        from operation: BaseOperation<ResultType>
+    ) async throws -> ResultType {
+        let result: ResultType = try await withCheckedThrowingContinuation { continuation in
             operation.completionBlock = {
                 guard let result = operation.result else {
                     continuation.resume(throwing: AsyncCoreDataRepositoryError.resultNotFetched)

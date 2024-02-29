@@ -23,7 +23,10 @@ final class NMapStorageRequestWorker<P: Decodable>: StorageRequestWorker {
         storagePath: any StorageCodingPathProtocol
     ) async throws -> [StorageResponse<T>] {
         guard case let StorageRequestWorkerType.nMap(params: params) = params else {
-            throw StorageRequestWorkerError.invalidParameters
+            throw StorageRequestWorkerError.invalidParameters(
+                moduleName: storagePath.moduleName,
+                itemName: storagePath.itemName
+            )
         }
         
         let coderFactoryOperation = try await runtimeService.fetchCoderFactory()
