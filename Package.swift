@@ -8,6 +8,7 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [.iOS(.v14)],
     products: [
+        .library(name: "SSFUtils", targets: ["SSFUtils"]),
         .library(name: "IrohaCrypto", targets: ["IrohaCrypto"]),
     ],
     dependencies: [
