@@ -8,31 +8,7 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [.iOS(.v14)],
     products: [
-        .library(name: "SSFXCM", targets: ["SSFXCM"]),
-        .library(name: "SSFModels", targets: ["SSFModels"]),
-        .library(name: "SSFCrypto", targets: ["SSFCrypto"]),
-        .library(name: "SSFUtils", targets: ["SSFUtils"]),
-        .library(name: "SSFHelpers", targets: ["SSFHelpers"]),
-        .library(name: "SSFNetwork", targets: ["SSFNetwork"]),
-        .library(name: "SSFChainRegistry", targets: ["SSFChainRegistry"]),
-        .library(name: "SSFLogger", targets: ["SSFLogger"]),
-        .library(name: "SSFKeyPair", targets: ["SSFKeyPair"]),
-        .library(name: "SSFExtrinsicKit", targets: ["SSFExtrinsicKit"]),
-        .library(name: "SSFEraKit", targets: ["SSFEraKit"]),
-        .library(name: "SSFRuntimeCodingService", targets: ["SSFRuntimeCodingService"]),
-        .library(name: "SSFStorageQueryKit", targets: ["SSFStorageQueryKit"]),
-        .library(name: "SSFChainConnection", targets: ["SSFChainConnection"]),
-        .library(name: "SSFSigner", targets: ["SSFSigner"]),
-        .library(name: "SSFCloudStorage", targets: ["SSFCloudStorage"]),
-        .library(name: "SSFAccountManagment", targets: ["SSFAccountManagment"]),
-        .library(name: "SSFAccountManagmentStorage", targets: ["SSFAccountManagmentStorage"]),
-        .library(name: "SSFAssetManagment", targets: ["SSFAssetManagment"]),
-        .library(name: "SSFAssetManagmentStorage", targets: ["SSFAssetManagmentStorage"]),
         .library(name: "IrohaCrypto", targets: ["IrohaCrypto"]),
-        .library(name: "keccak", targets: ["keccak"]), //TODO: generate xcframework
-        .library(name: "RobinHood", targets: ["RobinHood"]), //TODO: get from github
-        .library(name: "SoraKeystore", targets: ["SoraKeystore"]), //TODO: get from github
-        .library(name: "SSFQRService", targets: ["SSFQRService"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
