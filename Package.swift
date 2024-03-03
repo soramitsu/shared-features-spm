@@ -10,6 +10,7 @@ let package = Package(
     products: [
         .library(name: "SSFUtils", targets: ["SSFUtils"]),
         .library(name: "IrohaCrypto", targets: ["IrohaCrypto"]),
+        .library(name: "SSFCloudStorage", targets: ["SSFCloudStorage"]),
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
