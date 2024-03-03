@@ -8,6 +8,8 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [.iOS(.v14)],
     products: [
+        
+        .library(name: "SSFCrypto", targets: ["SSFCrypto"]),
         .library(name: "SSFUtils", targets: ["SSFUtils"]),
         .library(name: "IrohaCrypto", targets: ["IrohaCrypto"]),
         .library(name: "SSFCloudStorage", targets: ["SSFCloudStorage"]),
