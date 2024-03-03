@@ -168,7 +168,8 @@ extension CoreDataContextObservable: DataProviderRepositoryObservable {
     public func addObserver(
         _ observer: AnyObject,
         deliverOn queue: DispatchQueue,
-        executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void
+        executing updateBlock: @escaping ([DataProviderChange<Model>])
+            -> Void
     ) {
         processingQueue.async {
             self.observers = self.observers.filter { $0.observer != nil }

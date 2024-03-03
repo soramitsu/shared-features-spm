@@ -160,7 +160,9 @@ extension DataProvider: DataProviderProtocol {
         }
 
         let reduceOperation = ClosureOperation<[T]> {
-            if let result = try sourceCancellationOperation.extractResultData(), !result.isEmpty {
+            if let result = try sourceCancellationOperation.extractResultData(),
+               !result.isEmpty
+            {
                 return result
             }
 
