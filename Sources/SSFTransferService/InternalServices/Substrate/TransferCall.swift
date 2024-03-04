@@ -1,7 +1,7 @@
-import Foundation
-import SSFUtils
 import BigInt
+import Foundation
 import SSFModels
+import SSFUtils
 
 struct TokenSymbol: Equatable {
     let symbol: String

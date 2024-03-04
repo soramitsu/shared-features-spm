@@ -10,7 +10,7 @@ public enum ConnectionPoolError: Error {
 public protocol ConnectionPoolProtocol {
     func setupSubstrateConnection(for chain: ChainModel) async throws -> SubstrateConnection
     func getSubstrateConnection(for chainId: ChainModel.Id) async throws -> SubstrateConnection
-    
+
     func setupWeb3EthereumConnection(for chain: ChainModel) async throws -> Web3EthConnection
     func getWeb3EthereumConnection(for chainId: ChainModel.Id) async throws -> Web3EthConnection
 }
@@ -21,12 +21,14 @@ protocol ConnectionPoolDelegate: AnyObject {
 
 public actor ConnectionPool: ConnectionPoolProtocol {
     private var autoBalancesByChainIds: [ChainModel.Id: any ChainConnectionProtocol] = [:]
-    
+
     public init() {}
-    
+
     // MARK: - Public methods
 
-    public func setupSubstrateConnection(for chain: ChainModel) async throws -> SubstrateConnection {
+    public func setupSubstrateConnection(for chain: ChainModel) async throws
+        -> SubstrateConnection
+    {
         if let connection = try? await getSubstrateConnection(for: chain.chainId) {
             return connection
         }
@@ -45,36 +47,44 @@ public actor ConnectionPool: ConnectionPoolProtocol {
         return try autoBalance.connection()
     }
 
-    public func getSubstrateConnection(for chainId: ChainModel.Id) async throws -> SubstrateConnection {
+    public func getSubstrateConnection(
+        for chainId: ChainModel
+            .Id
+    ) async throws -> SubstrateConnection {
         guard let autoBalance = autoBalancesByChainIds[chainId] as? SubstrateConnectionAutoBalance else {
             throw ConnectionPoolError.missingConnection
         }
         return try autoBalance.connection()
     }
-    
-    public func setupWeb3EthereumConnection(for chain: ChainModel) async throws -> Web3EthConnection {
+
+    public func setupWeb3EthereumConnection(for chain: ChainModel) async throws
+        -> Web3EthConnection
+    {
         if let connection = try? await getWeb3EthereumConnection(for: chain.chainId) {
             return connection
         }
 
         clearUnusedConnections()
-        
+
         let autoBalance = Web3EthConnectionAutoBalance(chain: chain)
-        
+
         autoBalancesByChainIds[chain.chainId] = autoBalance
 
         return try autoBalance.connection()
     }
-    
-    public func getWeb3EthereumConnection(for chainId: ChainModel.Id) async throws -> Web3EthConnection {
+
+    public func getWeb3EthereumConnection(
+        for chainId: ChainModel
+            .Id
+    ) async throws -> Web3EthConnection {
         guard let autoBalance = autoBalancesByChainIds[chainId] as? Web3EthConnectionAutoBalance else {
             throw ConnectionPoolError.missingConnection
         }
         return try autoBalance.connection()
     }
-    
+
     // MARK: - Private methods
-    
+
     private func clearUnusedConnections() {
         autoBalancesByChainIds = autoBalancesByChainIds.filter { $0.value.isActive }
     }

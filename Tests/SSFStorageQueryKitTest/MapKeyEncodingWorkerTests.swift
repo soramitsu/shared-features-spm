@@ -1,13 +1,12 @@
-import XCTest
 import MocksBasket
-import SSFUtils
-import SSFRuntimeCodingService
 import SSFCrypto
+import SSFRuntimeCodingService
+import SSFUtils
+import XCTest
 
 @testable import SSFStorageQueryKit
 
 final class MapKeyEncodingWorkerTests: XCTestCase {
-
     private var codingFactory: RuntimeCoderFactoryProtocol!
 
     override func setUp() async throws {
@@ -22,16 +21,16 @@ final class MapKeyEncodingWorkerTests: XCTestCase {
             storageKeyFactory: StorageKeyFactory(),
             keyParams: ["2094"]
         )
-        
+
         let keys = try worker.performEncoding()
 
         let expectedModuleNaneKey = "3d9cad2baf702e20b136f4c8900cd802"
         let expectedItemNameKey = "b6f9671a19ef28ecb1e331fea3029098"
         let expectedParamKey = "071ceff5b0f64d362e080000"
         let expectedKey = [expectedModuleNaneKey, expectedItemNameKey, expectedParamKey].joined()
-        
+
         let keyResult = keys.first?.toHex()
-        
+
         XCTAssertEqual(keys.count, 1)
         XCTAssertEqual(expectedKey, keyResult)
     }
@@ -47,7 +46,7 @@ final class MapKeyEncodingWorkerTests: XCTestCase {
             storageKeyFactory: StorageKeyFactory(),
             keyParams: [account]
         )
-        
+
         do {
             let _ = try worker.performEncoding()
             XCTFail("Test should to throw error")
@@ -55,7 +54,7 @@ final class MapKeyEncodingWorkerTests: XCTestCase {
             XCTAssertTrue(true)
         }
     }
-    
+
     private func buildRuntimeProvider() async throws {
         guard codingFactory == nil else {
             return

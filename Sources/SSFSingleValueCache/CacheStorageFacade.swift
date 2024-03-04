@@ -1,6 +1,6 @@
+import CoreData
 import Foundation
 import RobinHood
-import CoreData
 
 protocol StorageFacade: AnyObject {
     var databaseService: CoreDataServiceProtocol { get }
@@ -34,24 +34,24 @@ final class CacheStorageFacade: StorageFacade {
         else {
             preconditionFailure("CacheDataModel.momd not found")
         }
-        
+
         let options = [
             NSMigratePersistentStoresAutomaticallyOption: true,
-            NSInferMappingModelAutomaticallyOption: true
+            NSInferMappingModelAutomaticallyOption: true,
         ]
-        
+
         let persistentSettings = CoreDataPersistentSettings(
             databaseDirectory: baseURL,
             databaseName: "CacheDataModel.sqlite",
             incompatibleModelStrategy: .removeStore,
             options: options
         )
-        
+
         let configuration = CoreDataServiceConfiguration(
             modelURL: modelURL,
             storageType: .persistent(settings: persistentSettings)
         )
-        
+
         databaseService = CoreDataService(configuration: configuration)
     }
 

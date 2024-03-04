@@ -3,36 +3,64 @@
 // swiftlint:disable all
 
 import UIKit
-@testable import SSFXCM
 @testable import RobinHood
-@testable import SSFUtils
-@testable import SSFModels
 @testable import SSFChainConnection
-@testable import SSFRuntimeCodingService
 @testable import SSFChainRegistry
+@testable import SSFModels
+@testable import SSFRuntimeCodingService
+@testable import SSFUtils
+@testable import SSFXCM
 
 class ChainRegistryProtocolMock: ChainRegistryProtocol {
-
-    //MARK: - getRuntimeProvider
+    // MARK: - getRuntimeProvider
 
     var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemThrowableError: Error?
     var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemCallsCount = 0
     var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemCalled: Bool {
-        return getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemCallsCount > 0
+        getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemCallsCount > 0
     }
-    var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReceivedArguments: (chainId: ChainModel.Id, usedRuntimePaths: [String: [String]], runtimeItem: RuntimeMetadataItemProtocol?)?
-    var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReceivedInvocations: [(chainId: ChainModel.Id, usedRuntimePaths: [String: [String]], runtimeItem: RuntimeMetadataItemProtocol?)] = []
-    var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReturnValue: RuntimeProviderProtocol!
-    var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemClosure: ((ChainModel.Id, [String: [String]], RuntimeMetadataItemProtocol?) throws -> RuntimeProviderProtocol)?
 
-    func getRuntimeProvider(chainId: ChainModel.Id, usedRuntimePaths: [String: [String]], runtimeItem: RuntimeMetadataItemProtocol?) throws -> RuntimeProviderProtocol {
+    var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReceivedArguments: (
+        chainId: ChainModel.Id,
+        usedRuntimePaths: [String: [String]],
+        runtimeItem: RuntimeMetadataItemProtocol?
+    )?
+    var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReceivedInvocations: [(
+        chainId: ChainModel.Id,
+        usedRuntimePaths: [String: [String]],
+        runtimeItem: RuntimeMetadataItemProtocol?
+    )] = []
+    var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReturnValue: RuntimeProviderProtocol!
+    var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemClosure: ((
+        ChainModel.Id,
+        [String: [String]],
+        RuntimeMetadataItemProtocol?
+    ) throws -> RuntimeProviderProtocol)?
+
+    func getRuntimeProvider(
+        chainId: ChainModel.Id,
+        usedRuntimePaths: [String: [String]],
+        runtimeItem: RuntimeMetadataItemProtocol?
+    ) throws -> RuntimeProviderProtocol {
         if let error = getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemThrowableError {
             throw error
         }
         getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemCallsCount += 1
-        getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReceivedArguments = (chainId: chainId, usedRuntimePaths: usedRuntimePaths, runtimeItem: runtimeItem)
-        getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReceivedInvocations.append((chainId: chainId, usedRuntimePaths: usedRuntimePaths, runtimeItem: runtimeItem))
-        return try getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemClosure.map({ try $0(chainId, usedRuntimePaths, runtimeItem) }) ?? getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReturnValue
+        getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReceivedArguments = (
+            chainId: chainId,
+            usedRuntimePaths: usedRuntimePaths,
+            runtimeItem: runtimeItem
+        )
+        getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReceivedInvocations.append((
+            chainId: chainId,
+            usedRuntimePaths: usedRuntimePaths,
+            runtimeItem: runtimeItem
+        ))
+        return try getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemClosure.map { try $0(
+            chainId,
+            usedRuntimePaths,
+            runtimeItem
+        ) } ?? getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReturnValue
     }
     
     // MARK: - getRuntimeProvider
@@ -53,13 +81,14 @@ class ChainRegistryProtocolMock: ChainRegistryProtocol {
         return getRuntimeProviderClosure.map({ $0(chainId) }) ?? getRuntimeProviderReturnValue
     }
 
-    //MARK: - getSubstrateConnection
+    // MARK: - getSubstrateConnection
 
     var getSubstrateConnectionForThrowableError: Error?
     var getSubstrateConnectionForCallsCount = 0
     var getSubstrateConnectionForCalled: Bool {
-        return getSubstrateConnectionForCallsCount > 0
+        getSubstrateConnectionForCallsCount > 0
     }
+
     var getSubstrateConnectionForReceivedChain: ChainModel?
     var getSubstrateConnectionForReceivedInvocations: [ChainModel] = []
     var getSubstrateConnectionForReturnValue: SubstrateConnection!
@@ -72,16 +101,18 @@ class ChainRegistryProtocolMock: ChainRegistryProtocol {
         getSubstrateConnectionForCallsCount += 1
         getSubstrateConnectionForReceivedChain = chain
         getSubstrateConnectionForReceivedInvocations.append(chain)
-        return try getSubstrateConnectionForClosure.map({ try $0(chain) }) ?? getSubstrateConnectionForReturnValue
+        return try getSubstrateConnectionForClosure
+            .map { try $0(chain) } ?? getSubstrateConnectionForReturnValue
     }
 
-    //MARK: - getEthereumConnection
+    // MARK: - getEthereumConnection
 
     var getEthereumConnectionForThrowableError: Error?
     var getEthereumConnectionForCallsCount = 0
     var getEthereumConnectionForCalled: Bool {
-        return getEthereumConnectionForCallsCount > 0
+        getEthereumConnectionForCallsCount > 0
     }
+
     var getEthereumConnectionForReceivedChain: ChainModel?
     var getEthereumConnectionForReceivedInvocations: [ChainModel] = []
     var getEthereumConnectionForReturnValue: Web3EthConnection!
@@ -94,16 +125,18 @@ class ChainRegistryProtocolMock: ChainRegistryProtocol {
         getEthereumConnectionForCallsCount += 1
         getEthereumConnectionForReceivedChain = chain
         getEthereumConnectionForReceivedInvocations.append(chain)
-        return try getEthereumConnectionForClosure.map({ try $0(chain) }) ?? getEthereumConnectionForReturnValue
+        return try getEthereumConnectionForClosure
+            .map { try $0(chain) } ?? getEthereumConnectionForReturnValue
     }
 
-    //MARK: - getChain
+    // MARK: - getChain
 
     var getChainForThrowableError: Error?
     var getChainForCallsCount = 0
     var getChainForCalled: Bool {
-        return getChainForCallsCount > 0
+        getChainForCallsCount > 0
     }
+
     var getChainForReceivedChainId: ChainModel.Id?
     var getChainForReceivedInvocations: [ChainModel.Id] = []
     var getChainForReturnValue: ChainModel!
@@ -116,16 +149,17 @@ class ChainRegistryProtocolMock: ChainRegistryProtocol {
         getChainForCallsCount += 1
         getChainForReceivedChainId = chainId
         getChainForReceivedInvocations.append(chainId)
-        return try getChainForClosure.map({ try $0(chainId) }) ?? getChainForReturnValue
+        return try getChainForClosure.map { try $0(chainId) } ?? getChainForReturnValue
     }
 
-    //MARK: - getChains
+    // MARK: - getChains
 
     var getChainsThrowableError: Error?
     var getChainsCallsCount = 0
     var getChainsCalled: Bool {
-        return getChainsCallsCount > 0
+        getChainsCallsCount > 0
     }
+
     var getChainsReturnValue: [ChainModel]!
     var getChainsClosure: (() throws -> [ChainModel])?
 
@@ -134,29 +168,57 @@ class ChainRegistryProtocolMock: ChainRegistryProtocol {
             throw error
         }
         getChainsCallsCount += 1
-        return try getChainsClosure.map({ try $0() }) ?? getChainsReturnValue
+        return try getChainsClosure.map { try $0() } ?? getChainsReturnValue
     }
 
-    //MARK: - getReadySnapshot
+    // MARK: - getReadySnapshot
 
     var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemThrowableError: Error?
     var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemCallsCount = 0
     var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemCalled: Bool {
-        return getReadySnapshotChainIdUsedRuntimePathsRuntimeItemCallsCount > 0
+        getReadySnapshotChainIdUsedRuntimePathsRuntimeItemCallsCount > 0
     }
-    var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReceivedArguments: (chainId: ChainModel.Id, usedRuntimePaths: [String: [String]], runtimeItem: RuntimeMetadataItemProtocol?)?
-    var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReceivedInvocations: [(chainId: ChainModel.Id, usedRuntimePaths: [String: [String]], runtimeItem: RuntimeMetadataItemProtocol?)] = []
-    var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReturnValue: RuntimeSnapshot!
-    var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemClosure: ((ChainModel.Id, [String: [String]], RuntimeMetadataItemProtocol?) throws -> RuntimeSnapshot)?
 
-    func getReadySnapshot(chainId: ChainModel.Id, usedRuntimePaths: [String: [String]], runtimeItem: RuntimeMetadataItemProtocol?) throws -> RuntimeSnapshot {
+    var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReceivedArguments: (
+        chainId: ChainModel.Id,
+        usedRuntimePaths: [String: [String]],
+        runtimeItem: RuntimeMetadataItemProtocol?
+    )?
+    var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReceivedInvocations: [(
+        chainId: ChainModel.Id,
+        usedRuntimePaths: [String: [String]],
+        runtimeItem: RuntimeMetadataItemProtocol?
+    )] = []
+    var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReturnValue: RuntimeSnapshot!
+    var getReadySnapshotChainIdUsedRuntimePathsRuntimeItemClosure: ((
+        ChainModel.Id,
+        [String: [String]],
+        RuntimeMetadataItemProtocol?
+    ) throws -> RuntimeSnapshot)?
+
+    func getReadySnapshot(
+        chainId: ChainModel.Id,
+        usedRuntimePaths: [String: [String]],
+        runtimeItem: RuntimeMetadataItemProtocol?
+    ) throws -> RuntimeSnapshot {
         if let error = getReadySnapshotChainIdUsedRuntimePathsRuntimeItemThrowableError {
             throw error
         }
         getReadySnapshotChainIdUsedRuntimePathsRuntimeItemCallsCount += 1
-        getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReceivedArguments = (chainId: chainId, usedRuntimePaths: usedRuntimePaths, runtimeItem: runtimeItem)
-        getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReceivedInvocations.append((chainId: chainId, usedRuntimePaths: usedRuntimePaths, runtimeItem: runtimeItem))
-        return try getReadySnapshotChainIdUsedRuntimePathsRuntimeItemClosure.map({ try $0(chainId, usedRuntimePaths, runtimeItem) }) ?? getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReturnValue
+        getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReceivedArguments = (
+            chainId: chainId,
+            usedRuntimePaths: usedRuntimePaths,
+            runtimeItem: runtimeItem
+        )
+        getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReceivedInvocations.append((
+            chainId: chainId,
+            usedRuntimePaths: usedRuntimePaths,
+            runtimeItem: runtimeItem
+        ))
+        return try getReadySnapshotChainIdUsedRuntimePathsRuntimeItemClosure.map { try $0(
+            chainId,
+            usedRuntimePaths,
+            runtimeItem
+        ) } ?? getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReturnValue
     }
-
 }

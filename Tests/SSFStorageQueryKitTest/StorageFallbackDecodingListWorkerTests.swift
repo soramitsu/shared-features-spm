@@ -1,11 +1,10 @@
-import XCTest
-import MocksBasket
 import BigInt
+import MocksBasket
+import XCTest
 
 @testable import SSFStorageQueryKit
 
 final class StorageFallbackDecodingListWorkerTests: XCTestCase {
-
     func testExample() async throws {
         let codingFactory = try await PolkadotRuntimeProvider()
             .buildRuntimeProvider()
@@ -25,5 +24,4 @@ final class StorageFallbackDecodingListWorkerTests: XCTestCase {
         XCTAssertEqual(decoded.count, 1)
         XCTAssertEqual(decoded.first, extectedResult)
     }
-
 }

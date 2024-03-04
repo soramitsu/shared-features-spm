@@ -24,8 +24,11 @@ public final class SingleValueCacheRepositoryFactoryDefault: SingleValueCacheRep
     }
     
     public func createSingleValueCacheRepository() -> SingleValueRepository {
-        let facade = CacheStorageFacade()
-        let mapper = AnyCoreDataMapper(CodableCoreDataMapper<SingleValueProviderObject, CDSingleValue>())
+        let facade = try CacheStorageFacade()
+        let mapper = AnyCoreDataMapper(CodableCoreDataMapper<
+            SingleValueProviderObject,
+            CDSingleValue
+        >())
         let repository = facade.createRepository(
             filter: nil,
             sortDescriptors: [],

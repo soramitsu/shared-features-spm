@@ -1,7 +1,7 @@
 import Foundation
-import SSFUtils
-import SSFRuntimeCodingService
 import SSFModels
+import SSFRuntimeCodingService
+import SSFUtils
 
 final class NMapStorageRequestWorker<P: Decodable>: StorageRequestWorker {
     private let runtimeService: RuntimeCodingServiceProtocol
@@ -17,7 +17,7 @@ final class NMapStorageRequestWorker<P: Decodable>: StorageRequestWorker {
         self.connection = connection
         self.storageRequestFactory = storageRequestFactory
     }
-    
+
     func perform<T: Decodable>(
         params: StorageRequestWorkerType,
         storagePath: any StorageCodingPathProtocol
@@ -28,7 +28,7 @@ final class NMapStorageRequestWorker<P: Decodable>: StorageRequestWorker {
                 itemName: storagePath.itemName
             )
         }
-        
+
         let coderFactoryOperation = try await runtimeService.fetchCoderFactory()
         let response: [StorageResponse<T>] = try await storageRequestFactory.queryItems(
             engine: connection,

@@ -1,10 +1,9 @@
-import XCTest
 import MocksBasket
+import XCTest
 
 @testable import SSFCloudStorage
 
 final class BackupFileFactoryTests: XCTestCase {
-
     func testBackupFileFactoryInit() {
         // arrange
         let service = EncryptionServiceProtocolMock()
@@ -19,7 +18,8 @@ final class BackupFileFactoryTests: XCTestCase {
     func testCreateFileWithMock() throws {
         // arrange
         let service = EncryptionServiceProtocolMock()
-        service.createEncryptedDataWithMessageReturnValue = try Data(hexStringSSF: TestData.hexString)
+        service
+            .createEncryptedDataWithMessageReturnValue = try Data(hexStringSSF: TestData.hexString)
 
         // act
         let factory = BackupFileFactory(service: service)
@@ -59,14 +59,17 @@ extension BackupFileFactoryTests {
         {\"address\":\"cnSNFyYFzPPJWm1yKjZCKZnGhhrZWWx1Mme1gw64YvjJhNGoJ\",\"encoded\":\"AAUbK8HDAE7Mw26rox6dktexv9pG5MRk\\/WtCJFtV2+kAgAAAAQAAAAgAAACivZKIFh9rMwauWG97MJ0ONwPg6eOpXNygK6X9RQfKMPvETRAfpHbRJp42LKEeWDNczqKaxltMj3yeMUi9kOYIz1sXMt7g7PC7aHUvSsF2G8nzV+XrNpC7nc8s+ty1OmVeKJWsSACfNj3OW9gxesmAtpfSrWx2ppSviKwvU1SKNYPfq+rxFCG+sXx4lggOFouAmT5iaPTL9fck\\/1vI\",\"encoding\":{\"content\":[\"pkcs8\",\"sr25519\"],\"type\":[\"scrypt\",\"xsalsa20-poly1305\"],\"version\":\"3\"},\"meta\":{\"genesisHash\":\"0xded5a658e6ff2c82ce640caf8910ea2bb700aad5511ec7c3014cc7c256f5d956\",\"name\":\"chop\",\"whenCreated\":1706609064}}
         """
 
-        static let account = OpenBackupAccount(name: "chop",
-                                               address: "cnSNFyYFzPPJWm1yKjZCKZnGhhrZWWx1Mme1gw64YvjJhNGoJ",
-                                               passphrase: "carpet shiver bacon dirt sadness hammer isolate window hope lounge humble kitten",
-                                               cryptoType: "SR25519",
-                                               substrateDerivationPath: nil,
-                                               ethDerivationPath: nil,
-                                               backupAccountType: [.passphrase, .json, .seed],
-                                               json: OpenBackupAccount.Json(substrateJson: substrateJson),
-                                               encryptedSeed: OpenBackupAccount.Seed())
+        static let account = OpenBackupAccount(
+            name: "chop",
+            address: "cnSNFyYFzPPJWm1yKjZCKZnGhhrZWWx1Mme1gw64YvjJhNGoJ",
+            passphrase: "carpet shiver bacon dirt sadness hammer isolate window hope lounge humble kitten",
+            cryptoType: "SR25519",
+            substrateDerivationPath: nil,
+            ethDerivationPath: nil,
+            backupAccountType: [.passphrase, .json, .seed],
+            json: OpenBackupAccount
+                .Json(substrateJson: substrateJson),
+            encryptedSeed: OpenBackupAccount.Seed()
+        )
     }
 }

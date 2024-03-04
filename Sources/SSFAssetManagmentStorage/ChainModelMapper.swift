@@ -19,7 +19,7 @@ public final class ChainModelMapper {
     public init(apiKeyInjector: ApiKeyInjector) {
         self.apiKeyInjector = apiKeyInjector
     }
-    
+
     private func createAsset(from entity: CDAsset) -> AssetModel? {
         var symbol: String?
         if let entitySymbol = entity.symbol {

@@ -6,7 +6,8 @@ import SSFNetwork
 import SSFUtils
 
 public protocol RuntimeSyncServiceProtocol {
-    func register(chain: ChainModel, with connection: SubstrateConnection) async throws -> RuntimeMetadataItem
+    func register(chain: ChainModel, with connection: SubstrateConnection) async throws
+        -> RuntimeMetadataItem
     func unregister(chainId: ChainModel.Id)
     func getRuntimeItem(chainId: ChainModel.Id) throws -> RuntimeMetadataItem
 }
@@ -38,7 +39,7 @@ public final class RuntimeSyncService {
 
     private var mutex = NSLock()
     private var retryScheduler: Scheduler?
-    
+
     private var knownChains: [ChainModel.Id: SubstrateConnection] = [:]
     private var syncingChains: [ChainModel.Id: CompoundOperationWrapper<SyncResult>] = [:]
     private var metadataItems: [ChainModel.Id: RuntimeMetadataItem] = [:]
@@ -236,8 +237,10 @@ public final class RuntimeSyncService {
             ]
         )
     }
-    
-    private func getRemoteRuntimeVersion(with connection: SubstrateConnection) async throws -> RuntimeVersion {
+
+    private func getRemoteRuntimeVersion(with connection: SubstrateConnection) async throws
+        -> RuntimeVersion
+    {
         let remoteRuntimeVersionOperation = JSONRPCOperation<[String], RuntimeVersion>(
             engine: connection,
             method: RPCMethod.getRuntimeVersion
@@ -296,7 +299,10 @@ extension RuntimeSyncService: SchedulerDelegate {
 }
 
 extension RuntimeSyncService: RuntimeSyncServiceProtocol {
-    public func register(chain: ChainModel, with connection: SubstrateConnection) async throws -> RuntimeMetadataItem {
+    public func register(
+        chain: ChainModel,
+        with connection: SubstrateConnection
+    ) async throws -> RuntimeMetadataItem {
         if let runtimeMetadataItem = metadataItems[chain.chainId] {
             return runtimeMetadataItem
         }

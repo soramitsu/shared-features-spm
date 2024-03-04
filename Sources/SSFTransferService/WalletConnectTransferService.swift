@@ -1,6 +1,6 @@
 import Foundation
-import Web3
 import SSFModels
+import Web3
 
 public protocol WalletConnectTransferService {
     func sign(
@@ -13,10 +13,10 @@ public protocol WalletConnectTransferService {
     ) async throws -> EthereumData
 }
 
-final public class WalletConnectTransferServiceDefault: WalletConnectTransferService {
+public final class WalletConnectTransferServiceDefault: WalletConnectTransferService {
     private let privateKey: EthereumPrivateKey
     private let ethereumService: EthereumService
-    
+
     init(
         privateKey: EthereumPrivateKey,
         ethereumService: EthereumService
@@ -24,9 +24,9 @@ final public class WalletConnectTransferServiceDefault: WalletConnectTransferSer
         self.privateKey = privateKey
         self.ethereumService = ethereumService
     }
-    
+
     // MARK: - WalletConnectTransferService
-    
+
     public func sign(
         transaction: EthereumTransaction,
         chain: ChainModel
@@ -41,10 +41,9 @@ final public class WalletConnectTransferServiceDefault: WalletConnectTransferSer
         transaction: EthereumTransaction,
         chain: ChainModel
     ) async throws -> EthereumData {
-        guard
-            let receiverAddress = transaction.to,
-            let senderAddress = transaction.from
-        else {
+        guard let receiverAddress = transaction.to,
+              let senderAddress = transaction.from else
+        {
             throw TransferServiceError.transferFailed(reason: "Wallet connect invalid params")
         }
         let quantity: EthereumQuantity
@@ -80,7 +79,8 @@ final public class WalletConnectTransferServiceDefault: WalletConnectTransferSer
             transactionType: .eip1559
         )
         guard let chainId = BigUInt(string: chain.chainId) else {
-            throw EthereumSignedTransaction.Error.chainIdNotSet(msg: "WC transactions need a chainId")
+            throw EthereumSignedTransaction.Error
+                .chainIdNotSet(msg: "WC transactions need a chainId")
         }
         let chainIdValue = EthereumQuantity(quantity: chainId)
         let rawTransaction = try tx.sign(with: privateKey, chainId: chainIdValue)

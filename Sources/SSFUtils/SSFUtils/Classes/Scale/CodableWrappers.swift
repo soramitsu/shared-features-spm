@@ -142,9 +142,9 @@ public struct ArrayCodable: Codable, Equatable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
 
-        guard
-            let bytes = try? Data(hexStringSSF: wrappedValue).map({ StringScaleMapper(value: $0) })
-        else {
+        guard let bytes = try? Data(hexStringSSF: wrappedValue)
+            .map({ StringScaleMapper(value: $0) }) else
+        {
             let context = EncodingError.Context(
                 codingPath: container.codingPath,
                 debugDescription: "Invalid encoding"

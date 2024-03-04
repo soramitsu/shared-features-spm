@@ -4,11 +4,11 @@ enum SubstrateCallPath: CaseIterable {
     var moduleName: String {
         path.moduleName
     }
-    
+
     var callName: String {
         path.callName
     }
-    
+
     var path: (moduleName: String, callName: String) {
         switch self {
         case .transfer:
@@ -29,7 +29,7 @@ enum SubstrateCallPath: CaseIterable {
             return (moduleName: "Balances", callName: "transfer_allow_death")
         }
     }
-    
+
     case transfer
     case xorlessTransfer
     case ormlChainTransfer

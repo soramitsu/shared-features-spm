@@ -14,7 +14,7 @@ public struct ChainNodeModel: Equatable, Codable, Hashable {
     public let url: URL
     public let name: String
     public let apikey: ApiKey?
-    
+
     public init(url: URL, name: String, apikey: ChainNodeModel.ApiKey?) {
         self.url = url
         self.name = name

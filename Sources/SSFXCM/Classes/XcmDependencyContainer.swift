@@ -20,9 +20,9 @@ protocol XcmDependencyContainerProtocol: AnyObject {
 final class XcmDependencyContainer: XcmDependencyContainerProtocol {
     private let chainRegistry: ChainRegistryProtocol
     private let fromChainData: XcmAssembly.FromChainData
-    
+
     private var connection: SubstrateConnection?
-    
+
     init(
         chainRegistry: ChainRegistryProtocol,
         fromChainData: XcmAssembly.FromChainData

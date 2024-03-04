@@ -280,8 +280,8 @@ public final class ChainModel: Codable, Identifiable {
     }
 }
 
-extension ChainModel {
-    public func accountRequest(_ accountId: AccountId? = nil) -> ChainAccountRequest {
+public extension ChainModel {
+    func accountRequest(_ accountId: AccountId? = nil) -> ChainAccountRequest {
         ChainAccountRequest(
             chainId: chainId,
             addressPrefix: addressPrefix,

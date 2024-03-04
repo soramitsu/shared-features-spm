@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 import SSFUtils
 
 public struct XorlessTransfer: Codable {
@@ -12,7 +12,7 @@ public struct XorlessTransfer: Codable {
     public let selectedSourceTypes: [[String?]]
     public let filterMode: PolkaswapCallFilterModeType
     public let additionalData: Data
-    
+
     public init(
         dexId: String,
         assetId: SoraAssetId,
@@ -48,7 +48,7 @@ public struct XorlessTransfer: Codable {
     }
 }
 
-//TODO: - Move to polkaswap package
+// TODO: - Move to polkaswap package
 
 public struct PolkaswapCallFilterModeType: Codable {
     public var name: String
