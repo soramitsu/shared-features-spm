@@ -5,6 +5,7 @@
 # format options
 
 --allman false
+--anonymousforeach ignore
 --binarygrouping 4,8
 --commas always
 --decimalgrouping 3,6
