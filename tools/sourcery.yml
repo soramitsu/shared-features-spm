@@ -71,3 +71,11 @@ configurations:
         ../Tests/SSFXCMTests/Mocks
       args:
         autoMockableTestableImports: ["SSFUtils", "SSFCrypto", "SSFModels", "RobinHood", "SSFExtrinsicKit", "IrohaCrypto", "SSFRuntimeCodingService", "SSFSigner"]
+    - sources:
+      - ../Sources/SSFTransferService
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Tests/SSFTransferServiceTests/Mocks
+      args:
+        autoMockableTestableImports: ["SSFTransferService", "SSFModels", "Web3", "Web3ContractABI"]

@@ -32,7 +32,8 @@ let package = Package(
         .library(name: "keccak", targets: ["keccak"]), //TODO: generate xcframework
         .library(name: "RobinHood", targets: ["RobinHood"]), //TODO: get from github
         .library(name: "SoraKeystore", targets: ["SoraKeystore"]), //TODO: get from github
-        .library(name: "SSFQRService", targets: ["SSFQRService"])
+        .library(name: "SSFQRService", targets: ["SSFQRService"]),
+        .library(name: "SSFTransferService", targets: ["SSFTransferService"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
@@ -46,6 +47,7 @@ let package = Package(
         .package(url: "https://github.com/daisuke-t-jp/xxHash-Swift", from: "1.1.1"),
         .package(url: "https://github.com/SwiftyBeaver/SwiftyBeaver.git", .upToNextMajor(from: "2.0.0")),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.50.4"),
+        .package(url: "https://github.com/bnsports/Web3.swift.git", branch: "master")
     ],
     targets: [
         .binaryTarget(name: "blake2lib", path: "Binaries/blake2lib.xcframework"),
@@ -60,8 +62,23 @@ let package = Package(
         .target(name: "SSFKeyPair", dependencies: [ "IrohaCrypto", "SSFCrypto" ]),
         .target(name: "SSFModels", dependencies: [ "IrohaCrypto" ]),
         .target(name: "SSFCrypto", dependencies: [ "IrohaCrypto", "SSFUtils", "SSFModels", "keccak" ]),
-        .target(name: "SSFChainConnection", dependencies: [ "SSFUtils" ]),
         .target(name: "SSFSigner", dependencies: [ "IrohaCrypto", "SSFCrypto" ]),
+        .target(name: "SSFChainConnection", dependencies: [
+            .product(name: "Web3", package: "Web3.swift"),
+            "SSFUtils"
+        ]),
+        .target(name: "SSFTransferService", dependencies: [
+            .product(name: "Web3", package: "Web3.swift"),
+            .product(name: "Web3ContractABI", package: "Web3.swift"),
+            "SSFModels",
+            "BigInt",
+            "SSFUtils",
+            "SSFRuntimeCodingService",
+            "SSFExtrinsicKit",
+            "SSFChainRegistry",
+            "SSFChainConnection",
+            "SSFNetwork"
+        ]),
         .target(name: "SSFQRService", dependencies: [
             .byName(name: "MPQRCoreSDK"),
             "SSFCrypto",
@@ -187,6 +204,7 @@ let package = Package(
         .target(
             name: "SSFChainRegistry",
             dependencies: [
+                .product(name: "Web3", package: "Web3.swift"),
                 "SSFUtils",
                 "RobinHood",
                 "SSFModels",
@@ -250,6 +268,26 @@ let package = Package(
             dependencies: [
                 "SSFKeyPair",
                 "IrohaCrypto"
+            ]
+        ),
+        .testTarget(
+            name: "SSFTransferServiceTests",
+            dependencies: [
+                .product(name: "Web3", package: "Web3.swift"),
+                .product(name: "Web3ContractABI", package: "Web3.swift"),
+                "SSFTransferService",
+                "SSFModels",
+                "BigInt",
+                "SSFUtils",
+                "SSFRuntimeCodingService",
+                "SSFExtrinsicKit",
+                "SSFChainRegistry",
+                "SSFChainConnection",
+                "SSFNetwork",
+                "SSFHelpers"
+            ],
+            resources: [
+                .process("Resources")
             ]
         ),
         .testTarget(

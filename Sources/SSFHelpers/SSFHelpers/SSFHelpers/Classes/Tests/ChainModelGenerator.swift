@@ -10,7 +10,8 @@ public enum ChainModelGenerator {
         count: Int,
         withTypes: Bool = true,
         staking: StakingType? = nil,
-        hasCrowdloans: Bool = false
+        hasCrowdloans: Bool = false,
+        isEthereumBased: Bool = false
     ) -> [ChainModel] {
         (0 ..< count).map { index in
             let chainId = chainId ?? Data.random(of: 32)!.toHex()
@@ -30,6 +31,9 @@ public enum ChainModelGenerator {
 
             if hasCrowdloans {
                 options.append(.crowdloans)
+            }
+            if isEthereumBased {
+                options.append(.ethereumBased)
             }
 
             let externalApi: ChainModel.ExternalApiSet? = generateExternaApis(
@@ -179,11 +183,13 @@ public enum ChainModelGenerator {
         return chain
     }
 
-    static func generateAssetWithId(
+    public static func generateAssetWithId(
         _ identifier: AssetModel.Id,
         symbol: String,
-        assetPresicion: UInt16 = (9 ... 18).randomElement()!,
-        chainId _: String = ""
+        assetPresicion: UInt16 = (9...18).randomElement()!,
+        chainId: String = "",
+        substrateAssetType: SubstrateAssetType = .normal,
+        currencyId: String? = nil
     ) -> AssetModel {
         AssetModel(
             id: identifier,
@@ -193,14 +199,14 @@ public enum ChainModelGenerator {
             icon: nil,
             price: nil,
             fiatDayChange: nil,
-            currencyId: nil,
+            currencyId: currencyId,
             existentialDeposit: nil,
             color: nil,
             isUtility: false,
             isNative: false,
             staking: nil,
             purchaseProviders: nil,
-            type: .normal,
+            type: substrateAssetType,
             ethereumType: .normal,
             priceProvider: nil,
             coingeckoPriceId: nil

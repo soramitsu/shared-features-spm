@@ -39,9 +39,10 @@ final class ChainAssetsFetchWorkerTests: XCTestCase {
 private extension ChainAssetsFetchWorkerTests {
     func prepareRepostory() -> CoreDataRepository<ChainModel, CDChain> {
         let facade = SubstrateStorageTestFacade()
-        let mapper = ChainModelMapper()
-
-        let chains: [ChainModel] = (0 ..< 10).map { index in
+        let apiKeyInjector = ApiKeyInjectorMock()
+        let mapper = ChainModelMapper(apiKeyInjector: apiKeyInjector)
+        
+        let chains: [ChainModel] = (0..<10).map { index in
             ChainModelGenerator.generateChain(
                 generatingAssets: 2,
                 addressPrefix: UInt16(index),
@@ -55,5 +56,16 @@ private extension ChainAssetsFetchWorkerTests {
         OperationQueue().addOperations([saveOperation], waitUntilFinished: true)
 
         return repository
+    }
+}
+
+// TODO: Remove after MocksBasket merge
+class ApiKeyInjectorMock: ApiKeyInjector {
+    func getBlockExplorerKey(for type: SSFModels.BlockExplorerType, chainId: SSFModels.ChainModel.Id) -> String? {
+        nil
+    }
+    
+    func getNodeApiKey(for chainId: String, apiKeyName: String) -> String? {
+        nil
     }
 }
