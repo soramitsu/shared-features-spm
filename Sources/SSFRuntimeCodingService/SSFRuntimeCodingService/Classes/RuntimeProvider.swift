@@ -267,4 +267,17 @@ extension RuntimeProvider: RuntimeProviderProtocol {
             }
         }
     }
+    
+    public func fetchCoderFactory() async throws -> RuntimeCoderFactoryProtocol {
+        try await withUnsafeThrowingContinuation { continuation in
+            fetchCoderFactory(runCompletionIn: nil) { factory in
+                guard let factory = factory else {
+                    continuation.resume(with: .failure(RuntimeProviderError.providerUnavailable))
+                    return
+                }
+
+                continuation.resume(with: .success(factory))
+            }
+        }
+    }
 }

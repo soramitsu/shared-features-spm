@@ -16,6 +16,11 @@ public struct SingleValueProviderObject: Identifiable & Codable {
 
     /// serialized object's data
     public var payload: Data
+    
+    public init(identifier: String, payload: Data) {
+        self.identifier = identifier
+        self.payload = payload
+    }
 }
 
 /**

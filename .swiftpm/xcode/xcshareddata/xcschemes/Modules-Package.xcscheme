@@ -513,9 +513,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SSFIndexers"
-               BuildableName = "SSFIndexers"
-               BlueprintName = "SSFIndexers"
+               BlueprintIdentifier = "SSFTransferService"
+               BuildableName = "SSFTransferService"
+               BlueprintName = "SSFTransferService"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -530,20 +530,6 @@
                BlueprintIdentifier = "Modules_SSFTransferServiceTests"
                BuildableName = "Modules_SSFTransferServiceTests"
                BlueprintName = "Modules_SSFTransferServiceTests"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SSFTransferService"
-               BuildableName = "SSFTransferService"
-               BlueprintName = "SSFTransferService"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>

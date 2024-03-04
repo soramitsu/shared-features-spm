@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import keccak
+@_implementationOnly import keccak
 
 enum KeccakError: Error {
     case internalFailure
