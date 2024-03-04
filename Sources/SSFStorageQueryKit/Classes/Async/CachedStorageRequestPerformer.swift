@@ -6,7 +6,6 @@ public struct CachedStorageRequestTrigger: OptionSet {
     
     public static var onPerform: CachedStorageRequestTrigger { CachedStorageRequestTrigger(rawValue: 1 << 0) }
     public static var onCache: CachedStorageRequestTrigger { CachedStorageRequestTrigger(rawValue: 1 << 1) }
-    
     public static var onAll: CachedStorageRequestTrigger = [.onCache, onPerform]
     
     public init(rawValue: CachedStorageRequestTrigger.RawValue) {

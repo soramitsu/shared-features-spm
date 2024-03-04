@@ -96,11 +96,10 @@ public class UniversalIconGenerator: IconGenerating {
 
         let typeValue = (try? addressFactory.type(fromAddress: address)) ?? 0
 
-        let chainType = typeValue.uint16Value
         let isEthereum = address.contains("0x")
         let chainFormat: SFChainFormat = isEthereum ? .sfEthereum :
             .sfSubstrate(typeValue.uint16Value)
-        let accountId = try AddressFactory.accountId(from: address, chainFormat: chainFormat)
+        let accountId = try UtilsAddressFactory.accountId(from: address, chainFormat: chainFormat)
 
         var bytes: [UInt8] = try (accountId as NSData).blake2b(64).map { $0 }
 

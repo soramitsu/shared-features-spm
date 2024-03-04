@@ -27,4 +27,22 @@ public init() {}
         return getBlockExplorerKeyForChainIdClosure.map({ $0(type, chainId) }) ?? getBlockExplorerKeyForChainIdReturnValue
     }
 
+    //MARK: - getNodeApiKey
+
+    public var getNodeApiKeyForApiKeyNameCallsCount = 0
+    public var getNodeApiKeyForApiKeyNameCalled: Bool {
+        return getNodeApiKeyForApiKeyNameCallsCount > 0
+    }
+    public var getNodeApiKeyForApiKeyNameReceivedArguments: (chainId: String, apiKeyName: String)?
+    public var getNodeApiKeyForApiKeyNameReceivedInvocations: [(chainId: String, apiKeyName: String)] = []
+    public var getNodeApiKeyForApiKeyNameReturnValue: String?
+    public var getNodeApiKeyForApiKeyNameClosure: ((String, String) -> String?)?
+
+    public func getNodeApiKey(for chainId: String, apiKeyName: String) -> String? {
+        getNodeApiKeyForApiKeyNameCallsCount += 1
+        getNodeApiKeyForApiKeyNameReceivedArguments = (chainId: chainId, apiKeyName: apiKeyName)
+        getNodeApiKeyForApiKeyNameReceivedInvocations.append((chainId: chainId, apiKeyName: apiKeyName))
+        return getNodeApiKeyForApiKeyNameClosure.map({ $0(chainId, apiKeyName) }) ?? getNodeApiKeyForApiKeyNameReturnValue
+    }
+
 }

@@ -2,6 +2,7 @@ import XCTest
 import MocksBasket
 import SSFRuntimeCodingService
 import SSFUtils
+import SSFCrypto
 
 @testable import SSFStorageQueryKit
 
@@ -48,7 +49,13 @@ final class NMapKeyEncodingWorkerTests: XCTestCase {
         XCTAssertEqual(expectedKey, keyResult)
     }
 
-    func testThrows1() async throws { //guard case let .nMap(nMapEntry) = entry.type
+    /**
+     Test for NMapKeyEncodingWorker
+     
+     testing entrie type is equal to entrie from storage path
+     guard case let .nMap(nMapEntry) = entry.type
+     */
+    func testThrows1() async throws {
         let account = try AddressFactory.accountId(
             from: "12zcF9m6QpUaGeJrrKYRGubZuxa9YyuVRTjpXGyVNsCpzspY",
             chainFormat: .sfSubstrate(0)
@@ -70,8 +77,14 @@ final class NMapKeyEncodingWorkerTests: XCTestCase {
             XCTAssertTrue(true)
         }
     }
-    
-    func testThrows2() async throws { //guard keyEntries.count == keyParams.count
+
+    /**
+     Test for NMapKeyEncodingWorker
+     
+     testing entries count and params count
+     guard keyEntries.count == keyParams.count
+     */
+    func testThrows2() async throws {
         let account = try AddressFactory.accountId(
             from: "12zcF9m6QpUaGeJrrKYRGubZuxa9YyuVRTjpXGyVNsCpzspY",
             chainFormat: .sfSubstrate(0)
@@ -93,11 +106,13 @@ final class NMapKeyEncodingWorkerTests: XCTestCase {
         }
     }
     
-    func testThrows3() async throws { //try param.encode(encoder: codingFactory.createEncoder(), type: keyEntries[index])
-        let account = try AddressFactory.accountId(
-            from: "12zcF9m6QpUaGeJrrKYRGubZuxa9YyuVRTjpXGyVNsCpzspY",
-            chainFormat: .sfSubstrate(0)
-        )
+    /**
+     Test for NMapKeyEncodingWorker
+     
+     testing error throwing for param encoding
+     try param.encode(encoder: codingFactory.createEncoder(), type: keyEntries[index])
+     */
+    func testThrows3() async throws {
         let worker = NMapKeyEncodingWorker(
             codingFactory: codingFactory,
             path: StoragePathMock.custom(moduleName: "Staking", itemName: "ErasValidatorPrefs"),

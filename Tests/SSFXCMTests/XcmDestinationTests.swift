@@ -40,7 +40,7 @@ extension XcmDestinationTests {
             paraId: "1001",
             name: "test",
             xcm: nil,
-            nodes: Set([ChainNodeModel(url: TestData.url, name: "test")]),
+            nodes: Set([ChainNodeModel(url: TestData.url, name: "test", apikey: nil)]),
             addressPrefix: 1,
             icon: nil,
             iosMinAppVersion: nil
@@ -55,7 +55,8 @@ extension XcmDestinationTests {
             xcm: nil,
             nodes: Set([ChainNodeModel(
                 url: TestData.url,
-                name: "test"
+                name: "test",
+                apikey: nil
             )]),
             addressPrefix: 1,
             icon: nil,

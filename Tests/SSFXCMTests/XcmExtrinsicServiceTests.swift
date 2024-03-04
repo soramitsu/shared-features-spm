@@ -186,7 +186,8 @@ private extension XcmExtrinsicServiceTests {
             ),
             nodes: Set([ChainNodeModel(
                 url: XcmConfig.shared.tokenLocationsSourceUrl,
-                name: "test1"
+                name: "test1",
+                apikey: nil
             )]),
             addressPrefix: 0,
             icon: nil,

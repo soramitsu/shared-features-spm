@@ -107,14 +107,3 @@ extension MetaAccountModel {
         return nil
     }
 }
-
-extension ChainModel {
-    func accountRequest(_ accountId: AccountId? = nil) -> ChainAccountRequest {
-        ChainAccountRequest(
-            chainId: chainId,
-            addressPrefix: addressPrefix,
-            isEthereumBased: isEthereumBased,
-            accountId: accountId
-        )
-    }
-}

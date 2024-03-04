@@ -7,4 +7,8 @@ public protocol ApiKeyInjector {
         for type: BlockExplorerType,
         chainId: ChainModel.Id
     ) -> String?
+    func getNodeApiKey(
+        for chainId: String,
+        apiKeyName: String
+    ) -> String?
 }

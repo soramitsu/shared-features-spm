@@ -17,7 +17,10 @@ final class EncodableStorageRequestWorkerTests: XCTestCase {
         )
         
         do {
-            let _: [StorageResponse<String>] = try await worker.perform(request: request)
+            let _: [StorageResponse<String>] = try await worker.perform(
+                params: request.parametersType.workerType,
+                storagePath: request.storagePath
+            )
             XCTFail("Error needs to be thrown")
         } catch {
             XCTAssertTrue(true)
@@ -36,7 +39,10 @@ final class EncodableStorageRequestWorkerTests: XCTestCase {
         )
         
         do {
-            let _: [StorageResponse<String>] = try await worker.perform(request: request)
+            let _: [StorageResponse<String>] = try await worker.perform(
+                params: request.parametersType.workerType,
+                storagePath: request.storagePath
+            )
             XCTFail("Error needs to be thrown")
         } catch {
             XCTAssertTrue(true)
@@ -55,7 +61,10 @@ final class EncodableStorageRequestWorkerTests: XCTestCase {
         )
         
         do {
-            let _: [StorageResponse<String>] = try await worker.perform(request: request)
+            let _: [StorageResponse<String>] = try await worker.perform(
+                params: request.parametersType.workerType,
+                storagePath: request.storagePath
+            )
             XCTFail("Error needs to be thrown")
         } catch {
             XCTAssertTrue(true)

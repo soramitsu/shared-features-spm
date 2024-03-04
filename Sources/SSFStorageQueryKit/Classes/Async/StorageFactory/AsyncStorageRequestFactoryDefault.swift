@@ -5,7 +5,7 @@ import SSFModels
 
 final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
     
-    private lazy var remoteFactory: StorageKeyFactoryProtocol = {
+    private lazy var storageKeyFactory: StorageKeyFactoryProtocol = {
         StorageKeyFactory()
     }()
     
@@ -21,7 +21,7 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
         let keysWorker = MapKeyEncodingWorker(
             codingFactory: factory,
             path: storagePath,
-            storageKeyFactory: remoteFactory,
+            storageKeyFactory: storageKeyFactory,
             keyParams: keyParams
         )
         let keys = try keysWorker.performEncoding()
@@ -103,7 +103,7 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
         let keysWorker = NMapKeyEncodingWorker(
             codingFactory: factory,
             path: storagePath,
-            storageKeyFactory: remoteFactory,
+            storageKeyFactory: storageKeyFactory,
             keyParams: keyParams
         )
         let keys = try keysWorker.performEncoding()

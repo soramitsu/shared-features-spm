@@ -35,26 +35,48 @@ class ChainRegistryProtocolMock: ChainRegistryProtocol {
         return try getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemClosure.map({ try $0(chainId, usedRuntimePaths, runtimeItem) }) ?? getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReturnValue
     }
 
-    //MARK: - getConnection
+    //MARK: - getSubstrateConnection
 
-    var getConnectionForThrowableError: Error?
-    var getConnectionForCallsCount = 0
-    var getConnectionForCalled: Bool {
-        return getConnectionForCallsCount > 0
+    var getSubstrateConnectionForThrowableError: Error?
+    var getSubstrateConnectionForCallsCount = 0
+    var getSubstrateConnectionForCalled: Bool {
+        return getSubstrateConnectionForCallsCount > 0
     }
-    var getConnectionForReceivedChain: ChainModel?
-    var getConnectionForReceivedInvocations: [ChainModel] = []
-    var getConnectionForReturnValue: ChainConnection!
-    var getConnectionForClosure: ((ChainModel) throws -> ChainConnection)?
+    var getSubstrateConnectionForReceivedChain: ChainModel?
+    var getSubstrateConnectionForReceivedInvocations: [ChainModel] = []
+    var getSubstrateConnectionForReturnValue: SubstrateConnection!
+    var getSubstrateConnectionForClosure: ((ChainModel) throws -> SubstrateConnection)?
 
-    func getConnection(for chain: ChainModel) throws -> ChainConnection {
-        if let error = getConnectionForThrowableError {
+    func getSubstrateConnection(for chain: ChainModel) throws -> SubstrateConnection {
+        if let error = getSubstrateConnectionForThrowableError {
             throw error
         }
-        getConnectionForCallsCount += 1
-        getConnectionForReceivedChain = chain
-        getConnectionForReceivedInvocations.append(chain)
-        return try getConnectionForClosure.map({ try $0(chain) }) ?? getConnectionForReturnValue
+        getSubstrateConnectionForCallsCount += 1
+        getSubstrateConnectionForReceivedChain = chain
+        getSubstrateConnectionForReceivedInvocations.append(chain)
+        return try getSubstrateConnectionForClosure.map({ try $0(chain) }) ?? getSubstrateConnectionForReturnValue
+    }
+
+    //MARK: - getEthereumConnection
+
+    var getEthereumConnectionForThrowableError: Error?
+    var getEthereumConnectionForCallsCount = 0
+    var getEthereumConnectionForCalled: Bool {
+        return getEthereumConnectionForCallsCount > 0
+    }
+    var getEthereumConnectionForReceivedChain: ChainModel?
+    var getEthereumConnectionForReceivedInvocations: [ChainModel] = []
+    var getEthereumConnectionForReturnValue: Web3EthConnection!
+    var getEthereumConnectionForClosure: ((ChainModel) throws -> Web3EthConnection)?
+
+    func getEthereumConnection(for chain: ChainModel) throws -> Web3EthConnection {
+        if let error = getEthereumConnectionForThrowableError {
+            throw error
+        }
+        getEthereumConnectionForCallsCount += 1
+        getEthereumConnectionForReceivedChain = chain
+        getEthereumConnectionForReceivedInvocations.append(chain)
+        return try getEthereumConnectionForClosure.map({ try $0(chain) }) ?? getEthereumConnectionForReturnValue
     }
 
     //MARK: - getChain

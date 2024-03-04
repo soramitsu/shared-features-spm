@@ -1,6 +1,6 @@
 import Foundation
 import BigInt
-import SSFUtils
+import SSFCrypto
 import SSFModels
 
 extension AssetTransactionData {
