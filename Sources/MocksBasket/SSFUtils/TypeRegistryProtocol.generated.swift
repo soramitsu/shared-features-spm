@@ -4,6 +4,7 @@
 
 import UIKit
 @testable import SSFUtils
+@testable import BigInt
 
 public class TypeRegistryProtocolMock: TypeRegistryProtocol {
 public init() {}

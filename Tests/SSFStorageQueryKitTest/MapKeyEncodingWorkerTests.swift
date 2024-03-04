@@ -2,6 +2,7 @@ import XCTest
 import MocksBasket
 import SSFUtils
 import SSFRuntimeCodingService
+import SSFCrypto
 
 @testable import SSFStorageQueryKit
 

@@ -505,6 +505,34 @@
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFTransferService"
+               BuildableName = "SSFTransferService"
+               BlueprintName = "SSFTransferService"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Modules_SSFTransferServiceTests"
+               BuildableName = "Modules_SSFTransferServiceTests"
+               BlueprintName = "Modules_SSFTransferServiceTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -601,6 +629,16 @@
                BlueprintIdentifier = "SSFXCMTests"
                BuildableName = "SSFXCMTests"
                BlueprintName = "SSFXCMTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFTransferServiceTests"
+               BuildableName = "SSFTransferServiceTests"
+               BlueprintName = "SSFTransferServiceTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>

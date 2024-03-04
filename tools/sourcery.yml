@@ -61,4 +61,36 @@ configurations:
       output:
         ../Sources/MocksBasket/SSFUtils
       args:
-        autoMockableTestableImports: ["SSFUtils"]
+        autoMockableTestableImports: ["SSFUtils", "BigInt"]
+    - sources:
+      - ../Sources/SSFNetwork
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Sources/MocksBasket/SSFNetwork
+      args:
+        autoMockableTestableImports: ["SSFNetwork", "RobinHood"]
+    - sources:
+      - ../Sources/SSFXCM
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Sources/MocksBasket/SSFXCM
+      args:
+        autoMockableTestableImports: ["SSFXCM", "SSFUtils", "SSFNetwork", "SSFModels", "RobinHood", "BigInt", "SSFExtrinsicKit", "SSFChainRegistry", "SSFRuntimeCodingService", "SSFSigner", "SSFChainConnection", "SSFStorageQueryKit"]
+    - sources:
+      - ../Sources/SSFExtrinsicKit
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Sources/MocksBasket/SSFExtrinsicKit
+      args:
+        autoMockableTestableImports: ["SSFUtils", "SSFCrypto", "SSFModels", "RobinHood", "SSFExtrinsicKit", "IrohaCrypto", "SSFRuntimeCodingService", "SSFSigner"]
+    - sources:
+      - ../Sources/SSFTransferService
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Sources/MocksBasket/SSFTransferService
+      args:
+        autoMockableTestableImports: ["SSFTransferService", "SSFModels", "Web3", "Web3ContractABI"]

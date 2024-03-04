@@ -16,7 +16,7 @@ final class XcmDependencyContainerTests: XCTestCase {
         chainRegistry.getChainForReturnValue = TestData.chainModel
         chainRegistry.getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReturnValue = TestData
             .runtimeProvider
-        chainRegistry.getConnectionForReturnValue = TestData.connectionChain
+        chainRegistry.getSubstrateConnectionForReturnValue = TestData.connectionChain
 
         self.chainRegistry = chainRegistry
 
@@ -43,7 +43,7 @@ final class XcmDependencyContainerTests: XCTestCase {
             chainRegistry?.getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemCallsCount,
             1
         )
-        XCTAssertEqual(chainRegistry?.getConnectionForCallsCount, 1)
+        XCTAssertEqual(chainRegistry?.getSubstrateConnectionForCallsCount, 1)
     }
 }
 
@@ -84,7 +84,8 @@ extension XcmDependencyContainerTests {
             ),
             nodes: Set([ChainNodeModel(
                 url: XcmConfig.shared.tokenLocationsSourceUrl,
-                name: "test1"
+                name: "test1",
+                apikey: nil
             )]),
             addressPrefix: 0,
             icon: nil,

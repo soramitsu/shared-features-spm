@@ -33,6 +33,7 @@ let package = Package(
         .library(name: "RobinHood", targets: ["RobinHood"]), //TODO: get from github
         .library(name: "SoraKeystore", targets: ["SoraKeystore"]), //TODO: get from github
         .library(name: "SSFQRService", targets: ["SSFQRService"]),
+        .library(name: "SSFTransferService", targets: ["SSFTransferService"]),
         .library(name: "SSFSingleValueCache", targets: ["SSFSingleValueCache"])
     ],
     dependencies: [
@@ -47,6 +48,7 @@ let package = Package(
         .package(url: "https://github.com/daisuke-t-jp/xxHash-Swift", from: "1.1.1"),
         .package(url: "https://github.com/SwiftyBeaver/SwiftyBeaver.git", .upToNextMajor(from: "2.0.0")),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.50.4"),
+        .package(url: "https://github.com/bnsports/Web3.swift.git", branch: "master")
     ],
     targets: [
         .binaryTarget(name: "blake2lib", path: "Binaries/blake2lib.xcframework"),
@@ -93,7 +95,10 @@ let package = Package(
         ),
         .target(
             name: "SSFChainConnection",
-            dependencies: ["SSFUtils"]
+            dependencies: [
+                .product(name: "Web3", package: "Web3.swift"),
+                "SSFUtils"
+            ]
         ),
         .target(
             name: "SSFSigner",
@@ -276,6 +281,7 @@ let package = Package(
         .target(
             name: "SSFChainRegistry",
             dependencies: [
+                .product(name: "Web3", package: "Web3.swift"),
                 "SSFUtils",
                 "RobinHood",
                 "SSFModels",
@@ -316,7 +322,39 @@ let package = Package(
         .testTarget(
             name: "SSFSingleValueCacheTests",
             dependencies: ["SSFSingleValueCache"]
-        )
+        ),
+        .target(name: "SSFTransferService", dependencies: [
+            .product(name: "Web3", package: "Web3.swift"),
+            .product(name: "Web3ContractABI", package: "Web3.swift"),
+            "SSFModels",
+            "BigInt",
+            "SSFUtils",
+            "SSFRuntimeCodingService",
+            "SSFExtrinsicKit",
+            "SSFChainRegistry",
+            "SSFChainConnection",
+            "SSFNetwork"
+        ]),
+        .testTarget(
+            name: "SSFTransferServiceTests",
+            dependencies: [
+                .product(name: "Web3", package: "Web3.swift"),
+                .product(name: "Web3ContractABI", package: "Web3.swift"),
+                "SSFTransferService",
+                "SSFModels",
+                "BigInt",
+                "SSFUtils",
+                "SSFRuntimeCodingService",
+                "SSFExtrinsicKit",
+                "SSFChainRegistry",
+                "SSFChainConnection",
+                "SSFNetwork",
+                "SSFHelpers"
+            ],
+            resources: [
+                .process("Resources")
+            ]
+        ),
     ]
 )
 

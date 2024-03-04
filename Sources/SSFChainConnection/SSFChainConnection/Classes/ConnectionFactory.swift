@@ -6,7 +6,7 @@ protocol ConnectionFactoryProtocol {
         connectionName: String?,
         for url: URL,
         delegate: WebSocketEngineDelegate
-    ) -> ChainConnection
+    ) -> SubstrateConnection
 }
 
 final class ConnectionFactory: ConnectionFactoryProtocol {
@@ -19,7 +19,7 @@ final class ConnectionFactory: ConnectionFactoryProtocol {
         connectionName: String?,
         for url: URL,
         delegate: WebSocketEngineDelegate
-    ) -> ChainConnection {
+    ) -> SubstrateConnection {
         let engine = WebSocketEngine(
             connectionName: connectionName,
             url: url,

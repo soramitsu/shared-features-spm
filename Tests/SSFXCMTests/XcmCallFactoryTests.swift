@@ -263,7 +263,8 @@ extension XcmCallFactoryTests {
 
         static let node = ChainNodeModel(
             url: XcmConfig.shared.tokenLocationsSourceUrl,
-            name: "node"
+            name: "node",
+            apikey: nil
         )
 
         static let model = ChainModel(

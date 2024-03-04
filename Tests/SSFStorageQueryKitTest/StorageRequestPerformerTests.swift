@@ -4,6 +4,7 @@ import SSFRuntimeCodingService
 import SSFUtils
 import SSFModels
 import BigInt
+import SSFCrypto
 
 @testable import SSFStorageQueryKit
 

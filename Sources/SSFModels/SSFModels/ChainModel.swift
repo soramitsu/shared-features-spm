@@ -280,6 +280,17 @@ public final class ChainModel: Codable, Identifiable {
     }
 }
 
+extension ChainModel {
+    public func accountRequest(_ accountId: AccountId? = nil) -> ChainAccountRequest {
+        ChainAccountRequest(
+            chainId: chainId,
+            addressPrefix: addressPrefix,
+            isEthereumBased: isEthereumBased,
+            accountId: accountId
+        )
+    }
+}
+
 extension ChainModel: Hashable {
     public static func == (lhs: ChainModel, rhs: ChainModel) -> Bool {
         lhs.rank == rhs.rank

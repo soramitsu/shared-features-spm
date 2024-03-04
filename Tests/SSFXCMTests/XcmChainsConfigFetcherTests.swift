@@ -196,7 +196,8 @@ extension XcmChainsConfigFetcherTests {
             ),
             nodes: Set([ChainNodeModel(
                 url: XcmConfig.shared.tokenLocationsSourceUrl,
-                name: "test1"
+                name: "test1",
+                apikey: nil
             )]),
             addressPrefix: 0,
             icon: nil,
@@ -224,7 +225,8 @@ extension XcmChainsConfigFetcherTests {
             ),
             nodes: Set([ChainNodeModel(
                 url: XcmConfig.shared.tokenLocationsSourceUrl,
-                name: "test2"
+                name: "test2",
+                apikey: nil
             )]),
             addressPrefix: 1,
             icon: nil,
@@ -240,7 +242,8 @@ extension XcmChainsConfigFetcherTests {
             xcm: nil,
             nodes: Set([ChainNodeModel(
                 url: XcmConfig.shared.tokenLocationsSourceUrl,
-                name: "test3"
+                name: "test3",
+                apikey: nil
             )]),
             addressPrefix: 2,
             icon: nil,

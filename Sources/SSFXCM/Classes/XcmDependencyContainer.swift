@@ -20,9 +20,9 @@ protocol XcmDependencyContainerProtocol: AnyObject {
 final class XcmDependencyContainer: XcmDependencyContainerProtocol {
     private let chainRegistry: ChainRegistryProtocol
     private let fromChainData: XcmAssembly.FromChainData
-
-    private var connection: ChainConnection?
-
+    
+    private var connection: SubstrateConnection?
+    
     init(
         chainRegistry: ChainRegistryProtocol,
         fromChainData: XcmAssembly.FromChainData
@@ -39,7 +39,7 @@ final class XcmDependencyContainer: XcmDependencyContainerProtocol {
             usedRuntimePaths: XcmCallPath.usedRuntimePaths,
             runtimeItem: fromChainData.chainMetadata
         )
-        let engine = try chainRegistry.getConnection(for: fromChainModel)
+        let engine = try await chainRegistry.getSubstrateConnection(for: fromChainModel)
         connection = engine
 
         let extrinsicService = ExtrinsicService(

@@ -220,7 +220,8 @@ private extension XcmExtrinsicBuilderTests {
             ),
             nodes: Set([ChainNodeModel(
                 url: XcmConfig.shared.tokenLocationsSourceUrl,
-                name: "node"
+                name: "node",
+                apikey: nil
             )]),
             addressPrefix: 0,
             icon: nil,
