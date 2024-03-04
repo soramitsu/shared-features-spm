@@ -316,6 +316,16 @@ let package = Package(
         .testTarget(
             name: "SSFSingleValueCacheTests",
             dependencies: ["SSFSingleValueCache"]
+        ),
+        .target(
+            name: "SSFIndexers",
+            dependencies: [
+                "SSFModels",
+                "IrohaCrypto",
+                "RobinHood",
+                "SSFUtils",
+                "SSFChainRegistry"
+            ]
         )
     ]
 )

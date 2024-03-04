@@ -27,6 +27,14 @@ public enum AddressFactory {
             return Data(count: SubstrateConstants.accountIdLength)
         }
     }
+    
+    public static func accountId(from address: AccountAddress, chain: ChainModel) throws -> AccountId {
+        try address.toAccountId(using: chainFormat(of: chain))
+    }
+    
+    private static func chainFormat(of chain: ChainModel) -> SFChainFormat {
+        chain.isEthereumBased ? .sfEthereum : .sfSubstrate(chain.addressPrefix)
+    }
 }
 
 public extension AccountId {

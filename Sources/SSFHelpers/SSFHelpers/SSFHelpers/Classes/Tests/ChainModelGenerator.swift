@@ -228,7 +228,8 @@ public enum ChainModelGenerator {
         if staking != nil {
             stakingApi = ChainModel.BlockExplorer(
                 type: "test",
-                url: URL(string: "https://staking.io/\(chainId)-\(UUID().uuidString).json")!
+                url: URL(string: "https://staking.io/\(chainId)-\(UUID().uuidString).json")!,
+                apiKey: nil
             )
         } else {
             stakingApi = nil

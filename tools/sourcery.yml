@@ -8,6 +8,15 @@ configurations:
         ../Sources/MocksBasket/SSFAssetManagmentTests
       args:
         autoMockableTestableImports: ["SSFAssetManagment", "SSFModels"]
+# SSFAssetManagmentStorage
+    - sources:
+      - ../Sources/SSFAssetManagmentStorage
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Sources/MocksBasket/SSFAssetManagmentStorage
+      args:
+        autoMockableTestableImports: ["SSFAssetManagmentStorage", "SSFModels"]
 # SSFAccountManagment
     - sources:
       - ../Sources/SSFAccountManagment

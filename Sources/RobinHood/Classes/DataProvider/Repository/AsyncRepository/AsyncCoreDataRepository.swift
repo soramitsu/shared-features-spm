@@ -21,7 +21,7 @@ public protocol AsyncCoreDataRepository {
     func save(
         models: [Model],
         deleteIds: [String]
-    ) async throws
+    ) async
 }
 
 public extension AsyncCoreDataRepository {
@@ -33,12 +33,12 @@ public extension AsyncCoreDataRepository {
         try await fetchAll(with: RepositoryFetchOptions())
     }
     
-    func save(models: [Model]) async throws {
-        try await save(models: models, deleteIds: [])
+    func save(models: [Model]) async {
+        await save(models: models, deleteIds: [])
     }
     
-    func remove(models: [Model]) async throws {
-        try await save(models: [], deleteIds: models.map { $0.identifier })
+    func remove(ids: [String]) async {
+        await save(models: [], deleteIds: ids)
     }
 }
 
@@ -113,7 +113,7 @@ public final class AsyncCoreDataRepositoryDefault<T: Identifiable, U: NSManagedO
     public func save(
         models: [Model],
         deleteIds: [String]
-    ) async throws {
+    ) async {
         let operation = coreDataRepository.saveOperation(
             { models },
             { deleteIds }

@@ -4,6 +4,7 @@ import SSFHelpers
 import SSFModels
 import SSFUtils
 import XCTest
+import MocksBasket
 
 @testable import SSFAssetManagment
 
@@ -39,7 +40,8 @@ final class ChainAssetsFetchWorkerTests: XCTestCase {
 private extension ChainAssetsFetchWorkerTests {
     func prepareRepostory() -> CoreDataRepository<ChainModel, CDChain> {
         let facade = SubstrateStorageTestFacade()
-        let mapper = ChainModelMapper()
+        let apiKeyInjector = ApiKeyInjectorMock()
+        let mapper = ChainModelMapper(apiKeyInjector: apiKeyInjector)
 
         let chains: [ChainModel] = (0 ..< 10).map { index in
             ChainModelGenerator.generateChain(

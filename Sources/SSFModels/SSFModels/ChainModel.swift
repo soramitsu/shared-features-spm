@@ -353,14 +353,20 @@ public extension ChainModel {
     struct BlockExplorer: Codable, Hashable {
         public let type: BlockExplorerType
         public let url: URL
+        public let apiKey: String?
 
-        public init?(type: String, url: URL) {
+        public init?(
+            type: String,
+            url: URL,
+            apiKey: String?
+        ) {
             guard let externalApiType = BlockExplorerType(rawValue: type) else {
                 return nil
             }
 
             self.type = externalApiType
             self.url = url
+            self.apiKey = apiKey
         }
     }
 
