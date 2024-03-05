@@ -10,4 +10,4 @@ def pipeline = new org.ios.ShareFeature(
   sonarProjectName: "shared-features-spm"
 )
 
-pipeline.runPipeline()
+pipeline.runPipeline('fearless')
