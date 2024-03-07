@@ -2,6 +2,7 @@ import Foundation
 import RobinHood
 import SSFUtils
 import SSFPools
+import BigInt
 
 enum PolkaswapWorkerError: Error {
     case getPoolReservesIdFailed
@@ -11,16 +12,17 @@ enum PolkaswapWorkerError: Error {
 protocol PolkaswapWorker: Actor {
     func getBaseAssetIds() async throws -> [String]
     func getAccountPools(accountId: Data, baseAssetId: String) async throws -> [AccountPool]
+    func getPoolReservesId(baseAssetId: String) async throws -> [LiquidityPair]
     func getPoolReservesId(baseAssetId: String, targetAssetId: String) async throws -> PolkaswapAccountId
-    func getPoolProviderBalance(reservesId: Data?, accountId: Data) async throws -> Decimal
-    func getPoolTotalIssuances(reservesId: Data?) async throws -> Decimal
+    func getPoolProviderBalance(reservesId: Data?, accountId: Data) async throws -> BigUInt
+    func getPoolTotalIssuances(reservesId: Data?) async throws -> BigUInt
     func getPoolReserves(baseAssetId: String, targetAssetId: String) async throws -> PolkaswapPoolReserves
     func getPoolsReserves(baseAssetId: String) async throws -> [LiquidityPair]
 }
 
-actor PolkaswapWorkerImpl: PolkaswapWorker {
-    let operationFactory: PolkaswapOperationFactory
-    let operationManager: OperationManagerProtocol
+actor PolkaswapWorkerDefault: PolkaswapWorker {
+    private let operationFactory: PolkaswapOperationFactory
+    private let operationManager: OperationManagerProtocol
     
     init(
         operationFactory: PolkaswapOperationFactory,
@@ -62,8 +64,25 @@ actor PolkaswapWorkerImpl: PolkaswapWorker {
         }
     }
     
+    func getPoolReservesId(baseAssetId: String) async throws -> [LiquidityPair] {
+        let operation = try operationFactory.poolProperties(baseAssetId: baseAssetId)
+        operationManager.enqueue(operations: operation.allOperations, in: .transient)
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            operation.targetOperation.completionBlock = {
+                do {
+                    let result = try operation.targetOperation.extractNoCancellableResultData()
+                    continuation.resume(returning: result)
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+    
+    
     func getPoolReservesId(baseAssetId: String, targetAssetId: String) async throws -> PolkaswapAccountId {
-        let operation = try operationFactory.poolProperties(baseAssetId: baseAssetId, targetAssetId: targetAssetId)
+        let operation = operationFactory.poolProperties(baseAssetId: baseAssetId, targetAssetId: targetAssetId)
         operationManager.enqueue(operations: operation.allOperations, in: .transient)
         
         return try await withCheckedThrowingContinuation { continuation in
@@ -80,7 +99,7 @@ actor PolkaswapWorkerImpl: PolkaswapWorker {
         }
     }
     
-    func getPoolProviderBalance(reservesId: Data?, accountId: Data) async throws -> Decimal {
+    func getPoolProviderBalance(reservesId: Data?, accountId: Data) async throws -> BigUInt {
         let operation = try operationFactory.poolProvidersBalance(reservesId: reservesId, accountId: accountId)
         operationManager.enqueue(operations: operation.allOperations, in: .transient)
         
@@ -96,7 +115,7 @@ actor PolkaswapWorkerImpl: PolkaswapWorker {
         }
     }
     
-    func getPoolTotalIssuances(reservesId: Data?) async throws -> Decimal {
+    func getPoolTotalIssuances(reservesId: Data?) async throws -> BigUInt {
         let operation = try operationFactory.poolTotalIssuances(reservesId: reservesId)
         operationManager.enqueue(operations: operation.allOperations, in: .transient)
         

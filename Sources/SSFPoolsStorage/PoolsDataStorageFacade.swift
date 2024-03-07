@@ -2,32 +2,71 @@ import RobinHood
 import CoreData
 import SSFUtils
 
-class PoolsDataStorageFacade: StorageFacadeProtocol {
-    static let shared = PoolsDataStorageFacade()
+enum PoolsDataStorageParams {
+    static let modelName = "PoolsDataModel"
+    static let modelDirectory: String = "PoolsDataModel.momd"
+    static let databaseName = "PoolsDataModel.sqlite"
+    public static let momURL = Bundle.main.url(
+        forResource: "PoolsDataModel",
+        withExtension: "momd"
+    )
 
-    let databaseService: CoreDataServiceProtocol
+    static let storageDirectoryURL: URL = {
+        let baseURL = FileManager.default.urls(
+            for: .documentDirectory,
+            in: .userDomainMask
+        ).first?.appendingPathComponent("CoreData")
+
+        return baseURL!
+    }()
+
+    static var storageURL: URL {
+        storageDirectoryURL.appendingPathComponent(databaseName)
+    }
+}
+
+public final class PoolsDataStorageFacade: StorageFacadeProtocol {
+    public static let shared = PoolsDataStorageFacade()
+
+    public let databaseService: CoreDataServiceProtocol
 
     private init() {
-        let modelName = "PoolsDataModel"
-        let modelURL = Bundle.main.url(forResource: modelName, withExtension: "momd")
-        let databaseName = "\(modelName).sqlite"
+        
+        let bundle = Bundle(for: PoolsDataStorageFacade.self)
 
-        let baseURL = FileManager.default.urls(for: .documentDirectory,
-                                               in: .userDomainMask).first?.appendingPathComponent("CoreData")
+        let omoURL = bundle.url(
+            forResource: PoolsDataStorageParams.modelName,
+            withExtension: "omo",
+            subdirectory: PoolsDataStorageParams.modelDirectory
+        )
 
-        let persistentSettings = CoreDataPersistentSettings(databaseDirectory: baseURL!,
-                                                            databaseName: databaseName,
-                                                            incompatibleModelStrategy: .removeStore)
+        let momURL = bundle.url(
+            forResource: PoolsDataStorageParams.modelName,
+            withExtension: "mom",
+            subdirectory: PoolsDataStorageParams.modelDirectory
+        )
 
-        let configuration = CoreDataServiceConfiguration(modelURL: modelURL!,
-                                                         storageType: .persistent(settings: persistentSettings))
+        let modelURL = omoURL ?? momURL
+
+        let persistentSettings = CoreDataPersistentSettings(
+            databaseDirectory: PoolsDataStorageParams.storageDirectoryURL,
+            databaseName: PoolsDataStorageParams.databaseName,
+            incompatibleModelStrategy: .removeStore
+        )
+
+        let configuration = CoreDataServiceConfiguration(
+            modelURL: modelURL!,
+            storageType: .persistent(settings: persistentSettings)
+        )
 
         databaseService = CoreDataService(configuration: configuration)
     }
-
-    func createRepository<T, U>(filter: NSPredicate?,
-                                sortDescriptors: [NSSortDescriptor],
-                                mapper: AnyCoreDataMapper<T, U>) -> CoreDataRepository<T, U>
+    
+    public func createRepository<T, U>(
+        filter: NSPredicate?,
+        sortDescriptors: [NSSortDescriptor],
+        mapper: AnyCoreDataMapper<T, U>
+    ) -> CoreDataRepository<T, U>
     where T: Identifiable, U: NSManagedObject {
         return CoreDataRepository(
             databaseService: databaseService,
@@ -37,3 +76,4 @@ class PoolsDataStorageFacade: StorageFacadeProtocol {
         )
     }
 }
+

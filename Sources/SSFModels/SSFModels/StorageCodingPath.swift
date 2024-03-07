@@ -129,18 +129,6 @@ public enum StorageCodingPath: Equatable, CaseIterable, StorageCodingPathProtoco
             return (moduleName: "NominationPools", itemName: "RewardPools")
         case .polkaswapXykPool:
             return (moduleName: "MulticollateralBondingCurvePool", itemName: "CollateralReserves")
-        case .polkaswapDexManagerDesInfos:
-            return (moduleName: "DEXManager", itemName: "DEXManager")
-        case .polkaswapUserPools:
-            return (moduleName: "PoolXYK", itemName: "AccountPools")
-        case .polkaswapPoolProperties:
-            return (moduleName: "PoolXYK", itemName: "Properties")
-        case .polkaswapPoolProviders:
-            return (moduleName: "PoolXYK", itemName: "PoolProviders")
-        case .polkaswapPoolTotalIssuances:
-            return (moduleName: "PoolXYK", itemName: "TotalIssuances")
-        case .polkaswapPoolReserves:
-            return (moduleName: "PoolXYK", itemName: "Reserves")
         case .eqOraclePricePoint:
             return (moduleName: "Oracle", itemName: "PricePoints")
         }
@@ -205,11 +193,5 @@ public enum StorageCodingPath: Equatable, CaseIterable, StorageCodingPathProtoco
     case stakingPoolLastPoolId
     case polkaswapXykPool
     case polkaswapTbcPool
-    case polkaswapDexManagerDesInfos
-    case polkaswapUserPools
-    case polkaswapPoolProperties
-    case polkaswapPoolProviders
-    case polkaswapPoolTotalIssuances
-    case polkaswapPoolReserves
     case eqOraclePricePoint
 }

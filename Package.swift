@@ -329,7 +329,9 @@ let package = Package(
         .target(
             name: "SSFPools",
             dependencies: [
-                "RobinHood"
+                "RobinHood",
+                "SSFUtils",
+                "SSFStorageQueryKit"
             ]
         ),
         .target(

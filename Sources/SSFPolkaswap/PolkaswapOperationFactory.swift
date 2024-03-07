@@ -1,11 +1,14 @@
 import Foundation
-import RobinHood
 import SSFUtils
 import SSFModels
 import SSFPools
 import SSFChainRegistry
 import SSFStorageQueryKit
 import SSFChainConnection
+import RobinHood
+import IrohaCrypto
+import BigInt
+import SSFCrypto
 
 enum PolkaswapOperationFactoryError: Error {
     case unexpectedError
@@ -14,32 +17,39 @@ enum PolkaswapOperationFactoryError: Error {
 protocol PolkaswapOperationFactory {
     func dexInfos() throws -> CompoundOperationWrapper<[String]>
     func accountPools(accountId: Data, baseAssetId: String) throws -> CompoundOperationWrapper<[AccountPool]>
-    func poolProperties(baseAssetId: String, targetAssetId: String) throws -> CompoundOperationWrapper<PolkaswapAccountId?>
-    func poolProvidersBalance(reservesId: Data?, accountId: Data) throws -> CompoundOperationWrapper<Decimal>
-    func poolTotalIssuances(reservesId: Data?) throws -> CompoundOperationWrapper<Decimal>
+    func poolProperties(baseAssetId: String) throws -> CompoundOperationWrapper<[LiquidityPair]>
+    func poolProperties(baseAssetId: String, targetAssetId: String) -> CompoundOperationWrapper<PolkaswapAccountId?>
+    func poolProvidersBalance(reservesId: Data?, accountId: Data) throws -> CompoundOperationWrapper<BigUInt>
+    func poolTotalIssuances(reservesId: Data?) throws -> CompoundOperationWrapper<BigUInt>
     func poolReserves(baseAssetId: String, targetAssetId: String) throws -> CompoundOperationWrapper<PolkaswapPoolReserves?>
     func reservesKeysOperation(baseAssetId: String) throws -> CompoundOperationWrapper<[LiquidityPair]>
 }
 
-final class PolkaswapOperationFactoryImpl {
+final class PolkaswapOperationFactoryDefault {
     private let storageRequestFactory: StorageRequestFactoryProtocol
     private let chainRegistry: ChainRegistryProtocol
-    private let engine: SubstrateConnection
     private let chain: ChainModel
+    private let engine: SubstrateConnection
+    private let addressFactory: AddressFactory
+    private let keyFactory: StorageKeyFactoryProtocol
     
-    public init(
+    init(
         storageRequestFactory: StorageRequestFactoryProtocol,
         chainRegistry: ChainRegistryProtocol,
+        addressFactory: AddressFactory,
         engine: SubstrateConnection,
-        chain: ChainModel
+        chain: ChainModel,
+        keyFactory: StorageKeyFactoryProtocol
     ) {
         self.storageRequestFactory = storageRequestFactory
         self.chainRegistry = chainRegistry
+        self.addressFactory = addressFactory
         self.engine = engine
         self.chain = chain
+        self.keyFactory = keyFactory
     }
 }
-extension PolkaswapOperationFactoryImpl: PolkaswapOperationFactory {
+extension PolkaswapOperationFactoryDefault: PolkaswapOperationFactory {
     func dexInfos() throws -> CompoundOperationWrapper<[String]> {
         guard let runtimeProvider = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
             return CompoundOperationWrapper.createWithError(ChainRegistryError.runtimeMetadaUnavailable)
@@ -50,9 +60,9 @@ extension PolkaswapOperationFactoryImpl: PolkaswapOperationFactory {
         let storageOperation: CompoundOperationWrapper<[StorageResponse<DexInfos>]> =
         storageRequestFactory.queryItemsByPrefix(
             engine: engine,
-            keys: { [ try StorageKeyFactory().key(from: .polkaswapDexManagerDesInfos) ] },
+            keys: { [ try StorageKeyFactory().key(from: .dexInfos) ] },
             factory: { try fetchCoderFactoryOperation.extractNoCancellableResultData() },
-            storagePath: StorageCodingPath.polkaswapDexManagerDesInfos
+            storagePath: StorageCodingPath.dexInfos
         )
         
         storageOperation.allOperations.forEach { $0.addDependency(fetchCoderFactoryOperation) }
@@ -71,42 +81,39 @@ extension PolkaswapOperationFactoryImpl: PolkaswapOperationFactory {
     }
     
     func accountPools(accountId: Data, baseAssetId: String) throws -> CompoundOperationWrapper<[AccountPool]> {
-        guard let runtimeOperation = chainRegistry.getRuntimeProvider(for: chain.chainId)
-        else {
+        guard let runtimeOperation = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
             return CompoundOperationWrapper.createWithError(ChainRegistryError.runtimeMetadaUnavailable)
         }
-            
+        
         let fetchCoderFactoryOperation = runtimeOperation.fetchCoderFactoryOperation()
 
-        let storageOperation: CompoundOperationWrapper<[StorageResponse<[PolkaswapDexInfoAssetId]>]> =
+        let storageOperation: CompoundOperationWrapper<[StorageResponse<[SoraAssetId]>]> =
         storageRequestFactory.queryItems(
             engine: engine,
             keyParams: {
                 [
                     [ NMapKeyParam(value: accountId) ],
-                    [ NMapKeyParam(value: PolkaswapDexInfoAssetId(code: baseAssetId)) ]
+                    [ NMapKeyParam(value: SoraAssetId(wrappedValue: baseAssetId)) ]
                 ]
             },
             factory: { try fetchCoderFactoryOperation.extractNoCancellableResultData() },
-            storagePath: StorageCodingPath.polkaswapUserPools
+            storagePath: StorageCodingPath.userPools
         )
         
         storageOperation.allOperations.forEach { $0.addDependency(fetchCoderFactoryOperation) }
 
         let mapOperation = ClosureOperation<[AccountPool]> { [weak self] in
-            guard let chainId = self?.chain.chainId else {
+            guard let self else {
                 throw PolkaswapOperationFactoryError.unexpectedError
             }
-
             let result = try storageOperation.targetOperation.extractNoCancellableResultData().first?.value ?? []
-            return result.map { 
-                let poolId = [ Data(baseAssetId.utf8), Data($0.code.utf8), Data(accountId), Data(chainId.utf8) ].createId()
-                return AccountPool(
-                    poolId: poolId,
+            return result.map {
+                AccountPool(
+                    poolId: "\(baseAssetId)-\($0.value)",
                     accountId: accountId.toHex(),
-                    chainId: chainId,
+                    chainId: self.chain.chainId,
                     baseAssetId: baseAssetId,
-                    targetAssetId: $0.code
+                    targetAssetId: $0.value
                 )
             }
         }
@@ -119,11 +126,63 @@ extension PolkaswapOperationFactoryImpl: PolkaswapOperationFactory {
         )
     }
     
-    func poolProperties(baseAssetId: String, targetAssetId: String) throws -> CompoundOperationWrapper<PolkaswapAccountId?> {
+    func poolProperties(baseAssetId: String) throws -> CompoundOperationWrapper<[LiquidityPair]> {
+        guard let runtimeOperation = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
+            return CompoundOperationWrapper.createWithError(ChainRegistryError.connectionUnavailable)
+        }
+        
+        let fetchCoderFactoryOperation = runtimeOperation.fetchCoderFactoryOperation()
+        
+        let key = try StorageKeyFactory().xykPoolKeyProperties(asset: Data(hex: baseAssetId))
+        
+        let dexInfosWrapper: CompoundOperationWrapper<[StorageResponse<[Data]>]> =
+            storageRequestFactory.queryItemsByPrefix(
+                engine: engine,
+                keys: { [ key ] },
+                factory: { try fetchCoderFactoryOperation.extractNoCancellableResultData() },
+                storagePath: StorageCodingPath.poolProperties
+            )
+
+        let mapOperation = ClosureOperation<[LiquidityPair]> {
+            let storageResponse = try dexInfosWrapper.targetOperation.extractNoCancellableResultData()
+            
+            let pairs = try storageResponse.compactMap { [weak self] response in
+                guard let self else {
+                    throw PolkaswapOperationFactoryError.unexpectedError
+                }
+
+                let targetAssetId = try response.key.toHex().assetIdFromKey()
+                let decoder = try ScaleDecoder(data: response.value?.first ?? Data())
+                let accountId = try PolkaswapAccountId(scaleDecoder: decoder)
+                let reservesId = try AddressFactory.address(
+                    for: accountId.value,
+                    chainFormat: self.chain.chainFormat
+                )
+                return LiquidityPair(
+                    pairId: "\(baseAssetId)-\(targetAssetId)",
+                    chainId: self.chain.chainId,
+                    baseAssetId: baseAssetId,
+                    targetAssetId: targetAssetId,
+                    reservesId: reservesId
+                )
+            }
+            return pairs
+        }
+
+        mapOperation.addDependency(dexInfosWrapper.targetOperation)
+        mapOperation.addDependency(fetchCoderFactoryOperation)
+
+        return CompoundOperationWrapper(
+            targetOperation: mapOperation,
+            dependencies: [fetchCoderFactoryOperation] + dexInfosWrapper.allOperations
+        )
+    }
+    
+    func poolProperties(baseAssetId: String, targetAssetId: String) -> CompoundOperationWrapper<PolkaswapAccountId?> {
         guard let runtimeOperation = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
             return CompoundOperationWrapper.createWithError(ChainRegistryError.runtimeMetadaUnavailable)
         }
-            
+        
         let fetchCoderFactoryOperation = runtimeOperation.fetchCoderFactoryOperation()
 
         let storageOperation: CompoundOperationWrapper<[StorageResponse<[Data]>]> =
@@ -131,19 +190,24 @@ extension PolkaswapOperationFactoryImpl: PolkaswapOperationFactory {
             engine: engine,
             keyParams: {
                 [
-                    [ NMapKeyParam(value: PolkaswapDexInfoAssetId(code: baseAssetId)) ],
-                    [ NMapKeyParam(value: PolkaswapDexInfoAssetId(code: targetAssetId)) ]
+                    [ NMapKeyParam(value: SoraAssetId(wrappedValue: baseAssetId)) ],
+                    [ NMapKeyParam(value: SoraAssetId(wrappedValue: targetAssetId)) ]
                 ]
             },
             factory: { try fetchCoderFactoryOperation.extractNoCancellableResultData() },
-            storagePath: StorageCodingPath.polkaswapPoolProperties
+            storagePath: StorageCodingPath.poolProperties
         )
         
         storageOperation.allOperations.forEach { $0.addDependency(fetchCoderFactoryOperation) }
 
         let mapOperation = ClosureOperation<PolkaswapAccountId?> {
-            let storageResponse = try storageOperation.targetOperation.extractNoCancellableResultData().first?.value?.first
-            let decoder = try ScaleDecoder(data: storageResponse ?? Data())
+            guard let storageResponse = try storageOperation.targetOperation.extractNoCancellableResultData()
+                .first?.value?.first
+            else {
+                throw PolkaswapOperationFactoryError.unexpectedError
+            }
+                  
+            let decoder = try ScaleDecoder(data: storageResponse)
             let accountId = try PolkaswapAccountId(scaleDecoder: decoder)
             return accountId
         }
@@ -156,9 +220,8 @@ extension PolkaswapOperationFactoryImpl: PolkaswapOperationFactory {
         )
     }
     
-    func poolProvidersBalance(reservesId: Data?, accountId: Data) throws -> CompoundOperationWrapper<Decimal> {
-        guard let runtimeOperation = chainRegistry.getRuntimeProvider(for: chain.chainId)
-        else {
+    func poolProvidersBalance(reservesId: Data?, accountId: Data) throws -> CompoundOperationWrapper<BigUInt> {
+        guard let runtimeOperation = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
             return CompoundOperationWrapper.createWithError(ChainRegistryError.runtimeMetadaUnavailable)
         }
 
@@ -174,13 +237,14 @@ extension PolkaswapOperationFactoryImpl: PolkaswapOperationFactory {
                 ]
             },
             factory: { try fetchCoderFactoryOperation.extractNoCancellableResultData() },
-            storagePath: StorageCodingPath.polkaswapPoolProviders
+            storagePath: StorageCodingPath.poolProviders
         )
         
         storageOperation.allOperations.forEach { $0.addDependency(fetchCoderFactoryOperation) }
 
-        let mapOperation = ClosureOperation<Decimal> {
-            try storageOperation.targetOperation.extractNoCancellableResultData().first?.value?.decimalValue ?? Decimal(0)
+        let mapOperation = ClosureOperation<BigUInt> {
+            let response = try storageOperation.targetOperation.extractNoCancellableResultData()
+            return (response.first?.value?.value) ?? BigUInt(integerLiteral: 0)
         }
 
         mapOperation.addDependency(storageOperation.targetOperation)
@@ -191,11 +255,11 @@ extension PolkaswapOperationFactoryImpl: PolkaswapOperationFactory {
         )
     }
     
-    func poolTotalIssuances(reservesId: Data?) throws -> CompoundOperationWrapper<Decimal> {
+    func poolTotalIssuances(reservesId: Data?) throws -> CompoundOperationWrapper<BigUInt> {
         guard let runtimeOperation = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
             return CompoundOperationWrapper.createWithError(ChainRegistryError.runtimeMetadaUnavailable)
         }
-            
+
         let fetchCoderFactoryOperation = runtimeOperation.fetchCoderFactoryOperation()
 
         let storageOperation: CompoundOperationWrapper<[StorageResponse<SoraAmountDecimal>]> =
@@ -203,13 +267,14 @@ extension PolkaswapOperationFactoryImpl: PolkaswapOperationFactory {
             engine: engine,
             keyParams: { [ reservesId ] },
             factory: { try fetchCoderFactoryOperation.extractNoCancellableResultData() },
-            storagePath: StorageCodingPath.polkaswapPoolTotalIssuances
+            storagePath: StorageCodingPath.poolTotalIssuances
         )
         
         storageOperation.allOperations.forEach { $0.addDependency(fetchCoderFactoryOperation) }
 
-        let mapOperation = ClosureOperation<Decimal> {
-            try storageOperation.targetOperation.extractNoCancellableResultData().first?.value?.decimalValue ?? Decimal(0)
+        let mapOperation = ClosureOperation<BigUInt> {
+            let response = try storageOperation.targetOperation.extractNoCancellableResultData()
+            return (response.first?.value?.value) ?? BigUInt(integerLiteral: 0)
         }
 
         mapOperation.addDependency(storageOperation.targetOperation)
@@ -227,36 +292,31 @@ extension PolkaswapOperationFactoryImpl: PolkaswapOperationFactory {
         
         let fetchCoderFactoryOperation = runtimeOperation.fetchCoderFactoryOperation()
         
-        let key = try StorageKeyFactory().xykPoolKeyReserves(asset: Data(hexStringSSF: baseAssetId))
+        let key = try keyFactory.poolReservesKey(asset: Data(hex: baseAssetId))
 
         let dexInfosWrapper: CompoundOperationWrapper<[StorageResponse<[SoraAmountDecimal]>]> =
             storageRequestFactory.queryItemsByPrefix(
                 engine: engine,
                 keys: { [ key ] },
                 factory: { try fetchCoderFactoryOperation.extractNoCancellableResultData() },
-                storagePath: StorageCodingPath.polkaswapPoolReserves
+                storagePath: StorageCodingPath.poolReserves
             )
 
-        let mapOperation = ClosureOperation<[LiquidityPair]> { [weak self] in
-            guard let chainId = self?.chain.chainId else {
-                throw PolkaswapOperationFactoryError.unexpectedError
-            }
-
-            let storageResponse = try? dexInfosWrapper.targetOperation.extractNoCancellableResultData()
+        let mapOperation = ClosureOperation<[LiquidityPair]> {
+            let storageResponse = try dexInfosWrapper.targetOperation.extractNoCancellableResultData()
                 
-            let reservesInfo = storageResponse?.compactMap { response in
-                let targetAssetId = response.key.toHex().assetIdFromKey()
-                let pairId = [ Data(baseAssetId.utf8), Data(targetAssetId.utf8), Data(chainId.utf8) ].createId()
+            let reservesInfo = try storageResponse.compactMap { [weak self] response in
+                let targetAssetId = try response.key.toHex().assetIdFromKey()
                 return LiquidityPair(
-                    pairId: pairId,
-                    chainId: chainId,
+                    pairId: "\(baseAssetId)-\(targetAssetId)",
+                    chainId: self?.chain.chainId,
                     baseAssetId: baseAssetId,
                     targetAssetId: targetAssetId,
-                    reserves: response.value?.first?.decimalValue
+                    reserves: response.value?.first?.value
                 )
             }
 
-            return reservesInfo ?? []
+            return reservesInfo
         }
 
         mapOperation.addDependency(dexInfosWrapper.targetOperation)
@@ -279,19 +339,25 @@ extension PolkaswapOperationFactoryImpl: PolkaswapOperationFactory {
             engine: engine,
             keyParams: {
                 [
-                    [ NMapKeyParam(value: PolkaswapDexInfoAssetId(code: baseAssetId)) ],
-                    [ NMapKeyParam(value: PolkaswapDexInfoAssetId(code: targetAssetId)) ]
+                    [ NMapKeyParam(value: SoraAssetId(wrappedValue: baseAssetId)) ],
+                    [ NMapKeyParam(value: SoraAssetId(wrappedValue: targetAssetId)) ]
                 ]
             },
             factory: { try fetchCoderFactoryOperation.extractNoCancellableResultData() },
-            storagePath: StorageCodingPath.polkaswapPoolReserves
+            storagePath: StorageCodingPath.poolReserves
         )
         
         storageOperation.allOperations.forEach { $0.addDependency(fetchCoderFactoryOperation) }
 
         let mapOperation = ClosureOperation<PolkaswapPoolReserves?> {
-            let response = try? storageOperation.targetOperation.extractNoCancellableResultData().first?.value ?? []
-            return PolkaswapPoolReserves(reserves: response?.first?.decimalValue, fees: response?.last?.decimalValue)
+            guard let response = try storageOperation.targetOperation.extractNoCancellableResultData().first?.value else {
+                throw PolkaswapOperationFactoryError.unexpectedError
+            }
+
+            return PolkaswapPoolReserves(
+                reserves: response.first?.value ?? BigUInt(integerLiteral: 0),
+                fees: response.last?.value ?? BigUInt(integerLiteral: 0)
+            )
         }
 
         mapOperation.addDependency(storageOperation.targetOperation)
@@ -300,14 +366,5 @@ extension PolkaswapOperationFactoryImpl: PolkaswapOperationFactory {
             targetOperation: mapOperation,
             dependencies: [fetchCoderFactoryOperation] + storageOperation.allOperations
         )
-    }
-}
-
-extension JSONRPCOperation {
-    public static func failureOperation(_ error: Error) -> JSONRPCOperation<P, T> {
-        let mockEngine = WebSocketEngine(connectionName: nil, url: URL(string: "https://wiki.fearlesswallet.io")!, autoconnect: false)
-        let operation = JSONRPCOperation<P, T>(engine: mockEngine, method: "")
-        operation.result = .failure(error)
-        return operation
     }
 }

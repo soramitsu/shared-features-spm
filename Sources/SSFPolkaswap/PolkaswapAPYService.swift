@@ -3,22 +3,26 @@ import IrohaCrypto
 import RobinHood
 import sorawallet
 
-protocol PolkaswapAPYService: Actor {
-    func getApy(reservesId: String) async throws -> Decimal?
+enum PolkaswapAPYServiceError: Swift.Error {
+    case unexpectedError
 }
 
-actor PolkaswapAPYServiceImpl {
+protocol PolkaswapAPYService: Actor {
+    func getApy(reservesId: String) async throws -> Decimal
+}
+
+public actor PolkaswapAPYServiceDefault {
     private let worker: PolkaswapAPYWorker
-    private var apyCache: [String: Decimal?] = [:]
+    private var apyCache: [String: Decimal] = [:]
     
-    init(worker: PolkaswapAPYWorker) {
+    public init(worker: PolkaswapAPYWorker) {
         self.worker = worker
     }
 }
 
-extension PolkaswapAPYServiceImpl: PolkaswapAPYService {
+extension PolkaswapAPYServiceDefault: PolkaswapAPYService {
 
-    func getApy(reservesId: String) async throws -> Decimal? {
+    func getApy(reservesId: String) async throws -> Decimal {
         if let apy = apyCache[reservesId] {
             return apy
         }
@@ -28,7 +32,12 @@ extension PolkaswapAPYServiceImpl: PolkaswapAPYService {
         apyInfo.forEach { apy in
             apyCache[apy.id] = apy.sbApy?.decimalValue
         }
+        
+        if let apy = apyCache[reservesId] {
+            return apy
+        }
 
-        return apyCache[reservesId] ?? nil
+        throw PolkaswapAPYServiceError.unexpectedError
     }
 }
+

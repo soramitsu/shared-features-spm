@@ -3,10 +3,10 @@ import RobinHood
 import SSFUtils
 import SSFPools
 
-final class PoolRepositoryFactory {
-    let storageFacade: StorageFacadeProtocol
+public final class PoolRepositoryFactory {
+    private let storageFacade: StorageFacadeProtocol
 
-    init(storageFacade: StorageFacadeProtocol = PoolsDataStorageFacade.shared) {
+    public init(storageFacade: StorageFacadeProtocol = PoolsDataStorageFacade.shared) {
         self.storageFacade = storageFacade
     }
 

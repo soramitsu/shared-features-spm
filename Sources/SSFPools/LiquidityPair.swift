@@ -1,5 +1,6 @@
 import Foundation
 import RobinHood
+import BigInt
 
 public struct LiquidityPair: Codable {
     public enum CodingKeys: String, CodingKey {
@@ -16,16 +17,16 @@ public struct LiquidityPair: Codable {
     public let baseAssetId: String
     public let targetAssetId: String
     public let rewardAssetId: String = WalletAssetId.pswap.rawValue
-    public let reserves: Decimal?
+    public let reserves: BigUInt?
     public var apy: Decimal?
     public var reservesId: String?
     
     public init(
         pairId: String,
-        chainId: String?, 
-        baseAssetId: String, 
+        chainId: String?,
+        baseAssetId: String,
         targetAssetId: String,
-        reserves: Decimal? = nil,
+        reserves: BigUInt? = nil,
         apy: Decimal? = nil,
         reservesId: String? = nil
     ) {
@@ -45,7 +46,7 @@ public struct LiquidityPair: Codable {
             baseAssetId: pair.baseAssetId,
             targetAssetId: pair.targetAssetId,
             reserves: pair.reserves,
-            apy: pair.reserves,
+            apy: pair.apy,
             reservesId: pair.reservesId
         )
     }

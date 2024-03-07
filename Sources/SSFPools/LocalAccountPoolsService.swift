@@ -1,17 +1,12 @@
 import Foundation
 import RobinHood
 
-enum LocalAccountPoolsError: Error {
-    case unexpectedError
-}
-
 public protocol LocalAccountPoolsService {
     func get() async throws -> [AccountPool]
-    func save(accountPool: AccountPool?) async throws
     func sync(remoteAccounts: [AccountPool]) async throws
 }
 
-public final class LocalAccountPairServiceImpl {
+public final class LocalAccountPairServiceDefault {
     struct Changes {
         let newOrUpdatedItems: [AccountPool]
         let removedItems: [AccountPool]
@@ -20,7 +15,7 @@ public final class LocalAccountPairServiceImpl {
     private let repository: AnyDataProviderRepository<AccountPool>
     private let operationManager: OperationManagerProtocol
     
-    init(
+    public init(
         repository: AnyDataProviderRepository<AccountPool>,
         operationManager: OperationManagerProtocol
     ) {
@@ -29,7 +24,7 @@ public final class LocalAccountPairServiceImpl {
     }
 }
 
-extension LocalAccountPairServiceImpl: LocalAccountPoolsService {
+extension LocalAccountPairServiceDefault: LocalAccountPoolsService {
     
     public func get() async throws -> [AccountPool] {
         let fetchOperation = repository.fetchAllOperation(with: RepositoryFetchOptions())
@@ -40,26 +35,6 @@ extension LocalAccountPairServiceImpl: LocalAccountPoolsService {
                 do {
                     let localPairs = try fetchOperation.extractNoCancellableResultData()
                     continuation.resume(returning: localPairs)
-                } catch {
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
-    }
-    
-    public func save(accountPool: AccountPool?) async throws {
-        guard let accountPool else {
-            throw LocalAccountPoolsError.unexpectedError
-        }
-
-        let saveOperaiton = repository.saveOperation({ [accountPool] }, { [] })
-        operationManager.enqueue(operations: [saveOperaiton], in: .transient)
-        
-        return try await withCheckedThrowingContinuation { continuation in
-            saveOperaiton.completionBlock = {
-                do {
-                    try saveOperaiton.extractNoCancellableResultData()
-                    continuation.resume(returning: ())
                 } catch {
                     continuation.resume(throwing: error)
                 }

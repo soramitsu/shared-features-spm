@@ -1,0 +1,20 @@
+import SSFUtils
+import BigInt
+
+struct WithdrawLiquidityCall: Codable {
+    let dexId: String
+    var assetA: SoraAssetId
+    var assetB: SoraAssetId
+    @StringCodable var assetDesired: BigUInt
+    @StringCodable var minA: BigUInt
+    @StringCodable var minB: BigUInt
+
+    enum CodingKeys: String, CodingKey {
+        case dexId = "dexId"
+        case assetA = "outputAssetA"
+        case assetB = "outputAssetB"
+        case assetDesired = "markerAssetDesired"
+        case minA = "outputAMin"
+        case minB = "outputBMin"
+    }
+}

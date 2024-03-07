@@ -121,6 +121,8 @@ public protocol JSONRPCEngine: AnyObject {
 
     func connectIfNeeded()
     func disconnectIfNeeded()
+    func unsubsribe(_ identifier: UInt16)
+    func unsubsribeAll()
 }
 
 public extension JSONRPCEngine {

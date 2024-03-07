@@ -174,6 +174,22 @@ public final class WebSocketEngine {
 
         mutex.unlock()
     }
+    
+    public func unsubsribe(_ identifier: UInt16) {
+        mutex.lock()
+
+        processUnsubscription(identifier)
+
+        mutex.unlock()
+    }
+    
+    public func unsubsribeAll() {
+        mutex.lock()
+
+        processUnsubscribeAll()
+
+        mutex.unlock()
+    }
 }
 
 // MARK: Internal
@@ -566,5 +582,14 @@ extension WebSocketEngine {
     private func handleNodeNotHealthy() {
         connection.disconnect()
         scheduleReconnectionOrDisconnect(NetworkConstants.websocketReconnectAttemptsLimit + 1)
+    }
+    
+    private func processUnsubscription(_ identifier: UInt16) {
+        guard let subscription = subscriptions[identifier] else { return }
+        subscriptions.removeValue(forKey: identifier)
+    }
+    
+    private func processUnsubscribeAll() {
+        subscriptions.removeAll()
     }
 }

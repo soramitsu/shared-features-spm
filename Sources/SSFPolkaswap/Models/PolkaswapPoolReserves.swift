@@ -1,6 +1,7 @@
 import Foundation
+import BigInt
 
 struct PolkaswapPoolReserves {
-    var reserves: Decimal?
-    var fees: Decimal?
+    let reserves: BigUInt
+    let fees: BigUInt
 }

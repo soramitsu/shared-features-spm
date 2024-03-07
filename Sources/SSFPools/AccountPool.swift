@@ -70,15 +70,15 @@ public struct AccountPool: Codable {
         )
     }
     
-    public func update(apy: Decimal?) -> AccountPool {
-        var copy = AccountPool(accountPool: self)
-        copy.apy = apy
-        return copy
-    }
-    
     public func update(reservesId: String?) -> AccountPool {
         var copy = AccountPool(accountPool: self)
         copy.reservesId = reservesId
+        return copy
+    }
+    
+    public func update(apy: Decimal?) -> AccountPool {
+        var copy = AccountPool(accountPool: self)
+        copy.apy = apy
         return copy
     }
 }

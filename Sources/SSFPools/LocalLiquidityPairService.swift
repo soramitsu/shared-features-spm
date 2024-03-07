@@ -6,7 +6,7 @@ public protocol LocalLiquidityPairService {
     func sync(remotePairs: [LiquidityPair]) async throws
 }
 
-public final class LocalLiquidityPairServiceImpl {
+public final class LocalLiquidityPairServiceDefault {
     struct Changes {
         let newOrUpdatedItems: [LiquidityPair]
         let removedItems: [LiquidityPair]
@@ -15,7 +15,7 @@ public final class LocalLiquidityPairServiceImpl {
     private let repository: AnyDataProviderRepository<LiquidityPair>
     private let operationManager: OperationManagerProtocol
     
-    init(
+    public init(
         repository: AnyDataProviderRepository<LiquidityPair>,
         operationManager: OperationManagerProtocol
     ) {
@@ -24,7 +24,7 @@ public final class LocalLiquidityPairServiceImpl {
     }
 }
 
-extension LocalLiquidityPairServiceImpl: LocalLiquidityPairService {
+extension LocalLiquidityPairServiceDefault: LocalLiquidityPairService {
     
     public func get() async throws -> [LiquidityPair] {
         let fetchOperation = repository.fetchAllOperation(with: RepositoryFetchOptions())
