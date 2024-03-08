@@ -1,9 +1,15 @@
 import Foundation
 
-public final class NetworkWorker {
+public protocol NetworkWorker {
+    func performRequest<T: Decodable>(
+        with config: RequestConfig
+    ) async throws -> T
+}
+
+public final class NetworkWorkerDefault: NetworkWorker {
     public init() {}
 
-    public func performRequest<T>(
+    public func performRequest<T: Decodable>(
         with config: RequestConfig
     ) async throws -> T {
         let requestConfiguratorFactory = BaseRequestConfiguratorFactory()

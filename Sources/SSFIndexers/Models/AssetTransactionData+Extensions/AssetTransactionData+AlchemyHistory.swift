@@ -16,16 +16,16 @@ extension AssetTransactionData {
             transactionId: item.uniqueId,
             status: .commited,
             assetId: item.asset,
-            peerId: "",
+            peerId: nil,
             peerFirstName: nil,
             peerLastName: nil,
             peerName: peerAddress,
-            details: "",
+            details: nil,
             amount: SubstrateAmountDecimal(value: item.value),
             fees: [],
             timestamp: timestamp,
             type: type.rawValue,
-            reason: "",
+            reason: nil,
             context: nil
         )
     }

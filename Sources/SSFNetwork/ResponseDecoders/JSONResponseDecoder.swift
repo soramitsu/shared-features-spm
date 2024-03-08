@@ -1,5 +1,4 @@
 import Foundation
-//import SSFUtils
 
 enum JSONResponseDecoderError: Error {
     case typeNotDecodable
@@ -12,17 +11,7 @@ final class JSONResponseDecoder: ResponseDecoder {
         self.jsonDecoder = jsonDecoder
     }
 
-    func decode<T>(data: Data) throws -> T {
-        guard let type = T.self as? Decodable.Type else {
-            throw JSONResponseDecoderError.typeNotDecodable
-        }
-
-        let obj = try jsonDecoder.decode(type, from: data)
-
-        guard let decoded = obj as? T else {
-            throw JSONResponseDecoderError.typeNotDecodable
-        }
-
-        return decoded
+    func decode<T: Decodable>(data: Data) throws -> T {
+        try jsonDecoder.decode(T.self, from: data)
     }
 }

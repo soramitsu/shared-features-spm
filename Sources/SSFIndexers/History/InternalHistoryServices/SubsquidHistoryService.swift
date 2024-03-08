@@ -6,11 +6,14 @@ import SSFNetwork
 
 final class SubsquidHistoryService: HistoryService {
     private let txStorage: AsyncAnyRepository<TransactionHistoryItem>
+    private let networkWorker: NetworkWorker
 
     init(
-        txStorage: AsyncAnyRepository<TransactionHistoryItem>
+        txStorage: AsyncAnyRepository<TransactionHistoryItem>,
+        networkWorker: NetworkWorker
     ) {
         self.txStorage = txStorage
+        self.networkWorker = networkWorker
     }
     
     // MARK: - HistoryService
@@ -82,13 +85,12 @@ final class SubsquidHistoryService: HistoryService {
             filters: filters
         )
 
-        let worker = NetworkWorker()
         let request = try HistoryRequest(
             url: url,
             query: queryString
         )
         
-        let response: GraphQLResponse<SubsquidHistoryResponse> = try await worker.performRequest(with: request)
+        let response: GraphQLResponse<SubsquidHistoryResponse> = try await networkWorker.performRequest(with: request)
         return try response.result()
     }
 

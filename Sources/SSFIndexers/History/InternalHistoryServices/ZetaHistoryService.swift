@@ -7,6 +7,12 @@ import SSFNetwork
 
 final class ZetaHistoryService: HistoryService {
     
+    private let networkWorker: NetworkWorker
+    
+    init(networkWorker: NetworkWorker) {
+        self.networkWorker = networkWorker
+    }
+    
     // MARK: - HistoryService
     
     func fetchTransactionHistory(
@@ -44,8 +50,7 @@ final class ZetaHistoryService: HistoryService {
             address: address
         )
 
-        let worker = NetworkWorker()
-        let response: ZetaHistoryResponse = try await worker.performRequest(with: request)
+        let response: ZetaHistoryResponse = try await networkWorker.performRequest(with: request)
         return response
     }
 

@@ -6,6 +6,12 @@ import SSFNetwork
 
 final class EtherscanHistoryService: HistoryService {
     
+    private let networkWorker: NetworkWorker
+    
+    init(networkWorker: NetworkWorker) {
+        self.networkWorker = networkWorker
+    }
+    
     // MARK: - HistoryService
     
     func fetchTransactionHistory(
@@ -42,8 +48,7 @@ final class EtherscanHistoryService: HistoryService {
             address: address
         )
         
-        let worker = NetworkWorker()
-        let response: EtherscanHistoryResponse = try await worker.performRequest(with: request)
+        let response: EtherscanHistoryResponse = try await networkWorker.performRequest(with: request)
         return response
     }
 

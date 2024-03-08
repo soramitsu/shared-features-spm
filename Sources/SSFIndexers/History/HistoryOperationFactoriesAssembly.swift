@@ -2,6 +2,7 @@ import Foundation
 import SSFModels
 import RobinHood
 import SSFChainRegistry
+import SSFNetwork
 
 public enum HistoryError: Error {
     case urlMissing
@@ -18,9 +19,9 @@ public protocol HistoryService {
 
 final public class HistoryServiceAssembly {
     public static func createService(
-        for chainAsset: ChainAsset,
-        with txStorage: AsyncAnyRepository<TransactionHistoryItem>
+        for chainAsset: ChainAsset
     ) async throws -> HistoryService? {
+        let networkWorker = NetworkWorkerDefault()
         switch chainAsset.chain.externalApi?.history?.type {
         case .subquery:
             let chainRegistry = ChainRegistryAssembly.createDefaultRegistry()
@@ -29,14 +30,24 @@ final public class HistoryServiceAssembly {
                 usedRuntimePaths: [:],
                 runtimeItem: nil
             )
+            let txStorage = try Self.createTxRepository()
             return SubqueryHistoryService(
                 txStorage: txStorage,
-                runtimeService: runtimeService
+                runtimeService: runtimeService,
+                networkWorker: networkWorker
             )
         case .subsquid:
-            return SubsquidHistoryService(txStorage: txStorage)
+            let txStorage = try Self.createTxRepository()
+            return SubsquidHistoryService(
+                txStorage: txStorage,
+                networkWorker: networkWorker
+            )
         case .giantsquid:
-            return GiantsquidHistoryService(txStorage: txStorage)
+            let txStorage = try Self.createTxRepository()
+            return GiantsquidHistoryService(
+                txStorage: txStorage,
+                networkWorker: networkWorker
+            )
         case .sora:
             let chainRegistry = ChainRegistryAssembly.createDefaultRegistry()
             let runtimeService = try await chainRegistry.getRuntimeProvider(
@@ -44,22 +55,33 @@ final public class HistoryServiceAssembly {
                 usedRuntimePaths: [:],
                 runtimeItem: nil
             )
+            let txStorage = try Self.createTxRepository()
             return SoraSubsquidHistoryService(
                 txStorage: txStorage,
-                runtimeService: runtimeService
+                runtimeService: runtimeService,
+                networkWorker: networkWorker
             )
         case .alchemy:
-            return AlchemyHistoryService()
+            return AlchemyHistoryService(networkWorker: networkWorker)
         case .etherscan:
-            return EtherscanHistoryService()
+            return EtherscanHistoryService(networkWorker: networkWorker)
         case .oklink:
-            return OklinkHistoryService()
+            return OklinkHistoryService(networkWorker: networkWorker)
         case .reef:
-            return ReefSubsquidHistoryService(txStorage: txStorage)
+            let txStorage = try Self.createTxRepository()
+            return ReefSubsquidHistoryService(
+                txStorage: txStorage,
+                networkWorker: networkWorker
+            )
         case .zeta:
-            return ZetaHistoryService()
+            return ZetaHistoryService(networkWorker: networkWorker)
         case .none:
             return nil
         }
+    }
+    
+    private static func createTxRepository() throws -> AsyncAnyRepository<TransactionHistoryItem> {
+        let repository = try IndexersRepositoryAssemblyDefault().createRepository()
+        return AsyncAnyRepository(repository)
     }
 }

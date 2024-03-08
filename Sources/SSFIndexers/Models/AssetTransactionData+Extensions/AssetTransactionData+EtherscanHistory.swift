@@ -37,12 +37,12 @@ extension AssetTransactionData {
         return AssetTransactionData(
             transactionId: item.hash ?? "",
             status: .commited,
-            assetId: item.contractAddress ?? "",
-            peerId: "",
+            assetId: item.contractAddress,
+            peerId: nil,
             peerFirstName: nil,
             peerLastName: nil,
             peerName: peerAddress,
-            details: "",
+            details: nil,
             amount: SubstrateAmountDecimal(
                 big: item.value,
                 precision: chainAsset.asset.precision
@@ -50,7 +50,7 @@ extension AssetTransactionData {
             fees: [fee],
             timestamp: timestamp,
             type: type.rawValue,
-            reason: "",
+            reason: nil,
             context: nil
         )
     }

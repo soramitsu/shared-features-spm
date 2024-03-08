@@ -34,7 +34,8 @@ let package = Package(
         .library(name: "SoraKeystore", targets: ["SoraKeystore"]), //TODO: get from github
         .library(name: "SSFQRService", targets: ["SSFQRService"]),
         .library(name: "SSFTransferService", targets: ["SSFTransferService"]),
-        .library(name: "SSFSingleValueCache", targets: ["SSFSingleValueCache"])
+        .library(name: "SSFSingleValueCache", targets: ["SSFSingleValueCache"]),
+        .library(name: "SSFIndexers", targets: ["SSFIndexers"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
@@ -359,10 +360,24 @@ let package = Package(
             name: "SSFIndexers",
             dependencies: [
                 "SSFModels",
-                "IrohaCrypto",
                 "RobinHood",
                 "SSFUtils",
                 "SSFChainRegistry"
+            ]
+        ),
+        .testTarget(
+            name: "SSFIndexersTests",
+            dependencies: [
+                "SSFIndexers",
+                "SSFModels",
+                "RobinHood",
+                "SSFUtils",
+                "SSFChainRegistry",
+                "MocksBasket",
+                "SSFNetwork"
+            ],
+            resources: [
+                .process("Resources")
             ]
         )
     ]

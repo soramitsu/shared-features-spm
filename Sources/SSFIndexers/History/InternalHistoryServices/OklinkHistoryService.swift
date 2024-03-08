@@ -6,6 +6,12 @@ import SSFNetwork
 
 final class OklinkHistoryService: HistoryService {
     
+    private let networkWorker: NetworkWorker
+    
+    init(networkWorker: NetworkWorker) {
+        self.networkWorker = networkWorker
+    }
+    
     // MARK: - HistoryService
 
     func fetchTransactionHistory(
@@ -39,11 +45,11 @@ final class OklinkHistoryService: HistoryService {
 
         let request = OklinkHistoryRequest(
             baseUrl: historyUrl,
-            chainAsset: chainAsset
+            chainAsset: chainAsset,
+            address: address
         )
 
-        let worker = NetworkWorker()
-        let response: OklinkHistoryResponse = try await worker.performRequest(with: request)
+        let response: OklinkHistoryResponse = try await networkWorker.performRequest(with: request)
         return response
     }
 

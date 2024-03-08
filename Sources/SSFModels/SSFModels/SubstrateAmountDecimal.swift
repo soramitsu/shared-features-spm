@@ -8,7 +8,10 @@ public struct SubstrateAmountDecimal: Equatable {
         return (decimalValue as NSNumber).stringValue
     }
 
-    public init(value: Decimal) {
+    public init?(value: Decimal?) {
+        guard let value else {
+            return nil
+        }
         decimalValue = value
     }
 

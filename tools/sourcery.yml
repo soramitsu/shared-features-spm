@@ -71,6 +71,7 @@ configurations:
         ../Sources/MocksBasket/SSFUtils
       args:
         autoMockableTestableImports: ["SSFUtils", "BigInt"]
+# SSFNetwork
     - sources:
       - ../Sources/SSFNetwork
       templates:
@@ -79,6 +80,7 @@ configurations:
         ../Sources/MocksBasket/SSFNetwork
       args:
         autoMockableTestableImports: ["SSFNetwork", "RobinHood"]
+# SSFXCM
     - sources:
       - ../Sources/SSFXCM
       templates:
@@ -87,6 +89,7 @@ configurations:
         ../Sources/MocksBasket/SSFXCM
       args:
         autoMockableTestableImports: ["SSFXCM", "SSFUtils", "SSFNetwork", "SSFModels", "RobinHood", "BigInt", "SSFExtrinsicKit", "SSFChainRegistry", "SSFRuntimeCodingService", "SSFSigner", "SSFChainConnection", "SSFStorageQueryKit"]
+# SSFExtrinsicKit
     - sources:
       - ../Sources/SSFExtrinsicKit
       templates:
@@ -95,6 +98,7 @@ configurations:
         ../Sources/MocksBasket/SSFExtrinsicKit
       args:
         autoMockableTestableImports: ["SSFUtils", "SSFCrypto", "SSFModels", "RobinHood", "SSFExtrinsicKit", "IrohaCrypto", "SSFRuntimeCodingService", "SSFSigner"]
+# SSFTransferService
     - sources:
       - ../Sources/SSFTransferService
       templates:

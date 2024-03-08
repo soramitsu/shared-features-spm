@@ -10,8 +10,8 @@ struct AlchemyHistoryElement: Decodable {
     let hash: String
     let from: String
     let to: String
-    let value: Decimal
-    let asset: String
+    let value: Decimal?
+    let asset: String?
     let category: String
     let metadata: AlchemyHistoryElementMetadata?
 

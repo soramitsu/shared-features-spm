@@ -6,6 +6,12 @@ import SSFNetwork
 
 final actor AlchemyHistoryService: HistoryService {
     
+    private let networkWorker: NetworkWorker
+    
+    init(networkWorker: NetworkWorker) {
+        self.networkWorker = networkWorker
+    }
+    
     // MARK: - HistoryService
     
     func fetchTransactionHistory(
@@ -15,7 +21,7 @@ final actor AlchemyHistoryService: HistoryService {
         pagination: Pagination
     ) async throws -> AssetTransactionPageData? {
         guard let historyUrl = chainAsset.chain.externalApi?.history?.url else {
-            return nil
+            throw HistoryError.urlMissing
         }
         let apiKey = chainAsset.chain.externalApi?.history?.apiKey
         let baseURL = createBaseUrl(baseUrl: historyUrl, with: apiKey)
@@ -91,8 +97,7 @@ final actor AlchemyHistoryService: HistoryService {
             baseURL: baseURL,
             body: paramsEncoded
         )
-        let worker = NetworkWorker()
-        let response: AlchemyResponse<AlchemyHistory> = try await worker.performRequest(with: request)
+        let response: AlchemyResponse<AlchemyHistory> = try await networkWorker.performRequest(with: request)
         return response.result
     }
 
@@ -105,7 +110,7 @@ final actor AlchemyHistoryService: HistoryService {
         let history = received.transfers + sent.transfers
         
         let transactions = history
-            .filter { $0.asset.lowercased() == chainAsset.asset.symbol.lowercased() }
+            .filter { $0.asset?.lowercased() == chainAsset.asset.symbol.lowercased() }
             .sorted(by: { $0.timestampInSeconds > $1.timestampInSeconds })
             .compactMap {
                 AssetTransactionData.createTransaction(

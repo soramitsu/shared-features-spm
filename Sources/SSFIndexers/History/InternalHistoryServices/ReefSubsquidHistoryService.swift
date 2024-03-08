@@ -6,11 +6,14 @@ import SSFNetwork
 
 final class ReefSubsquidHistoryService: HistoryService {
     private let txStorage: AsyncAnyRepository<TransactionHistoryItem>
+    private let networkWorker: NetworkWorker
 
     init(
-        txStorage: AsyncAnyRepository<TransactionHistoryItem>
+        txStorage: AsyncAnyRepository<TransactionHistoryItem>,
+        networkWorker: NetworkWorker
     ) {
         self.txStorage = txStorage
+        self.networkWorker = networkWorker
     }
     
     // MARK: - HistoryService
@@ -86,13 +89,12 @@ final class ReefSubsquidHistoryService: HistoryService {
             stakingsCursor: stakingsCursor
         )
 
-        let worker = NetworkWorker()
         let request = try HistoryRequest(
             url: url,
             query: queryString
         )
         
-        let response: GraphQLResponse<ReefResponseData> = try await worker.performRequest(with: request)
+        let response: GraphQLResponse<ReefResponseData> = try await networkWorker.performRequest(with: request)
         return try response.result()
     }
 

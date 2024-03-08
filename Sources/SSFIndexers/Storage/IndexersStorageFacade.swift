@@ -2,21 +2,25 @@ import Foundation
 import RobinHood
 import CoreData
 
-final class CacheStorageFacade: StorageFacade {
-    let databaseService: CoreDataServiceProtocol
+public enum IndexersStorageFacadeError: Error {
+    case coreDataUrlMissed
+}
 
-    init() throws {
+public final class IndexersStorageFacade: StorageFacade {
+    public var databaseService: CoreDataServiceProtocol
+    
+    public init() throws {
         guard
             let baseURL = FileManager.default.urls(
                 for: .documentDirectory,
                 in: .userDomainMask
             ).first?.appendingPathComponent("CoreData"),
             let modelURL = Bundle.module.url(
-                forResource: "CacheDataModel",
+                forResource: "IndexersDataModel",
                 withExtension: "momd"
             )
         else {
-            throw CacheStorageFacadeError.coreDataUrlMissed
+            throw IndexersStorageFacadeError.coreDataUrlMissed
         }
         
         let options = [
@@ -26,7 +30,7 @@ final class CacheStorageFacade: StorageFacade {
         
         let persistentSettings = CoreDataPersistentSettings(
             databaseDirectory: baseURL,
-            databaseName: "CacheDataModel.sqlite",
+            databaseName: "IndexersDataModel.sqlite",
             incompatibleModelStrategy: .removeStore,
             options: options
         )
@@ -39,7 +43,7 @@ final class CacheStorageFacade: StorageFacade {
         databaseService = CoreDataService(configuration: configuration)
     }
 
-    func createRepository<T, U>(
+    public func createRepository<T, U>(
         filter: NSPredicate?,
         sortDescriptors: [NSSortDescriptor],
         mapper: AnyCoreDataMapper<T, U>
@@ -51,8 +55,4 @@ final class CacheStorageFacade: StorageFacade {
             sortDescriptors: sortDescriptors
         )
     }
-}
-
-public enum CacheStorageFacadeError: Error {
-    case coreDataUrlMissed
 }

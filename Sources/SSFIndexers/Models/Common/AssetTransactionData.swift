@@ -5,7 +5,7 @@ public struct AssetTransactionData: Equatable {
     
     public let transactionId: String
     public let status: AssetTransactionStatus
-    public let assetId: String
+    public let assetId: String?
     public let peerId: String?
     public let peerFirstName: String?
     public let peerLastName: String?
@@ -21,7 +21,7 @@ public struct AssetTransactionData: Equatable {
     public init(
         transactionId: String,
         status: AssetTransactionStatus,
-        assetId: String,
+        assetId: String?,
         peerId: String?,
         peerFirstName: String?,
         peerLastName: String?,

@@ -9,13 +9,16 @@ import SSFNetwork
 class SoraSubsquidHistoryService: HistoryService {
     private let txStorage: AsyncAnyRepository<TransactionHistoryItem>
     private let runtimeService: RuntimeProviderProtocol
+    private let networkWorker: NetworkWorker
 
     init(
         txStorage: AsyncAnyRepository<TransactionHistoryItem>,
-        runtimeService: RuntimeProviderProtocol
+        runtimeService: RuntimeProviderProtocol,
+        networkWorker: NetworkWorker
     ) {
         self.txStorage = txStorage
         self.runtimeService = runtimeService
+        self.networkWorker = networkWorker
     }
     
     // MARK: - HistoryService
@@ -84,13 +87,12 @@ class SoraSubsquidHistoryService: HistoryService {
             filters: filters
         )
         
-        let worker = NetworkWorker()
         let request = try HistoryRequest(
             url: url,
             query: queryString
         )
         
-        let response: GraphQLResponse<SoraSubsquidHistoryConnectionResponse> = try await worker.performRequest(with: request)
+        let response: GraphQLResponse<SoraSubsquidHistoryConnectionResponse> = try await networkWorker.performRequest(with: request)
         return try response.result()
     }
 

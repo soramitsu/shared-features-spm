@@ -37,6 +37,7 @@ public enum RuntimeSpecVersion: UInt32 {
     }
 }
 
+// sourcery: AutoMockable
 public protocol RuntimeProviderProtocol: AnyObject, RuntimeCodingServiceProtocol {
     var runtimeSpecVersion: RuntimeSpecVersion { get }
 

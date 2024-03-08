@@ -6,10 +6,11 @@ final class OklinkHistoryRequest: RequestConfig {
     
     init(
         baseUrl: URL,
-        chainAsset: ChainAsset
+        chainAsset: ChainAsset,
+        address: String
     ) {
         let queryItems = [
-            URLQueryItem(name: "address", value: "address"),
+            URLQueryItem(name: "address", value: address),
             URLQueryItem(name: "symbol", value: chainAsset.asset.symbol.lowercased())
         ]
 

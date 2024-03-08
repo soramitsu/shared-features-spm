@@ -1,6 +1,5 @@
 import Foundation
 import BigInt
-import IrohaCrypto
 import SSFModels
 
 struct GiantsquidReward: Decodable {
