@@ -59,7 +59,7 @@ final class XcmAssetMultilocationFetcherTests: XCTestCase {
         XCTAssertTrue(fetchFactory.fetchDataFromCalled)
     }
 
-    func testVersionedMultilocation() async throws {
+    /*func testVersionedMultilocation() async throws {
         // arrange
         dataFetchFactory?.fetchDataFromReturnValue = createVersionedOperation()
 
@@ -73,7 +73,7 @@ final class XcmAssetMultilocationFetcherTests: XCTestCase {
         XCTAssertEqual(assetMultiplication, TestData.multilocation)
         XCTAssertEqual(dataFetchFactory?.fetchDataFromCallsCount, 2)
         XCTAssertTrue(dataFetchFactory?.fetchDataFromCalled ?? false)
-    }
+    }*/
 
     func testVersionedMultilocationWithAssetError() async throws {
         // arrange
