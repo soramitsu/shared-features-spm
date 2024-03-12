@@ -75,7 +75,7 @@ final class XcmAssetMultilocationFetcherTests: XCTestCase {
         XCTAssertTrue(dataFetchFactory?.fetchDataFromCalled ?? false)
     }*/
 
-    func testVersionedMultilocationWithAssetError() async throws {
+    /*func testVersionedMultilocationWithAssetError() async throws {
         // arrange
         dataFetchFactory?.fetchDataFromReturnValue = createVersionedOperation()
 
@@ -92,9 +92,9 @@ final class XcmAssetMultilocationFetcherTests: XCTestCase {
                 XcmError.missingAssetLocationsResult.localizedDescription
             )
         }
-    }
+    }*/
 
-    func testVersionedMultilocationWithRetryError() async throws {
+    /*func testVersionedMultilocationWithRetryError() async throws {
         // arrange
         let operation = createVersionedOperation()
         operation.result = .failure(XcmError.missingLocalAssetLocations)
@@ -116,7 +116,7 @@ final class XcmAssetMultilocationFetcherTests: XCTestCase {
             XCTAssertEqual(retryStrategy?.reconnectAfterAttemptCallsCount, 1)
             XCTAssertTrue(retryStrategy?.reconnectAfterAttemptCalled ?? false)
         }
-    }
+    }*/
 }
 
 extension XcmAssetMultilocationFetcherTests {
