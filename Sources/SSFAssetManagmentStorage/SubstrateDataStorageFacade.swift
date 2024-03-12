@@ -48,8 +48,8 @@ class SubstrateDataStorageFacade: StorageFacadeProtocol {
         let persistentSettings = CoreDataPersistentSettings(
             databaseDirectory: baseURL!,
             databaseName: databaseName,
-            incompatibleModelStrategy: .ignore,
-            options: options
+            incompatibleModelStrategy: .ignore
+//            options: options
         )
 
         let configuration = CoreDataServiceConfiguration(
