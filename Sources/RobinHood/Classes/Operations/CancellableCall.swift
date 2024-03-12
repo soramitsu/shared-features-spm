@@ -1,7 +1,7 @@
 /**
- * Copyright Soramitsu Co., Ltd. All Rights Reserved.
- * SPDX-License-Identifier: GPL-3.0
- */
+* Copyright Soramitsu Co., Ltd. All Rights Reserved.
+* SPDX-License-Identifier: GPL-3.0
+*/
 
 import Foundation
 
@@ -12,7 +12,7 @@ import Foundation
  *  Use the protocol to return from methods that schedules cancellable work.
  */
 
-public protocol CancellableCall: AnyObject {
+public protocol CancellableCall: class {
     /**
      *  Cancels all operations related to call
      */

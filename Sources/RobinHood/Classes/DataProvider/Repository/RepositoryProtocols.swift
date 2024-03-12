@@ -1,7 +1,7 @@
 /**
- * Copyright Soramitsu Co., Ltd. All Rights Reserved.
- * SPDX-License-Identifier: GPL-3.0
- */
+* Copyright Soramitsu Co., Ltd. All Rights Reserved.
+* SPDX-License-Identifier: GPL-3.0
+*/
 
 import Foundation
 
@@ -16,21 +16,6 @@ public protocol DataProviderRepositoryProtocol {
     associatedtype Model: Identifiable
 
     /**
-     *  Creates operation which fetches objects by identifier.
-     *
-     *  - parameters:
-     *    - modelIdsClosure: Closure that returs identifiers to fetch.
-     *    - options: Options to define fetch logic and caching policy.
-     *  - returns: Operation that results in an array of objects or empty if there is
-     *  no objects with specified identifiers.
-     */
-
-    func fetchOperation(
-        by modelIdsClosure: @escaping () throws -> [String],
-        options: RepositoryFetchOptions
-    ) -> BaseOperation<[Model]>
-
-    /**
      *  Creates operation which fetches object by identifier.
      *
      *  - parameters:
@@ -40,10 +25,8 @@ public protocol DataProviderRepositoryProtocol {
      *  no object with specified identifier.
      */
 
-    func fetchOperation(
-        by modelIdClosure: @escaping () throws -> String,
-        options: RepositoryFetchOptions
-    ) -> BaseOperation<Model?>
+    func fetchOperation(by modelIdClosure: @escaping () throws -> String,
+                        options: RepositoryFetchOptions) -> BaseOperation<Model?>
 
     /**
      *  Creates operation which fetches all objects.
@@ -64,10 +47,8 @@ public protocol DataProviderRepositoryProtocol {
      *  - returns: Operation that results in a list of objects.
      */
 
-    func fetchOperation(
-        by request: RepositorySliceRequest,
-        options: RepositoryFetchOptions
-    ) -> BaseOperation<[Model]>
+    func fetchOperation(by request: RepositorySliceRequest,
+                        options: RepositoryFetchOptions) -> BaseOperation<[Model]>
 
     /**
      *  Creates operation which persists changes to the list of objects.
@@ -78,10 +59,8 @@ public protocol DataProviderRepositoryProtocol {
      *  - returns: Operation that returns nothing.
      */
 
-    func saveOperation(
-        _ updateModelsBlock: @escaping () throws -> [Model],
-        _ deleteIdsBlock: @escaping () throws -> [String]
-    ) -> BaseOperation<Void>
+    func saveOperation(_ updateModelsBlock: @escaping () throws -> [Model],
+                       _ deleteIdsBlock: @escaping () throws -> [String]) -> BaseOperation<Void>
 
     /**
      *  Creates operation which that replaces persisted list of objects.
@@ -184,11 +163,9 @@ public protocol DataProviderRepositoryObservable {
      *    - updateBlock: Closure to deliver changes to observer.
      */
 
-    func addObserver(
-        _ observer: AnyObject,
-        deliverOn queue: DispatchQueue,
-        executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void
-    )
+    func addObserver(_ observer: AnyObject,
+                     deliverOn queue: DispatchQueue,
+                     executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void)
 
     /**
      *  Removes an observer from repository's observers list.
@@ -211,17 +188,8 @@ public extension DataProviderRepositoryProtocol {
      *  no object with specified identifier.
      */
 
-    func fetchOperation(
-        by modelId: String,
-        options: RepositoryFetchOptions
-    ) -> BaseOperation<Model?> {
+    func fetchOperation(by modelId: String,
+                        options: RepositoryFetchOptions) -> BaseOperation<Model?> {
         fetchOperation(by: { modelId }, options: options)
-    }
-
-    func fetchOperation(
-        by modelIds: [String],
-        options: RepositoryFetchOptions
-    ) -> BaseOperation<[Model]> {
-        fetchOperation(by: { modelIds }, options: options)
     }
 }

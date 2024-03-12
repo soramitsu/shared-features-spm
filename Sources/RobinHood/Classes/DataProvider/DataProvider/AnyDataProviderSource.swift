@@ -1,7 +1,7 @@
 /**
- * Copyright Soramitsu Co., Ltd. All Rights Reserved.
- * SPDX-License-Identifier: GPL-3.0
- */
+* Copyright Soramitsu Co., Ltd. All Rights Reserved.
+* SPDX-License-Identifier: GPL-3.0
+*/
 
 import Foundation
 
@@ -39,19 +39,17 @@ public final class AnyDataProviderSource<T: Identifiable>: DataProviderSourcePro
      *    - fetchById: Closure to return object by id.
      */
 
-    public init(
-        fetchByPage: @escaping (UInt) -> CompoundOperationWrapper<[Model]>,
-        fetchById: @escaping (String) -> CompoundOperationWrapper<Model?>
-    ) {
+    public init(fetchByPage: @escaping (UInt) -> CompoundOperationWrapper<[Model]>,
+                fetchById: @escaping (String) -> CompoundOperationWrapper<Model?>) {
         _fetchByPage = fetchByPage
         _fetchById = fetchById
     }
 
     public func fetchOperation(by modelId: String) -> CompoundOperationWrapper<T?> {
-        _fetchById(modelId)
+        return _fetchById(modelId)
     }
 
     public func fetchOperation(page index: UInt) -> CompoundOperationWrapper<[T]> {
-        _fetchByPage(index)
+        return _fetchByPage(index)
     }
 }

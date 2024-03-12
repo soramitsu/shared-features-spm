@@ -1,7 +1,7 @@
 /**
- * Copyright Soramitsu Co., Ltd. All Rights Reserved.
- * SPDX-License-Identifier: GPL-3.0
- */
+* Copyright Soramitsu Co., Ltd. All Rights Reserved.
+* SPDX-License-Identifier: GPL-3.0
+*/
 
 import Foundation
 
@@ -39,8 +39,7 @@ public protocol SingleValueProviderProtocol {
      *  block to the function instead.
      */
 
-    func fetch(with completionBlock: ((Result<Model?, Error>?) -> Void)?)
-        -> CompoundOperationWrapper<Model?>
+    func fetch(with completionBlock: ((Result<Model?, Error>?) -> Void)?) -> CompoundOperationWrapper<Model?>
 
     /**
      *  Adds observer to notify when there are changes in local storage.
@@ -67,13 +66,11 @@ public protocol SingleValueProviderProtocol {
      *    - options: Controls a way of how and when observer is notified.
      */
 
-    func addObserver(
-        _ observer: AnyObject,
-        deliverOn queue: DispatchQueue?,
-        executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void,
-        failing failureBlock: @escaping (Error) -> Void,
-        options: DataProviderObserverOptions
-    )
+    func addObserver(_ observer: AnyObject,
+                     deliverOn queue: DispatchQueue?,
+                     executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void,
+                     failing failureBlock: @escaping (Error) -> Void,
+                     options: DataProviderObserverOptions)
 
     /**
      *  Removes an observer from the list of observers.
@@ -119,19 +116,15 @@ public extension SingleValueProviderProtocol {
      *      after failed synchronization but only if `alwaysNotifyOnRefresh` flag is set in options.
      */
 
-    func addObserver(
-        _ observer: AnyObject,
-        deliverOn queue: DispatchQueue?,
-        executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void,
-        failing failureBlock: @escaping (Error) -> Void
-    ) {
-        addObserver(
-            observer,
-            deliverOn: queue,
-            executing: updateBlock,
-            failing: failureBlock,
-            options: DataProviderObserverOptions()
-        )
+    func addObserver(_ observer: AnyObject,
+                     deliverOn queue: DispatchQueue?,
+                     executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void,
+                     failing failureBlock: @escaping (Error) -> Void) {
+        addObserver(observer,
+                    deliverOn: queue,
+                    executing: updateBlock,
+                    failing: failureBlock,
+                    options: DataProviderObserverOptions())
     }
 }
 

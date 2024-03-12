@@ -1,7 +1,7 @@
 /**
- * Copyright Soramitsu Co., Ltd. All Rights Reserved.
- * SPDX-License-Identifier: GPL-3.0
- */
+* Copyright Soramitsu Co., Ltd. All Rights Reserved.
+* SPDX-License-Identifier: GPL-3.0
+*/
 
 import Foundation
 
@@ -9,7 +9,7 @@ import Foundation
  *  Protocol is designed to create result value from remote response.
  */
 
-public protocol NetworkResultFactoryProtocol: AnyObject {
+public protocol NetworkResultFactoryProtocol: class {
     associatedtype ResultType
 
     /**
@@ -21,21 +21,16 @@ public protocol NetworkResultFactoryProtocol: AnyObject {
      *    - error: Error if request is failed.
      *  - result: Swift Result containing concrete value or an error in case of failure.
      */
-    func createResult(data: Data?, response: URLResponse?, error: Error?)
-        -> Result<ResultType, Error>
+    func createResult(data: Data?, response: URLResponse?, error: Error?) -> Result<ResultType, Error>
 }
 
 /// Closure to convert network response to concrete value.
-public typealias NetworkResultFactoryBlock<ResultType> = (Data?, URLResponse?, Error?) -> Result<
-    ResultType,
-    Error
->
+public typealias NetworkResultFactoryBlock<ResultType> = (Data?, URLResponse?, Error?) -> Result<ResultType, Error>
 
 /// Closure to produce result in case of successfull response.
 public typealias NetworkResultFactorySuccessResponseBlock<ResultType> = () -> ResultType
 
-/// Closure to convert network response data to concrete value to form result in case of successfull
-/// response.
+/// Closure to convert network response data to concrete value to form result in case of successfull response.
 public typealias NetworkResultFactoryProcessingBlock<ResultType> = (Data) throws -> ResultType
 
 /**
@@ -83,10 +78,8 @@ public final class AnyNetworkResultFactory<T>: NetworkResultFactoryProtocol {
      *    result.
      */
 
-    public convenience init(
-        successResponseBlock: @escaping NetworkResultFactorySuccessResponseBlock<ResultType>
-    ) {
-        self.init { data, response, error -> Result<ResultType, Error> in
+    public convenience init(successResponseBlock: @escaping NetworkResultFactorySuccessResponseBlock<ResultType>) {
+        self.init { (data, response, error) -> Result<ResultType, Error> in
             if let connectionError = error {
                 return .failure(connectionError)
             }
@@ -110,10 +103,8 @@ public final class AnyNetworkResultFactory<T>: NetworkResultFactoryProtocol {
      *    result from response data.
      */
 
-    public convenience init(
-        processingBlock: @escaping NetworkResultFactoryProcessingBlock<ResultType>
-    ) {
-        self.init { data, response, error -> Result<ResultType, Error> in
+    public convenience init(processingBlock: @escaping NetworkResultFactoryProcessingBlock<ResultType>) {
+        self.init { (data, response, error) -> Result<ResultType, Error> in
             if let connectionError = error {
                 return .failure(connectionError)
             }
@@ -135,11 +126,7 @@ public final class AnyNetworkResultFactory<T>: NetworkResultFactoryProtocol {
         }
     }
 
-    public func createResult(
-        data: Data?,
-        response: URLResponse?,
-        error: Error?
-    ) -> Result<ResultType, Error> {
-        _createResult(data, response, error)
+    public func createResult(data: Data?, response: URLResponse?, error: Error?) -> Result<ResultType, Error> {
+        return _createResult(data, response, error)
     }
 }

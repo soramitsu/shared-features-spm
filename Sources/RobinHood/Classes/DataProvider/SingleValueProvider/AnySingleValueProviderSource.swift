@@ -1,7 +1,7 @@
 /**
- * Copyright Soramitsu Co., Ltd. All Rights Reserved.
- * SPDX-License-Identifier: GPL-3.0
- */
+* Copyright Soramitsu Co., Ltd. All Rights Reserved.
+* SPDX-License-Identifier: GPL-3.0
+*/
 
 import Foundation
 
@@ -32,6 +32,6 @@ public final class AnySingleValueProviderSource<T>: SingleValueProviderSourcePro
     }
 
     public func fetchOperation() -> CompoundOperationWrapper<Model?> {
-        _fetch()
+        return _fetch()
     }
 }

@@ -1,7 +1,7 @@
 /**
- * Copyright Soramitsu Co., Ltd. All Rights Reserved.
- * SPDX-License-Identifier: GPL-3.0
- */
+* Copyright Soramitsu Co., Ltd. All Rights Reserved.
+* SPDX-License-Identifier: GPL-3.0
+*/
 
 import Foundation
 
@@ -14,11 +14,7 @@ public final class AnyDataProviderRepositoryObservable<T>: DataProviderRepositor
 
     private let _start: (@escaping (Error?) -> Void) -> Void
     private let _stop: (@escaping (Error?) -> Void) -> Void
-    private let _addObserver: (
-        AnyObject,
-        DispatchQueue,
-        @escaping ([DataProviderChange<Model>]) -> Void
-    ) -> Void
+    private let _addObserver: (AnyObject, DispatchQueue, @escaping ([DataProviderChange<Model>]) -> Void) -> Void
     private let _removeObserver: (AnyObject) -> Void
 
     /**
@@ -43,11 +39,9 @@ public final class AnyDataProviderRepositoryObservable<T>: DataProviderRepositor
         _stop(completionBlock)
     }
 
-    public func addObserver(
-        _ observer: AnyObject,
-        deliverOn queue: DispatchQueue,
-        executing updateBlock: @escaping ([DataProviderChange<T>]) -> Void
-    ) {
+    public func addObserver(_ observer: AnyObject,
+                            deliverOn queue: DispatchQueue,
+                            executing updateBlock: @escaping ([DataProviderChange<T>]) -> Void) {
         _addObserver(observer, queue, updateBlock)
     }
 

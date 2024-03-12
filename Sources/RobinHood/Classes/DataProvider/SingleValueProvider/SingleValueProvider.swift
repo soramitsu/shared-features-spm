@@ -1,7 +1,7 @@
 /**
- * Copyright Soramitsu Co., Ltd. All Rights Reserved.
- * SPDX-License-Identifier: GPL-3.0
- */
+* Copyright Soramitsu Co., Ltd. All Rights Reserved.
+* SPDX-License-Identifier: GPL-3.0
+*/
 
 import Foundation
 
@@ -33,8 +33,7 @@ public final class SingleValueProvider<T: Codable & Equatable> {
     /// Type erased implementation of `DataProviderRepositoryProtocol` that manages local storage.
     public private(set) var repository: AnyDataProviderRepository<SingleValueProviderObject>
 
-    /// Type erased implementation of `SingleValueProviderSourceProtocol` that controls fetching
-    /// data
+    /// Type erased implementation of `SingleValueProviderSourceProtocol` that controls fetching data
     /// from remote source.
     public private(set) var source: AnySingleValueProviderSource<T>
 
@@ -82,14 +81,13 @@ public final class SingleValueProvider<T: Codable & Equatable> {
      *      but sometimes there is a need to share a global queue due to optimization reasons.
      */
 
-    public init(
-        targetIdentifier: String,
-        source: AnySingleValueProviderSource<T>,
-        repository: AnyDataProviderRepository<SingleValueProviderObject>,
-        updateTrigger: DataProviderTriggerProtocol = DataProviderEventTrigger.onAll,
-        executionQueue: OperationQueue? = nil,
-        serialSyncQueue: DispatchQueue? = nil
-    ) {
+    public init(targetIdentifier: String,
+                source: AnySingleValueProviderSource<T>,
+                repository: AnyDataProviderRepository<SingleValueProviderObject>,
+                updateTrigger: DataProviderTriggerProtocol = DataProviderEventTrigger.onAll,
+                executionQueue: OperationQueue? = nil,
+                serialSyncQueue: DispatchQueue? = nil) {
+
         self.targetIdentifier = targetIdentifier
         self.source = source
         self.repository = repository
@@ -101,12 +99,11 @@ public final class SingleValueProvider<T: Codable & Equatable> {
         }
 
         if let currentSyncQueue = serialSyncQueue {
-            syncQueue = currentSyncQueue
+            self.syncQueue = currentSyncQueue
         } else {
-            syncQueue = DispatchQueue(
+            self.syncQueue = DispatchQueue(
                 label: "co.jp.singlevalueprovider.repository.queue.\(UUID().uuidString)",
-                qos: .utility
-            )
+                qos: .utility)
         }
 
         self.updateTrigger = updateTrigger
@@ -116,7 +113,6 @@ public final class SingleValueProvider<T: Codable & Equatable> {
 }
 
 // MARK: Internal Repository update logic implementation
-
 extension SingleValueProvider {
     func dispatchUpdateRepository() {
         syncQueue.async {
@@ -126,8 +122,7 @@ extension SingleValueProvider {
 
     private func updateRepository() {
         if let currentUpdateRepositoryOperation = repositoryUpdateOperation,
-           !currentUpdateRepositoryOperation.isFinished
-        {
+            !currentUpdateRepositoryOperation.isFinished {
             return
         }
 
@@ -135,10 +130,8 @@ extension SingleValueProvider {
 
         let repositoryOperation = repository.fetchOperation(by: targetIdentifier)
 
-        let differenceOperation = createDifferenceOperation(
-            dependingOn: sourceWrapper.targetOperation,
-            repositoryOperation: repositoryOperation
-        )
+        let differenceOperation = createDifferenceOperation(dependingOn: sourceWrapper.targetOperation,
+                                                            repositoryOperation: repositoryOperation)
 
         let saveOperation = createSaveRepositoryOperation(dependingOn: differenceOperation)
 
@@ -147,7 +140,7 @@ extension SingleValueProvider {
                 return
             }
 
-            if case let .failure(error) = saveResult {
+            if case .failure(let error) = saveResult {
                 self.syncQueue.async {
                     self.notifyObservers(with: error)
                 }
@@ -156,9 +149,8 @@ extension SingleValueProvider {
             }
 
             guard let changesResult = differenceOperation.result,
-                  case let .success(optionalUpdate) = changesResult else
-            {
-                return
+                case .success(let optionalUpdate) = changesResult else {
+                    return
             }
 
             self.syncQueue.async {
@@ -175,114 +167,102 @@ extension SingleValueProvider {
 
         lastSyncOperation = saveOperation
 
-        let operations = sourceWrapper.allOperations + [
-            repositoryOperation,
-            differenceOperation,
-            saveOperation,
-        ]
+        let operations = sourceWrapper.allOperations + [repositoryOperation, differenceOperation, saveOperation]
 
         executionQueue.addOperations(operations, waitUntilFinished: false)
     }
 
-    private func createDifferenceOperation(
-        dependingOn sourceOperation: BaseOperation<T?>,
-        repositoryOperation: BaseOperation<SingleValueProviderObject?>
-    )
-        -> BaseOperation<DataProviderChange<T>?>
-    {
-        let operation = ClosureOperation<DataProviderChange<T>?> {
-            guard let sourceResult = sourceOperation.result else {
-                throw DataProviderError.unexpectedSourceResult
+    private func createDifferenceOperation(dependingOn sourceOperation: BaseOperation<T?>,
+                                           repositoryOperation: BaseOperation<SingleValueProviderObject?>)
+        -> BaseOperation<DataProviderChange<T>?> {
+
+            let operation = ClosureOperation<DataProviderChange<T>?> {
+                guard let sourceResult = sourceOperation.result else {
+                    throw DataProviderError.unexpectedSourceResult
+                }
+
+                if case .failure(let error) = sourceResult {
+                    throw error
+                }
+
+                guard let repositoryResult = repositoryOperation.result else {
+                    throw DataProviderError.unexpectedSourceResult
+                }
+
+                if case .failure(let error) = repositoryResult {
+                    throw error
+                }
+
+                if case .success(let sourceModel) = sourceResult,
+                    case .success(let repositoryModel) = repositoryResult {
+
+                    return try self.findChanges(sourceResult: sourceModel,
+                                                repositoryResult: repositoryModel)
+                } else {
+                    throw DataProviderError.unexpectedSourceResult
+                }
             }
 
-            if case let .failure(error) = sourceResult {
-                throw error
-            }
+            operation.addDependency(sourceOperation)
+            operation.addDependency(repositoryOperation)
 
-            guard let repositoryResult = repositoryOperation.result else {
-                throw DataProviderError.unexpectedSourceResult
-            }
-
-            if case let .failure(error) = repositoryResult {
-                throw error
-            }
-
-            if case let .success(sourceModel) = sourceResult,
-               case let .success(repositoryModel) = repositoryResult
-            {
-                return try self.findChanges(
-                    sourceResult: sourceModel,
-                    repositoryResult: repositoryModel
-                )
-            } else {
-                throw DataProviderError.unexpectedSourceResult
-            }
-        }
-
-        operation.addDependency(sourceOperation)
-        operation.addDependency(repositoryOperation)
-
-        return operation
+            return operation
     }
 
-    private func createSaveRepositoryOperation(
-        dependingOn differenceOperation: BaseOperation<DataProviderChange<T>?>
-    )
-        -> BaseOperation<Void>
-    {
-        let itemIdentifier = targetIdentifier
+    private func createSaveRepositoryOperation(dependingOn differenceOperation: BaseOperation<DataProviderChange<T>?>)
+        -> BaseOperation<Void> {
 
-        let updatedItemsBlock = { () throws -> [SingleValueProviderObject] in
-            guard let result = differenceOperation.result else {
-                throw DataProviderError.dependencyCancelled
-            }
+            let itemIdentifier = targetIdentifier
 
-            switch result {
-            case let .success(optionalUpdate):
-                if let update = optionalUpdate, let item = update.item {
-                    let payload = try self.encoder.encode(item)
-                    let singleValueObject = SingleValueProviderObject(
-                        identifier: itemIdentifier,
-                        payload: payload
-                    )
-                    return [singleValueObject]
-                } else {
-                    return []
+            let updatedItemsBlock = { () throws -> [SingleValueProviderObject] in
+                guard let result = differenceOperation.result else {
+                    throw DataProviderError.dependencyCancelled
                 }
-            case let .failure(error):
-                throw error
-            }
-        }
 
-        let deletedItemsBlock = { () throws -> [String] in
-            guard let result = differenceOperation.result else {
-                throw DataProviderError.dependencyCancelled
-            }
-
-            switch result {
-            case let .success(optionalUpdate):
-                if let update = optionalUpdate, case .delete = update {
-                    return [itemIdentifier]
-                } else {
-                    return []
+                switch result {
+                case .success(let optionalUpdate):
+                    if let update = optionalUpdate, let item = update.item {
+                        let payload = try self.encoder.encode(item)
+                        let singleValueObject = SingleValueProviderObject(identifier: itemIdentifier,
+                                                                          payload: payload)
+                        return [singleValueObject]
+                    } else {
+                        return []
+                    }
+                case .failure(let error):
+                    throw error
                 }
-            case let .failure(error):
-                throw error
             }
-        }
 
-        let operation = repository.saveOperation(updatedItemsBlock, deletedItemsBlock)
+            let deletedItemsBlock = { () throws -> [String] in
+                guard let result = differenceOperation.result else {
+                    throw DataProviderError.dependencyCancelled
+                }
 
-        operation.addDependency(differenceOperation)
+                switch result {
+                case .success(let optionalUpdate):
+                    if let update = optionalUpdate, case .delete = update {
+                        return [itemIdentifier]
+                    } else {
+                        return []
+                    }
+                case .failure(let error):
+                    throw error
+                }
+            }
 
-        return operation
+            let operation = repository.saveOperation(updatedItemsBlock, deletedItemsBlock)
+
+            operation.addDependency(differenceOperation)
+
+            return operation
     }
 
     private func notifyObservers(with update: DataProviderChange<T>?) {
-        for repositoryObserver in observers {
+        observers.forEach { (repositoryObserver) in
             if repositoryObserver.observer != nil,
-               update != nil || repositoryObserver.options.alwaysNotifyOnRefresh
-            {
+                (update != nil || repositoryObserver.options.alwaysNotifyOnRefresh) {
+
                 dispatchInQueueWhenPossible(repositoryObserver.queue) {
                     if let update = update {
                         repositoryObserver.updateBlock([update])
@@ -295,10 +275,8 @@ extension SingleValueProvider {
     }
 
     private func notifyObservers(with error: Error) {
-        for repositoryObserver in observers {
-            if repositoryObserver.observer != nil,
-               repositoryObserver.options.alwaysNotifyOnRefresh
-            {
+        observers.forEach { (repositoryObserver) in
+            if repositoryObserver.observer != nil, repositoryObserver.options.alwaysNotifyOnRefresh {
                 dispatchInQueueWhenPossible(repositoryObserver.queue) {
                     repositoryObserver.failureBlock(error)
                 }
@@ -307,35 +285,32 @@ extension SingleValueProvider {
     }
 
     private func findChanges(sourceResult: T?, repositoryResult: SingleValueProviderObject?) throws
-        -> DataProviderChange<T>?
-    {
-        guard let existingSourceResult = sourceResult else {
-            if repositoryResult != nil {
-                // no source data or broken, just remove inconsistent local data
-                return DataProviderChange.delete(deletedIdentifier: targetIdentifier)
+        -> DataProviderChange<T>? {
+
+            guard let existingSourceResult = sourceResult else {
+                if repositoryResult != nil {
+                    // no source data or broken, just remove inconsistent local data
+                    return DataProviderChange.delete(deletedIdentifier: targetIdentifier)
+                } else {
+                    return nil
+                }
+            }
+
+            guard let existingRepositoryResult = repositoryResult else {
+                // new data received and no local data, so insert new one
+                return DataProviderChange.insert(newItem: existingSourceResult)
+            }
+
+            guard let existingLocalValue = try? decoder.decode(T.self, from: existingRepositoryResult.payload) else {
+                // local data is broken but remote one is ok, so just update local one
+                return DataProviderChange.update(newItem: existingSourceResult)
+            }
+
+            if existingSourceResult != existingLocalValue {
+                // remote data change so update local one
+                return DataProviderChange.update(newItem: existingSourceResult)
             } else {
                 return nil
             }
-        }
-
-        guard let existingRepositoryResult = repositoryResult else {
-            // new data received and no local data, so insert new one
-            return DataProviderChange.insert(newItem: existingSourceResult)
-        }
-
-        guard let existingLocalValue = try? decoder.decode(
-            T.self,
-            from: existingRepositoryResult.payload
-        ) else {
-            // local data is broken but remote one is ok, so just update local one
-            return DataProviderChange.update(newItem: existingSourceResult)
-        }
-
-        if existingSourceResult != existingLocalValue {
-            // remote data change so update local one
-            return DataProviderChange.update(newItem: existingSourceResult)
-        } else {
-            return nil
-        }
     }
 }

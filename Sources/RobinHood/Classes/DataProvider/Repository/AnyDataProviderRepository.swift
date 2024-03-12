@@ -1,7 +1,7 @@
 /**
- * Copyright Soramitsu Co., Ltd. All Rights Reserved.
- * SPDX-License-Identifier: GPL-3.0
- */
+* Copyright Soramitsu Co., Ltd. All Rights Reserved.
+* SPDX-License-Identifier: GPL-3.0
+*/
 
 import Foundation
 
@@ -12,15 +12,11 @@ import Foundation
 public final class AnyDataProviderRepository<T: Identifiable>: DataProviderRepositoryProtocol {
     public typealias Model = T
 
-    private let _fetchByModelIds: (@escaping () throws -> [String], RepositoryFetchOptions)
-        -> BaseOperation<[Model]>
-    private let _fetchByModelId: (@escaping () throws -> String, RepositoryFetchOptions)
-        -> BaseOperation<Model?>
+    private let _fetchByModelId: (@escaping () throws -> String, RepositoryFetchOptions) -> BaseOperation<Model?>
     private let _fetchAll: (RepositoryFetchOptions) -> BaseOperation<[Model]>
     private let _fetchByOffsetCount: (RepositorySliceRequest, RepositoryFetchOptions)
-        -> BaseOperation<[Model]>
-    private let _save: (@escaping () throws -> [Model], @escaping () throws -> [String])
-        -> BaseOperation<Void>
+    -> BaseOperation<[Model]>
+    private let _save: (@escaping () throws -> [Model], @escaping () throws -> [String]) -> BaseOperation<Void>
     private let _replace: (@escaping () throws -> [Model]) -> BaseOperation<Void>
     private let _deleteAll: () -> BaseOperation<Void>
     private let _fetchCount: () -> BaseOperation<Int>
@@ -40,54 +36,36 @@ public final class AnyDataProviderRepository<T: Identifiable>: DataProviderRepos
         _replace = repository.replaceOperation
         _deleteAll = repository.deleteAllOperation
         _fetchCount = repository.fetchCountOperation
-        _fetchByModelIds = repository.fetchOperation
     }
 
-    public func fetchOperation(
-        by modelIdsClosure: @escaping () throws -> [String],
-        options: RepositoryFetchOptions
-    ) -> BaseOperation<[T]> {
-        _fetchByModelIds(modelIdsClosure, options)
+    public func fetchOperation(by modelIdClosure: @escaping () throws -> String,
+                               options: RepositoryFetchOptions) -> BaseOperation<T?> {
+        return _fetchByModelId(modelIdClosure, options)
     }
 
-    public func fetchOperation(
-        by modelIdClosure: @escaping () throws -> String,
-        options: RepositoryFetchOptions
-    ) -> BaseOperation<T?> {
-        _fetchByModelId(modelIdClosure, options)
-    }
-
-    public func fetchOperation(
-        by request: RepositorySliceRequest,
-        options: RepositoryFetchOptions
-    ) -> BaseOperation<[T]> {
-        _fetchByOffsetCount(request, options)
+    public func fetchOperation(by request: RepositorySliceRequest,
+                               options: RepositoryFetchOptions) -> BaseOperation<[T]> {
+        return _fetchByOffsetCount(request, options)
     }
 
     public func fetchAllOperation(with options: RepositoryFetchOptions) -> BaseOperation<[T]> {
-        _fetchAll(options)
+        return _fetchAll(options)
     }
 
-    public func saveOperation(
-        _ updateModelsBlock: @escaping () throws -> [T],
-        _ deleteIdsBlock: @escaping () throws -> [String]
-    )
-        -> BaseOperation<Void>
-    {
-        _save(updateModelsBlock, deleteIdsBlock)
+    public func saveOperation(_ updateModelsBlock: @escaping () throws -> [T],
+                              _ deleteIdsBlock: @escaping () throws -> [String]) -> BaseOperation<Void> {
+        return _save(updateModelsBlock, deleteIdsBlock)
     }
 
-    public func replaceOperation(_ newModelsBlock: @escaping () throws -> [T])
-        -> BaseOperation<Void>
-    {
-        _replace(newModelsBlock)
+    public func replaceOperation(_ newModelsBlock: @escaping () throws -> [T]) -> BaseOperation<Void> {
+        return _replace(newModelsBlock)
     }
 
     public func deleteAllOperation() -> BaseOperation<Void> {
-        _deleteAll()
+        return _deleteAll()
     }
 
     public func fetchCountOperation() -> BaseOperation<Int> {
-        _fetchCount()
+        return _fetchCount()
     }
 }

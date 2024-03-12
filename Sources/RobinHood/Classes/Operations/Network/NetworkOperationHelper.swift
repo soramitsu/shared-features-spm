@@ -1,7 +1,7 @@
 /**
- * Copyright Soramitsu Co., Ltd. All Rights Reserved.
- * SPDX-License-Identifier: GPL-3.0
- */
+* Copyright Soramitsu Co., Ltd. All Rights Reserved.
+* SPDX-License-Identifier: GPL-3.0
+*/
 
 import Foundation
 
@@ -10,7 +10,8 @@ import Foundation
  *  to network operation.
  */
 
-public enum NetworkOperationHelper {
+public final class NetworkOperationHelper {
+
     /**
      *  Checks whether the error is actually cancellation of the request.
      *

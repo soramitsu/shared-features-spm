@@ -1,7 +1,7 @@
 /**
- * Copyright Soramitsu Co., Ltd. All Rights Reserved.
- * SPDX-License-Identifier: GPL-3.0
- */
+* Copyright Soramitsu Co., Ltd. All Rights Reserved.
+* SPDX-License-Identifier: GPL-3.0
+*/
 
 import Foundation
 
@@ -42,6 +42,6 @@ public final class BlockNetworkRequestFactory: NetworkRequestFactoryProtocol {
     }
 
     public func createRequest() throws -> URLRequest {
-        try requestBlock()
+        return try requestBlock()
     }
 }

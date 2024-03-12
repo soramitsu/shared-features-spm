@@ -1,7 +1,7 @@
 /**
- * Copyright Soramitsu Co., Ltd. All Rights Reserved.
- * SPDX-License-Identifier: GPL-3.0
- */
+* Copyright Soramitsu Co., Ltd. All Rights Reserved.
+* SPDX-License-Identifier: GPL-3.0
+*/
 
 import Foundation
 
@@ -55,13 +55,11 @@ public final class DataProvider<T: Identifiable & Equatable> {
      *      but sometimes there is a need to share a global queue due to optimization reasons.
      */
 
-    public init(
-        source: AnyDataProviderSource<T>,
-        repository: AnyDataProviderRepository<T>,
-        updateTrigger: DataProviderTriggerProtocol = DataProviderEventTrigger.onAll,
-        executionQueue: OperationQueue? = nil,
-        serialSyncQueue: DispatchQueue? = nil
-    ) {
+    public init(source: AnyDataProviderSource<T>,
+                repository: AnyDataProviderRepository<T>,
+                updateTrigger: DataProviderTriggerProtocol = DataProviderEventTrigger.onAll,
+                executionQueue: OperationQueue? = nil,
+                serialSyncQueue: DispatchQueue? = nil) {
         self.source = source
         self.repository = repository
 
@@ -72,12 +70,11 @@ public final class DataProvider<T: Identifiable & Equatable> {
         }
 
         if let currentSyncQueue = serialSyncQueue {
-            syncQueue = currentSyncQueue
+            self.syncQueue = currentSyncQueue
         } else {
-            syncQueue = DispatchQueue(
+            self.syncQueue = DispatchQueue(
                 label: "co.jp.dataprovider.repository.queue.\(UUID().uuidString)",
-                qos: .utility
-            )
+                qos: .utility)
         }
 
         self.updateTrigger = updateTrigger
@@ -87,7 +84,6 @@ public final class DataProvider<T: Identifiable & Equatable> {
 }
 
 // MARK: Internal Repository update logic
-
 extension DataProvider {
     func dispatchUpdateRepository() {
         syncQueue.async {
@@ -97,8 +93,7 @@ extension DataProvider {
 
     private func updateRepository() {
         if let currentUpdateRepositoryOperation = repositoryUpdateOperation,
-           !currentUpdateRepositoryOperation.isFinished
-        {
+            !currentUpdateRepositoryOperation.isFinished {
             return
         }
 
@@ -106,10 +101,8 @@ extension DataProvider {
 
         let repositoryOperation = repository.fetchAllOperation()
 
-        let differenceOperation = createDifferenceOperation(
-            dependingOn: sourceWrapper.targetOperation,
-            repositoryOperation: repositoryOperation
-        )
+        let differenceOperation = createDifferenceOperation(dependingOn: sourceWrapper.targetOperation,
+                                                            repositoryOperation: repositoryOperation)
 
         let saveOperation = createSaveRepositoryOperation(dependingOn: differenceOperation)
 
@@ -118,7 +111,7 @@ extension DataProvider {
                 return
             }
 
-            if case let .failure(error) = saveResult {
+            if case .failure(let error) = saveResult {
                 self.syncQueue.async {
                     self.notifyObservers(with: error)
                 }
@@ -127,9 +120,8 @@ extension DataProvider {
             }
 
             guard let changesResult = differenceOperation.result,
-                  case let .success(updates) = changesResult else
-            {
-                return
+                case .success(let updates) = changesResult else {
+                    return
             }
 
             self.syncQueue.async {
@@ -146,107 +138,96 @@ extension DataProvider {
 
         lastSyncOperation = saveOperation
 
-        let operations = sourceWrapper.allOperations + [
-            repositoryOperation,
-            differenceOperation,
-            saveOperation,
-        ]
+        let operations = sourceWrapper.allOperations + [repositoryOperation, differenceOperation, saveOperation]
 
         executionQueue.addOperations(operations, waitUntilFinished: false)
     }
 
-    private func createDifferenceOperation(
-        dependingOn sourceOperation: BaseOperation<[T]>,
-        repositoryOperation: BaseOperation<[T]>
-    )
-        -> BaseOperation<[DataProviderChange<T>]>
-    {
-        let operation = ClosureOperation<[DataProviderChange<T>]> {
-            guard let sourceResult = sourceOperation.result else {
-                throw DataProviderError.unexpectedSourceResult
+    private func createDifferenceOperation(dependingOn sourceOperation: BaseOperation<[T]>,
+                                           repositoryOperation: BaseOperation<[T]>)
+        -> BaseOperation<[DataProviderChange<T>]> {
+
+            let operation = ClosureOperation<[DataProviderChange<T>]> {
+                guard let sourceResult = sourceOperation.result else {
+                    throw DataProviderError.unexpectedSourceResult
+                }
+
+                if case .failure(let error) = sourceResult {
+                    throw error
+                }
+
+                guard let repositoryResult = repositoryOperation.result else {
+                    throw DataProviderError.unexpectedRepositoryResult
+                }
+
+                if case .failure(let error) = repositoryResult {
+                    throw error
+                }
+
+                if case .success(let sourceModels) = sourceResult,
+                    case .success(let repositoryModels) = repositoryResult {
+
+                    return try self.findChanges(sourceResult: sourceModels,
+                                                repositoryResult: repositoryModels)
+                } else {
+                    throw DataProviderError.unexpectedSourceResult
+                }
             }
 
-            if case let .failure(error) = sourceResult {
-                throw error
-            }
+            operation.addDependency(sourceOperation)
+            operation.addDependency(repositoryOperation)
 
-            guard let repositoryResult = repositoryOperation.result else {
-                throw DataProviderError.unexpectedRepositoryResult
-            }
-
-            if case let .failure(error) = repositoryResult {
-                throw error
-            }
-
-            if case let .success(sourceModels) = sourceResult,
-               case let .success(repositoryModels) = repositoryResult
-            {
-                return try self.findChanges(
-                    sourceResult: sourceModels,
-                    repositoryResult: repositoryModels
-                )
-            } else {
-                throw DataProviderError.unexpectedSourceResult
-            }
-        }
-
-        operation.addDependency(sourceOperation)
-        operation.addDependency(repositoryOperation)
-
-        return operation
+            return operation
     }
 
-    private func createSaveRepositoryOperation(
-        dependingOn differenceOperation: BaseOperation<[DataProviderChange<T>]>
-    )
-        -> BaseOperation<Void>
-    {
-        let updatedItemsBlock = { () throws -> [T] in
-            guard let result = differenceOperation.result else {
-                throw DataProviderError.dependencyCancelled
-            }
+    private func createSaveRepositoryOperation(dependingOn differenceOperation: BaseOperation<[DataProviderChange<T>]>)
+        -> BaseOperation<Void> {
 
-            switch result {
-            case let .success(updates):
-                return updates.compactMap { update in
-                    update.item
+            let updatedItemsBlock = { () throws -> [T] in
+                guard let result = differenceOperation.result else {
+                    throw DataProviderError.dependencyCancelled
                 }
-            case let .failure(error):
-                throw error
-            }
-        }
 
-        let deletedItemsBlock = { () throws -> [String] in
-            guard let result = differenceOperation.result else {
-                throw DataProviderError.dependencyCancelled
-            }
-
-            switch result {
-            case let .success(updates):
-                return updates.compactMap { item in
-                    if case let .delete(identifier) = item {
-                        return identifier
-                    } else {
-                        return nil
+                switch result {
+                case .success(let updates):
+                    return updates.compactMap { (update) in
+                        return update.item
                     }
+                case .failure(let error):
+                    throw error
                 }
-            case let .failure(error):
-                throw error
             }
-        }
 
-        let operation = repository.saveOperation(updatedItemsBlock, deletedItemsBlock)
+            let deletedItemsBlock = { () throws -> [String] in
+                guard let result = differenceOperation.result else {
+                    throw DataProviderError.dependencyCancelled
+                }
 
-        operation.addDependency(differenceOperation)
+                switch result {
+                case .success(let updates):
+                    return updates.compactMap { (item) in
+                        if case .delete(let identifier) = item {
+                            return identifier
+                        } else {
+                            return nil
+                        }
+                    }
+                case .failure(let error):
+                    throw error
+                }
+            }
 
-        return operation
+            let operation = repository.saveOperation(updatedItemsBlock, deletedItemsBlock)
+
+            operation.addDependency(differenceOperation)
+
+            return operation
     }
 
     private func notifyObservers(with updates: [DataProviderChange<T>]) {
-        for repositoryObserver in observers {
+        observers.forEach { (repositoryObserver) in
             if repositoryObserver.observer != nil,
-               !updates.isEmpty || repositoryObserver.options.alwaysNotifyOnRefresh
-            {
+                (updates.count > 0 || repositoryObserver.options.alwaysNotifyOnRefresh) {
                 dispatchInQueueWhenPossible(repositoryObserver.queue) {
                     repositoryObserver.updateBlock(updates)
                 }
@@ -255,10 +236,8 @@ extension DataProvider {
     }
 
     private func notifyObservers(with error: Error) {
-        for repositoryObserver in observers {
-            if repositoryObserver.observer != nil,
-               repositoryObserver.options.alwaysNotifyOnRefresh
-            {
+        observers.forEach { (repositoryObserver) in
+            if repositoryObserver.observer != nil, repositoryObserver.options.alwaysNotifyOnRefresh {
                 dispatchInQueueWhenPossible(repositoryObserver.queue) {
                     repositoryObserver.failureBlock(error)
                 }
@@ -266,15 +245,12 @@ extension DataProvider {
         }
     }
 
-    private func findChanges(
-        sourceResult: [T],
-        repositoryResult: [T]
-    ) throws -> [DataProviderChange<T>] {
-        let sourceKeyValue = sourceResult.reduce(into: [String: T]()) { result, item in
+    private func findChanges(sourceResult: [T], repositoryResult: [T]) throws -> [DataProviderChange<T>] {
+        let sourceKeyValue = sourceResult.reduce(into: [String: T]()) { (result, item) in
             result[item.identifier] = item
         }
 
-        let repositoryKeyValue = repositoryResult.reduce(into: [String: T]()) { result, item in
+        let repositoryKeyValue = repositoryResult.reduce(into: [String: T]()) { (result, item) in
             result[item.identifier] = item
         }
 
@@ -291,9 +267,7 @@ extension DataProvider {
             }
         }
 
-        for repositoryModel in repositoryResult
-            where sourceKeyValue[repositoryModel.identifier] == nil
-        {
+        for repositoryModel in repositoryResult where sourceKeyValue[repositoryModel.identifier] == nil {
             updates.append(DataProviderChange.delete(deletedIdentifier: repositoryModel.identifier))
         }
 

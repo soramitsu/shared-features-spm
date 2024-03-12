@@ -1,10 +1,10 @@
 /**
- * Copyright Soramitsu Co., Ltd. All Rights Reserved.
- * SPDX-License-Identifier: GPL-3.0
- */
+* Copyright Soramitsu Co., Ltd. All Rights Reserved.
+* SPDX-License-Identifier: GPL-3.0
+*/
 
-import CoreData
 import Foundation
+import CoreData
 
 /**
  *  Enum is defining possible strategies to handle situations
@@ -36,9 +36,6 @@ public struct CoreDataPersistentSettings {
     /// Flag that states whether to allow database backup to iCloud.
     public var excludeFromiCloudBackup: Bool
 
-    /// Store Options and Migration Options
-    public var options: [AnyHashable: Any]?
-
     /**
      *  Creates Core Data persistent store settins.
      *
@@ -49,23 +46,16 @@ public struct CoreDataPersistentSettings {
      *    incompatible persisten store.
      *    - excludeFromiCloudBackup: Flag that states whether to allow database
      *    backup to iCloud.
-     *    - options: A dictionary containing key-value pairs that specify whether the store should be read-only,
-     *    and whether (for an XML store) the XML file should be validated against the DTD before it is read.
-     *    For key definitions, see Store Options and Migration Options. This value may be nil.
      */
 
-    public init(
-        databaseDirectory: URL,
-        databaseName: String,
-        incompatibleModelStrategy: IncompatibleModelHandlingStrategy = .ignore,
-        excludeFromiCloudBackup: Bool = true,
-        options: [AnyHashable: Any]? = nil
-    ) {
+    public init(databaseDirectory: URL,
+                databaseName: String,
+                incompatibleModelStrategy: IncompatibleModelHandlingStrategy = .ignore,
+                excludeFromiCloudBackup: Bool = true) {
         self.databaseDirectory = databaseDirectory
         self.databaseName = databaseName
         self.incompatibleModelStrategy = incompatibleModelStrategy
         self.excludeFromiCloudBackup = excludeFromiCloudBackup
-        self.options = options
     }
 }
 

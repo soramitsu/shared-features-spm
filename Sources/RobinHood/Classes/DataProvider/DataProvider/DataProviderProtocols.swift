@@ -1,7 +1,7 @@
 /**
- * Copyright Soramitsu Co., Ltd. All Rights Reserved.
- * SPDX-License-Identifier: GPL-3.0
- */
+* Copyright Soramitsu Co., Ltd. All Rights Reserved.
+* SPDX-License-Identifier: GPL-3.0
+*/
 
 import Foundation
 
@@ -41,11 +41,8 @@ public protocol DataProviderProtocol {
      *  block to the function instead.
      */
 
-    func fetch(
-        by modelId: String,
-        completionBlock: ((Result<Model?, Error>?) -> Void)?
-    )
-        -> CompoundOperationWrapper<Model?>
+    func fetch(by modelId: String,
+               completionBlock: ((Result<Model?, Error>?) -> Void)?) -> CompoundOperationWrapper<Model?>
 
     /**
      *  Returns a concrete page of objects from local store or fetches from remote store in case it is absent locally.
@@ -64,11 +61,8 @@ public protocol DataProviderProtocol {
      *  block to the function instead.
      */
 
-    func fetch(
-        page index: UInt,
-        completionBlock: ((Result<[Model], Error>?) -> Void)?
-    )
-        -> CompoundOperationWrapper<[Model]>
+    func fetch(page index: UInt,
+               completionBlock: ((Result<[Model], Error>?) -> Void)?) -> CompoundOperationWrapper<[Model]>
 
     /**
      *  Adds observer to notify when there are changes in local storage.
@@ -95,13 +89,11 @@ public protocol DataProviderProtocol {
      *    - options: Controls a way of how and when observer is notified.
      */
 
-    func addObserver(
-        _ observer: AnyObject,
-        deliverOn queue: DispatchQueue?,
-        executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void,
-        failing failureBlock: @escaping (Error) -> Void,
-        options: DataProviderObserverOptions
-    )
+    func addObserver(_ observer: AnyObject,
+                     deliverOn queue: DispatchQueue?,
+                     executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void,
+                     failing failureBlock: @escaping (Error) -> Void,
+                     options: DataProviderObserverOptions)
 
     /**
      *  Removes an observer from the list of observers.
@@ -120,6 +112,7 @@ public protocol DataProviderProtocol {
 }
 
 public extension DataProviderProtocol {
+
     /**
      *  Adds observer to notify when there are changes in local storage.
      *
@@ -147,19 +140,15 @@ public extension DataProviderProtocol {
      *      after failed synchronization but only if `alwaysNotifyOnRefresh` flag is set in options.
      */
 
-    func addObserver(
-        _ observer: AnyObject,
-        deliverOn queue: DispatchQueue?,
-        executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void,
-        failing failureBlock: @escaping (Error) -> Void
-    ) {
-        addObserver(
-            observer,
-            deliverOn: queue,
-            executing: updateBlock,
-            failing: failureBlock,
-            options: DataProviderObserverOptions()
-        )
+    func addObserver(_ observer: AnyObject,
+                     deliverOn queue: DispatchQueue?,
+                     executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void,
+                     failing failureBlock: @escaping (Error) -> Void) {
+        addObserver(observer,
+                    deliverOn: queue,
+                    executing: updateBlock,
+                    failing: failureBlock,
+                    options: DataProviderObserverOptions())
     }
 }
 

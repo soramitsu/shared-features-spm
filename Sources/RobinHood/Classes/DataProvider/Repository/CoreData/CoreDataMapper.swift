@@ -1,10 +1,10 @@
 /**
- * Copyright Soramitsu Co., Ltd. All Rights Reserved.
- * SPDX-License-Identifier: GPL-3.0
- */
+* Copyright Soramitsu Co., Ltd. All Rights Reserved.
+* SPDX-License-Identifier: GPL-3.0
+*/
 
-import CoreData
 import Foundation
+import CoreData
 
 /**
  *  Protocol is designed to provide an interface for mapping swift identifiable model
@@ -38,11 +38,7 @@ public protocol CoreDataMapperProtocol: AnyObject {
      *    - context: Core Data context to created nested object if needed.
      */
 
-    func populate(
-        entity: CoreDataEntity,
-        from model: DataProviderModel,
-        using context: NSManagedObjectContext
-    ) throws
+    func populate(entity: CoreDataEntity, from model: DataProviderModel, using context: NSManagedObjectContext) throws
 
     /// Name of idetifier field to access NSManagedObject by.
     var entityIdentifierFieldName: String { get }
@@ -57,8 +53,7 @@ public final class AnyCoreDataMapper<T: Identifiable, U: NSManagedObject>: CoreD
     public typealias CoreDataEntity = U
 
     private let _transform: (CoreDataEntity) throws -> DataProviderModel
-    private let _populate: (CoreDataEntity, DataProviderModel, NSManagedObjectContext) throws
-        -> Void
+    private let _populate: (CoreDataEntity, DataProviderModel, NSManagedObjectContext) throws -> Void
     private let _entityIdentifierFieldName: String
 
     /**
@@ -68,28 +63,24 @@ public final class AnyCoreDataMapper<T: Identifiable, U: NSManagedObject>: CoreD
      *    - mapper: Core Data mapper implementation to erase type of.
      */
 
-    public init<M: CoreDataMapperProtocol>(_ mapper: M) where M.DataProviderModel == T,
-        M.CoreDataEntity == U
-    {
+    public init<M: CoreDataMapperProtocol>(_ mapper: M) where M.DataProviderModel == T, M.CoreDataEntity == U {
         _transform = mapper.transform
         _populate = mapper.populate
         _entityIdentifierFieldName = mapper.entityIdentifierFieldName
     }
 
     public func transform(entity: CoreDataEntity) throws -> DataProviderModel {
-        try _transform(entity)
+        return try _transform(entity)
     }
 
-    public func populate(
-        entity: CoreDataEntity,
-        from model: DataProviderModel,
-        using context: NSManagedObjectContext
-    ) throws {
+    public func populate(entity: CoreDataEntity,
+                         from model: DataProviderModel,
+                         using context: NSManagedObjectContext) throws {
         try _populate(entity, model, context)
     }
 
     public var entityIdentifierFieldName: String {
-        _entityIdentifierFieldName
+        return _entityIdentifierFieldName
     }
 }
 
@@ -130,10 +121,8 @@ private class CoreDataDecodingContainer: Decodable {
  *  Implementation assumes that swift model conforms to ```Codable``` protocol.
  */
 
-public final class CodableCoreDataMapper<
-    T: Identifiable & Codable,
-    U: NSManagedObject & CoreDataCodable
->: CoreDataMapperProtocol {
+public final class CodableCoreDataMapper<T: Identifiable & Codable,
+U: NSManagedObject & CoreDataCodable>: CoreDataMapperProtocol {
     public typealias DataProviderModel = T
     public typealias CoreDataEntity = U
 
@@ -157,10 +146,8 @@ public final class CodableCoreDataMapper<
 
     public func populate(entity: U, from model: T, using context: NSManagedObjectContext) throws {
         let data = try JSONEncoder().encode(model)
-        let container = try JSONDecoder().decode(
-            CoreDataDecodingContainer.self,
-            from: data
-        )
+        let container = try JSONDecoder().decode(CoreDataDecodingContainer.self,
+                                                 from: data)
         try container.populate(entity: entity, using: context)
     }
 }
