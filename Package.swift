@@ -10,7 +10,6 @@ let package = Package(
     products: [
         
         .library(name: "SSFCrypto", targets: ["SSFCrypto"]),
-        .library(name: "IrohaCrypto", targets: ["IrohaCrypto"]),
         .library(name: "SSFCloudStorage", targets: ["SSFCloudStorage"]),
         .library(name: "SSFQRService", targets: ["SSFQRService"]),
     ],
