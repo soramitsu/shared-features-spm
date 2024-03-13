@@ -1,5 +1,0 @@
-module scrypt {
-    header "../../Headers/scrypt-Bridging-Header.h"
-    link "scrypt"
-    export *
-}
