@@ -77,7 +77,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ShlyapkinIN/scrypt-test.git",
       "state" : {
-        "revision" : "aba2d497066ae1b4e2cf50d44537cc04318a6bb1"
+        "revision" : "396592c845830ec9fca0dac017c25bfb101ba85d"
       }
     },
     {

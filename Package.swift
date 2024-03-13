@@ -16,7 +16,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
-        .package(url: "https://github.com/ShlyapkinIN/scrypt-test.git", revision: "aba2d497066ae1b4e2cf50d44537cc04318a6bb1"),
+        .package(url: "https://github.com/ShlyapkinIN/scrypt-test.git", revision: "396592c845830ec9fca0dac017c25bfb101ba85d"),
         .package(url: "https://github.com/bitmark-inc/tweetnacl-swiftwrap", from: "1.1.0"),
         .package(url: "https://github.com/ashleymills/Reachability.swift", from: "5.0.0"),
         .package(url: "https://github.com/soramitsu/fearless-starscream", from: "4.0.8"),
