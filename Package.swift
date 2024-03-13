@@ -16,7 +16,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
-//        .package(url: "https://github.com/v57/scrypt.c.git", from: "0.1.0"),
+        .package(url: "https://github.com/ShlyapkinIN/scrypt-test.git", branch: "main"),
         .package(url: "https://github.com/bitmark-inc/tweetnacl-swiftwrap", from: "1.1.0"),
         .package(url: "https://github.com/ashleymills/Reachability.swift", from: "5.0.0"),
         .package(url: "https://github.com/soramitsu/fearless-starscream", from: "4.0.8"),
@@ -32,7 +32,6 @@ let package = Package(
         .binaryTarget(name: "libed25519", path: "Binaries/libed25519.xcframework"),
         .binaryTarget(name: "sr25519lib", path: "Binaries/sr25519lib.xcframework"),
         .binaryTarget(name: "MPQRCoreSDK", path: "Binaries/MPQRCoreSDK.xcframework"),
-        .target(name: "scrypt", path: "./Sources/scrypt"),
         .target(name: "RobinHood"),
         .target(name: "keccak"),
         .target(name: "SoraKeystore"),
@@ -54,8 +53,7 @@ let package = Package(
                 .byName(name: "sr25519lib"),
                 .byName(name: "blake2lib"),
                 .product(name: "secp256k1", package: "secp256k1.swift"),
-//                .product(name: "scrypt", package: "scrypt.c")
-                "scrypt"
+                .product(name: "scrypt", package: "scrypt-test")
             ],
             publicHeadersPath: "include",
             cSettings: [ .headerSearchPath(".") ]
