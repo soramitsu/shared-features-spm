@@ -16,7 +16,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
-        .package(url: "https://github.com/ShlyapkinIN/scrypt-test.git", revision: "396592c845830ec9fca0dac017c25bfb101ba85d"),
+        .package(url: "https://github.com/ShlyapkinIN/scrypt-test.git", revision: "d4723984090c5a35f34a16e767c7019a1ebb1e66"),
         .package(url: "https://github.com/bitmark-inc/tweetnacl-swiftwrap", from: "1.1.0"),
         .package(url: "https://github.com/ashleymills/Reachability.swift", from: "5.0.0"),
         .package(url: "https://github.com/soramitsu/fearless-starscream", from: "4.0.8"),
@@ -55,8 +55,13 @@ let package = Package(
                 .product(name: "secp256k1", package: "secp256k1.swift"),
                 .product(name: "scrypt", package: "scrypt-test")
             ],
-            publicHeadersPath: "include",
-            cSettings: [ .headerSearchPath(".") ]
+            publicHeadersPath: "include", 
+            cSettings: [ .headerSearchPath(".") ], 
+            swiftSettings: [
+                .define("EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64"),
+                .define("ONLY_ACTIVE_ARCH = YES"),
+                .define("BUILD_LIBRARY_FOR_DISTRIBUTION = YES")
+            ]
         ),
         .target(
             name: "SSFCloudStorage",
