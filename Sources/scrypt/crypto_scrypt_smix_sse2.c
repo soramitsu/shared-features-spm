@@ -28,6 +28,7 @@
  */
 #include <emmintrin.h>
 #include <stdint.h>
+#include <immintrin.h>
 
 #include "sysendian.h"
 
