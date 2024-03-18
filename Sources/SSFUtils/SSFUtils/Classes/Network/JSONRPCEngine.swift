@@ -98,14 +98,14 @@ public protocol JSONRPCEngine: AnyObject {
     var url: URL? { get set }
     var pendingEngineRequests: [JSONRPCRequest] { get }
 
-    func callMethod<P: Encodable, T: Decodable>(
+    func callMethod<P: Codable, T: Decodable>(
         _ method: String,
         params: P?,
         options: JSONRPCOptions,
         completion closure: ((Result<T, Error>) -> Void)?
     ) throws -> UInt16
 
-    func subscribe<P: Encodable, T: Decodable>(
+    func subscribe<P: Codable, T: Decodable>(
         _ method: String,
         params: P?,
         updateClosure: @escaping (T) -> Void,
@@ -121,12 +121,11 @@ public protocol JSONRPCEngine: AnyObject {
 
     func connectIfNeeded()
     func disconnectIfNeeded()
-    func unsubsribe(_ identifier: UInt16)
-    func unsubsribeAll()
+    func unsubsribe(_ identifier: UInt16) throws
 }
 
 public extension JSONRPCEngine {
-    func callMethod<P: Encodable, T: Decodable>(
+    func callMethod<P: Codable, T: Decodable>(
         _ method: String,
         params: P?,
         completion closure: ((Result<T, Error>) -> Void)?

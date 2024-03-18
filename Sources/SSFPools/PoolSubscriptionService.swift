@@ -15,7 +15,5 @@ public protocol PoolSubscriptionService {
         updateClosure: @escaping (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void
     ) throws -> UInt16
     
-    func unsubscribe(id: UInt16)
-    
-    func unsubscribeAll()
+    func unsubscribe(id: UInt16) throws
 }

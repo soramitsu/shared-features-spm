@@ -21,6 +21,7 @@ public enum RPCMethod {
     public static let runtimeVersionSubscribe = "state_subscribeRuntimeVersion"
     public static let existentialDeposit = "tokens_queryExistentialDeposit"
     public static let stateCall = "state_call"
+    public static let stateUnsubscribe = "state_unsubscribeStorage"
 
     // Polkaswap
     public static let checkIsSwapPossible = "liquidityProxy_isPathAvailable"

@@ -356,7 +356,7 @@ extension PolkaswapOperationFactoryDefault: PolkaswapOperationFactory {
 
             return PolkaswapPoolReserves(
                 reserves: response.first?.value ?? BigUInt(integerLiteral: 0),
-                fees: response.last?.value ?? BigUInt(integerLiteral: 0)
+                fee: response.last?.value ?? BigUInt(integerLiteral: 0)
             )
         }
 

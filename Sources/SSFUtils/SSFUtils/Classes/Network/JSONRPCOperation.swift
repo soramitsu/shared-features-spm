@@ -5,7 +5,7 @@ enum JSONRPCOperationError: Error {
     case timeout
 }
 
-public class JSONRPCOperation<P: Encodable, T: Decodable>: BaseOperation<T> {
+public class JSONRPCOperation<P: Codable, T: Decodable>: BaseOperation<T> {
     public let engine: JSONRPCEngine
     private(set) var requestId: UInt16?
     public let method: String

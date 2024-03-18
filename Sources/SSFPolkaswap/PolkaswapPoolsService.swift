@@ -3,22 +3,38 @@ import SSFUtils
 import SSFPools
 import SSFPoolsStorage
 import SSFStorageQueryKit
+import Combine
 
 enum PolkaswapServiceError: Error {
     case unexpectedError
 }
 
-final class PolkaswapPoolsService {
-    
-    @Published var liquidityPairs: [LiquidityPair] = []
-    var pairsPublisher: Published<[LiquidityPair]>.Publisher { $liquidityPairs }
-    
-    @Published var accountPools: [AccountPool] = []
-    var accountPoolsPublisher: Published<[AccountPool]>.Publisher { $accountPools }
-    
-    @Published var poolDetails: AccountPool?
-    var poolDetailsPublisher: Published<AccountPool?>.Publisher { $poolDetails }
-    
+protocol PoolsService {
+    func getAllPairs() async throws -> [LiquidityPair]
+
+    func getAccountPools(accountId: Data) async throws -> [AccountPool]
+
+    func getAccountPoolDetails(
+        accountId: Data,
+        baseAsset: PooledAssetInfo,
+        targetAsset: PooledAssetInfo
+    ) async throws -> AccountPool?
+
+    func subscribeAccountPools(
+        accountId: Data
+    ) async throws -> (ids: [UInt16], publisher: PassthroughSubject<[AccountPool], Error>)
+
+    func subscribeAccountPoolDetails(
+        accountId: Data,
+        baseAsset: PooledAssetInfo,
+        targetAsset: PooledAssetInfo
+    ) throws -> (id: UInt16, publisher: PassthroughSubject<AccountPool, Error>)
+
+    func unsubscribe(id: UInt16) throws
+}
+
+final class PolkaswapService {
+
     private let remoteService: RemotePolkaswapPoolsService
     private let localPairService: LocalLiquidityPairService
     private let localAccountPoolService: LocalAccountPoolsService
@@ -37,24 +53,32 @@ final class PolkaswapPoolsService {
     }
 }
 
-extension PolkaswapPoolsService: PoolsService {
-    func subscribeAccountPools(accountId: Data) async throws -> [UInt16] {
+extension PolkaswapService: PoolsService {
+    func subscribeAccountPools(
+        accountId: Data
+    ) async throws -> (ids: [UInt16], publisher: PassthroughSubject<[AccountPool], Error>) {
+
+        let publisher = PassthroughSubject<[AccountPool], Error>()
+        
         let baseAssetIds = try await remoteService.getBaseAssetIds()
         
         let updateClosure: (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void = { [weak self] update in
             Task { [weak self] in
                 guard let self else { return }
-                self.accountPools = try await self.getAccountPools(accountId: accountId)
+                let accountPools = try await self.getAccountPools(accountId: accountId)
+                publisher.send(accountPools)
             }
         }
         
-        return try baseAssetIds.compactMap { baseAssetId in
+        let ids = try baseAssetIds.compactMap { baseAssetId in
             try subscriptionService.createAccountPoolsSubscription(
                 accountId: accountId,
                 baseAssetId: baseAssetId,
                 updateClosure: updateClosure
             )
         }
+        
+        return (ids: ids, publisher: publisher)
     }
     
     func getAccountPools(accountId: Data) async throws -> [AccountPool] {
@@ -73,29 +97,36 @@ extension PolkaswapPoolsService: PoolsService {
             return try await localAccountPoolService.get()
         }
     }
-
+    
     func subscribeAccountPoolDetails(
         accountId: Data,
         baseAsset: PooledAssetInfo,
         targetAsset: PooledAssetInfo
-    ) throws -> UInt16 {
+    ) throws -> (id: UInt16, publisher: PassthroughSubject<AccountPool, Error>) {
+        let publisher = PassthroughSubject<AccountPool, Error>()
+        
         let updateClosure: (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void = { [weak self] update in
             Task { [weak self] in
-                guard let self else { return }
+                guard let self,
+                      let poolDetails = try await self.getAccountPoolDetails(
+                        accountId: accountId,
+                        baseAsset: baseAsset,
+                        targetAsset: targetAsset
+                      ) else {
+                    return
+                }
 
-                self.poolDetails = try await self.getAccountPoolDetails(
-                    accountId: accountId,
-                    baseAsset: baseAsset,
-                    targetAsset: targetAsset
-                )
+                publisher.send(poolDetails)
             }
         }
-
-        return try subscriptionService.createPoolReservesSubscription(
+        
+        let id = try subscriptionService.createPoolReservesSubscription(
             baseAssetId: baseAsset.id,
             targetAssetId: targetAsset.id,
             updateClosure: updateClosure
         )
+        
+        return (id: id, publisher: publisher)
     }
     
     func getAccountPoolDetails(
@@ -110,28 +141,10 @@ extension PolkaswapPoolsService: PoolsService {
                 targetAsset: targetAsset
             )
 
-            try await localAccountPoolService.sync(remoteAccounts: accountPools)
-
             return poolDetails
         } catch {
             let pools = try? await localAccountPoolService.get()
             return pools?.first { $0.baseAssetId == baseAsset.id && $0.targetAssetId == targetAsset.id }
-        }
-    }
-    
-    func subscribeAllPairs() async throws {
-        do {
-            liquidityPairs = try await remoteService.getAllPairs()
-            
-            liquidityPairs = try await liquidityPairs.asyncMap { [weak self] pair in
-                let apy = try await self?.remoteService.getAPY(reservesId: pair.reservesId)
-                return pair.update(apy: apy)
-            }
-            
-            try await localPairService.sync(remotePairs: liquidityPairs)
-        } catch {
-            liquidityPairs = try await localPairService.get()
-            throw PolkaswapServiceError.unexpectedError
         }
     }
     
@@ -152,11 +165,7 @@ extension PolkaswapPoolsService: PoolsService {
         }
     }
     
-    func unsubscribe(id: UInt16) {
-        subscriptionService.unsubscribe(id: id)
-    }
-    
-    func unsubscribeAll() {
-        subscriptionService.unsubscribeAll()
+    func unsubscribe(id: UInt16) throws {
+        try subscriptionService.unsubscribe(id: id)
     }
 }

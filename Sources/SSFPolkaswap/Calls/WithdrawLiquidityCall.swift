@@ -3,8 +3,8 @@ import BigInt
 
 struct WithdrawLiquidityCall: Codable {
     let dexId: String
-    var assetA: SoraAssetId
-    var assetB: SoraAssetId
+    let assetA: SoraAssetId
+    let assetB: SoraAssetId
     @StringCodable var assetDesired: BigUInt
     @StringCodable var minA: BigUInt
     @StringCodable var minB: BigUInt

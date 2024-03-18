@@ -25,6 +25,4 @@ public protocol PoolsService {
     ) async throws -> AccountPool?
     
     func unsubscribe(id: UInt16)
-
-    func unsubscribeAll()
 }

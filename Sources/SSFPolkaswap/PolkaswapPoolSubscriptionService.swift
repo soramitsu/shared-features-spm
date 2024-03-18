@@ -55,11 +55,7 @@ extension PolkaswapPoolSubscriptionService: PoolSubscriptionService {
         )
     }
     
-    func unsubscribe(id: UInt16) {
-        connection.unsubsribe(id)
-    }
-    
-    func unsubscribeAll() {
-        connection.unsubsribeAll()
+    func unsubscribe(id: UInt16) throws {
+        try connection.unsubsribe(id)
     }
 }

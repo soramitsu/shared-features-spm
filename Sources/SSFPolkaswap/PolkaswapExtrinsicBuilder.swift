@@ -17,9 +17,9 @@ protocol PoolsExtrinsicBuilder {
 }
 
 final class PolkaswapExtrinsicBuilder {
-    private let callFactory: SubstrateCallFactoryProtocol
+    private let callFactory: SubstrateCallFactory
     
-    init(callFactory: SubstrateCallFactoryProtocol) {
+    init(callFactory: SubstrateCallFactory) {
         self.callFactory = callFactory
     }
 }

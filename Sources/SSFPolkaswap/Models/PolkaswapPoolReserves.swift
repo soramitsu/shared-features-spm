@@ -3,5 +3,5 @@ import BigInt
 
 struct PolkaswapPoolReserves {
     let reserves: BigUInt
-    let fees: BigUInt
+    let fee: BigUInt
 }

@@ -2,11 +2,15 @@ import RobinHood
 import CoreData
 import SSFUtils
 
+enum PoolsDataStorageFacadeError: Error {
+    case unexpectedError
+}
+
 enum PoolsDataStorageParams {
     static let modelName = "PoolsDataModel"
     static let modelDirectory: String = "PoolsDataModel.momd"
     static let databaseName = "PoolsDataModel.sqlite"
-    public static let momURL = Bundle.main.url(
+    public static let momURL = Bundle.module.url(
         forResource: "PoolsDataModel",
         withExtension: "momd"
     )
@@ -26,27 +30,12 @@ enum PoolsDataStorageParams {
 }
 
 public final class PoolsDataStorageFacade: StorageFacadeProtocol {
-    public static let shared = PoolsDataStorageFacade()
-
     public let databaseService: CoreDataServiceProtocol
 
-    private init() {
-        
-        let bundle = Bundle(for: PoolsDataStorageFacade.self)
-
-        let omoURL = bundle.url(
-            forResource: PoolsDataStorageParams.modelName,
-            withExtension: "omo",
-            subdirectory: PoolsDataStorageParams.modelDirectory
-        )
-
-        let momURL = bundle.url(
-            forResource: PoolsDataStorageParams.modelName,
-            withExtension: "mom",
-            subdirectory: PoolsDataStorageParams.modelDirectory
-        )
-
-        let modelURL = omoURL ?? momURL
+    public init() throws {
+        guard let modelURL = Self.createModelURL() else {
+            throw PoolsDataStorageFacadeError.unexpectedError
+        }
 
         let persistentSettings = CoreDataPersistentSettings(
             databaseDirectory: PoolsDataStorageParams.storageDirectoryURL,
@@ -55,7 +44,7 @@ public final class PoolsDataStorageFacade: StorageFacadeProtocol {
         )
 
         let configuration = CoreDataServiceConfiguration(
-            modelURL: modelURL!,
+            modelURL: modelURL,
             storageType: .persistent(settings: persistentSettings)
         )
 
@@ -74,6 +63,24 @@ public final class PoolsDataStorageFacade: StorageFacadeProtocol {
             filter: filter,
             sortDescriptors: sortDescriptors
         )
+    }
+    
+    static private func createModelURL() -> URL? {
+        let bundle = Bundle(for: PoolsDataStorageFacade.self)
+
+        let omoURL = bundle.url(
+            forResource: PoolsDataStorageParams.modelName,
+            withExtension: "omo",
+            subdirectory: PoolsDataStorageParams.modelDirectory
+        )
+
+        let momURL = bundle.url(
+            forResource: PoolsDataStorageParams.modelName,
+            withExtension: "mom",
+            subdirectory: PoolsDataStorageParams.modelDirectory
+        )
+
+        return omoURL ?? momURL
     }
 }
 

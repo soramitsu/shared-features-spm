@@ -6,7 +6,7 @@ import SSFPools
 public final class PoolRepositoryFactory {
     private let storageFacade: StorageFacadeProtocol
 
-    public init(storageFacade: StorageFacadeProtocol = PoolsDataStorageFacade.shared) {
+    public init(storageFacade: StorageFacadeProtocol) {
         self.storageFacade = storageFacade
     }
 

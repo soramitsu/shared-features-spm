@@ -20,8 +20,6 @@ protocol RemotePolkaswapPoolsService {
     func getBaseAssetIds() async throws -> [String]
     func getAllPairs() async throws -> [LiquidityPair]
     func getAPY(reservesId: String?) async throws -> Decimal?
-    func getPoolReservesId(baseAssetId: String) async throws -> [LiquidityPair]
-    func getPoolReservesId(baseAssetId: String, targetAssetId: String) async throws -> String
 }
 
 actor RemotePolkaswapPoolsServiceDefault {
@@ -108,7 +106,7 @@ extension RemotePolkaswapPoolsServiceDefault: RemotePolkaswapPoolsService {
         ) ?? Decimal(0)
         
         let targetAssetPooledTotal = Decimal.fromSubstrateAmount(
-            poolDetails.poolReserves.fees,
+            poolDetails.poolReserves.fee,
             precision: targetAsset.precision
         ) ?? Decimal(0)
         
@@ -169,17 +167,5 @@ extension RemotePolkaswapPoolsServiceDefault: RemotePolkaswapPoolsService {
             throw RemotePolkaswapPoolsServiceError.reservesIdNotFound
         }
         return try await apyService.getApy(reservesId: reservesId)
-    }
-    
-    func getPoolReservesId(baseAssetId: String) async throws -> [LiquidityPair] {
-        return try await worker.getPoolReservesId(baseAssetId: baseAssetId)
-    }
-    
-    func getPoolReservesId(baseAssetId: String, targetAssetId: String) async throws -> String {
-        let accountId = try await worker.getPoolReservesId(baseAssetId: baseAssetId, targetAssetId: targetAssetId)
-        return try AddressFactory.address(
-            for: accountId.value,
-            chainFormat: chain.chainFormat
-        )
     }
 }
