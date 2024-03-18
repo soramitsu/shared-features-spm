@@ -5,7 +5,7 @@ import SSFModels
 
 @testable import SSFIndexers
 
-final class ZetaHistoryServiceTests: BaseHistoryService {
+final class ZetaHistoryServiceTests: BaseHistoryServiceTestCase {
     
     private var expectedResponse: ZetaHistoryResponse {
         get throws {
@@ -22,7 +22,7 @@ final class ZetaHistoryServiceTests: BaseHistoryService {
         historyService = nil
     }
 
-    func test() async throws {
+    func testHistoryFetching() async throws {
         let chainAsset = chainAsset(
             blockExplorerType: .zeta,
             assetSymbol: "eth",

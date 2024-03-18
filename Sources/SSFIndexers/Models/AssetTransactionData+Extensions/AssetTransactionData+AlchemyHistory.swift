@@ -7,8 +7,7 @@ extension AssetTransactionData {
         address: String
     ) -> AssetTransactionData {
         let peerAddress = item.from == address ? item.to : item.from
-        let type = item.from == address ? TransactionType.outgoing :
-            TransactionType.incoming
+        let type: TransactionType = item.from == address ? .outgoing : .incoming
 
         let timestamp = Self.convertAlchemy(timestamp: item.metadata?.blockTimestamp)
 

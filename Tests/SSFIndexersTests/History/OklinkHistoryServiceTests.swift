@@ -5,7 +5,7 @@ import SSFModels
 
 @testable import SSFIndexers
 
-final class OklinkHistoryServiceTests: BaseHistoryService {
+final class OklinkHistoryServiceTests: BaseHistoryServiceTestCase {
     
     private var expectedResponse: OklinkHistoryResponse {
         get throws {

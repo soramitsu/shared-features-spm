@@ -188,16 +188,7 @@ final class GiantsquidHistoryService: HistoryService {
         chainAsset: ChainAsset,
         address: String
     ) -> TransactionHistoryMergeResult {
-        if !localHistory.isEmpty {
-            let manager = TransactionHistoryMergeManager(
-                address: address,
-                chainAsset: chainAsset
-            )
-            return manager.merge(
-                subscanItems: remoteHistory.history,
-                localItems: localHistory
-            )
-        } else {
+        if localHistory.isEmpty {
             let transactions: [AssetTransactionData] = remoteHistory.history.map { item in
                 item.createTransactionForAddress(
                     address,
@@ -208,6 +199,15 @@ final class GiantsquidHistoryService: HistoryService {
             return TransactionHistoryMergeResult(
                 historyItems: transactions,
                 identifiersToRemove: []
+            )
+        } else {
+            let manager = TransactionHistoryMergeManager(
+                address: address,
+                chainAsset: chainAsset
+            )
+            return manager.merge(
+                subscanItems: remoteHistory.history,
+                localItems: localHistory
             )
         }
     }

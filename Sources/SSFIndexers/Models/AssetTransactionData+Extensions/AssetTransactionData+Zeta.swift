@@ -8,21 +8,25 @@ extension AssetTransactionData {
         chainAsset: ChainAsset
     ) -> AssetTransactionData {
         let peerAddress = item.from.hash == address ? item.to.hash : item.from.hash
-        let type = item.from.hash == address ? TransactionType.outgoing : TransactionType.incoming
+        let type: TransactionType = item.from.hash == address ? .outgoing : .incoming
         let utilityAsset = chainAsset.chain.utilityChainAssets().first?.asset ?? chainAsset.asset
 
+        let feeAmount = SubstrateAmountDecimal(
+            big: item.fee?.value,
+            precision: utilityAsset.precision
+        )
         let fee = AssetTransactionFee(
             identifier: chainAsset.asset.id,
             assetId: chainAsset.asset.id,
-            amount: SubstrateAmountDecimal(
-                big: item.fee?.value,
-                precision: utilityAsset.precision
-            ),
+            amount: feeAmount,
             context: nil
         )
 
         let amountValue = item.value ?? item.total?.value
-
+        let amount = SubstrateAmountDecimal(
+            big: amountValue,
+            precision: chainAsset.asset.precision
+        )
         return AssetTransactionData(
             transactionId: item.hash ?? item.txHash ?? "",
             status: .commited,
@@ -32,10 +36,7 @@ extension AssetTransactionData {
             peerLastName: nil,
             peerName: peerAddress,
             details: nil,
-            amount: SubstrateAmountDecimal(
-                big: amountValue,
-                precision: chainAsset.asset.precision
-            ),
+            amount: amount,
             fees: [fee],
             timestamp: Self.convertGiantsquid(timestamp: item.timestamp),
             type: type.rawValue,

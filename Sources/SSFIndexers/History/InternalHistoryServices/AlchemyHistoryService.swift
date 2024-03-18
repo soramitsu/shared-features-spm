@@ -1,10 +1,9 @@
 import Foundation
 import RobinHood
-import SSFUtils
 import SSFModels
 import SSFNetwork
 
-final actor AlchemyHistoryService: HistoryService {
+final class AlchemyHistoryService: HistoryService {
     
     private let networkWorker: NetworkWorker
     
@@ -58,7 +57,7 @@ final actor AlchemyHistoryService: HistoryService {
     ) async throws -> AlchemyHistory {
         let receivedRequest = AlchemyHistoryRequest(
             toAddress: address,
-            category: [.erc20, .external, .internal, .erc1155, .erc721, .specialnft]
+            category: AlchemyTokenCategory.allCases
         )
         let history = try await perform(
             request: receivedRequest,
@@ -71,12 +70,12 @@ final actor AlchemyHistoryService: HistoryService {
         baseURL: URL,
         address: String
     ) async throws -> AlchemyHistory {
-        let receivedRequest = AlchemyHistoryRequest(
+        let sentRequest = AlchemyHistoryRequest(
             fromAddress: address,
-            category: [.erc20, .external, .internal, .erc1155, .erc721, .specialnft]
+            category: AlchemyTokenCategory.allCases
         )
         let history = try await perform(
-            request: receivedRequest,
+            request: sentRequest,
             baseURL: baseURL
         )
         return history
@@ -86,16 +85,9 @@ final actor AlchemyHistoryService: HistoryService {
         request: AlchemyHistoryRequest,
         baseURL: URL
     ) async throws -> AlchemyHistory {
-        let body = JSONRPCInfo(
-            identifier: 1,
-            jsonrpc: "2.0",
-            method: AlchemyEndpoint.getAssetTransfers.rawValue,
-            params: [request]
-        )
-        let paramsEncoded = try JSONEncoder().encode(body)
-        let request = AlchemyRequest(
+        let request = try AlchemyRequest(
             baseURL: baseURL,
-            body: paramsEncoded
+            request: request
         )
         let response: AlchemyResponse<AlchemyHistory> = try await networkWorker.performRequest(with: request)
         return response.result
@@ -106,7 +98,7 @@ final actor AlchemyHistoryService: HistoryService {
         sent: AlchemyHistory,
         address: String,
         chainAsset: ChainAsset
-    ) throws -> AssetTransactionPageData? {
+    ) throws -> AssetTransactionPageData {
         let history = received.transfers + sent.transfers
         
         let transactions = history

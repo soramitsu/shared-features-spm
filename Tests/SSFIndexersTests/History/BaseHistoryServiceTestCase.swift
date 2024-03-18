@@ -9,7 +9,7 @@ enum BaseHistoryServiceError: Error {
     case fileNotFound(name: String)
 }
 
-class BaseHistoryService: XCTestCase {
+class BaseHistoryServiceTestCase: XCTestCase {
     
     var networkWorker: NetworkWorker?
     var historyService: HistoryService?

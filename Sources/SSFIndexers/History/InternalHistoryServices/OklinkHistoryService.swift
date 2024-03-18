@@ -4,6 +4,10 @@ import SSFUtils
 import SSFModels
 import SSFNetwork
 
+enum OklinkHistoryServiceError: Error {
+    case remoteResultNotFetched
+}
+
 final class OklinkHistoryService: HistoryService {
     
     private let networkWorker: NetworkWorker
@@ -25,7 +29,7 @@ final class OklinkHistoryService: HistoryService {
             chainAsset: chainAsset
         )
         
-        let map = createMap(
+        let map = try createMap(
             remote: remote,
             address: address,
             chainAsset: chainAsset
@@ -57,24 +61,24 @@ final class OklinkHistoryService: HistoryService {
         remote: OklinkHistoryResponse,
         address: String,
         chainAsset: ChainAsset
-    ) -> AssetTransactionPageData? {
+    ) throws -> AssetTransactionPageData {
+        guard let remoteTransactions = remote.data.first?.transactionLists else {
+            throw OklinkHistoryServiceError.remoteResultNotFetched
+        }
         let asset = chainAsset.asset
-        let remoteTransactions = remote.data.first?.transactionLists
         let isNormalAsset = asset.ethereumType == .normal
 
-        let transactions = remoteTransactions?
+        let transactions = remoteTransactions
             .filter { isNormalAsset ? true : $0.tokenContractAddress.lowercased() == asset.id.lowercased() }
             .sorted(by: { $0.transactionTime > $1.transactionTime })
-            .compactMap {
+            .map {
                 AssetTransactionData.createTransaction(
                     from: $0,
                     address: address,
                     chainAsset: chainAsset
                 )
-            }.filter { ($0.amount?.decimalValue ?? 0) > 0 }
-        guard let transactions else {
-            return nil
-        }
+            }
+            .filter { ($0.amount?.decimalValue ?? 0) > 0 }
         
         return AssetTransactionPageData(transactions: transactions)
     }

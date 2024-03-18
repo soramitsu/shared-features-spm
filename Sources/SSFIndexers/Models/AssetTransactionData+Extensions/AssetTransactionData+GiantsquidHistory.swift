@@ -15,9 +15,7 @@ extension AssetTransactionData {
             precision: asset.precision
         )
         let status: AssetTransactionStatus = transfer.success == true ? .commited : .rejected
-        let type = transfer.from?.id == address
-        ? TransactionType.outgoing
-        : TransactionType.incoming
+        let type: TransactionType = transfer.from?.id == address ? .outgoing : .incoming
 
         var fees: [AssetTransactionFee] = []
         if

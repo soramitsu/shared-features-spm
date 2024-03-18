@@ -5,7 +5,7 @@ import SSFModels
 
 @testable import SSFIndexers
 
-final class EtherscanHistoryTests: BaseHistoryService {
+final class EtherscanHistoryTests: BaseHistoryServiceTestCase {
 
     override func tearDownWithError() throws {
         networkWorker = nil

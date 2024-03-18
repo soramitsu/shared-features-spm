@@ -6,7 +6,7 @@ import RobinHood
 
 @testable import SSFIndexers
 
-final class GiantsquidHistoryServiceTests: BaseHistoryService {
+final class GiantsquidHistoryServiceTests: BaseHistoryServiceTestCase {
     
     override func setUpWithError() throws {
         try setupServices()

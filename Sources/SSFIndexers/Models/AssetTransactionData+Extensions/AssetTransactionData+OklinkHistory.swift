@@ -8,11 +8,12 @@ extension AssetTransactionData {
         chainAsset: ChainAsset
     ) -> AssetTransactionData {
         let peerAddress = item.from == address ? item.to : item.from
-        let type = item.from == address ? TransactionType.outgoing :
-            TransactionType.incoming
+        let type: TransactionType = item.from == address ? .outgoing : .incoming
 
-        let timestamp: Int64 = {
-            let timestamp = Int64(item.transactionTime) ?? 0
+        let timestamp: Int64? = {
+            guard let timestamp = Int64(item.transactionTime) else {
+                return nil
+            }
             return timestamp / 1000
         }()
 
@@ -27,16 +28,16 @@ extension AssetTransactionData {
             transactionId: item.blockHash,
             status: .commited,
             assetId: item.tokenContractAddress,
-            peerId: "",
+            peerId: nil,
             peerFirstName: nil,
             peerLastName: nil,
             peerName: peerAddress,
-            details: "",
+            details: nil,
             amount: SubstrateAmountDecimal(string: item.amount),
             fees: [fee],
             timestamp: timestamp,
             type: type.rawValue,
-            reason: "",
+            reason: nil,
             context: nil
         )
     }

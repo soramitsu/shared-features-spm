@@ -4,6 +4,10 @@ import SSFCrypto
 import SSFModels
 
 extension AssetTransactionData {
+    enum AssetTransactionDataType: String {
+        case unknown = "UNKNOWN"
+    }
+
     static func createTransaction(
         from item: SubqueryHistoryElement,
         address: String,
@@ -47,7 +51,7 @@ extension AssetTransactionData {
             amount: nil,
             fees: [],
             timestamp: Int64(item.timestamp),
-            type: "UNKNOWN",
+            type: AssetTransactionData.AssetTransactionDataType.unknown.rawValue,
             reason: nil,
             context: nil
         )
@@ -71,19 +75,18 @@ extension AssetTransactionData {
             precision: chainAsset.asset.precision
         )
 
+        let feeAmount = SubstrateAmountDecimal(
+            string: transfer.fee,
+            precision: chainAsset.asset.precision
+        )
         let fee = AssetTransactionFee(
             identifier: chainAsset.asset.id,
             assetId: chainAsset.asset.id,
-            amount: SubstrateAmountDecimal(
-                string: transfer.fee,
-                precision: chainAsset.asset.precision
-            ),
+            amount: feeAmount,
             context: nil
         )
 
-        let type = transfer.sender == address
-        ? TransactionType.outgoing
-        : TransactionType.incoming
+        let type: TransactionType = transfer.sender == address ? .outgoing : .incoming
 
         return AssetTransactionData(
             transactionId: item.identifier,
@@ -114,7 +117,7 @@ extension AssetTransactionData {
             string: reward.amount,
             precision: chainAsset.asset.precision
         )
-        let type = reward.isReward ? TransactionType.reward.rawValue : TransactionType.slash.rawValue
+        let type: TransactionType = reward.isReward ? .reward : .slash
         let accountId = try? AddressFactory.accountId(
             from: address,
             chain: chainAsset.chain
@@ -128,12 +131,12 @@ extension AssetTransactionData {
             peerId: peerId,
             peerFirstName: reward.validator,
             peerLastName: nil,
-            peerName: type,
+            peerName: type.rawValue,
             details: "#\(reward.era ?? 0)",
             amount: amount,
             fees: [],
             timestamp: Int64(item.timestamp),
-            type: type,
+            type: type.rawValue,
             reason: item.identifier,
             context: nil
         )
@@ -200,20 +203,22 @@ extension AssetTransactionData {
         )
         let peerId = accountId?.toHex() ?? peerAddress
 
+        let feeAmount = SubstrateAmountDecimal(
+            string: item.fee,
+            precision: chainAsset.asset.precision
+        )
         let fee = AssetTransactionFee(
             identifier: chainAsset.asset.id,
             assetId: chainAsset.asset.id,
-            amount: SubstrateAmountDecimal(
-                string: item.fee,
-                precision: chainAsset.asset.precision
-            ),
+            amount: feeAmount,
             context: nil
         )
 
-        let type = item.sender == address
-        ? TransactionType.outgoing
-        : TransactionType.incoming
-
+        let type: TransactionType = item.sender == address ? .outgoing : .incoming
+        let amount = SubstrateAmountDecimal(
+            string: item.value,
+            precision: chainAsset.asset.precision
+        )
         return AssetTransactionData(
             transactionId: item.txHash,
             status: item.status.walletValue,
@@ -223,10 +228,7 @@ extension AssetTransactionData {
             peerLastName: nil,
             peerName: peerAddress,
             details: nil,
-            amount: SubstrateAmountDecimal(
-                string: item.value,
-                precision: chainAsset.asset.precision
-            ),
+            amount: amount,
             fees: [fee],
             timestamp: item.timestamp,
             type: type.rawValue,

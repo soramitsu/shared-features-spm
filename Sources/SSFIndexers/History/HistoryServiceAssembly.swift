@@ -6,6 +6,7 @@ import SSFNetwork
 
 public enum HistoryError: Error {
     case urlMissing
+    case missingHistoryType(chainId: ChainModel.Id)
 }
 
 public protocol HistoryService {
@@ -17,10 +18,10 @@ public protocol HistoryService {
     ) async throws -> AssetTransactionPageData?
 }
 
-final public class HistoryServiceAssembly {
+public enum HistoryServiceAssembly {
     public static func createService(
         for chainAsset: ChainAsset
-    ) async throws -> HistoryService? {
+    ) async throws -> HistoryService {
         let networkWorker = NetworkWorkerDefault()
         switch chainAsset.chain.externalApi?.history?.type {
         case .subquery:
@@ -76,7 +77,7 @@ final public class HistoryServiceAssembly {
         case .zeta:
             return ZetaHistoryService(networkWorker: networkWorker)
         case .none:
-            return nil
+            throw HistoryError.missingHistoryType(chainId: chainAsset.chain.chainId)
         }
     }
     

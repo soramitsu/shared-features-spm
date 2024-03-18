@@ -14,7 +14,7 @@ struct SubqueryHistoryElement: Decodable, RewardOrSlashData {
     let identifier: String
     let timestamp: String
     let address: String
-    var reward: SubqueryRewardOrSlash?
+    let reward: SubqueryRewardOrSlash?
     let extrinsic: SubqueryExtrinsic?
     let transfer: SubqueryTransfer?
 

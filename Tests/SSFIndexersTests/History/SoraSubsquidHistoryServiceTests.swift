@@ -6,7 +6,7 @@ import RobinHood
 
 @testable import SSFIndexers
 
-final class SoraSubsquidHistoryServiceTests: BaseHistoryService {
+final class SoraSubsquidHistoryServiceTests: BaseHistoryServiceTestCase {
     
     private var expectedResponse: GraphQLResponse<SoraSubsquidHistoryConnectionResponse> {
         get throws {

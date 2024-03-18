@@ -43,12 +43,24 @@ struct SoraSubsquidHistoryElement: Decodable {
     let blockHash: String?
     let blockHeight: UInt64?
     let data: SoraSubsquidHistoryElementData?
-    let method: String?
+    let method: SoraSubsquidHistoryMethod?
     let name: String?
-    let module: String?
+    let module: SoraSubsquidHistoryModule?
     let networkFee: String?
     let timestamp: TimeInterval?
     let execution: SoraSubsquidHistoryElementExecution?
+}
+
+enum SoraSubsquidHistoryModule: String, Decodable {
+    case staking
+    case assets
+}
+
+enum SoraSubsquidHistoryMethod: String, Decodable {
+    case rewarded
+    case transfer
+    case swap
+    case transferToSidechain
 }
 
 struct SoraSubsquidHistoryElementExecution: Decodable {

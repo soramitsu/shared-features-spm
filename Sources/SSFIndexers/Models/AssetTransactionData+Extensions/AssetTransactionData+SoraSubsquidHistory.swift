@@ -23,26 +23,26 @@ extension AssetTransactionData {
         )
 
         switch (item.module, item.method) {
-        case ("staking", "rewarded"):
+        case (.staking, .rewarded):
             return createRewardTransaction(
                 from: item,
                 fee: transactionFee,
                 status: status
             )
-        case ("assets", "transfer"):
+        case (.assets, .transfer):
             return createTransferTransaction(
                 from: item,
                 address: address,
                 fee: transactionFee,
                 status: status
             )
-        case (.some(_), "swap"):
+        case (.some(_), .swap):
             return createSwapTransaction(
                 from: item,
                 fee: transactionFee,
                 status: status
             )
-        case (.some(_), "transferToSidechain"):
+        case (.some(_), .transferToSidechain):
             return createBridgeTransaction(
                 from: item,
                 fee: transactionFee,
@@ -66,8 +66,7 @@ extension AssetTransactionData {
         let from = item.data?.from
         let to = item.data?.to
         let assetId = item.data?.assetId ?? ""
-        let type = from == address ? TransactionType.outgoing :
-            TransactionType.incoming
+        let type: TransactionType = from == address ? .outgoing : .incoming
         let timestamp = item.itemTimestamp
         let peer = from == address ? to : from
 
@@ -75,16 +74,16 @@ extension AssetTransactionData {
             transactionId: item.id,
             status: status,
             assetId: assetId,
-            peerId: "",
+            peerId: nil,
             peerFirstName: nil,
             peerLastName: nil,
             peerName: peer,
-            details: "",
+            details: nil,
             amount: SubstrateAmountDecimal(string: item.data?.amount),
             fees: [fee],
             timestamp: timestamp,
             type: type.rawValue,
-            reason: "",
+            reason: nil,
             context: nil
         )
     }
@@ -97,13 +96,13 @@ extension AssetTransactionData {
         let type = TransactionType.reward
         let timestamp = item.itemTimestamp
         let stash = item.data?.stash
-        let era = item.data?.era.map { "\($0)" } ?? ""
+        let era = item.data?.era.map { "\($0)" }
 
         return AssetTransactionData(
             transactionId: item.id,
             status: status,
-            assetId: "",
-            peerId: "",
+            assetId: nil,
+            peerId: nil,
             peerFirstName: nil,
             peerLastName: nil,
             peerName: stash,
@@ -112,7 +111,7 @@ extension AssetTransactionData {
             fees: [fee],
             timestamp: timestamp,
             type: type.rawValue,
-            reason: "",
+            reason: nil,
             context: nil
         )
     }
@@ -125,9 +124,9 @@ extension AssetTransactionData {
         let type = TransactionType.swap
         let timestamp = item.itemTimestamp
         let stash = item.data?.stash
-        let assetId = item.data?.targetAssetId ?? ""
-        let baseAssetId = item.data?.baseAssetId ?? ""
-        let sendAmount = item.data?.baseAssetAmount ?? ""
+        let assetId = item.data?.targetAssetId
+        let baseAssetId = item.data?.baseAssetId
+        let sendAmount = item.data?.baseAssetAmount
         return AssetTransactionData(
             transactionId: item.id,
             status: .commited,
@@ -141,7 +140,7 @@ extension AssetTransactionData {
             fees: [fee],
             timestamp: timestamp,
             type: type.rawValue,
-            reason: "",
+            reason: nil,
             context: nil
         )
     }
@@ -157,17 +156,17 @@ extension AssetTransactionData {
         return AssetTransactionData(
             transactionId: item.id,
             status: .commited,
-            assetId: "",
-            peerId: "",
+            assetId: nil,
+            peerId: nil,
             peerFirstName: nil,
             peerLastName: nil,
             peerName: stash,
-            details: "",
+            details: nil,
             amount: SubstrateAmountDecimal(string: item.data?.amount),
             fees: [fee],
             timestamp: timestamp,
             type: type.rawValue,
-            reason: "",
+            reason: nil,
             context: nil
         )
     }
@@ -177,9 +176,9 @@ extension AssetTransactionData {
         fee: AssetTransactionFee,
         status _: AssetTransactionStatus
     ) -> AssetTransactionData {
-        let from = item.address ?? ""
+        let from = item.address
         let to = item.data?.to
-        let assetId = item.data?.assetId ?? ""
+        let assetId = item.data?.assetId
         let timestamp = item.itemTimestamp
 
         return AssetTransactionData(
@@ -187,15 +186,15 @@ extension AssetTransactionData {
             status: .commited,
             assetId: assetId,
             peerId: from,
-            peerFirstName: item.module,
-            peerLastName: item.method,
+            peerFirstName: item.module?.rawValue,
+            peerLastName: item.method?.rawValue,
             peerName: to,
-            details: "",
+            details: nil,
             amount: fee.amount,
             fees: [fee],
             timestamp: timestamp,
             type: TransactionType.extrinsic.rawValue,
-            reason: "",
+            reason: nil,
             context: nil
         )
     }

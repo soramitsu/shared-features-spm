@@ -189,16 +189,7 @@ final class ReefSubsquidHistoryService: HistoryService {
     ) -> TransactionHistoryMergeResult {
         let remoteTransactions: [WalletRemoteHistoryItemProtocol] = remote.history
         
-        if !local.isEmpty {
-            let manager = TransactionHistoryMergeManager(
-                address: address,
-                chainAsset: chainAsset
-            )
-            return manager.merge(
-                subscanItems: remoteTransactions,
-                localItems: local
-            )
-        } else {
+        if local.isEmpty {
             let transactions: [AssetTransactionData] = remoteTransactions.sorted(by: { item1, item2 in
                 item1.itemTimestamp > item2.itemTimestamp
             }).map { item in
@@ -212,27 +203,38 @@ final class ReefSubsquidHistoryService: HistoryService {
                 historyItems: transactions,
                 identifiersToRemove: []
             )
+        } else {
+            let manager = TransactionHistoryMergeManager(
+                address: address,
+                chainAsset: chainAsset
+            )
+            return manager.merge(
+                subscanItems: remoteTransactions,
+                localItems: local
+            )
         }
     }
 
     private func createHistoryMap(
         merge: TransactionHistoryMergeResult,
         remote: ReefResponseData
-    ) -> AssetTransactionPageData? {
-            var context: [String: String] = [:]
-            if let transfersCursor = remote.transfersConnection?.pageInfo?.endCursor {
-                context["transfersCursor"] = transfersCursor
-            }
-
-            if let stakingsCursor = remote.stakingsConnection?.pageInfo?.endCursor {
-                context["stakingsCursor"] = stakingsCursor
-            }
-
-            let hasNextPage = (remote.transfersConnection?.pageInfo?.hasNextPage).or(false) || (remote.stakingsConnection?.pageInfo?.hasNextPage).or(false)
-
-            return AssetTransactionPageData(
-                transactions: merge.historyItems,
-                context: hasNextPage ? context : nil
-            )
+    ) -> AssetTransactionPageData {
+        var context: [String: String] = [:]
+        if let transfersCursor = remote.transfersConnection?.pageInfo?.endCursor {
+            context["transfersCursor"] = transfersCursor
+        }
+        
+        if let stakingsCursor = remote.stakingsConnection?.pageInfo?.endCursor {
+            context["stakingsCursor"] = stakingsCursor
+        }
+        
+        let isTransfersHasNextPage = (remote.transfersConnection?.pageInfo?.hasNextPage).or(false)
+        let isStakingHasNextPage = (remote.stakingsConnection?.pageInfo?.hasNextPage).or(false)
+        let hasNextPage = isTransfersHasNextPage || isStakingHasNextPage
+        
+        return AssetTransactionPageData(
+            transactions: merge.historyItems,
+            context: hasNextPage ? context : nil
+        )
     }
 }

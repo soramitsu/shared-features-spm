@@ -165,20 +165,11 @@ final class SubsquidHistoryService: HistoryService {
         chainAsset: ChainAsset,
         address: String
     ) throws -> TransactionHistoryMergeResult {
-        let filteredTransactions = remoteHistory.historyElements.sorted { element1, element2 in
-            element2.timestampInSeconds < element1.timestampInSeconds
-        }
-        
-        if !localHistory.isEmpty {
-            let manager = TransactionHistoryMergeManager(
-                address: address,
-                chainAsset: chainAsset
-            )
-            return manager.merge(
-                subscanItems: remoteHistory.historyElements,
-                localItems: localHistory
-            )
-        } else {
+        if localHistory.isEmpty {
+            let filteredTransactions = remoteHistory.historyElements.sorted { element1, element2 in
+                element2.timestampInSeconds < element1.timestampInSeconds
+            }
+            
             let transactions: [AssetTransactionData] = filteredTransactions.map { item in
                 item.createTransactionForAddress(
                     address,
@@ -188,6 +179,15 @@ final class SubsquidHistoryService: HistoryService {
             return TransactionHistoryMergeResult(
                 historyItems: transactions,
                 identifiersToRemove: []
+            )
+        } else {
+            let manager = TransactionHistoryMergeManager(
+                address: address,
+                chainAsset: chainAsset
+            )
+            return manager.merge(
+                subscanItems: remoteHistory.historyElements,
+                localItems: localHistory
             )
         }
     }

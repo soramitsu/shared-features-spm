@@ -6,7 +6,7 @@ import RobinHood
 
 @testable import SSFIndexers
 
-final class ReefSubsquidHistoryServiceTests: BaseHistoryService {
+final class ReefSubsquidHistoryServiceTests: BaseHistoryServiceTestCase {
     
     private var expectedResponse: GraphQLResponse<ReefResponseData> {
         get throws {

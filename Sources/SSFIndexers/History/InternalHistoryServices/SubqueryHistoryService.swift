@@ -57,7 +57,6 @@ final class SubqueryHistoryService: HistoryService {
         let mergeResult = try await merge(
             remote: remoteHistory,
             local: localHistory,
-            runtime: runtimeService.fetchCoderFactory(),
             chainAsset: chainAsset,
             address: address
         )
@@ -162,11 +161,44 @@ final class SubqueryHistoryService: HistoryService {
     private func merge(
         remote: SubqueryHistoryData,
         local: [TransactionHistoryItem],
-        runtime: RuntimeCoderFactoryProtocol,
         chainAsset: ChainAsset,
         address: String
-    ) throws -> TransactionHistoryMergeResult {
+    ) async throws -> TransactionHistoryMergeResult {
         let remoteTransactions = remote.historyElements.nodes
+        
+        if local.isEmpty {
+            let filteredTransactions = try await filter(
+                remoteTransactions: remoteTransactions,
+                chainAsset: chainAsset
+            )
+            let transactions: [AssetTransactionData] = filteredTransactions.map { item in
+                item.createTransactionForAddress(
+                    address,
+                    chainAsset: chainAsset
+                )
+            }
+            
+            return TransactionHistoryMergeResult(
+                historyItems: transactions,
+                identifiersToRemove: []
+            )
+        } else {
+            let manager = TransactionHistoryMergeManager(
+                address: address,
+                chainAsset: chainAsset
+            )
+            return manager.merge(
+                subscanItems: remoteTransactions,
+                localItems: local
+            )
+        }
+    }
+    
+    private func filter(
+        remoteTransactions: [SubqueryHistoryElement],
+        chainAsset: ChainAsset
+    ) async throws -> [SubqueryHistoryElement] {
+        let coderFactory = try await runtimeService.fetchCoderFactory()
         let filteredTransactions = try remoteTransactions.filter { transaction in
             var assetId: String?
             
@@ -195,12 +227,12 @@ final class SubqueryHistoryService: HistoryService {
             }
             
             let assetIdBytes = try Data(hexStringSSF: assetId)
-            let encoder = runtime.createEncoder()
+            let encoder = coderFactory.createEncoder()
             guard let currencyId = chainAsset.currencyId else {
                 return false
             }
             
-            guard let type = runtime.metadata.schema?.types
+            guard let type = coderFactory.metadata.schema?.types
                 .first(where: { $0.type.path.contains("CurrencyId") })?
                 .type
                 .path
@@ -214,27 +246,6 @@ final class SubqueryHistoryService: HistoryService {
             return currencyIdBytes == assetIdBytes
         }
         
-        if !local.isEmpty {
-            let manager = TransactionHistoryMergeManager(
-                address: address,
-                chainAsset: chainAsset
-            )
-            return manager.merge(
-                subscanItems: remoteTransactions,
-                localItems: local
-            )
-        } else {
-            let transactions: [AssetTransactionData] = filteredTransactions.map { item in
-                item.createTransactionForAddress(
-                    address,
-                    chainAsset: chainAsset
-                )
-            }
-            
-            return TransactionHistoryMergeResult(
-                historyItems: transactions,
-                identifiersToRemove: []
-            )
-        }
+        return filteredTransactions
     }
 }

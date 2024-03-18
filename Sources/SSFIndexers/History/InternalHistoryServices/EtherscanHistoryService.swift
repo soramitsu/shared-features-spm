@@ -4,6 +4,10 @@ import SSFUtils
 import SSFModels
 import SSFNetwork
 
+enum EtherscanHistoryServiceError: Error {
+    case remoteResultNotFetched
+}
+
 final class EtherscanHistoryService: HistoryService {
     
     private let networkWorker: NetworkWorker
@@ -24,7 +28,7 @@ final class EtherscanHistoryService: HistoryService {
             address: address,
             chainAsset: chainAsset
         )
-        let map = createMap(
+        let map = try createMap(
             remote: remote,
             address: address,
             chainAsset: chainAsset
@@ -56,18 +60,22 @@ final class EtherscanHistoryService: HistoryService {
         remote: EtherscanHistoryResponse,
         address: String,
         chainAsset: ChainAsset
-    ) -> AssetTransactionPageData {
+    ) throws -> AssetTransactionPageData {
+        guard let result = remote.result else {
+            throw EtherscanHistoryServiceError.remoteResultNotFetched
+        }
         let asset = chainAsset.asset
-        let transactions = remote.result?
+        let transactions = result
             .filter { asset.ethereumType == .normal ? true : $0.contractAddress?.lowercased() == asset.id.lowercased() }
             .sorted(by: { $0.timestampInSeconds > $1.timestampInSeconds })
-            .compactMap {
+            .map {
                 AssetTransactionData.createTransaction(
                     from: $0,
                     address: address,
                     chainAsset: chainAsset
                 )
-            }.filter { ($0.amount?.decimalValue ?? 0) > 0 } ?? []
+            }
+            .filter { ($0.amount?.decimalValue ?? 0) > 0 }
         
         return AssetTransactionPageData(transactions: transactions)
     }

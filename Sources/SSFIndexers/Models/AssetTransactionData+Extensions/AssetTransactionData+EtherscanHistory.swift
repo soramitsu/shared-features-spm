@@ -8,16 +8,14 @@ extension AssetTransactionData {
         chainAsset: ChainAsset
     ) -> AssetTransactionData {
         let peerAddress = item.from == address ? item.to : item.from
-        let type = item.from == address ? TransactionType.outgoing :
-            TransactionType.incoming
+        let type: TransactionType = item.from == address ? .outgoing : .incoming
 
-        let timestamp: Int64 = {
+        let timestamp: Int64? = {
             guard let timestampValue = item.timeStamp else {
-                return 0
+                return nil
             }
 
-            let timestamp = Int64(timestampValue) ?? 0
-            return timestamp
+            return Int64(timestampValue)
         }()
 
         let feeValue = item.gasUsed * item.gasPrice

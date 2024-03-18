@@ -99,8 +99,11 @@ class SoraSubsquidHistoryService: HistoryService {
     private func prepareFilter(
         filters: [WalletTransactionHistoryFilter]
     ) -> String {
-        var filterStrings: [String] = []
+        guard filters.isNotEmpty else {
+            return ""
+        }
 
+        var filterStrings: [String] = []
         if !filters.contains(where: { $0.type == .swap && $0.selected }) {
             filterStrings.append("\"swap\"")
         }
@@ -111,10 +114,6 @@ class SoraSubsquidHistoryService: HistoryService {
 
         if !filters.contains(where: { $0.type == .transfer && $0.selected }) {
             filterStrings.append("\"transfer\"")
-        }
-
-        guard !filterStrings.isEmpty else {
-            return ""
         }
 
         let resultFilters = filterStrings.joined(separator: ",")
@@ -184,41 +183,33 @@ class SoraSubsquidHistoryService: HistoryService {
         address: String
     ) -> TransactionHistoryMergeResult {
         let remoteTransactions = remote.historyElementsConnection.edges.map { $0.node }
-        let filteredTransactions = remoteTransactions
-            .filter { transaction in
-                if chainAsset.asset.symbol.lowercased() == "val", transaction.method == "rewarded" {
-                    return true
+
+        if local.isEmpty {
+            let filteredTransactions = remoteTransactions
+                .filter { transaction in
+                    if chainAsset.asset.symbol.lowercased() == "val", transaction.method?.rawValue == "rewarded" {
+                        return true
+                    }
+                    
+                    if chainAsset.asset.isUtility, transaction.module?.rawValue == "staking", transaction.method?.rawValue != "rewarded" {
+                        return true
+                    }
+                    
+                    if let targetAssetId = transaction.data?.targetAssetId, targetAssetId == chainAsset.asset.currencyId {
+                        return true
+                    }
+                    
+                    if let baseAssetId = transaction.data?.baseAssetId, baseAssetId == chainAsset.asset.currencyId {
+                        return true
+                    }
+                    
+                    if let assetId = transaction.data?.assetId, assetId == chainAsset.asset.currencyId {
+                        return true
+                    }
+                    
+                    return false
                 }
-                
-                if chainAsset.asset.isUtility, transaction.module == "staking", transaction.method != "rewarded" {
-                    return true
-                }
-                
-                if let targetAssetId = transaction.data?.targetAssetId, targetAssetId == chainAsset.asset.currencyId {
-                    return true
-                }
-                
-                if let baseAssetId = transaction.data?.baseAssetId, baseAssetId == chainAsset.asset.currencyId {
-                    return true
-                }
-                
-                if let assetId = transaction.data?.assetId, assetId == chainAsset.asset.currencyId {
-                    return true
-                }
-                
-                return false
-            }
-        
-        if !local.isEmpty {
-            let manager = TransactionHistoryMergeManager(
-                address: address,
-                chainAsset: chainAsset
-            )
-            return manager.merge(
-                subscanItems: remoteTransactions,
-                localItems: local
-            )
-        } else {
+            
             let transactions: [AssetTransactionData] = filteredTransactions.map { item in
                 item.createTransactionForAddress(
                     address,
@@ -229,6 +220,15 @@ class SoraSubsquidHistoryService: HistoryService {
             return TransactionHistoryMergeResult(
                 historyItems: transactions,
                 identifiersToRemove: []
+            )
+        } else {
+            let manager = TransactionHistoryMergeManager(
+                address: address,
+                chainAsset: chainAsset
+            )
+            return manager.merge(
+                subscanItems: remoteTransactions,
+                localItems: local
             )
         }
     }

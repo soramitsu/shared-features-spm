@@ -6,7 +6,7 @@ import RobinHood
 
 @testable import SSFIndexers
 
-final class SubqueryHistoryServiceTests: BaseHistoryService {
+final class SubqueryHistoryServiceTests: BaseHistoryServiceTestCase {
 
     private var expectedResponse: GraphQLResponse<SubqueryHistoryData> {
         get throws {

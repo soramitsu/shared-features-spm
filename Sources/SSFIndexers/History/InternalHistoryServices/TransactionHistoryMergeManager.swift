@@ -17,24 +17,10 @@ final class TransactionHistoryMergeManager {
         subscanItems: [WalletRemoteHistoryItemProtocol],
         localItems: [TransactionHistoryItem]
     ) -> TransactionHistoryMergeResult {
-        let existingHashes = Set(subscanItems.map(\.identifier))
-        let minSubscanItem = subscanItems.last
-
-        let hashesToRemove: [String] = localItems.compactMap { item in
-            if existingHashes.contains(item.txHash) {
-                return item.txHash
-            }
-
-            guard let subscanItem = minSubscanItem else {
-                return nil
-            }
-
-            if item.timestamp < subscanItem.itemTimestamp {
-                return item.txHash
-            }
-
-            return nil
-        }
+        let hashesToRemove: [String] = findHashesToRemove(
+            in: localItems,
+            with: subscanItems
+        )
 
         let filterSet = Set(hashesToRemove)
         let localMergeItems: [TransactionHistoryMergeItem] = localItems.compactMap { item in
@@ -70,24 +56,10 @@ final class TransactionHistoryMergeManager {
         subqueryItems: [WalletRemoteHistoryItemProtocol],
         localItems: [TransactionHistoryItem]
     ) -> TransactionHistoryMergeResult {
-        let existingHashes = Set(subqueryItems.map(\.identifier))
-        let minSubscanItem = subqueryItems.last
-
-        let hashesToRemove: [String] = localItems.compactMap { item in
-            if existingHashes.contains(item.txHash) {
-                return item.txHash
-            }
-
-            guard let subscanItem = minSubscanItem else {
-                return nil
-            }
-
-            if item.timestamp < subscanItem.itemTimestamp {
-                return item.txHash
-            }
-
-            return nil
-        }
+        let hashesToRemove: [String] = findHashesToRemove(
+            in: localItems,
+            with: subqueryItems
+        )
 
         let filterSet = Set(hashesToRemove)
         let localMergeItems: [TransactionHistoryMergeItem] = localItems.compactMap { item in
@@ -117,5 +89,32 @@ final class TransactionHistoryMergeManager {
         )
 
         return results
+    }
+    
+    // MARK: - Private methods
+    
+    private func findHashesToRemove(
+        in localItems: [TransactionHistoryItem],
+        with items: [WalletRemoteHistoryItemProtocol]
+    ) -> [String] {
+        let existingHashes = Set(items.map(\.identifier))
+        let minSubscanItem = items.last
+
+        let hashesToRemove: [String] = localItems.compactMap { item in
+            if existingHashes.contains(item.txHash) {
+                return item.txHash
+            }
+
+            guard let subscanItem = minSubscanItem else {
+                return nil
+            }
+
+            if item.timestamp < subscanItem.itemTimestamp {
+                return item.txHash
+            }
+
+            return nil
+        }
+        return hashesToRemove
     }
 }

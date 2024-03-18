@@ -5,7 +5,7 @@ import SSFModels
 
 @testable import SSFIndexers
 
-final class AlchemyHistoryServiceTests: BaseHistoryService {
+final class AlchemyHistoryServiceTests: BaseHistoryServiceTestCase {
     
     private var expectedResponse: AlchemyResponse<AlchemyHistory> {
         get throws {

@@ -49,7 +49,7 @@ extension AssetTransactionData {
             amount: nil,
             fees: [],
             timestamp: timestamp,
-            type: "UNKNOWN",
+            type: Self.AssetTransactionDataType.unknown.rawValue,
             reason: nil,
             context: nil
         )
@@ -74,19 +74,18 @@ extension AssetTransactionData {
             precision: chainAsset.asset.precision
         )
         let utilityAsset = chainAsset.chain.utilityChainAssets().first?.asset ?? chainAsset.asset
+        let feeAmount = SubstrateAmountDecimal(
+            string: transfer.fee,
+            precision: utilityAsset.precision
+        )
         let fee = AssetTransactionFee(
             identifier: chainAsset.asset.id,
             assetId: chainAsset.asset.id,
-            amount: SubstrateAmountDecimal(
-                string: transfer.fee,
-                precision: utilityAsset.precision
-            ),
+            amount: feeAmount,
             context: nil
         )
 
-        let type = transfer.sender == address
-        ? TransactionType.outgoing
-        : TransactionType.incoming
+        let type: TransactionType = transfer.sender == address ? .outgoing : .incoming
 
         return AssetTransactionData(
             transactionId: item.extrinsicHash ?? item.identifier,
@@ -117,9 +116,7 @@ extension AssetTransactionData {
             string: reward.amount,
             precision: chainAsset.asset.precision
         )
-        let type = reward.isReward
-        ? TransactionType.reward.rawValue
-        : TransactionType.slash.rawValue
+        let type: TransactionType = reward.isReward ? .reward : .slash
 
         let accountId = try? AddressFactory.accountId(
             from: address,
@@ -134,12 +131,12 @@ extension AssetTransactionData {
             peerId: peerId,
             peerFirstName: reward.validator,
             peerLastName: nil,
-            peerName: type,
+            peerName: type.rawValue,
             details: "#\(reward.era ?? 0)",
             amount: amount,
             fees: [],
             timestamp: item.timestampInSeconds,
-            type: type,
+            type: type.rawValue,
             reason: item.identifier,
             context: nil
         )

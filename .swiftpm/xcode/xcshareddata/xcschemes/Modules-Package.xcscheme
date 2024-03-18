@@ -541,9 +541,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SSFIndexers"
-               BuildableName = "SSFIndexers"
-               BlueprintName = "SSFIndexers"
+               BlueprintIdentifier = "Modules_SSFIndexers"
+               BuildableName = "Modules_SSFIndexers"
+               BlueprintName = "Modules_SSFIndexers"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -569,9 +569,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Modules_SSFIndexers"
-               BuildableName = "Modules_SSFIndexers"
-               BlueprintName = "Modules_SSFIndexers"
+               BlueprintIdentifier = "SSFIndexers"
+               BuildableName = "SSFIndexers"
+               BlueprintName = "SSFIndexers"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
