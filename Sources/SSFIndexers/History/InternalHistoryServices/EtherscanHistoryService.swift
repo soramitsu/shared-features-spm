@@ -66,7 +66,12 @@ final class EtherscanHistoryService: HistoryService {
         }
         let asset = chainAsset.asset
         let transactions = result
-            .filter { asset.ethereumType == .normal ? true : $0.contractAddress?.lowercased() == asset.id.lowercased() }
+            .filter { element in
+                guard asset.ethereumType != .normal else {
+                    return true
+                }
+                return element.contractAddress?.lowercased() == asset.id.lowercased()
+            }
             .sorted(by: { $0.timestampInSeconds > $1.timestampInSeconds })
             .map {
                 AssetTransactionData.createTransaction(

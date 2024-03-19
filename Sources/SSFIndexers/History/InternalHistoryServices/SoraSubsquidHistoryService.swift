@@ -8,16 +8,13 @@ import SSFNetwork
 
 class SoraSubsquidHistoryService: HistoryService {
     private let txStorage: AsyncAnyRepository<TransactionHistoryItem>
-    private let runtimeService: RuntimeProviderProtocol
     private let networkWorker: NetworkWorker
 
     init(
         txStorage: AsyncAnyRepository<TransactionHistoryItem>,
-        runtimeService: RuntimeProviderProtocol,
         networkWorker: NetworkWorker
     ) {
         self.txStorage = txStorage
-        self.runtimeService = runtimeService
         self.networkWorker = networkWorker
     }
     
@@ -129,51 +126,12 @@ class SoraSubsquidHistoryService: HistoryService {
         let after: String = cursor.map { "\($0)" } ?? "1"
         let filter = prepareFilter(filters: filters)
 
-        return """
-        query MyQuery {
-                  historyElementsConnection(
-                    where: {
-                      OR: [
-                        { address_eq: "\(address)"\(filter) },
-                        { dataTo_eq: "\(address)"\(filter) },
-                      ]
-                    },
-                    after: "\(after)"
-                    first: \(count),
-                    orderBy: timestamp_DESC,
-                  ) {
-                    pageInfo {
-                      endCursor
-                      hasNextPage
-                      hasPreviousPage
-                      startCursor
-                    }
-                    totalCount
-                    edges {
-                      node {
-                        address
-                        blockHash
-                        blockHeight
-                        callNames
-                        data
-                        dataFrom
-                        dataTo
-                        id
-                        method
-                        module
-                        name
-                        networkFee
-                        timestamp
-                        type
-                        updatedAtBlock
-                        execution {
-                          success
-                        }
-                      }
-                    }
-                  }
-                }
-        """
+        return SoraSubsquidHistoryServiceFilters.query(
+            after: after,
+            address: address,
+            filter: filter,
+            count: count
+        )
     }
 
     private func createSubqueryHistoryMerge(

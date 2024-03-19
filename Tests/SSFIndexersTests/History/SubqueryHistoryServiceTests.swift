@@ -55,9 +55,11 @@ final class SubqueryHistoryServiceTests: BaseHistoryServiceTestCase {
         let runtimeService = RuntimeProviderProtocolMock()
         runtimeService.fetchCoderFactoryReturnValue = RuntimeCoderFactoryProtocolMock()
 
+        let chainRegistry = ChainRegistryProtocolMock()
+        chainRegistry.getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReturnValue = runtimeService
         let service = SubqueryHistoryService(
             txStorage: txStorage,
-            runtimeService: runtimeService,
+            chainRegistry: chainRegistry,
             networkWorker: networkWorker
         )
         super.historyService = service

@@ -101,69 +101,19 @@ final class GiantsquidHistoryService: HistoryService {
 
         if filters.contains(where: { $0.type == .other && $0.selected }), GiantsquidConfig.giantsquidExtrinsicEnabled {
             filterStrings.append(
-                """
-                          slashes(where: {accountId_containsInsensitive: \"\(address)\"}) {
-                            accountId
-                            amount
-                            blockNumber
-                            era
-                            extrinsicHash
-                            id
-                            timestamp
-                          }
-                          bonds(where: {accountId_containsInsensitive: \"\(address)\"}) {
-                            accountId
-                            amount
-                            blockNumber
-                            extrinsicHash
-                            id
-                            success
-                            timestamp
-                            type
-                          }
-                """
+                GiantsquidHistoryServiceFilter.slashesFilter(for: address)
             )
         }
 
         if filters.contains(where: { $0.type == .reward && $0.selected }), GiantsquidConfig.giantsquidRewardsEnabled {
             filterStrings.append(
-                """
-                rewards(where: {accountId_containsInsensitive: \"\(address)\"}) {
-                accountId
-                amount
-                blockNumber
-                era
-                extrinsicHash
-                id
-                timestamp
-                validator
-                }
-                """
+                GiantsquidHistoryServiceFilter.rewards(for: address)
             )
         }
 
         if filters.contains(where: { $0.type == .transfer && $0.selected }) {
             filterStrings.append(
-                """
-                          transfers(where: {account: {id_eq: "\(address)"}}, orderBy: id_DESC) {
-                           id
-                               transfer {
-                                 amount
-                                 blockNumber
-                                 extrinsicHash
-                                 from {
-                                   id
-                                 }
-                                 to {
-                                   id
-                                 }
-                                 timestamp
-                                 success
-                                 id
-                               }
-                               direction
-                          }
-                """
+                GiantsquidHistoryServiceFilter.transfers(for: address)
             )
         }
 
@@ -175,11 +125,7 @@ final class GiantsquidHistoryService: HistoryService {
         filters: [WalletTransactionHistoryFilter]
     ) -> String {
         let filterString = prepareFilter(filters: filters, address: address)
-        return """
-        query MyQuery {
-          \(filterString)
-        }
-        """
+        return GiantsquidHistoryServiceFilter.query(with: filterString)
     }
 
     private func createSubqueryHistoryMerge(

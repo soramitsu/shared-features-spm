@@ -26,15 +26,10 @@ public enum HistoryServiceAssembly {
         switch chainAsset.chain.externalApi?.history?.type {
         case .subquery:
             let chainRegistry = ChainRegistryAssembly.createDefaultRegistry()
-            let runtimeService = try await chainRegistry.getRuntimeProvider(
-                chainId: chainAsset.chain.chainId,
-                usedRuntimePaths: [:],
-                runtimeItem: nil
-            )
             let txStorage = try Self.createTxRepository()
             return SubqueryHistoryService(
                 txStorage: txStorage,
-                runtimeService: runtimeService,
+                chainRegistry: chainRegistry,
                 networkWorker: networkWorker
             )
         case .subsquid:
@@ -50,20 +45,11 @@ public enum HistoryServiceAssembly {
                 networkWorker: networkWorker
             )
         case .sora:
-            let chainRegistry = ChainRegistryAssembly.createDefaultRegistry()
-            let runtimeService = try await chainRegistry.getRuntimeProvider(
-                chainId: chainAsset.chain.chainId,
-                usedRuntimePaths: [:],
-                runtimeItem: nil
-            )
             let txStorage = try Self.createTxRepository()
             return SoraSubsquidHistoryService(
                 txStorage: txStorage,
-                runtimeService: runtimeService,
                 networkWorker: networkWorker
             )
-        case .alchemy:
-            return AlchemyHistoryService(networkWorker: networkWorker)
         case .etherscan:
             return EtherscanHistoryService(networkWorker: networkWorker)
         case .oklink:

@@ -11,7 +11,6 @@ public enum BlockExplorerType: String, Codable {
     case subsquid
     case giantsquid
     case sora
-    case alchemy
     case etherscan
     case reef
     case oklink

@@ -54,7 +54,6 @@ final class SoraSubsquidHistoryServiceTests: BaseHistoryServiceTestCase {
 
         let service = SoraSubsquidHistoryService(
             txStorage: txStorage,
-            runtimeService: RuntimeProviderProtocolMock(),
             networkWorker: networkWorker
         )
         super.historyService = service

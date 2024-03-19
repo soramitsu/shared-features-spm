@@ -10,6 +10,12 @@ struct SubqueryHistoryElement: Decodable, RewardOrSlashData {
         case extrinsic
         case transfer
     }
+    
+    enum SubqueryHistoryElementType {
+        case reward(SubqueryRewardOrSlash)
+        case extrinsic(SubqueryExtrinsic)
+        case transfer(SubqueryTransfer)
+    }
 
     let identifier: String
     let timestamp: String
@@ -17,6 +23,19 @@ struct SubqueryHistoryElement: Decodable, RewardOrSlashData {
     let reward: SubqueryRewardOrSlash?
     let extrinsic: SubqueryExtrinsic?
     let transfer: SubqueryTransfer?
+    
+    var type: SubqueryHistoryElementType? {
+        if let reward {
+            return .reward(reward)
+        }
+        if let extrinsic {
+            return .extrinsic(extrinsic)
+        }
+        if let transfer {
+            return .transfer(transfer)
+        }
+        return nil
+    }
 
     var rewardInfo: RewardOrSlash? {
         reward

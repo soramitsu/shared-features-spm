@@ -8,16 +8,16 @@ import SSFNetwork
 
 final class SubqueryHistoryService: HistoryService {
     private let txStorage: AsyncAnyRepository<TransactionHistoryItem>
-    private let runtimeService: RuntimeProviderProtocol
+    private let chainRegistry: ChainRegistryProtocol
     private let networkWorker: NetworkWorker
 
     init(
         txStorage: AsyncAnyRepository<TransactionHistoryItem>,
-        runtimeService: RuntimeProviderProtocol,
+        chainRegistry: ChainRegistryProtocol,
         networkWorker: NetworkWorker
     ) {
         self.txStorage = txStorage
-        self.runtimeService = runtimeService
+        self.chainRegistry = chainRegistry
         self.networkWorker = networkWorker
     }
     
@@ -198,16 +198,22 @@ final class SubqueryHistoryService: HistoryService {
         remoteTransactions: [SubqueryHistoryElement],
         chainAsset: ChainAsset
     ) async throws -> [SubqueryHistoryElement] {
-        let coderFactory = try await runtimeService.fetchCoderFactory()
+        let coderFactory = try await fetchCoderFactory(
+            chainId: chainAsset.chain.chainId
+        )
+
         let filteredTransactions = try remoteTransactions.filter { transaction in
             var assetId: String?
             
-            if let transfer = transaction.transfer {
+            switch transaction.type {
+            case let .transfer(transfer):
                 assetId = transfer.assetId
-            } else if let reward = transaction.reward {
+            case let .reward(reward):
                 assetId = reward.assetId
-            } else if let extrinsic = transaction.extrinsic {
+            case let .extrinsic(extrinsic):
                 assetId = extrinsic.assetId
+            case .none:
+                assetId = nil
             }
             
             if chainAsset.chainAssetType != .normal, assetId == nil {
@@ -247,5 +253,17 @@ final class SubqueryHistoryService: HistoryService {
         }
         
         return filteredTransactions
+    }
+    
+    private func fetchCoderFactory(
+        chainId: ChainModel.Id
+    ) async throws -> RuntimeCoderFactoryProtocol {
+        let runtimeService = try await chainRegistry.getRuntimeProvider(
+            chainId: chainId,
+            usedRuntimePaths: [:],
+            runtimeItem: nil
+        )
+        let coderFactory = try await runtimeService.fetchCoderFactory()
+        return coderFactory
     }
 }

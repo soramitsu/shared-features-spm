@@ -13,48 +13,45 @@ extension AssetTransactionData {
         address: String,
         chainAsset: ChainAsset
     ) -> AssetTransactionData {
-        if let transfer = item.transfer {
+        switch item.type {
+        case let .transfer(transfer):
             return createTransaction(
                 from: item,
                 transfer: transfer,
                 address: address,
                 chainAsset: chainAsset
             )
-        }
-
-        if let reward = item.reward {
+        case let .reward(reward):
             return createTransaction(
                 from: item,
                 reward: reward,
                 address: address,
                 chainAsset: chainAsset
             )
-        }
-
-        if let extrinsic = item.extrinsic {
+        case let .extrinsic(extrinsic):
             return createTransaction(
                 from: item,
                 extrinsic: extrinsic,
                 asset: chainAsset.asset
             )
+        case .none:
+            return AssetTransactionData(
+                transactionId: item.identifier,
+                status: .pending,
+                assetId: chainAsset.asset.id,
+                peerId: nil,
+                peerFirstName: nil,
+                peerLastName: nil,
+                peerName: nil,
+                details: nil,
+                amount: nil,
+                fees: [],
+                timestamp: Int64(item.timestamp),
+                type: AssetTransactionData.AssetTransactionDataType.unknown.rawValue,
+                reason: nil,
+                context: nil
+            )
         }
-
-        return AssetTransactionData(
-            transactionId: item.identifier,
-            status: .pending,
-            assetId: chainAsset.asset.id,
-            peerId: nil,
-            peerFirstName: nil,
-            peerLastName: nil,
-            peerName: nil,
-            details: nil,
-            amount: nil,
-            fees: [],
-            timestamp: Int64(item.timestamp),
-            type: AssetTransactionData.AssetTransactionDataType.unknown.rawValue,
-            reason: nil,
-            context: nil
-        )
     }
 
     private static func createTransaction(

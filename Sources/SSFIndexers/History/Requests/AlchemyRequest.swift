@@ -8,6 +8,7 @@ final class AlchemyRequest: RequestConfig {
             HTTPHeader(field: "accept", value: "application/json"),
             HTTPHeader(field: "content-type", value: "application/json")
         ]
+        static let jsonrpc = "2.0"
     }
     
     init(
@@ -16,7 +17,7 @@ final class AlchemyRequest: RequestConfig {
     ) throws {
         let body = JSONRPCInfo(
             identifier: 1,
-            jsonrpc: "2.0",
+            jsonrpc: Constants.jsonrpc,
             method: AlchemyEndpoint.getAssetTransfers.rawValue,
             params: [request]
         )

@@ -76,10 +76,14 @@ enum TransactionHistoryMergeItem {
         timestamp1: Int64,
         timestamp2: Int64
     ) -> Bool {
-        if let number1 = number1, let number2 = number2 {
-            return number1 != number2 ? number1 > number2 : timestamp1 > timestamp2
+        guard let number1, let number2 else {
+            return timestamp1 > timestamp2
         }
-
-        return timestamp1 > timestamp2
+        
+        if number1 != number2 {
+            return number1 > number2
+        } else {
+            return timestamp1 > timestamp2
+        }
     }
 }

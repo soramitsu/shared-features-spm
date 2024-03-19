@@ -106,55 +106,27 @@ final class ReefSubsquidHistoryService: HistoryService {
         stakingsCursor: String?
     ) -> String {
         var filterStrings: [String] = []
-        let transfersAfter = transfersCursor.map { "after: \"\($0)\"" } ?? ""
-        let stakingsAfter = stakingsCursor.map { "after: \"\($0)\"" } ?? ""
 
         if filters.contains(where: { $0.type == .transfer && $0.selected }) {
+            let transfersAfter = transfersCursor.map { "after: \"\($0)\"" } ?? ""
             filterStrings.append(
-                """
-                transfersConnection(\(transfersAfter),
-                 first: \(count), where: {AND: [{type_eq: Native}, {OR: [{from: {id_eq: "\(address)"}}, {to: {id_eq: "\(address)"}}]}]}, orderBy: timestamp_DESC) {
-                    edges {
-                          node {
-                            amount
-                            timestamp
-                            success
-                    extrinsicHash
-                            to {
-                              id
-                            }
-                            from {
-                              id
-                            }
-                signedData
-                          }
-                        }
-                        pageInfo {
-                endCursor
-                          hasNextPage
-                        }
-                  }
-                """
+                ReefSubsquidHistoryServiceFilters.transfersConnection(
+                    after: transfersAfter,
+                    address: address,
+                    count: count
+                )
             )
         }
 
         if filters.contains(where: { $0.type == .reward && $0.selected }) {
-            filterStrings.append("""
-                        stakingsConnection(\(stakingsAfter),
-                 first: \(count), orderBy: timestamp_DESC, where: {AND: {signer: {id_eq: "\(address)"}, amount_gt: "0", type_eq: Reward}}) {
-                                edges {
-                                                                  node {
-            id
-                                                                    amount
-                                                                    timestamp
-                                                                  }
-                                                                }
-                                                                pageInfo {
-            endCursor
-                                                                  hasNextPage
-                                                                }
-                            }
-            """)
+            let stakingsAfter = stakingsCursor.map { "after: \"\($0)\"" } ?? ""
+            filterStrings.append(
+                ReefSubsquidHistoryServiceFilters.stakingsConnection(
+                    after: stakingsAfter,
+                    address: address,
+                    count: count
+                )
+            )
         }
 
         return filterStrings.joined(separator: "\n")
@@ -174,11 +146,7 @@ final class ReefSubsquidHistoryService: HistoryService {
             transfersCursor: transfersCursor,
             stakingsCursor: stakingsCursor
         )
-        return """
-        query MyQuery {
-          \(filterString)
-        }
-        """
+        return ReefSubsquidHistoryServiceFilters.query(with: filterString)
     }
 
     private func createSubqueryHistoryMerge(
@@ -203,22 +171,33 @@ final class ReefSubsquidHistoryService: HistoryService {
                 historyItems: transactions,
                 identifiersToRemove: []
             )
-        } else {
-            let manager = TransactionHistoryMergeManager(
-                address: address,
-                chainAsset: chainAsset
-            )
-            return manager.merge(
-                subscanItems: remoteTransactions,
-                localItems: local
-            )
         }
+
+        let manager = TransactionHistoryMergeManager(
+            address: address,
+            chainAsset: chainAsset
+        )
+        return manager.merge(
+            subscanItems: remoteTransactions,
+            localItems: local
+        )
     }
 
     private func createHistoryMap(
         merge: TransactionHistoryMergeResult,
         remote: ReefResponseData
     ) -> AssetTransactionPageData {
+        let isTransfersHasNextPage = (remote.transfersConnection?.pageInfo?.hasNextPage).or(false)
+        let isStakingHasNextPage = (remote.stakingsConnection?.pageInfo?.hasNextPage).or(false)
+        let hasNextPage = isTransfersHasNextPage || isStakingHasNextPage
+        
+        guard hasNextPage else {
+            return AssetTransactionPageData(
+                transactions: merge.historyItems,
+                context: nil
+            )
+        }
+        
         var context: [String: String] = [:]
         if let transfersCursor = remote.transfersConnection?.pageInfo?.endCursor {
             context["transfersCursor"] = transfersCursor
@@ -227,14 +206,10 @@ final class ReefSubsquidHistoryService: HistoryService {
         if let stakingsCursor = remote.stakingsConnection?.pageInfo?.endCursor {
             context["stakingsCursor"] = stakingsCursor
         }
-        
-        let isTransfersHasNextPage = (remote.transfersConnection?.pageInfo?.hasNextPage).or(false)
-        let isStakingHasNextPage = (remote.stakingsConnection?.pageInfo?.hasNextPage).or(false)
-        let hasNextPage = isTransfersHasNextPage || isStakingHasNextPage
-        
+
         return AssetTransactionPageData(
             transactions: merge.historyItems,
-            context: hasNextPage ? context : nil
+            context: context
         )
     }
 }
