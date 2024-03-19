@@ -2,7 +2,7 @@ import Foundation
 import RobinHood
 import CoreData
 
-public protocol StorageFacade: AnyObject {
+protocol StorageFacade: AnyObject {
     var databaseService: CoreDataServiceProtocol { get }
 
     func createAsyncRepository<T, U>(
@@ -18,10 +18,10 @@ public protocol StorageFacade: AnyObject {
     ) -> CoreDataRepository<T, U> where T: Identifiable, U: NSManagedObject
 }
 
-public final class CacheStorageFacade: StorageFacade {
-    public let databaseService: CoreDataServiceProtocol
+final class CacheStorageFacade: StorageFacade {
+    let databaseService: CoreDataServiceProtocol
 
-    public init() throws {
+    init() throws {
         guard
             let baseURL = FileManager.default.urls(
                 for: .documentDirectory,
@@ -55,7 +55,7 @@ public final class CacheStorageFacade: StorageFacade {
         databaseService = CoreDataService(configuration: configuration)
     }
 
-    public func createAsyncRepository<T, U>(
+    func createAsyncRepository<T, U>(
         filter: NSPredicate?,
         sortDescriptors: [NSSortDescriptor],
         mapper: AnyCoreDataMapper<T, U>
@@ -68,7 +68,7 @@ public final class CacheStorageFacade: StorageFacade {
         )
     }
     
-    public func createRepository<T, U>(
+    func createRepository<T, U>(
         filter: NSPredicate?,
         sortDescriptors: [NSSortDescriptor],
         mapper: AnyCoreDataMapper<T, U>
