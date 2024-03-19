@@ -2,11 +2,11 @@ import Foundation
 
 public struct ChainNodeModel: Equatable, Codable, Hashable {
     public struct ApiKey: Equatable, Codable, Hashable {
-        public let key: String
+        public let queryName: String
         public let keyName: String
         
-        public init(key: String, keyName: String) {
-            self.key = key
+        public init(queryName: String, keyName: String) {
+            self.queryName = queryName
             self.keyName = keyName
         }
     }

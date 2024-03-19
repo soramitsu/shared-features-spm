@@ -2,20 +2,26 @@ import Foundation
 import RobinHood
 import CoreData
 
-protocol StorageFacade: AnyObject {
+public protocol StorageFacade: AnyObject {
     var databaseService: CoreDataServiceProtocol { get }
 
-    func createRepository<T, U>(
+    func createAsyncRepository<T, U>(
         filter: NSPredicate?,
         sortDescriptors: [NSSortDescriptor],
         mapper: AnyCoreDataMapper<T, U>
     ) -> AsyncCoreDataRepositoryDefault<T, U>
+    
+    func createRepository<T, U>(
+        filter: NSPredicate?,
+        sortDescriptors: [NSSortDescriptor],
+        mapper: AnyCoreDataMapper<T, U>
+    ) -> CoreDataRepository<T, U> where T: Identifiable, U: NSManagedObject
 }
 
-final class CacheStorageFacade: StorageFacade {
-    let databaseService: CoreDataServiceProtocol
+public final class CacheStorageFacade: StorageFacade {
+    public let databaseService: CoreDataServiceProtocol
 
-    init() throws {
+    public init() throws {
         guard
             let baseURL = FileManager.default.urls(
                 for: .documentDirectory,
@@ -49,12 +55,25 @@ final class CacheStorageFacade: StorageFacade {
         databaseService = CoreDataService(configuration: configuration)
     }
 
-    func createRepository<T, U>(
+    public func createAsyncRepository<T, U>(
         filter: NSPredicate?,
         sortDescriptors: [NSSortDescriptor],
         mapper: AnyCoreDataMapper<T, U>
     ) -> AsyncCoreDataRepositoryDefault<T, U> {
         AsyncCoreDataRepositoryDefault(
+            databaseService: databaseService,
+            mapper: mapper,
+            filter: filter,
+            sortDescriptors: sortDescriptors
+        )
+    }
+    
+    public func createRepository<T, U>(
+        filter: NSPredicate?,
+        sortDescriptors: [NSSortDescriptor],
+        mapper: AnyCoreDataMapper<T, U>
+    ) -> CoreDataRepository<T, U> where T: Identifiable, U: NSManagedObject {
+        CoreDataRepository(
             databaseService: databaseService,
             mapper: mapper,
             filter: filter,

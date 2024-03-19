@@ -22,6 +22,8 @@ public final class KeystoreInfoFactory: KeystoreInfoFactoryProtocol {
             throw KeystoreInfoFactoryError.unsupportedCryptoType
         }
 
+        let isEthereum = value == "ethereum"
+        
         let chainType: ChainType?
 
         if let address = definition.address,
@@ -36,7 +38,8 @@ public final class KeystoreInfoFactory: KeystoreInfoFactoryProtocol {
             address: definition.address,
             chainType: chainType,
             cryptoType: cryptoType,
-            meta: definition.meta
+            meta: definition.meta,
+            isEthereum: isEthereum
         )
     }
 }

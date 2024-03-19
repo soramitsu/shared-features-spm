@@ -32,9 +32,9 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
         AsyncStorageRequestDefault()
     }()
     
-    private var cacheStorage: SingleValueRepository {
+    private var cacheStorage: AsyncSingleValueRepository {
         get throws {
-            try SingleValueCacheRepositoryFactoryDefault().createSingleValueCasheRepository()
+            try SingleValueCacheRepositoryFactoryDefault().createAsyncSingleValueCacheRepository()
         }
     }
     
