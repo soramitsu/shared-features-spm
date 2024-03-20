@@ -80,8 +80,10 @@ public final class RuntimeMetadata {
         callName: String,
         argumentName: String
     ) throws -> Bool {
-        return try wrapped.modules.first(where: {$0.name.lowercased() == moduleName.lowercased() })?
-            .calls(using: schemaResolver)?.first(where: { $0.name.lowercased() == callName.lowercased() })?
+        return try wrapped.modules
+            .first(where: {$0.name.lowercased() == moduleName.lowercased() })?
+            .calls(using: schemaResolver)?
+            .first(where: { $0.name.lowercased() == callName.lowercased() })?
             .arguments
             .first(where:  { $0.name.lowercased() == argumentName.lowercased() }) != nil
     }
