@@ -229,23 +229,24 @@ extension CoreDataRepository {
 
             databaseService.performAsync { (optionalContext, optionalError) in
 
-                if let context = optionalContext {
-                    do {
-                        try self.saveBatch(models: updatedModels, in: context)
-
-                        try self.delete(modelIds: deletedIds, in: context)
-
-                        try context.save()
-
-                        self.call(block: block, error: nil, queue: queue)
-
-                    } catch {
-                        context.rollback()
-
-                        self.call(block: block, error: error, queue: queue)
-                    }
-                } else {
+                guard let context = optionalContext {
                     self.call(block: block, error: optionalError, queue: queue)
+                    return
+                }
+                
+                do {
+                    try self.saveBatch(models: updatedModels, in: context)
+
+                    try self.delete(modelIds: deletedIds, in: context)
+
+                    try context.save()
+
+                    self.call(block: block, error: nil, queue: queue)
+
+                } catch {
+                    context.rollback()
+
+                    self.call(block: block, error: error, queue: queue)
                 }
             }
         }
