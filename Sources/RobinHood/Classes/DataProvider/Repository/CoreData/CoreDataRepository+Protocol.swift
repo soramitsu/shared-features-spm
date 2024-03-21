@@ -187,7 +187,7 @@ extension CoreDataRepository: DataProviderRepositoryProtocol {
                 let updatedModels = try updateModelsBlock()
                 let deletedIds = try deleteIdsBlock()
 
-                if updatedModels.count == 0, deletedIds.count == 0 {
+                if updatedModels.isEmpty, deletedIds.isEmpty {
                     return
                 }
 
