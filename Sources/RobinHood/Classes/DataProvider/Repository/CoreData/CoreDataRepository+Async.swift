@@ -229,7 +229,7 @@ extension CoreDataRepository {
 
             databaseService.performAsync { (optionalContext, optionalError) in
 
-                guard let context = optionalContext {
+                guard let context = optionalContext else {
                     self.call(block: block, error: optionalError, queue: queue)
                     return
                 }
