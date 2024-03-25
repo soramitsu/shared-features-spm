@@ -5,11 +5,17 @@ import CoreData
 protocol StorageFacade: AnyObject {
     var databaseService: CoreDataServiceProtocol { get }
 
-    func createRepository<T, U>(
+    func createAsyncRepository<T, U>(
         filter: NSPredicate?,
         sortDescriptors: [NSSortDescriptor],
         mapper: AnyCoreDataMapper<T, U>
     ) -> AsyncCoreDataRepositoryDefault<T, U>
+    
+    func createRepository<T, U>(
+        filter: NSPredicate?,
+        sortDescriptors: [NSSortDescriptor],
+        mapper: AnyCoreDataMapper<T, U>
+    ) -> CoreDataRepository<T, U> where T: Identifiable, U: NSManagedObject
 }
 
 final class CacheStorageFacade: StorageFacade {
@@ -49,12 +55,25 @@ final class CacheStorageFacade: StorageFacade {
         databaseService = CoreDataService(configuration: configuration)
     }
 
-    func createRepository<T, U>(
+    func createAsyncRepository<T, U>(
         filter: NSPredicate?,
         sortDescriptors: [NSSortDescriptor],
         mapper: AnyCoreDataMapper<T, U>
     ) -> AsyncCoreDataRepositoryDefault<T, U> {
         AsyncCoreDataRepositoryDefault(
+            databaseService: databaseService,
+            mapper: mapper,
+            filter: filter,
+            sortDescriptors: sortDescriptors
+        )
+    }
+    
+    func createRepository<T, U>(
+        filter: NSPredicate?,
+        sortDescriptors: [NSSortDescriptor],
+        mapper: AnyCoreDataMapper<T, U>
+    ) -> CoreDataRepository<T, U> where T: Identifiable, U: NSManagedObject {
+        CoreDataRepository(
             databaseService: databaseService,
             mapper: mapper,
             filter: filter,

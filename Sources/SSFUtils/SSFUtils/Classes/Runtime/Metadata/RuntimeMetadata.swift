@@ -1,5 +1,6 @@
 import BigInt
 import Foundation
+import SSFModels
 
 public protocol RuntimeMetadataProtocol: ScaleCodable {
     var schema: Schema? { get }
@@ -11,6 +12,14 @@ public final class RuntimeMetadata {
     public let metaReserved: UInt32
     public let version: UInt8
     public let schemaResolver: Schema.Resolver
+    
+    public var signatureType: String {
+        if version == 13 {
+            return KnownType.signature13.rawValue
+        }
+        
+        return KnownType.signature.rawValue
+    }
 
     private let wrapped: RuntimeMetadataProtocol
     public init(
@@ -64,6 +73,32 @@ public final class RuntimeMetadata {
     ) -> RuntimeModuleConstantMetadata? {
         wrapped.modules.first(where: { $0.name.lowercased() == moduleName.lowercased() })?
             .constants.first(where: { $0.name.lowercased() == constantName.lowercased() })
+    }
+    
+    public func checkArgument(
+        moduleName: String,
+        callName: String,
+        argumentName: String
+    ) throws -> Bool {
+        return try wrapped.modules
+            .first(where: {$0.name.lowercased() == moduleName.lowercased() })?
+            .calls(using: schemaResolver)?
+            .first(where: { $0.name.lowercased() == callName.lowercased() })?
+            .arguments
+            .first(where:  { $0.name.lowercased() == argumentName.lowercased() }) != nil
+    }
+    
+    public func multiAddressParameter(accountId: AccountId, chainFormat: SFChainFormat) -> MultiAddress {
+        switch chainFormat {
+        case .sfEthereum:
+            return MultiAddress.address20(accountId)
+        case .sfSubstrate:
+            if version == 13 {
+                return .indexedString(accountId)
+            } else {
+                return MultiAddress.address32(accountId)
+            }
+        }
     }
 }
 

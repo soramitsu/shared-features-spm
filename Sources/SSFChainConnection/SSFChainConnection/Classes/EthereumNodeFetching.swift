@@ -15,7 +15,7 @@ final class EthereumNodeFetchingDefault: EthereumNodeFetching {
     // MARK: - EthereumNodeFetching
     
     func getNode(for chain: ChainModel) throws -> Web3.Eth {
-        guard let node = getNodeFor(chain: chain, scheme: .wss), let apikey = node.apikey?.key else {
+        guard let node = getNodeFor(chain: chain, scheme: .wss), let apikey = node.apikey?.queryName else {
             return try getHttps(for: chain)
         }
 

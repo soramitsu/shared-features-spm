@@ -89,7 +89,7 @@ public final class ChainModelMapper {
         if
             let keyName = entity.apiKeyName,
             let nodeApiKey = apiKeyInjector.getNodeApiKey(for: chainId, apiKeyName: keyName) {
-            apiKey = ChainNodeModel.ApiKey(key: nodeApiKey, keyName: keyName)
+            apiKey = ChainNodeModel.ApiKey(queryName: nodeApiKey, keyName: keyName)
         } else {
             apiKey = nil
         }
