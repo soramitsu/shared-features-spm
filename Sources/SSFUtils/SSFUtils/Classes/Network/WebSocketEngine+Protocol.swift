@@ -6,7 +6,7 @@ extension WebSocketEngine: JSONRPCEngine {
         pendingRequests
     }
 
-    public func callMethod<P: Encodable, T: Decodable>(
+    public func callMethod<P: Codable, T: Decodable>(
         _ method: String,
         params: P?,
         options: JSONRPCOptions,
@@ -30,7 +30,7 @@ extension WebSocketEngine: JSONRPCEngine {
         return request.requestId
     }
 
-    public func subscribe<P: Encodable, T: Decodable>(
+    public func subscribe<P: Codable, T: Decodable>(
         _ method: String,
         params: P?,
         updateClosure: @escaping (T) -> Void,

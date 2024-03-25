@@ -15,6 +15,7 @@ public protocol ChainRegistryProtocol: AnyObject {
     ) async throws -> RuntimeProviderProtocol
     func getSubstrateConnection(for chain: ChainModel) async throws -> SubstrateConnection
     func getEthereumConnection(for chain: ChainModel) async throws -> Web3EthConnection
+    func getRuntimeProvider(for chainId: ChainModel.Id) -> RuntimeProviderProtocol?
     func getChain(for chainId: ChainModel.Id) async throws -> ChainModel
     func getChains() async throws -> [ChainModel]
     func getReadySnapshot(
@@ -32,6 +33,8 @@ public final class ChainRegistry {
     private let runtimeSyncService: RuntimeSyncServiceProtocol
 
     private let mutex = NSLock()
+    
+    private lazy var readLock = ReaderWriterLock()
 
     public init(
         runtimeProviderPool: RuntimeProviderPoolProtocol,
@@ -111,6 +114,10 @@ extension ChainRegistry: ChainRegistryProtocol {
         for chain: SSFModels.ChainModel
     ) async throws -> Web3EthConnection {
         try await connectionPool.setupWeb3EthereumConnection(for: chain)
+    }
+
+    public func getRuntimeProvider(for chainId: ChainModel.Id) -> RuntimeProviderProtocol? {
+        readLock.concurrentlyRead { runtimeProviderPool.getRuntimeProvider(for: chainId) }
     }
 
     public func getChain(for chainId: ChainModel.Id) async throws -> ChainModel {

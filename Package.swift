@@ -34,7 +34,10 @@ let package = Package(
         .library(name: "SoraKeystore", targets: ["SoraKeystore"]), //TODO: get from github
         .library(name: "SSFQRService", targets: ["SSFQRService"]),
         .library(name: "SSFTransferService", targets: ["SSFTransferService"]),
-        .library(name: "SSFSingleValueCache", targets: ["SSFSingleValueCache"])
+        .library(name: "SSFSingleValueCache", targets: ["SSFSingleValueCache"]),
+        .library(name: "SSFPolkaswap", targets: ["SSFPolkaswap"]),
+        .library(name: "SSFPools", targets: ["SSFPools"]),
+        .library(name: "SSFPoolsStorage", targets: ["SSFPoolsStorage"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
@@ -54,6 +57,7 @@ let package = Package(
         .binaryTarget(name: "blake2lib", path: "Binaries/blake2lib.xcframework"),
         .binaryTarget(name: "libed25519", path: "Binaries/libed25519.xcframework"),
         .binaryTarget(name: "sr25519lib", path: "Binaries/sr25519lib.xcframework"),
+        .binaryTarget(name: "sorawallet", path: "Binaries/sorawallet.xcframework"),
         .binaryTarget(name: "MPQRCoreSDK", path: "Binaries/MPQRCoreSDK.xcframework"),
         .target(name: "RobinHood"),
         .target(name: "keccak"),
@@ -309,6 +313,37 @@ let package = Package(
                 "SSFChainRegistry"
             ]
         ),
+        .target(
+            name: "SSFPolkaswap",
+            dependencies: [
+                "SSFUtils",
+                "SSFChainRegistry",
+                "RobinHood",
+                "SSFModels",
+                "SSFStorageQueryKit",
+                "SSFPools",
+                "sorawallet",
+                "SSFPoolsStorage"
+            ]
+        ),
+        .target(
+            name: "SSFPools",
+            dependencies: [
+                "RobinHood",
+                "SSFUtils",
+                "SSFStorageQueryKit"
+            ]
+        ),
+        .target(
+            name: "SSFPoolsStorage",
+            dependencies: [
+                "SSFUtils",
+                "RobinHood",
+                "SSFPools"
+            ]
+        ),
+
+        //Tests targets
         .testTarget(
             name: "SSFXCMTests",
             dependencies: [

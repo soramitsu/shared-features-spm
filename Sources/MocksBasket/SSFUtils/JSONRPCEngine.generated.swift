@@ -50,4 +50,8 @@ public class JSONRPCEngineMock: JSONRPCEngine {
     public func connectIfNeeded() {}
     
     public func disconnectIfNeeded() {}
+    
+    public func unsubsribe(_ identifier: UInt16) {}
+    
+    public func unsubsribeAll() {}
 }
