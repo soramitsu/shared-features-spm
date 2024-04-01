@@ -50,7 +50,9 @@ final class AccountManagementServiceTests: XCTestCase {
             let currentAccount = self?.service?.getCurrentAccount()
 
             // assert
-            XCTAssertEqual(currentAccount, TestData.account)
+            DispatchQueue.main.async {
+                XCTAssertEqual(currentAccount, TestData.account)
+            }
         })
     }
 
