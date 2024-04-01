@@ -6,15 +6,16 @@ import UIKit
 @testable import SSFQRService
 
 public class QREncoderMock: QREncoder {
-public init() {}
+    public init() {}
 
-    //MARK: - encode
+    // MARK: - encode
 
     public var encodeWithThrowableError: Error?
     public var encodeWithCallsCount = 0
     public var encodeWithCalled: Bool {
-        return encodeWithCallsCount > 0
+        encodeWithCallsCount > 0
     }
+
     public var encodeWithReceivedType: QRType?
     public var encodeWithReceivedInvocations: [QRType] = []
     public var encodeWithReturnValue: Data!
@@ -27,7 +28,6 @@ public init() {}
         encodeWithCallsCount += 1
         encodeWithReceivedType = type
         encodeWithReceivedInvocations.append(type)
-        return try encodeWithClosure.map({ try $0(type) }) ?? encodeWithReturnValue
+        return try encodeWithClosure.map { try $0(type) } ?? encodeWithReturnValue
     }
-
 }

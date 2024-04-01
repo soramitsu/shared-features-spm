@@ -6,15 +6,16 @@ import UIKit
 @testable import SSFQRService
 
 public class QRServiceMock: QRService {
-public init() {}
+    public init() {}
 
-    //MARK: - extractQrCode
+    // MARK: - extractQrCode
 
     public var extractQrCodeFromThrowableError: Error?
     public var extractQrCodeFromCallsCount = 0
     public var extractQrCodeFromCalled: Bool {
-        return extractQrCodeFromCallsCount > 0
+        extractQrCodeFromCallsCount > 0
     }
+
     public var extractQrCodeFromReceivedImage: UIImage?
     public var extractQrCodeFromReceivedInvocations: [UIImage] = []
     public var extractQrCodeFromReturnValue: QRMatcherType!
@@ -27,16 +28,17 @@ public init() {}
         extractQrCodeFromCallsCount += 1
         extractQrCodeFromReceivedImage = image
         extractQrCodeFromReceivedInvocations.append(image)
-        return try extractQrCodeFromClosure.map({ try $0(image) }) ?? extractQrCodeFromReturnValue
+        return try extractQrCodeFromClosure.map { try $0(image) } ?? extractQrCodeFromReturnValue
     }
 
-    //MARK: - generate
+    // MARK: - generate
 
     public var generateWithQrSizeThrowableError: Error?
     public var generateWithQrSizeCallsCount = 0
     public var generateWithQrSizeCalled: Bool {
-        return generateWithQrSizeCallsCount > 0
+        generateWithQrSizeCallsCount > 0
     }
+
     public var generateWithQrSizeReceivedArguments: (qrType: QRType, qrSize: CGSize)?
     public var generateWithQrSizeReceivedInvocations: [(qrType: QRType, qrSize: CGSize)] = []
     public var generateWithQrSizeReturnValue: UIImage!
@@ -49,7 +51,7 @@ public init() {}
         generateWithQrSizeCallsCount += 1
         generateWithQrSizeReceivedArguments = (qrType: qrType, qrSize: qrSize)
         generateWithQrSizeReceivedInvocations.append((qrType: qrType, qrSize: qrSize))
-        return try generateWithQrSizeClosure.map({ try $0(qrType, qrSize) }) ?? generateWithQrSizeReturnValue
+        return try generateWithQrSizeClosure
+            .map { try $0(qrType, qrSize) } ?? generateWithQrSizeReturnValue
     }
-
 }

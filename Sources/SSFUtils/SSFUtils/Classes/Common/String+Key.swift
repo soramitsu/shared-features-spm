@@ -4,11 +4,11 @@ enum AssetKeyExtractionError: Error {
     case invalidSize
 }
 
-extension String {
-     public func assetIdFromKey() throws -> String {
-        guard self.count > 64 else {
+public extension String {
+    func assetIdFromKey() throws -> String {
+        guard count > 64 else {
             throw AssetKeyExtractionError.invalidSize
         }
-        return "0x" + self.suffix(64)
+        return "0x" + suffix(64)
     }
 }

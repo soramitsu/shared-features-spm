@@ -48,13 +48,13 @@ public protocol CoreDataMapperProtocol: AnyObject {
     /// - Parameter model: Swift model to populate NSManagedObject from.
     /// - Returns: [String: Any]
     func dict(for model: DataProviderModel) throws -> [String: Any]
-    
+
     /// Name of idetifier field to access NSManagedObject by.
     var entityIdentifierFieldName: String { get }
 }
 
-extension CoreDataMapperProtocol {
-    public func dict(for model: DataProviderModel) throws -> [String: Any] { [:] }
+public extension CoreDataMapperProtocol {
+    func dict(for _: DataProviderModel) throws -> [String: Any] { [:] }
 }
 
 /**

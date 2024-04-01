@@ -33,7 +33,7 @@ public final class ChainRegistry {
     private let runtimeSyncService: RuntimeSyncServiceProtocol
 
     private let mutex = NSLock()
-    
+
     private lazy var readLock = ReaderWriterLock()
 
     public init(

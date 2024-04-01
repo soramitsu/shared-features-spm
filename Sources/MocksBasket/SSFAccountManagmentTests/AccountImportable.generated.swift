@@ -3,25 +3,29 @@
 // swiftlint:disable all
 
 import UIKit
+@testable import RobinHood
 @testable import SSFAccountManagment
 @testable import SSFModels
 @testable import SSFUtils
-@testable import RobinHood
 
 public class AccountImportableMock: AccountImportable {
-public init() {}
+    public init() {}
 
-    //MARK: - importMetaAccount
+    // MARK: - importMetaAccount
 
     public var importMetaAccountRequestThrowableError: Error?
     public var importMetaAccountRequestCallsCount = 0
     public var importMetaAccountRequestCalled: Bool {
-        return importMetaAccountRequestCallsCount > 0
+        importMetaAccountRequestCallsCount > 0
     }
+
     public var importMetaAccountRequestReceivedRequest: MetaAccountImportRequest?
     public var importMetaAccountRequestReceivedInvocations: [MetaAccountImportRequest] = []
     public var importMetaAccountRequestReturnValue: MetaAccountModel!
-    public var importMetaAccountRequestClosure: ((MetaAccountImportRequest) throws -> MetaAccountModel)?
+    public var importMetaAccountRequestClosure: (
+        (MetaAccountImportRequest) throws
+            -> MetaAccountModel
+    )?
 
     public func importMetaAccount(request: MetaAccountImportRequest) throws -> MetaAccountModel {
         if let error = importMetaAccountRequestThrowableError {
@@ -30,7 +34,7 @@ public init() {}
         importMetaAccountRequestCallsCount += 1
         importMetaAccountRequestReceivedRequest = request
         importMetaAccountRequestReceivedInvocations.append(request)
-        return try importMetaAccountRequestClosure.map({ try $0(request) }) ?? importMetaAccountRequestReturnValue
+        return try importMetaAccountRequestClosure
+            .map { try $0(request) } ?? importMetaAccountRequestReturnValue
     }
-
 }

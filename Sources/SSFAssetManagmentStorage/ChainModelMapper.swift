@@ -86,9 +86,9 @@ public final class ChainModelMapper {
     private func createChainNode(from entity: CDChainNode, chainId: String) -> ChainNodeModel {
         let apiKey: ChainNodeModel.ApiKey?
 
-        if
-            let keyName = entity.apiKeyName,
-            let nodeApiKey = apiKeyInjector.getNodeApiKey(for: chainId, apiKeyName: keyName) {
+        if let keyName = entity.apiKeyName,
+           let nodeApiKey = apiKeyInjector.getNodeApiKey(for: chainId, apiKeyName: keyName)
+        {
             apiKey = ChainNodeModel.ApiKey(queryName: nodeApiKey, keyName: keyName)
         } else {
             apiKey = nil

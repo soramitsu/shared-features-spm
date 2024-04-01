@@ -4,7 +4,7 @@ public struct ChainNodeModel: Equatable, Codable, Hashable {
     public struct ApiKey: Equatable, Codable, Hashable {
         public let queryName: String
         public let keyName: String
-        
+
         public init(queryName: String, keyName: String) {
             self.queryName = queryName
             self.keyName = keyName

@@ -176,37 +176,39 @@ extension CoreDataRepository: DataProviderRepositoryProtocol {
             }
         }
     }
-    
+
     public func saveBatchOperation(
-            _ updateModelsBlock: @escaping () throws -> [T],
-            _ deleteIdsBlock: @escaping () throws -> [String]
-        ) -> BaseOperation<Void> {
-            ClosureOperation {
-                var error: Error?
+        _ updateModelsBlock: @escaping () throws -> [T],
+        _ deleteIdsBlock: @escaping () throws -> [String]
+    ) -> BaseOperation<Void> {
+        ClosureOperation {
+            var error: Error?
 
-                let updatedModels = try updateModelsBlock()
-                let deletedIds = try deleteIdsBlock()
+            let updatedModels = try updateModelsBlock()
+            let deletedIds = try deleteIdsBlock()
 
-                if updatedModels.isEmpty, deletedIds.isEmpty {
-                    return
-                }
+            if updatedModels.isEmpty, deletedIds.isEmpty {
+                return
+            }
 
-                let semaphore = DispatchSemaphore(value: 0)
+            let semaphore = DispatchSemaphore(value: 0)
 
-                self.saveBatch(updating: updatedModels,
-                          deleting: deletedIds,
-                          runCompletionIn: nil) { (optionalError) in
-                            error = optionalError
-                            semaphore.signal()
-                }
+            self.saveBatch(
+                updating: updatedModels,
+                deleting: deletedIds,
+                runCompletionIn: nil
+            ) { optionalError in
+                error = optionalError
+                semaphore.signal()
+            }
 
-                semaphore.wait()
+            semaphore.wait()
 
-                if let existingError = error {
-                    throw existingError
-                }
+            if let existingError = error {
+                throw existingError
             }
         }
+    }
 
     public func replaceOperation(_ newModelsBlock: @escaping () throws -> [Model])
         -> BaseOperation<Void>

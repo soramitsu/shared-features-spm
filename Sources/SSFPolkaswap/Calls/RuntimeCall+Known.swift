@@ -7,14 +7,30 @@ extension RuntimeCall {
     }
 
     static func initializePool(_ args: InitializePoolCall) -> RuntimeCall<InitializePoolCall> {
-        RuntimeCall<InitializePoolCall>(moduleName: "PoolXYK", callName: "initialize_pool", args: args)
+        RuntimeCall<InitializePoolCall>(
+            moduleName: "PoolXYK",
+            callName: "initialize_pool",
+            args: args
+        )
     }
 
-    static func depositLiquidity(_ args: DepositLiquidityCall) -> RuntimeCall<DepositLiquidityCall> {
-        RuntimeCall<DepositLiquidityCall>(moduleName: "PoolXYK", callName: "deposit_liquidity", args: args)
+    static func depositLiquidity(_ args: DepositLiquidityCall)
+        -> RuntimeCall<DepositLiquidityCall>
+    {
+        RuntimeCall<DepositLiquidityCall>(
+            moduleName: "PoolXYK",
+            callName: "deposit_liquidity",
+            args: args
+        )
     }
 
-    static func withdrawLiquidity(_ args: WithdrawLiquidityCall) -> RuntimeCall<WithdrawLiquidityCall> {
-        RuntimeCall<WithdrawLiquidityCall>(moduleName: "PoolXYK", callName: "withdraw_liquidity", args: args)
+    static func withdrawLiquidity(_ args: WithdrawLiquidityCall)
+        -> RuntimeCall<WithdrawLiquidityCall>
+    {
+        RuntimeCall<WithdrawLiquidityCall>(
+            moduleName: "PoolXYK",
+            callName: "withdraw_liquidity",
+            args: args
+        )
     }
 }

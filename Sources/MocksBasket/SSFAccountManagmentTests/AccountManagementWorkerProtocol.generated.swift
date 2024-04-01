@@ -3,23 +3,33 @@
 // swiftlint:disable all
 
 import UIKit
+@testable import RobinHood
 @testable import SSFAccountManagment
 @testable import SSFModels
 @testable import SSFUtils
-@testable import RobinHood
 
 public class AccountManagementWorkerProtocolMock: AccountManagementWorkerProtocol {
-public init() {}
+    public init() {}
 
-    //MARK: - save
+    // MARK: - save
 
     public var saveAccountCompletionCallsCount = 0
     public var saveAccountCompletionCalled: Bool {
-        return saveAccountCompletionCallsCount > 0
+        saveAccountCompletionCallsCount > 0
     }
-    public var saveAccountCompletionReceivedArguments: (account: ManagedMetaAccountModel, completion: () -> Void)?
-    public var saveAccountCompletionReceivedInvocations: [(account: ManagedMetaAccountModel, completion: () -> Void)] = []
-    public var saveAccountCompletionClosure: ((ManagedMetaAccountModel, @escaping () -> Void) -> Void)?
+
+    public var saveAccountCompletionReceivedArguments: (
+        account: ManagedMetaAccountModel,
+        completion: () -> Void
+    )?
+    public var saveAccountCompletionReceivedInvocations: [(
+        account: ManagedMetaAccountModel,
+        completion: () -> Void
+    )] = []
+    public var saveAccountCompletionClosure: (
+        (ManagedMetaAccountModel, @escaping () -> Void)
+            -> Void
+    )?
 
     public func save(account: ManagedMetaAccountModel, completion: @escaping () -> Void) {
         saveAccountCompletionCallsCount += 1
@@ -28,13 +38,14 @@ public init() {}
         saveAccountCompletionClosure?(account, completion)
     }
 
-    //MARK: - fetchAll
+    // MARK: - fetchAll
 
     public var fetchAllThrowableError: Error?
     public var fetchAllCallsCount = 0
     public var fetchAllCalled: Bool {
-        return fetchAllCallsCount > 0
+        fetchAllCallsCount > 0
     }
+
     public var fetchAllReturnValue: [MetaAccountModel]!
     public var fetchAllClosure: (() throws -> [MetaAccountModel])?
 
@@ -43,17 +54,18 @@ public init() {}
             throw error
         }
         fetchAllCallsCount += 1
-        return try fetchAllClosure.map({ try $0() }) ?? fetchAllReturnValue
+        return try fetchAllClosure.map { try $0() } ?? fetchAllReturnValue
     }
 
-    //MARK: - deleteAll
+    // MARK: - deleteAll
 
     public var deleteAllCompletionCallsCount = 0
     public var deleteAllCompletionCalled: Bool {
-        return deleteAllCompletionCallsCount > 0
+        deleteAllCompletionCallsCount > 0
     }
+
     public var deleteAllCompletionReceivedCompletion: (() -> Void)?
-    public var deleteAllCompletionReceivedInvocations: [(() -> Void)] = []
+    public var deleteAllCompletionReceivedInvocations: [() -> Void] = []
     public var deleteAllCompletionClosure: ((@escaping () -> Void) -> Void)?
 
     public func deleteAll(completion: @escaping () -> Void) {
@@ -62,5 +74,4 @@ public init() {}
         deleteAllCompletionReceivedInvocations.append(completion)
         deleteAllCompletionClosure?(completion)
     }
-
 }

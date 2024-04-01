@@ -18,7 +18,7 @@ public struct AccountPool: Codable {
         case targetAssetPooled
         case accountPoolShare
     }
-    
+
     public let poolId: String
     public let accountId: String
     public let chainId: String
@@ -30,7 +30,7 @@ public struct AccountPool: Codable {
     public var targetAssetPooled: Decimal?
     public var accountPoolShare: Decimal?
     public var reservesId: String?
-    
+
     public init(
         poolId: String,
         accountId: String,
@@ -54,7 +54,7 @@ public struct AccountPool: Codable {
         self.accountPoolShare = accountPoolShare
         self.reservesId = reservesId
     }
-    
+
     init(accountPool: AccountPool) {
         self.init(
             poolId: accountPool.poolId,
@@ -69,13 +69,13 @@ public struct AccountPool: Codable {
             reservesId: accountPool.reservesId
         )
     }
-    
+
     public func update(reservesId: String?) -> AccountPool {
         var copy = AccountPool(accountPool: self)
         copy.reservesId = reservesId
         return copy
     }
-    
+
     public func update(apy: Decimal?) -> AccountPool {
         var copy = AccountPool(accountPool: self)
         copy.apy = apy
@@ -88,7 +88,6 @@ extension AccountPool: Identifiable {
 }
 
 extension AccountPool: Hashable {
-
     public func hash(into hasher: inout Hasher) {
         hasher.combine(poolId)
         hasher.combine(baseAssetId)
@@ -97,12 +96,11 @@ extension AccountPool: Hashable {
         hasher.combine(chainId)
     }
 
-    public static func ==(lhs: AccountPool, rhs: AccountPool) -> Bool {
+    public static func == (lhs: AccountPool, rhs: AccountPool) -> Bool {
         lhs.poolId == rhs.poolId &&
-        lhs.accountId == rhs.accountId &&
-        lhs.chainId == rhs.chainId &&
-        lhs.baseAssetId == rhs.baseAssetId &&
-        lhs.targetAssetId == rhs.targetAssetId
+            lhs.accountId == rhs.accountId &&
+            lhs.chainId == rhs.chainId &&
+            lhs.baseAssetId == rhs.baseAssetId &&
+            lhs.targetAssetId == rhs.targetAssetId
     }
 }
-

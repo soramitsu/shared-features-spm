@@ -1,7 +1,7 @@
 import Foundation
 import RobinHood
-import SSFUtils
 import SSFPools
+import SSFUtils
 
 public final class PoolRepositoryFactory {
     private let storageFacade: StorageFacadeProtocol
@@ -11,16 +11,16 @@ public final class PoolRepositoryFactory {
     }
 
     func createRepository(
-        for filter: NSPredicate? = nil,
-        sortDescriptors: [NSSortDescriptor] = []
+        for _: NSPredicate? = nil,
+        sortDescriptors _: [NSSortDescriptor] = []
     ) -> CoreDataRepository<AccountPool, CDAccountPool> {
-        return storageFacade.createRepository()
+        storageFacade.createRepository()
     }
-    
+
     func createRepository(
-        for filter: NSPredicate? = nil,
-        sortDescriptors: [NSSortDescriptor] = []
+        for _: NSPredicate? = nil,
+        sortDescriptors _: [NSSortDescriptor] = []
     ) -> CoreDataRepository<LiquidityPair, CDLiquidityPair> {
-        return storageFacade.createRepository()
+        storageFacade.createRepository()
     }
 }

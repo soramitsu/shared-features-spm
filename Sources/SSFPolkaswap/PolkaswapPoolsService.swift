@@ -1,9 +1,9 @@
+import Combine
 import Foundation
-import SSFUtils
 import SSFPools
 import SSFPoolsStorage
 import SSFStorageQueryKit
-import Combine
+import SSFUtils
 
 enum PolkaswapServiceError: Error {
     case unexpectedError
@@ -34,12 +34,11 @@ protocol PoolsService {
 }
 
 final class PolkaswapService {
-
     private let remoteService: RemotePolkaswapPoolsService
     private let localPairService: LocalLiquidityPairService
     private let localAccountPoolService: LocalAccountPoolsService
     private let subscriptionService: PoolSubscriptionService
-    
+
     init(
         remoteService: RemotePolkaswapPoolsService,
         localPairService: LocalLiquidityPairService,
@@ -57,19 +56,18 @@ extension PolkaswapService: PoolsService {
     func subscribeAccountPools(
         accountId: Data
     ) async throws -> (ids: [UInt16], publisher: PassthroughSubject<[AccountPool], Error>) {
-
         let publisher = PassthroughSubject<[AccountPool], Error>()
-        
+
         let baseAssetIds = try await remoteService.getBaseAssetIds()
-        
-        let updateClosure: (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void = { [weak self] update in
+
+        let updateClosure: (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void = { [weak self] _ in
             Task { [weak self] in
                 guard let self else { return }
                 let accountPools = try await self.getAccountPools(accountId: accountId)
                 publisher.send(accountPools)
             }
         }
-        
+
         let ids = try baseAssetIds.compactMap { baseAssetId in
             try subscriptionService.createAccountPoolsSubscription(
                 accountId: accountId,
@@ -77,14 +75,14 @@ extension PolkaswapService: PoolsService {
                 updateClosure: updateClosure
             )
         }
-        
+
         return (ids: ids, publisher: publisher)
     }
-    
+
     func getAccountPools(accountId: Data) async throws -> [AccountPool] {
         do {
             var accountPools = try await remoteService.getAccountPools(accountId: accountId)
-            
+
             accountPools = try await accountPools.asyncMap { [weak self] pool in
                 let apy = try await self?.remoteService.getAPY(reservesId: pool.reservesId)
                 return pool.update(apy: apy)
@@ -97,38 +95,39 @@ extension PolkaswapService: PoolsService {
             return try await localAccountPoolService.get()
         }
     }
-    
+
     func subscribeAccountPoolDetails(
         accountId: Data,
         baseAsset: PooledAssetInfo,
         targetAsset: PooledAssetInfo
     ) throws -> (id: UInt16, publisher: PassthroughSubject<AccountPool, Error>) {
         let publisher = PassthroughSubject<AccountPool, Error>()
-        
-        let updateClosure: (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void = { [weak self] update in
+
+        let updateClosure: (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void = { [weak self] _ in
             Task { [weak self] in
                 guard let self,
                       let poolDetails = try await self.getAccountPoolDetails(
-                        accountId: accountId,
-                        baseAsset: baseAsset,
-                        targetAsset: targetAsset
-                      ) else {
+                          accountId: accountId,
+                          baseAsset: baseAsset,
+                          targetAsset: targetAsset
+                      ) else
+                {
                     return
                 }
 
                 publisher.send(poolDetails)
             }
         }
-        
+
         let id = try subscriptionService.createPoolReservesSubscription(
             baseAssetId: baseAsset.id,
             targetAssetId: targetAsset.id,
             updateClosure: updateClosure
         )
-        
+
         return (id: id, publisher: publisher)
     }
-    
+
     func getAccountPoolDetails(
         accountId: Data,
         baseAsset: PooledAssetInfo,
@@ -144,27 +143,28 @@ extension PolkaswapService: PoolsService {
             return poolDetails
         } catch {
             let pools = try? await localAccountPoolService.get()
-            return pools?.first { $0.baseAssetId == baseAsset.id && $0.targetAssetId == targetAsset.id }
+            return pools?
+                .first { $0.baseAssetId == baseAsset.id && $0.targetAssetId == targetAsset.id }
         }
     }
-    
+
     func getAllPairs() async throws -> [LiquidityPair] {
         do {
             var liquidityPairs = try await remoteService.getAllPairs()
-            
+
             liquidityPairs = try await liquidityPairs.asyncMap { [weak self] pair in
                 let apy = try await self?.remoteService.getAPY(reservesId: pair.reservesId)
                 return pair.update(apy: apy)
             }
-            
+
             try await localPairService.sync(remotePairs: liquidityPairs)
-            
+
             return liquidityPairs
         } catch {
             return try await localPairService.get()
         }
     }
-    
+
     func unsubscribe(id: UInt16) throws {
         try subscriptionService.unsubscribe(id: id)
     }

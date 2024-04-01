@@ -10,7 +10,7 @@ protocol StorageFacade: AnyObject {
         sortDescriptors: [NSSortDescriptor],
         mapper: AnyCoreDataMapper<T, U>
     ) -> AsyncCoreDataRepositoryDefault<T, U>
-    
+
     func createRepository<T, U>(
         filter: NSPredicate?,
         sortDescriptors: [NSSortDescriptor],
@@ -67,7 +67,7 @@ final class CacheStorageFacade: StorageFacade {
             sortDescriptors: sortDescriptors
         )
     }
-    
+
     func createRepository<T, U>(
         filter: NSPredicate?,
         sortDescriptors: [NSSortDescriptor],

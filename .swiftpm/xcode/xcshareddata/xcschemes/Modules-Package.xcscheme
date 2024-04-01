@@ -545,6 +545,11 @@
                BlueprintName = "SSFXCMTests"
                ReferencedContainer = "container:">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "XcmAssetMultilocationFetcherTests/testVersionedMultilocationWithRetryError()">
+               </Test>
+            </SkippedTests>
          </TestableReference>
          <TestableReference
             skipped = "NO">

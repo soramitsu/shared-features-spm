@@ -28,10 +28,9 @@ public protocol StorageRequestPerformer {
 public final class StorageRequestPerformerDefault: StorageRequestPerformer {
     private let runtimeService: RuntimeCodingServiceProtocol
     private let connection: JSONRPCEngine
-    private lazy var storageRequestFactory: AsyncStorageRequestFactory = {
+    private lazy var storageRequestFactory: AsyncStorageRequestFactory =
         AsyncStorageRequestDefault()
-    }()
-    
+
     private var cacheStorage: AsyncSingleValueRepository {
         get throws {
             try SingleValueCacheRepositoryFactoryDefault().createAsyncSingleValueCacheRepository()

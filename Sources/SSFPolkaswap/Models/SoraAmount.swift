@@ -1,6 +1,6 @@
+import BigInt
 import Foundation
 import SSFUtils
-import BigInt
 
 public enum SoraAmountDecimalError: Error {
     case invalidStringValue

@@ -68,7 +68,10 @@ final class AccountManagementServiceTests: XCTestCase {
                 try self?.service?.update(visible: true, for: chainAsset, completion: {
                     // assert
                     DispatchQueue.main.async {
-                        XCTAssertTrue(self?.accountManagementWorker?.saveAccountCompletionCalled ?? false)
+                        XCTAssertTrue(
+                            self?.accountManagementWorker?
+                                .saveAccountCompletionCalled ?? false
+                        )
                     }
                 })
             } catch {

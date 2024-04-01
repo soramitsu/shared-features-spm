@@ -1,11 +1,11 @@
+import CoreData
 import Foundation
 import RobinHood
-import CoreData
 import SSFPools
 
 extension CDAccountPool: CoreDataCodable {
     var entityIdentifierFieldName: String { #keyPath(CDAccountPool.poolId) }
-    
+
     public func populate(from decoder: Decoder, using _: NSManagedObjectContext) throws {
         let container = try decoder.container(keyedBy: AccountPool.CodingKeys.self)
 

@@ -23,7 +23,7 @@ public final class KeystoreInfoFactory: KeystoreInfoFactoryProtocol {
         }
 
         let isEthereum = value == "ethereum"
-        
+
         let chainType: ChainType?
 
         if let address = definition.address,
