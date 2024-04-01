@@ -9,7 +9,7 @@ public extension Data {
         let jsonObject = try JSONSerialization.jsonObject(with: self)
         let jsonData = try JSONSerialization.data(
             withJSONObject: jsonObject,
-            options: []
+            options: [.prettyPrinted]
         )
 
         guard let jsonString = String(data: jsonData, encoding: .utf8) else {
