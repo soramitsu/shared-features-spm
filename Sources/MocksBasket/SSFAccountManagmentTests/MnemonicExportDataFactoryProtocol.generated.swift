@@ -3,69 +3,34 @@
 // swiftlint:disable all
 
 import UIKit
-@testable import RobinHood
 @testable import SSFAccountManagment
 @testable import SSFModels
 @testable import SSFUtils
+@testable import RobinHood
 
 public class MnemonicExportDataFactoryProtocolMock: MnemonicExportDataFactoryProtocol {
-    public init() {}
+public init() {}
 
-    // MARK: - createMnemonicExportData
+    //MARK: - createMnemonicExportData
 
     public var createMnemonicExportDataMetaIdAccountIdCryptoTypeChainThrowableError: Error?
     public var createMnemonicExportDataMetaIdAccountIdCryptoTypeChainCallsCount = 0
     public var createMnemonicExportDataMetaIdAccountIdCryptoTypeChainCalled: Bool {
-        createMnemonicExportDataMetaIdAccountIdCryptoTypeChainCallsCount > 0
+        return createMnemonicExportDataMetaIdAccountIdCryptoTypeChainCallsCount > 0
     }
-
-    public var createMnemonicExportDataMetaIdAccountIdCryptoTypeChainReceivedArguments: (
-        metaId: MetaAccountId,
-        accountId: AccountId?,
-        cryptoType: CryptoType?,
-        chain: ChainModel
-    )?
-    public var createMnemonicExportDataMetaIdAccountIdCryptoTypeChainReceivedInvocations: [(
-        metaId: MetaAccountId,
-        accountId: AccountId?,
-        cryptoType: CryptoType?,
-        chain: ChainModel
-    )] = []
+    public var createMnemonicExportDataMetaIdAccountIdCryptoTypeChainReceivedArguments: (metaId: MetaAccountId, accountId: AccountId?, cryptoType: CryptoType?, chain: ChainModel)?
+    public var createMnemonicExportDataMetaIdAccountIdCryptoTypeChainReceivedInvocations: [(metaId: MetaAccountId, accountId: AccountId?, cryptoType: CryptoType?, chain: ChainModel)] = []
     public var createMnemonicExportDataMetaIdAccountIdCryptoTypeChainReturnValue: MnemonicExportData!
-    public var createMnemonicExportDataMetaIdAccountIdCryptoTypeChainClosure: ((
-        MetaAccountId,
-        AccountId?,
-        CryptoType?,
-        ChainModel
-    ) throws -> MnemonicExportData)?
+    public var createMnemonicExportDataMetaIdAccountIdCryptoTypeChainClosure: ((MetaAccountId, AccountId?, CryptoType?, ChainModel) throws -> MnemonicExportData)?
 
-    public func createMnemonicExportData(
-        metaId: MetaAccountId,
-        accountId: AccountId?,
-        cryptoType: CryptoType?,
-        chain: ChainModel
-    ) throws -> MnemonicExportData {
+    public func createMnemonicExportData(metaId: MetaAccountId, accountId: AccountId?, cryptoType: CryptoType?, chain: ChainModel) throws -> MnemonicExportData {
         if let error = createMnemonicExportDataMetaIdAccountIdCryptoTypeChainThrowableError {
             throw error
         }
         createMnemonicExportDataMetaIdAccountIdCryptoTypeChainCallsCount += 1
-        createMnemonicExportDataMetaIdAccountIdCryptoTypeChainReceivedArguments = (
-            metaId: metaId,
-            accountId: accountId,
-            cryptoType: cryptoType,
-            chain: chain
-        )
-        createMnemonicExportDataMetaIdAccountIdCryptoTypeChainReceivedInvocations.append((
-            metaId: metaId,
-            accountId: accountId,
-            cryptoType: cryptoType,
-            chain: chain
-        ))
-        return try createMnemonicExportDataMetaIdAccountIdCryptoTypeChainClosure.map { try $0(
-            metaId,
-            accountId,
-            cryptoType,
-            chain
-        ) } ?? createMnemonicExportDataMetaIdAccountIdCryptoTypeChainReturnValue
+        createMnemonicExportDataMetaIdAccountIdCryptoTypeChainReceivedArguments = (metaId: metaId, accountId: accountId, cryptoType: cryptoType, chain: chain)
+        createMnemonicExportDataMetaIdAccountIdCryptoTypeChainReceivedInvocations.append((metaId: metaId, accountId: accountId, cryptoType: cryptoType, chain: chain))
+        return try createMnemonicExportDataMetaIdAccountIdCryptoTypeChainClosure.map({ try $0(metaId, accountId, cryptoType, chain) }) ?? createMnemonicExportDataMetaIdAccountIdCryptoTypeChainReturnValue
     }
+
 }

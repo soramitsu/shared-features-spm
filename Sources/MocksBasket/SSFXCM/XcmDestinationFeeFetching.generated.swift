@@ -3,68 +3,47 @@
 // swiftlint:disable all
 
 import UIKit
-@testable import BigInt
-@testable import RobinHood
-@testable import SSFChainConnection
-@testable import SSFChainRegistry
-@testable import SSFExtrinsicKit
-@testable import SSFModels
+@testable import SSFXCM
+@testable import SSFUtils
 @testable import SSFNetwork
+@testable import SSFModels
+@testable import RobinHood
+@testable import BigInt
+@testable import SSFExtrinsicKit
+@testable import SSFChainRegistry
 @testable import SSFRuntimeCodingService
 @testable import SSFSigner
+@testable import SSFChainConnection
 @testable import SSFStorageQueryKit
-@testable import SSFUtils
-@testable import SSFXCM
 
 public class XcmDestinationFeeFetchingMock: XcmDestinationFeeFetching {
-    public init() {}
+public init() {}
 
-    // MARK: - estimateFee
+    //MARK: - estimateFee
 
     public var estimateFeeDestinationChainIdTokenCallsCount = 0
     public var estimateFeeDestinationChainIdTokenCalled: Bool {
-        estimateFeeDestinationChainIdTokenCallsCount > 0
+        return estimateFeeDestinationChainIdTokenCallsCount > 0
     }
-
-    public var estimateFeeDestinationChainIdTokenReceivedArguments: (
-        destinationChainId: String,
-        token: String
-    )?
-    public var estimateFeeDestinationChainIdTokenReceivedInvocations: [(
-        destinationChainId: String,
-        token: String
-    )] = []
+    public var estimateFeeDestinationChainIdTokenReceivedArguments: (destinationChainId: String, token: String)?
+    public var estimateFeeDestinationChainIdTokenReceivedInvocations: [(destinationChainId: String, token: String)] = []
     public var estimateFeeDestinationChainIdTokenReturnValue: Result<DestXcmFee, Error>!
-    public var estimateFeeDestinationChainIdTokenClosure: ((String, String) -> Result<
-        DestXcmFee,
-        Error
-    >)?
+    public var estimateFeeDestinationChainIdTokenClosure: ((String, String) -> Result<DestXcmFee, Error>)?
 
-    public func estimateFee(
-        destinationChainId: String,
-        token: String
-    ) -> Result<DestXcmFee, Error> {
+    public func estimateFee(destinationChainId: String, token: String) -> Result<DestXcmFee, Error> {
         estimateFeeDestinationChainIdTokenCallsCount += 1
-        estimateFeeDestinationChainIdTokenReceivedArguments = (
-            destinationChainId: destinationChainId,
-            token: token
-        )
-        estimateFeeDestinationChainIdTokenReceivedInvocations.append((
-            destinationChainId: destinationChainId,
-            token: token
-        ))
-        return estimateFeeDestinationChainIdTokenClosure
-            .map { $0(destinationChainId, token) } ?? estimateFeeDestinationChainIdTokenReturnValue
+        estimateFeeDestinationChainIdTokenReceivedArguments = (destinationChainId: destinationChainId, token: token)
+        estimateFeeDestinationChainIdTokenReceivedInvocations.append((destinationChainId: destinationChainId, token: token))
+        return estimateFeeDestinationChainIdTokenClosure.map({ $0(destinationChainId, token) }) ?? estimateFeeDestinationChainIdTokenReturnValue
     }
 
-    // MARK: - estimateWeight
+    //MARK: - estimateWeight
 
     public var estimateWeightForThrowableError: Error?
     public var estimateWeightForCallsCount = 0
     public var estimateWeightForCalled: Bool {
-        estimateWeightForCallsCount > 0
+        return estimateWeightForCallsCount > 0
     }
-
     public var estimateWeightForReceivedChainId: String?
     public var estimateWeightForReceivedInvocations: [String] = []
     public var estimateWeightForReturnValue: BigUInt!
@@ -77,6 +56,7 @@ public class XcmDestinationFeeFetchingMock: XcmDestinationFeeFetching {
         estimateWeightForCallsCount += 1
         estimateWeightForReceivedChainId = chainId
         estimateWeightForReceivedInvocations.append(chainId)
-        return try estimateWeightForClosure.map { try $0(chainId) } ?? estimateWeightForReturnValue
+        return try estimateWeightForClosure.map({ try $0(chainId) }) ?? estimateWeightForReturnValue
     }
+
 }

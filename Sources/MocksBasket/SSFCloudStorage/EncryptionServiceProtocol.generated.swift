@@ -6,19 +6,17 @@ import UIKit
 @testable import SSFCloudStorage
 
 public class EncryptionServiceProtocolMock: EncryptionServiceProtocol {
-    public init() {}
+public init() {}
 
-    // MARK: - getDecrypted
+    //MARK: - getDecrypted
 
     public var getDecryptedFromPasswordThrowableError: Error?
     public var getDecryptedFromPasswordCallsCount = 0
     public var getDecryptedFromPasswordCalled: Bool {
-        getDecryptedFromPasswordCallsCount > 0
+        return getDecryptedFromPasswordCallsCount > 0
     }
-
     public var getDecryptedFromPasswordReceivedArguments: (message: String?, password: String)?
-    public var getDecryptedFromPasswordReceivedInvocations: [(message: String?, password: String)] =
-        []
+    public var getDecryptedFromPasswordReceivedInvocations: [(message: String?, password: String)] = []
     public var getDecryptedFromPasswordReturnValue: String?
     public var getDecryptedFromPasswordClosure: ((String?, String) throws -> String?)?
 
@@ -29,26 +27,18 @@ public class EncryptionServiceProtocolMock: EncryptionServiceProtocol {
         getDecryptedFromPasswordCallsCount += 1
         getDecryptedFromPasswordReceivedArguments = (message: message, password: password)
         getDecryptedFromPasswordReceivedInvocations.append((message: message, password: password))
-        return try getDecryptedFromPasswordClosure
-            .map { try $0(message, password) } ?? getDecryptedFromPasswordReturnValue
+        return try getDecryptedFromPasswordClosure.map({ try $0(message, password) }) ?? getDecryptedFromPasswordReturnValue
     }
 
-    // MARK: - createEncryptedData
+    //MARK: - createEncryptedData
 
     public var createEncryptedDataWithMessageThrowableError: Error?
     public var createEncryptedDataWithMessageCallsCount = 0
     public var createEncryptedDataWithMessageCalled: Bool {
-        createEncryptedDataWithMessageCallsCount > 0
+        return createEncryptedDataWithMessageCallsCount > 0
     }
-
-    public var createEncryptedDataWithMessageReceivedArguments: (
-        password: String,
-        message: String?
-    )?
-    public var createEncryptedDataWithMessageReceivedInvocations: [(
-        password: String,
-        message: String?
-    )] = []
+    public var createEncryptedDataWithMessageReceivedArguments: (password: String, message: String?)?
+    public var createEncryptedDataWithMessageReceivedInvocations: [(password: String, message: String?)] = []
     public var createEncryptedDataWithMessageReturnValue: Data?
     public var createEncryptedDataWithMessageClosure: ((String, String?) throws -> Data?)?
 
@@ -58,11 +48,8 @@ public class EncryptionServiceProtocolMock: EncryptionServiceProtocol {
         }
         createEncryptedDataWithMessageCallsCount += 1
         createEncryptedDataWithMessageReceivedArguments = (password: password, message: message)
-        createEncryptedDataWithMessageReceivedInvocations.append((
-            password: password,
-            message: message
-        ))
-        return try createEncryptedDataWithMessageClosure
-            .map { try $0(password, message) } ?? createEncryptedDataWithMessageReturnValue
+        createEncryptedDataWithMessageReceivedInvocations.append((password: password, message: message))
+        return try createEncryptedDataWithMessageClosure.map({ try $0(password, message) }) ?? createEncryptedDataWithMessageReturnValue
     }
+
 }

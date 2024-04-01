@@ -3,63 +3,42 @@
 // swiftlint:disable all
 
 import UIKit
-@testable import BigInt
-@testable import RobinHood
-@testable import SSFChainConnection
-@testable import SSFChainRegistry
-@testable import SSFExtrinsicKit
-@testable import SSFModels
+@testable import SSFXCM
+@testable import SSFUtils
 @testable import SSFNetwork
+@testable import SSFModels
+@testable import RobinHood
+@testable import BigInt
+@testable import SSFExtrinsicKit
+@testable import SSFChainRegistry
 @testable import SSFRuntimeCodingService
 @testable import SSFSigner
+@testable import SSFChainConnection
 @testable import SSFStorageQueryKit
-@testable import SSFUtils
-@testable import SSFXCM
 
 public class XcmAssetMultilocationFetchingMock: XcmAssetMultilocationFetching {
-    public init() {}
+public init() {}
 
-    // MARK: - versionedMultilocation
+    //MARK: - versionedMultilocation
 
     public var versionedMultilocationOriginAssetIdDestChainIdThrowableError: Error?
     public var versionedMultilocationOriginAssetIdDestChainIdCallsCount = 0
     public var versionedMultilocationOriginAssetIdDestChainIdCalled: Bool {
-        versionedMultilocationOriginAssetIdDestChainIdCallsCount > 0
+        return versionedMultilocationOriginAssetIdDestChainIdCallsCount > 0
     }
-
-    public var versionedMultilocationOriginAssetIdDestChainIdReceivedArguments: (
-        originAssetId: String,
-        destChainId: ChainModel.Id
-    )?
-    public var versionedMultilocationOriginAssetIdDestChainIdReceivedInvocations: [(
-        originAssetId: String,
-        destChainId: ChainModel.Id
-    )] = []
+    public var versionedMultilocationOriginAssetIdDestChainIdReceivedArguments: (originAssetId: String, destChainId: ChainModel.Id)?
+    public var versionedMultilocationOriginAssetIdDestChainIdReceivedInvocations: [(originAssetId: String, destChainId: ChainModel.Id)] = []
     public var versionedMultilocationOriginAssetIdDestChainIdReturnValue: AssetMultilocation!
-    public var versionedMultilocationOriginAssetIdDestChainIdClosure: ((
-        String,
-        ChainModel.Id
-    ) throws -> AssetMultilocation)?
+    public var versionedMultilocationOriginAssetIdDestChainIdClosure: ((String, ChainModel.Id) throws -> AssetMultilocation)?
 
-    public func versionedMultilocation(
-        originAssetId: String,
-        destChainId: ChainModel.Id
-    ) throws -> AssetMultilocation {
+    public func versionedMultilocation(originAssetId: String, destChainId: ChainModel.Id) throws -> AssetMultilocation {
         if let error = versionedMultilocationOriginAssetIdDestChainIdThrowableError {
             throw error
         }
         versionedMultilocationOriginAssetIdDestChainIdCallsCount += 1
-        versionedMultilocationOriginAssetIdDestChainIdReceivedArguments = (
-            originAssetId: originAssetId,
-            destChainId: destChainId
-        )
-        versionedMultilocationOriginAssetIdDestChainIdReceivedInvocations.append((
-            originAssetId: originAssetId,
-            destChainId: destChainId
-        ))
-        return try versionedMultilocationOriginAssetIdDestChainIdClosure.map { try $0(
-            originAssetId,
-            destChainId
-        ) } ?? versionedMultilocationOriginAssetIdDestChainIdReturnValue
+        versionedMultilocationOriginAssetIdDestChainIdReceivedArguments = (originAssetId: originAssetId, destChainId: destChainId)
+        versionedMultilocationOriginAssetIdDestChainIdReceivedInvocations.append((originAssetId: originAssetId, destChainId: destChainId))
+        return try versionedMultilocationOriginAssetIdDestChainIdClosure.map({ try $0(originAssetId, destChainId) }) ?? versionedMultilocationOriginAssetIdDestChainIdReturnValue
     }
+
 }

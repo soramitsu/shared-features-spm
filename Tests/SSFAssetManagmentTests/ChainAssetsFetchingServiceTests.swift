@@ -449,7 +449,7 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
         // act
         let chainAssets = await service.fetch(
             filters: [],
-            sorts: [.price(.ascending)],
+            sorts: [.price(.descending)],
             forceUpdate: false
         )
 
@@ -617,7 +617,7 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
         // act
         let chainAssets = await service.fetch(
             filters: [],
-            sorts: [.assetId(.ascending)],
+            sorts: [.assetId(.descending)],
             forceUpdate: false
         )
 

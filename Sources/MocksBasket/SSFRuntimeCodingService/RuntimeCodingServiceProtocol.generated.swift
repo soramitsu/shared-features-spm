@@ -3,42 +3,36 @@
 // swiftlint:disable all
 
 import UIKit
-@testable import RobinHood
-@testable import SSFModels
 @testable import SSFRuntimeCodingService
 @testable import SSFUtils
+@testable import RobinHood
+@testable import SSFModels
 
 public class RuntimeCodingServiceProtocolMock: RuntimeCodingServiceProtocol {
-    public init() {}
+public init() {}
     public var snapshot: RuntimeSnapshot?
 
-    // MARK: - fetchCoderFactoryOperation
+    //MARK: - fetchCoderFactoryOperation
 
     public var fetchCoderFactoryOperationCallsCount = 0
     public var fetchCoderFactoryOperationCalled: Bool {
-        fetchCoderFactoryOperationCallsCount > 0
+        return fetchCoderFactoryOperationCallsCount > 0
     }
-
     public var fetchCoderFactoryOperationReturnValue: BaseOperation<RuntimeCoderFactoryProtocol>!
-    public var fetchCoderFactoryOperationClosure: (
-        ()
-            -> BaseOperation<RuntimeCoderFactoryProtocol>
-    )?
+    public var fetchCoderFactoryOperationClosure: (() -> BaseOperation<RuntimeCoderFactoryProtocol>)?
 
     public func fetchCoderFactoryOperation() -> BaseOperation<RuntimeCoderFactoryProtocol> {
         fetchCoderFactoryOperationCallsCount += 1
-        return fetchCoderFactoryOperationClosure
-            .map { $0() } ?? fetchCoderFactoryOperationReturnValue
+        return fetchCoderFactoryOperationClosure.map({ $0() }) ?? fetchCoderFactoryOperationReturnValue
     }
 
-    // MARK: - fetchCoderFactory
+    //MARK: - fetchCoderFactory
 
     public var fetchCoderFactoryThrowableError: Error?
     public var fetchCoderFactoryCallsCount = 0
     public var fetchCoderFactoryCalled: Bool {
-        fetchCoderFactoryCallsCount > 0
+        return fetchCoderFactoryCallsCount > 0
     }
-
     public var fetchCoderFactoryReturnValue: RuntimeCoderFactoryProtocol!
     public var fetchCoderFactoryClosure: (() throws -> RuntimeCoderFactoryProtocol)?
 
@@ -47,6 +41,7 @@ public class RuntimeCodingServiceProtocolMock: RuntimeCodingServiceProtocol {
             throw error
         }
         fetchCoderFactoryCallsCount += 1
-        return try fetchCoderFactoryClosure.map { try $0() } ?? fetchCoderFactoryReturnValue
+        return try fetchCoderFactoryClosure.map({ try $0() }) ?? fetchCoderFactoryReturnValue
     }
+
 }

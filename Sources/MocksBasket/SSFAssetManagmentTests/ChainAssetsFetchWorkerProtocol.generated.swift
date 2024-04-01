@@ -7,20 +7,20 @@ import UIKit
 @testable import SSFModels
 
 public class ChainAssetsFetchWorkerProtocolMock: ChainAssetsFetchWorkerProtocol {
-    public init() {}
+public init() {}
 
-    // MARK: - getChainAssetsModels
+    //MARK: - getChainAssetsModels
 
     public var getChainAssetsModelsCallsCount = 0
     public var getChainAssetsModelsCalled: Bool {
-        getChainAssetsModelsCallsCount > 0
+        return getChainAssetsModelsCallsCount > 0
     }
-
     public var getChainAssetsModelsReturnValue: [ChainAsset]!
     public var getChainAssetsModelsClosure: (() -> [ChainAsset])?
 
     public func getChainAssetsModels() -> [ChainAsset] {
         getChainAssetsModelsCallsCount += 1
-        return getChainAssetsModelsClosure.map { $0() } ?? getChainAssetsModelsReturnValue
+        return getChainAssetsModelsClosure.map({ $0() }) ?? getChainAssetsModelsReturnValue
     }
+
 }

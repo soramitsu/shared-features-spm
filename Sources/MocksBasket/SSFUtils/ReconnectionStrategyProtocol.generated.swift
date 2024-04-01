@@ -3,19 +3,18 @@
 // swiftlint:disable all
 
 import UIKit
-@testable import BigInt
 @testable import SSFUtils
+@testable import BigInt
 
 public class ReconnectionStrategyProtocolMock: ReconnectionStrategyProtocol {
-    public init() {}
+public init() {}
 
-    // MARK: - reconnectAfter
+    //MARK: - reconnectAfter
 
     public var reconnectAfterAttemptCallsCount = 0
     public var reconnectAfterAttemptCalled: Bool {
-        reconnectAfterAttemptCallsCount > 0
+        return reconnectAfterAttemptCallsCount > 0
     }
-
     public var reconnectAfterAttemptReceivedAttempt: Int?
     public var reconnectAfterAttemptReceivedInvocations: [Int] = []
     public var reconnectAfterAttemptReturnValue: TimeInterval?
@@ -25,6 +24,7 @@ public class ReconnectionStrategyProtocolMock: ReconnectionStrategyProtocol {
         reconnectAfterAttemptCallsCount += 1
         reconnectAfterAttemptReceivedAttempt = attempt
         reconnectAfterAttemptReceivedInvocations.append(attempt)
-        return reconnectAfterAttemptClosure.map { $0(attempt) } ?? reconnectAfterAttemptReturnValue
+        return reconnectAfterAttemptClosure.map({ $0(attempt) }) ?? reconnectAfterAttemptReturnValue
     }
+
 }

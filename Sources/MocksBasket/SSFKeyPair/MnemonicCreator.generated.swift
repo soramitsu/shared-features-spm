@@ -4,21 +4,20 @@
 
 import UIKit
 @testable import IrohaCrypto
-@testable import SSFCrypto
 @testable import SSFKeyPair
 @testable import SSFModels
+@testable import SSFCrypto
 
 public class MnemonicCreatorMock: MnemonicCreator {
-    public init() {}
+public init() {}
 
-    // MARK: - randomMnemonic
+    //MARK: - randomMnemonic
 
     public var randomMnemonicStrengthThrowableError: Error?
     public var randomMnemonicStrengthCallsCount = 0
     public var randomMnemonicStrengthCalled: Bool {
-        randomMnemonicStrengthCallsCount > 0
+        return randomMnemonicStrengthCallsCount > 0
     }
-
     public var randomMnemonicStrengthReceivedStrength: IRMnemonicStrength?
     public var randomMnemonicStrengthReceivedInvocations: [IRMnemonicStrength] = []
     public var randomMnemonicStrengthReturnValue: IRMnemonicProtocol!
@@ -31,18 +30,16 @@ public class MnemonicCreatorMock: MnemonicCreator {
         randomMnemonicStrengthCallsCount += 1
         randomMnemonicStrengthReceivedStrength = strength
         randomMnemonicStrengthReceivedInvocations.append(strength)
-        return try randomMnemonicStrengthClosure
-            .map { try $0(strength) } ?? randomMnemonicStrengthReturnValue
+        return try randomMnemonicStrengthClosure.map({ try $0(strength) }) ?? randomMnemonicStrengthReturnValue
     }
 
-    // MARK: - mnemonic
+    //MARK: - mnemonic
 
     public var mnemonicFromListThrowableError: Error?
     public var mnemonicFromListCallsCount = 0
     public var mnemonicFromListCalled: Bool {
-        mnemonicFromListCallsCount > 0
+        return mnemonicFromListCallsCount > 0
     }
-
     public var mnemonicFromListReceivedMnemonicPhrase: String?
     public var mnemonicFromListReceivedInvocations: [String] = []
     public var mnemonicFromListReturnValue: IRMnemonicProtocol!
@@ -55,18 +52,16 @@ public class MnemonicCreatorMock: MnemonicCreator {
         mnemonicFromListCallsCount += 1
         mnemonicFromListReceivedMnemonicPhrase = mnemonicPhrase
         mnemonicFromListReceivedInvocations.append(mnemonicPhrase)
-        return try mnemonicFromListClosure
-            .map { try $0(mnemonicPhrase) } ?? mnemonicFromListReturnValue
+        return try mnemonicFromListClosure.map({ try $0(mnemonicPhrase) }) ?? mnemonicFromListReturnValue
     }
 
-    // MARK: - mnemonic
+    //MARK: - mnemonic
 
     public var mnemonicFromEntropyThrowableError: Error?
     public var mnemonicFromEntropyCallsCount = 0
     public var mnemonicFromEntropyCalled: Bool {
-        mnemonicFromEntropyCallsCount > 0
+        return mnemonicFromEntropyCallsCount > 0
     }
-
     public var mnemonicFromEntropyReceivedEntropy: Data?
     public var mnemonicFromEntropyReceivedInvocations: [Data] = []
     public var mnemonicFromEntropyReturnValue: IRMnemonicProtocol!
@@ -79,7 +74,7 @@ public class MnemonicCreatorMock: MnemonicCreator {
         mnemonicFromEntropyCallsCount += 1
         mnemonicFromEntropyReceivedEntropy = entropy
         mnemonicFromEntropyReceivedInvocations.append(entropy)
-        return try mnemonicFromEntropyClosure
-            .map { try $0(entropy) } ?? mnemonicFromEntropyReturnValue
+        return try mnemonicFromEntropyClosure.map({ try $0(entropy) }) ?? mnemonicFromEntropyReturnValue
     }
+
 }

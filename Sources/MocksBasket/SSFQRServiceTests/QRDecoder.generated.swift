@@ -6,16 +6,15 @@ import UIKit
 @testable import SSFQRService
 
 public class QRDecoderMock: QRDecoder {
-    public init() {}
+public init() {}
 
-    // MARK: - decode
+    //MARK: - decode
 
     public var decodeDataThrowableError: Error?
     public var decodeDataCallsCount = 0
     public var decodeDataCalled: Bool {
-        decodeDataCallsCount > 0
+        return decodeDataCallsCount > 0
     }
-
     public var decodeDataReceivedData: Data?
     public var decodeDataReceivedInvocations: [Data] = []
     public var decodeDataReturnValue: QRInfoType!
@@ -28,6 +27,7 @@ public class QRDecoderMock: QRDecoder {
         decodeDataCallsCount += 1
         decodeDataReceivedData = data
         decodeDataReceivedInvocations.append(data)
-        return try decodeDataClosure.map { try $0(data) } ?? decodeDataReturnValue
+        return try decodeDataClosure.map({ try $0(data) }) ?? decodeDataReturnValue
     }
+
 }
