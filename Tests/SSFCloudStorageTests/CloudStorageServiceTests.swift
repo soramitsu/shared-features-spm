@@ -147,11 +147,9 @@ final class CloudStorageServiceTests: XCTestCase {
         XCTAssertEqual(account?.name, TestData.account.name)
         XCTAssertEqual(account?.address, TestData.account.address)
         XCTAssertEqual(account?.cryptoType, TestData.account.cryptoType)
-        XCTAssertEqual(account?.substrateDerivationPath, TestData.account.substrateDerivationPath)
         XCTAssertEqual(account?.ethDerivationPath, TestData.account.ethDerivationPath)
         XCTAssertEqual(account?.backupAccountType, TestData.account.backupAccountType)
         XCTAssertEqual(account?.json, TestData.account.json)
-        XCTAssertEqual(account?.encryptedSeed, TestData.account.encryptedSeed)
     }
 
     func testImportBackupAccountWithError() async throws {

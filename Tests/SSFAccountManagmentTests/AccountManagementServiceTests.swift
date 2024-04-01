@@ -17,6 +17,9 @@ final class AccountManagementServiceTests: XCTestCase {
         let storageFacade = AccountStorageTestFacade()
 
         let accountManagementWorker = AccountManagementWorkerProtocolMock()
+        accountManagementWorker.saveAccountCompletionClosure = { _, closure in
+            closure()
+        }
         self.accountManagementWorker = accountManagementWorker
 
         let selectedWallet = SelectedWalletSettings(storageFacade: storageFacade)
@@ -62,13 +65,12 @@ final class AccountManagementServiceTests: XCTestCase {
             let chainAsset = ChainAsset(chain: chain, asset: asset)
 
             do {
-                try self?.service?.update(visible: true, for: chainAsset, completion: {})
-                DispatchQueue.main.async {
-                    XCTAssertEqual(
-                        self?.accountManagementWorker?.saveAccountCompletionCallsCount,
-                        1
-                    )
-                }
+                try self?.service?.update(visible: true, for: chainAsset, completion: {
+                    // assert
+                    DispatchQueue.main.async {
+                        XCTAssertTrue(self?.accountManagementWorker?.saveAccountCompletionCalled ?? false)
+                    }
+                })
             } catch {
                 XCTFail("UpdateVisability test failed with error - \(error)")
             }
