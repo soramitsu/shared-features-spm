@@ -39,7 +39,7 @@
 #include "warnp.h"
 
 #include "crypto_scrypt_smix.h"
-#if defined(__SSSE3__)
+#if TARGET_IPHONE_SIMULATOR
 #include "crypto_scrypt_smix_sse2.h"
 #endif
 
@@ -206,7 +206,7 @@ static void
 selectsmix(void)
 {
 
-    #if defined(__SSSE3__)
+    #if TARGET_IPHONE_SIMULATOR
     if (!testsmix(crypto_scrypt_smix_sse2)) {
         smix_func = crypto_scrypt_smix_sse2;
         return;
