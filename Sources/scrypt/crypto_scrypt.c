@@ -39,9 +39,7 @@
 #include "warnp.h"
 
 #include "crypto_scrypt_smix.h"
-#if TARGET_IPHONE_SIMULATOR
 #include "crypto_scrypt_smix_sse2.h"
-#endif
 
 #include "scrypt.h"
 
