@@ -4,6 +4,7 @@
 #include <arm_neon.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <inttypes.h>
 
 /*
  * sse2neon is freely redistributable under the MIT License.
