@@ -22,16 +22,15 @@ final class CacheStorageFacade: StorageFacade {
     let databaseService: CoreDataServiceProtocol
 
     init() {
-        guard
-            let baseURL = FileManager.default.urls(
-                for: .documentDirectory,
-                in: .userDomainMask
-            ).first?.appendingPathComponent("CoreData"),
+        guard let baseURL = FileManager.default.urls(
+            for: .documentDirectory,
+            in: .userDomainMask
+        ).first?.appendingPathComponent("CoreData"),
             let modelURL = Bundle.module.url(
                 forResource: "CacheDataModel",
                 withExtension: "momd"
-            )
-        else {
+            ) else
+        {
             preconditionFailure("CacheDataModel.momd not found")
         }
 

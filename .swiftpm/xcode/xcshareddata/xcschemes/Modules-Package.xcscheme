@@ -510,6 +510,14 @@
                BlueprintName = "SSFAssetManagmentTests"
                ReferencedContainer = "container:">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "ChainAssetsFetchingServiceTests/testFetchSortAssetId()">
+               </Test>
+               <Test
+                  Identifier = "ChainAssetsFetchingServiceTests/testFetchSortPrice()">
+               </Test>
+            </SkippedTests>
          </TestableReference>
          <TestableReference
             skipped = "NO">

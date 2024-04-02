@@ -1,7 +1,7 @@
 import Foundation
 import SSFModels
 
-public final class TransactionSignerAssembly {
+public enum TransactionSignerAssembly {
     public static func signer(
         for chainType: ChainBaseType,
         publicKeyData: Data,

@@ -1,6 +1,6 @@
 import Foundation
-import SSFCrypto
 import IrohaCrypto
+import SSFCrypto
 
 public final class EthereumTransactionSigner: TransactionSignerProtocol {
     private let publicKeyData: Data
