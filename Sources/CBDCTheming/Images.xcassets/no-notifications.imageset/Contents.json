@@ -1,0 +1,22 @@
+{
+  "images" : [
+    {
+      "filename" : "Empty_icon (2)_compressed.pdf",
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "Empty_icon (3)_compressed.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
