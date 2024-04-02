@@ -22,7 +22,8 @@ public enum XcmAssembly {
         fromChainData: FromChainData,
         sourceConfig: XcmConfigProtocol?
     ) -> XcmExtrinsicServices {
-        let signingWrapper = TransactionSigner(
+        let signingWrapper = TransactionSignerAssembly.signer(
+            for: fromChainData.chainType,
             publicKeyData: fromChainData.signingWrapperData.publicKeyData,
             secretKeyData: fromChainData.signingWrapperData.secretKeyData,
             cryptoType: fromChainData.cryptoType
@@ -101,23 +102,26 @@ public extension XcmAssembly {
 
     struct FromChainData {
         public let chainId: String
-        public let cryptoType: SFCryptoType
+        public let cryptoType: CryptoType
         public let chainMetadata: RuntimeMetadataItemProtocol?
         public let accountId: AccountId
         public let signingWrapperData: SigningWrapperData
+        public let chainType: ChainBaseType
 
         public init(
             chainId: String,
-            cryptoType: SFCryptoType,
+            cryptoType: CryptoType,
             chainMetadata: RuntimeMetadataItemProtocol?,
             accountId: AccountId,
-            signingWrapperData: XcmAssembly.SigningWrapperData
+            signingWrapperData: XcmAssembly.SigningWrapperData,
+            chainType: ChainBaseType
         ) {
             self.chainId = chainId
             self.cryptoType = cryptoType
             self.chainMetadata = chainMetadata
             self.accountId = accountId
             self.signingWrapperData = signingWrapperData
+            self.chainType = chainType
         }
     }
 }

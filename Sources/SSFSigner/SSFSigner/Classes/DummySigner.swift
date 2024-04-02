@@ -1,6 +1,7 @@
 import Foundation
 import IrohaCrypto
 import SSFCrypto
+import SSFModels
 
 public enum DummySigningType {
     case sr25519(secretKeyData: Data, publicKeyData: Data)
@@ -11,7 +12,7 @@ public enum DummySigningType {
 public final class DummySigner: TransactionSignerProtocol {
     let type: DummySigningType
 
-    public init(cryptoType: SFCryptoType, seed: Data = Data(repeating: 1, count: 32)) throws {
+    public init(cryptoType: CryptoType, seed: Data = Data(repeating: 1, count: 32)) throws {
         switch cryptoType {
         case .sr25519:
             let keypair = try SNKeyFactory().createKeypair(fromSeed: seed)
@@ -21,7 +22,7 @@ public final class DummySigner: TransactionSignerProtocol {
             )
         case .ed25519:
             type = .ed25519(seed: seed)
-        case .ecdsa, .ethereumEcdsa:
+        case .ecdsa:
             type = .ecdsa(seed: seed)
         }
     }

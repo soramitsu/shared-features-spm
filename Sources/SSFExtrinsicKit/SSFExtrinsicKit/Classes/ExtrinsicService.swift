@@ -65,7 +65,7 @@ public final class ExtrinsicService {
     public init(
         accountId: AccountId,
         chainFormat: SFChainFormat,
-        cryptoType: SFCryptoType,
+        cryptoType: CryptoType,
         runtimeRegistry: RuntimeCodingServiceProtocol,
         engine: JSONRPCEngine,
         operationManager: OperationManagerProtocol

@@ -5,15 +5,15 @@ public typealias AsyncSingleValueRepository = AsyncCoreDataRepositoryDefault<Sin
 public typealias SingleValueRepository = CoreDataRepository<SingleValueProviderObject, CDSingleValue>
 
 public protocol SingleValueCacheRepositoryAssembly {
-    func createSingleValueCacheRepository() throws -> SingleValueRepository
-    func createAsyncSingleValueCacheRepository() throws -> AsyncSingleValueRepository
+    func createSingleValueCacheRepository() -> SingleValueRepository
+    func createAsyncSingleValueCacheRepository() -> AsyncSingleValueRepository
 }
 
 public final class SingleValueCacheRepositoryFactoryDefault: SingleValueCacheRepositoryAssembly {
     public init() {}
 
-    public func createAsyncSingleValueCacheRepository() throws -> AsyncSingleValueRepository {
-        let facade = try CacheStorageFacade()
+    public func createAsyncSingleValueCacheRepository() -> AsyncSingleValueRepository {
+        let facade = CacheStorageFacade()
         let mapper = AnyCoreDataMapper(CodableCoreDataMapper<SingleValueProviderObject, CDSingleValue>())
         let repository = facade.createAsyncRepository(
             filter: nil,
@@ -23,8 +23,8 @@ public final class SingleValueCacheRepositoryFactoryDefault: SingleValueCacheRep
         return repository
     }
     
-    public func createSingleValueCacheRepository() throws -> SingleValueRepository {
-        let facade = try CacheStorageFacade()
+    public func createSingleValueCacheRepository() -> SingleValueRepository {
+        let facade = CacheStorageFacade()
         let mapper = AnyCoreDataMapper(CodableCoreDataMapper<SingleValueProviderObject, CDSingleValue>())
         let repository = facade.createRepository(
             filter: nil,

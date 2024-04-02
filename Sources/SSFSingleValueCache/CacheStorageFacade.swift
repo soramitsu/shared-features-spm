@@ -21,7 +21,7 @@ protocol StorageFacade: AnyObject {
 final class CacheStorageFacade: StorageFacade {
     let databaseService: CoreDataServiceProtocol
 
-    init() throws {
+    init() {
         guard
             let baseURL = FileManager.default.urls(
                 for: .documentDirectory,
@@ -32,7 +32,7 @@ final class CacheStorageFacade: StorageFacade {
                 withExtension: "momd"
             )
         else {
-            throw CacheStorageFacadeError.coreDataUrlMissed
+            preconditionFailure("CacheDataModel.momd not found")
         }
         
         let options = [
