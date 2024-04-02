@@ -28,25 +28,25 @@
  */
 
 
-#if defined(__SSSE3__)
-#include <emmintrin.h>
+//#include <emmintrin.h>
 #include <stdint.h>
-
+#include <arm_neon.h>
 #include "sysendian.h"
+#include "sse2neon.h"
 
 #include "crypto_scrypt_smix_sse2.h"
 
 static void blkcpy(void *, const void *, size_t);
 static void blkxor(void *, const void *, size_t);
-static void salsa20_8(__m128i *);
-static void blockmix_salsa8(const __m128i *, __m128i *, __m128i *, size_t);
+static void salsa20_8(int32x4_t *);
+static void blockmix_salsa8(const int32x4_t *, int32x4_t *, int32x4_t *, size_t);
 static uint64_t integerify(const void *, size_t);
 
 static void
 blkcpy(void * dest, const void * src, size_t len)
 {
-	__m128i * D = dest;
-	const __m128i * S = src;
+    int32x4_t * D = dest;
+	const int32x4_t * S = src;
 	size_t L = len / 16;
 	size_t i;
 
@@ -57,8 +57,8 @@ blkcpy(void * dest, const void * src, size_t len)
 static void
 blkxor(void * dest, const void * src, size_t len)
 {
-	__m128i * D = dest;
-	const __m128i * S = src;
+    int32x4_t * D = dest;
+	const int32x4_t * S = src;
 	size_t L = len / 16;
 	size_t i;
 
@@ -71,10 +71,10 @@ blkxor(void * dest, const void * src, size_t len)
  * Apply the salsa20/8 core to the provided block.
  */
 static void
-salsa20_8(__m128i B[4])
+salsa20_8(int32x4_t B[4])
 {
-	__m128i X0, X1, X2, X3;
-	__m128i T;
+    int32x4_t X0, X1, X2, X3;
+    int32x4_t T;
 	size_t i;
 
 	X0 = B[0];
@@ -135,7 +135,7 @@ salsa20_8(__m128i B[4])
  * temporary space X must be 64 bytes.
  */
 static void
-blockmix_salsa8(const __m128i * Bin, __m128i * Bout, __m128i * X, size_t r)
+blockmix_salsa8(const int32x4_t * Bin, int32x4_t * Bout, int32x4_t * X, size_t r)
 {
 	size_t i;
 
@@ -188,9 +188,9 @@ integerify(const void * B, size_t r)
 void
 crypto_scrypt_smix_sse2(uint8_t * B, size_t r, uint64_t N, void * V, void * XY)
 {
-	__m128i * X = XY;
-	__m128i * Y = (void *)((uintptr_t)(XY) + 128 * r);
-	__m128i * Z = (void *)((uintptr_t)(XY) + 256 * r);
+    int32x4_t * X = XY;
+    int32x4_t * Y = (void *)((uintptr_t)(XY) + 128 * r);
+    int32x4_t * Z = (void *)((uintptr_t)(XY) + 256 * r);
 	uint32_t * X32 = (void *)X;
 	uint64_t i, j;
 	size_t k;
@@ -245,5 +245,3 @@ crypto_scrypt_smix_sse2(uint8_t * B, size_t r, uint64_t N, void * V, void * XY)
 	}
 }
 
-
-#endif

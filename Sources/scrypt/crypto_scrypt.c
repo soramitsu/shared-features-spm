@@ -39,9 +39,7 @@
 #include "warnp.h"
 
 #include "crypto_scrypt_smix.h"
-#if defined(__SSSE3__)
 #include "crypto_scrypt_smix_sse2.h"
-#endif
 
 #include "scrypt.h"
 
@@ -224,7 +222,6 @@ selectsmix(void)
 	abort();
 }
 
-#if defined(__SSSE3__)
 static void
 selectsmix_sim(void)
 {
@@ -238,7 +235,6 @@ selectsmix_sim(void)
     /* If we get here, something really bad happened. */
     abort();
 }
-#endif
 
 /**
  * crypto_scrypt(passwd, passwdlen, salt, saltlen, N, r, p, buf, buflen):
@@ -262,7 +258,6 @@ crypto_scrypt(const uint8_t * passwd, size_t passwdlen,
 	    buf, buflen, smix_func));
 }
 
-#if defined(__SSSE3__)
 int
 crypto_scrypt_sim(const uint8_t * passwd, size_t passwdlen,
     const uint8_t * salt, size_t saltlen, uint64_t N, uint32_t _r, uint32_t _p,
@@ -275,4 +270,3 @@ crypto_scrypt_sim(const uint8_t * passwd, size_t passwdlen,
     return (private_crypto_scrypt(passwd, passwdlen, salt, saltlen, N, _r, _p,
         buf, buflen, smix_func));
 }
-#endif
