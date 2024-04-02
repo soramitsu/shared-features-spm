@@ -33,10 +33,7 @@ let package = Package(
         .binaryTarget(name: "sr25519lib", path: "Binaries/sr25519lib.xcframework"),
         .binaryTarget(name: "MPQRCoreSDK", path: "Binaries/MPQRCoreSDK.xcframework"),
         .target(name: "scrypt",
-                path: "./Sources/scrypt",
-                swiftSettings: [
-                    .define("EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64")
-                ]),
+                path: "./Sources/scrypt"),
         .target(name: "RobinHood"),
         .target(name: "keccak"),
         .target(name: "SoraKeystore"),
@@ -62,9 +59,7 @@ let package = Package(
                 "scrypt"
             ],
             publicHeadersPath: "include",
-            cSettings: [ .headerSearchPath(".") ], 
-            swiftSettings: [ .define("EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64"),
-                             .define("VALID_ARCHS = x86_64 armv7 arm64")]
+            cSettings: [ .headerSearchPath(".") ]
         ),
         .target(
             name: "SSFCloudStorage",
