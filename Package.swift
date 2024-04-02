@@ -32,7 +32,11 @@ let package = Package(
         .binaryTarget(name: "libed25519", path: "Binaries/libed25519.xcframework"),
         .binaryTarget(name: "sr25519lib", path: "Binaries/sr25519lib.xcframework"),
         .binaryTarget(name: "MPQRCoreSDK", path: "Binaries/MPQRCoreSDK.xcframework"),
-        .target(name: "scrypt", path: "./Sources/scrypt"),
+        .target(name: "scrypt",
+                path: "./Sources/scrypt",
+                swiftSettings: [
+                    .define("EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64")
+                ]),
         .target(name: "RobinHood"),
         .target(name: "keccak"),
         .target(name: "SoraKeystore"),
