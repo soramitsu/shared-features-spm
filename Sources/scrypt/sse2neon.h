@@ -2,6 +2,8 @@
 #define SSE2NEON_H
 
 #include <arm_neon.h>
+#include <stddef.h>
+#include <stdint.h>
 
 /*
  * sse2neon is freely redistributable under the MIT License.
