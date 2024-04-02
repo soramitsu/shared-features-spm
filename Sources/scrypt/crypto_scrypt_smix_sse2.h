@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <arm_neon.h>
 
 /**
  * crypto_scrypt_smix_sse2(B, r, N, V, XY):

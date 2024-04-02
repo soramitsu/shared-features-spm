@@ -31,6 +31,7 @@
 
 #include <stdint.h>
 #include <unistd.h>
+#include <arm_neon.h>
 
 /**
  * crypto_scrypt(passwd, passwdlen, salt, saltlen, N, r, p, buf, buflen):
