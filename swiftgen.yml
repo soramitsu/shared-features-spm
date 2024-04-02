@@ -1,0 +1,10 @@
+xcassets:
+  inputs:
+    - Sources/CBDCTheming/Images.xcassets
+    - Sources/CBDCTheming/Colors.xcassets
+    
+  outputs:
+    - templateName: swift5
+      output: Sources/CBDCTheming/Asset.generated.swift
+      params:
+        publicAccess: true

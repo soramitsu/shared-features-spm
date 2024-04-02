@@ -17,7 +17,7 @@
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Run Swiftgen"
-               scriptText = "echo &quot;${WORKSPACE_PATH}/../../../tools/SwiftGen/swiftgen&quot;&#10;">
+               scriptText = " &quot;${WORKSPACE_PATH}&quot;/../../../tools/SwiftGen/swiftgen config run --config &quot;${WORKSPACE_PATH}&quot;/../../../swiftgen.yml&#10;&#10;">
             </ActionContent>
          </ExecutionAction>
       </PreActions>
