@@ -5,6 +5,6 @@ import XCTest
 final class SSFSingleValueCacheTests: XCTestCase {
     func testAssembly() throws {
         let assembly = SingleValueCacheRepositoryFactoryDefault()
-        XCTAssertNoThrow(try assembly.createSingleValueCasheRepository())
+        XCTAssertNoThrow(try assembly.createSingleValueCacheRepository())
     }
 }

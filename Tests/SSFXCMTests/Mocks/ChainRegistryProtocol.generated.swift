@@ -34,6 +34,24 @@ class ChainRegistryProtocolMock: ChainRegistryProtocol {
         getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReceivedInvocations.append((chainId: chainId, usedRuntimePaths: usedRuntimePaths, runtimeItem: runtimeItem))
         return try getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemClosure.map({ try $0(chainId, usedRuntimePaths, runtimeItem) }) ?? getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReturnValue
     }
+    
+    // MARK: - getRuntimeProvider
+    
+    var getRuntimeProviderCallsCount = 0
+    var getRuntimeProviderCalled: Bool {
+        return getRuntimeProviderCallsCount > 0
+    }
+    var getRuntimeProviderReceivedArguments: ChainModel.Id?
+    var getRuntimeProviderReceivedInvocations: [ChainModel.Id] = []
+    var getRuntimeProviderReturnValue: RuntimeProviderProtocol?
+    var getRuntimeProviderClosure: ((ChainModel.Id) -> RuntimeProviderProtocol?)?
+    
+    func getRuntimeProvider(for chainId: ChainModel.Id) -> RuntimeProviderProtocol? {
+        getRuntimeProviderCallsCount += 1
+        getRuntimeProviderReceivedArguments = chainId
+        getRuntimeProviderReceivedInvocations.append(chainId)
+        return getRuntimeProviderClosure.map({ $0(chainId) }) ?? getRuntimeProviderReturnValue
+    }
 
     //MARK: - getSubstrateConnection
 
