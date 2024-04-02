@@ -62,7 +62,8 @@ let package = Package(
                 "scrypt"
             ],
             publicHeadersPath: "include",
-            cSettings: [ .headerSearchPath(".") ]
+            cSettings: [ .headerSearchPath(".") ], 
+            swiftSettings: [ .define("EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64") ]
         ),
         .target(
             name: "SSFCloudStorage",
