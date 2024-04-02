@@ -37,7 +37,8 @@ let package = Package(
         .library(name: "SSFSingleValueCache", targets: ["SSFSingleValueCache"]),
         .library(name: "SSFPolkaswap", targets: ["SSFPolkaswap"]),
         .library(name: "SSFPools", targets: ["SSFPools"]),
-        .library(name: "SSFPoolsStorage", targets: ["SSFPoolsStorage"])
+        .library(name: "SSFPoolsStorage", targets: ["SSFPoolsStorage"]),
+        .library(name: "CBDCTheming", targets: ["CBDCTheming"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
@@ -51,7 +52,8 @@ let package = Package(
         .package(url: "https://github.com/daisuke-t-jp/xxHash-Swift", from: "1.1.1"),
         .package(url: "https://github.com/SwiftyBeaver/SwiftyBeaver.git", .upToNextMajor(from: "2.0.0")),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.50.4"),
-        .package(url: "https://github.com/bnsports/Web3.swift.git", branch: "master")
+        .package(url: "https://github.com/bnsports/Web3.swift.git", branch: "master"),
+        .package(url: "https://github.com/SwiftGen/SwiftGen", from: "6.6.0")
     ],
     targets: [
         .binaryTarget(name: "blake2lib", path: "Binaries/blake2lib.xcframework"),
@@ -341,6 +343,9 @@ let package = Package(
                 "RobinHood",
                 "SSFPools"
             ]
+        ),
+        .target(
+            name: "CBDCTheming"
         ),
 
         //Tests targets

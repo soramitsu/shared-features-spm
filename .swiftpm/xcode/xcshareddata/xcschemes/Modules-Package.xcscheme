@@ -13,6 +13,13 @@
                scriptText = "sh &quot;${WORKSPACE_PATH}/../../../tools/sourcery.sh&quot;&#10;">
             </ActionContent>
          </ExecutionAction>
+         <ExecutionAction
+            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
+            <ActionContent
+               title = "Run Swiftgen"
+               scriptText = "echo &quot;${WORKSPACE_PATH}/../../../tools/SwiftGen/swiftgen&quot;&#10;">
+            </ActionContent>
+         </ExecutionAction>
       </PreActions>
       <BuildActionEntries>
          <BuildActionEntry
