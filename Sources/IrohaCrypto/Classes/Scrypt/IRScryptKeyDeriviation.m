@@ -36,6 +36,18 @@ static const NSUInteger BLOCK_SIZE = 8;
                             error:(NSError*_Nullable*_Nullable)error {
     uint8_t result[length];
 
+    #if TARGET_IPHONE_SIMULATOR
+    int status = crypto_scrypt_sim((uint8_t*)(password.bytes),
+                               password.length,
+                               (uint8_t*)(salt.bytes),
+                               salt.length,
+                               scryptN,
+                               (uint32_t)scryptR,
+                               (uint32_t)scryptP,
+                               result,
+                               length);
+    
+    #else
     int status = crypto_scrypt((uint8_t*)(password.bytes),
                                password.length,
                                (uint8_t*)(salt.bytes),
@@ -45,6 +57,9 @@ static const NSUInteger BLOCK_SIZE = 8;
                                (uint32_t)scryptP,
                                result,
                                length);
+    #endif
+
+    
 
     if (status != 0) {
         if (error) {

@@ -224,6 +224,20 @@ selectsmix(void)
 	abort();
 }
 
+static void
+selectsmix_sim(void)
+{
+    if (!testsmix(crypto_scrypt_smix_sse2)) {
+        smix_func = crypto_scrypt_smix_sse2;
+        return;
+    }
+    
+    warn0("Generic scrypt code is broken - please report bug!");
+
+    /* If we get here, something really bad happened. */
+    abort();
+}
+
 /**
  * crypto_scrypt(passwd, passwdlen, salt, saltlen, N, r, p, buf, buflen):
  * Compute scrypt(passwd[0 .. passwdlen - 1], salt[0 .. saltlen - 1], N, r,
@@ -244,4 +258,17 @@ crypto_scrypt(const uint8_t * passwd, size_t passwdlen,
 
 	return (private_crypto_scrypt(passwd, passwdlen, salt, saltlen, N, _r, _p,
 	    buf, buflen, smix_func));
+}
+
+int
+crypto_scrypt_sim(const uint8_t * passwd, size_t passwdlen,
+    const uint8_t * salt, size_t saltlen, uint64_t N, uint32_t _r, uint32_t _p,
+    uint8_t * buf, size_t buflen)
+{
+
+    if (smix_func == NULL)
+        selectsmix_sim();
+
+    return (private_crypto_scrypt(passwd, passwdlen, salt, saltlen, N, _r, _p,
+        buf, buflen, smix_func));
 }

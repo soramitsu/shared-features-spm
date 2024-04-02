@@ -28,7 +28,7 @@
  */
 
 
-#if TARGET_IPHONE_SIMULATOR
+#if TARGET_OS_SIMULATOR
 #include <emmintrin.h>
 #include <stdint.h>
 
