@@ -63,7 +63,8 @@ let package = Package(
             ],
             publicHeadersPath: "include",
             cSettings: [ .headerSearchPath(".") ], 
-            swiftSettings: [ .define("EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64") ]
+            swiftSettings: [ .define("EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64"),
+                             .define("VALID_ARCHS = x86_64 armv7 arm64")]
         ),
         .target(
             name: "SSFCloudStorage",
