@@ -27,12 +27,12 @@ public enum CryptoType: UInt8, Codable, CaseIterable {
 
     public
     init?(rawValue: String) {
-        switch rawValue {
+        switch rawValue.lowercased() {
         case "sr25519":
             self = .sr25519
         case "ed25519":
             self = .ed25519
-        case "ecdsa":
+        case "ecdsa", "ethereum":
             self = .ecdsa
         default:
             return nil
