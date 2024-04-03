@@ -1,5 +1,5 @@
-import Foundation
 import CoreData
+import Foundation
 
 public protocol AsyncCoreDataRepository {
     associatedtype Model: Identifiable
@@ -8,16 +8,16 @@ public protocol AsyncCoreDataRepository {
         by modelIds: [String],
         options: RepositoryFetchOptions
     ) async throws -> [Model]
-    
+
     func fetch(
         by modelId: String,
         options: RepositoryFetchOptions
     ) async throws -> Model?
-    
+
     func fetchAll(
         with options: RepositoryFetchOptions
     ) async throws -> [Model]
-    
+
     func save(
         models: [Model],
         deleteIds: [String]
@@ -32,24 +32,25 @@ public extension AsyncCoreDataRepository {
     func fetchAll() async throws -> [Model] {
         try await fetchAll(with: RepositoryFetchOptions())
     }
-    
+
     func save(models: [Model]) async throws {
         try await save(models: models, deleteIds: [])
     }
-    
+
     func remove(models: [Model]) async throws {
         try await save(models: [], deleteIds: models.map { $0.identifier })
     }
 }
 
-public final class AsyncCoreDataRepositoryDefault<T: Identifiable, U: NSManagedObject>: AsyncCoreDataRepository {
+public final class AsyncCoreDataRepositoryDefault<
+    T: Identifiable,
+    U: NSManagedObject
+>: AsyncCoreDataRepository {
     public typealias Model = T
-    
+
     private let coreDataRepository: CoreDataRepository<T, U>
-    private lazy var operationQueue: OperationQueue = {
-        OperationQueue()
-    }()
-    
+    private lazy var operationQueue: OperationQueue = .init()
+
     public init(
         databaseService: CoreDataServiceProtocol,
         mapper: AnyCoreDataMapper<T, U>,
@@ -63,7 +64,7 @@ public final class AsyncCoreDataRepositoryDefault<T: Identifiable, U: NSManagedO
             sortDescriptors: sortDescriptors
         )
     }
-    
+
     public func fetch(
         by modelIds: [String],
         options: RepositoryFetchOptions
@@ -73,11 +74,11 @@ public final class AsyncCoreDataRepositoryDefault<T: Identifiable, U: NSManagedO
             options: options
         )
         operationQueue.addOperation(operation)
-        
+
         let result: [Model] = try await extract(from: operation)
         return result
     }
-    
+
     public func fetch(
         by modelId: String,
         options: RepositoryFetchOptions
@@ -87,21 +88,21 @@ public final class AsyncCoreDataRepositoryDefault<T: Identifiable, U: NSManagedO
             options: options
         )
         operationQueue.addOperation(operation)
-        
+
         let result: Model? = try await extract(from: operation)
         return result
     }
-    
+
     public func fetchAll(
         with options: RepositoryFetchOptions
     ) async throws -> [Model] {
         let operation = coreDataRepository.fetchAllOperation(with: options)
         operationQueue.addOperation(operation)
-        
+
         let result: [Model] = try await extract(from: operation)
         return result
     }
-    
+
     public func save(
         models: [Model],
         deleteIds: [String]
@@ -111,7 +112,7 @@ public final class AsyncCoreDataRepositoryDefault<T: Identifiable, U: NSManagedO
             { deleteIds }
         )
         operationQueue.addOperation(operation)
-        
+
         let result: Void = await withCheckedContinuation { continuation in
             operation.completionBlock = {
                 continuation.resume()
@@ -119,9 +120,9 @@ public final class AsyncCoreDataRepositoryDefault<T: Identifiable, U: NSManagedO
         }
         return result
     }
-    
+
     // MARK: - Private methods
-    
+
     private func extract<ResultType>(
         from operation: BaseOperation<ResultType>
     ) async throws -> ResultType {

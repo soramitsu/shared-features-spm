@@ -1,7 +1,7 @@
 import Foundation
+import SSFModels
 import SSFRuntimeCodingService
 import SSFUtils
-import SSFModels
 
 protocol AsyncStorageRequestFactory {
     func queryItems<T>(
@@ -19,7 +19,7 @@ protocol AsyncStorageRequestFactory {
         storagePath: any StorageCodingPathProtocol,
         at blockHash: Data?
     ) async throws -> [StorageResponse<T>] where T: Decodable
-    
+
     func queryChildItem<T>(
         engine: JSONRPCEngine,
         storageKeyParam: Data,
@@ -28,7 +28,7 @@ protocol AsyncStorageRequestFactory {
         mapper: DynamicScaleDecodable,
         at blockHash: Data?
     ) async throws -> ChildStorageResponse<T> where T: Decodable
-    
+
     func queryItems<T>(
         engine: JSONRPCEngine,
         keyParams: [[any NMapKeyParamProtocol]],
@@ -36,7 +36,7 @@ protocol AsyncStorageRequestFactory {
         storagePath: any StorageCodingPathProtocol,
         at blockHash: Data?
     ) async throws -> [StorageResponse<T>] where T: Decodable
-    
+
     func queryItemsByPrefix<T>(
         engine: JSONRPCEngine,
         keys: [Data],

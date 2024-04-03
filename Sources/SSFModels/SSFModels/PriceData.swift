@@ -20,7 +20,7 @@ public struct PriceData: Codable, Equatable {
         self.fiatDayChange = fiatDayChange
         self.coingeckoPriceId = coingeckoPriceId
     }
-    
+
     public func replaceFiatDayChange(fiatDayChange: Decimal?) -> PriceData {
         PriceData(
             currencyId: currencyId,

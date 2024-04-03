@@ -7,28 +7,28 @@ public enum JSONRPCEngineMockError: Error {
 
 public class JSONRPCEngineMock: JSONRPCEngine {
     public var url: URL?
-    
+
     public var pendingEngineRequests: [SSFUtils.JSONRPCRequest] = []
-    
+
     public init() {}
-    
+
     public func subscribe<P: Encodable, T: Decodable>(
-        _ method: String,
-        params: P?,
-        updateClosure: @escaping (T) -> Void,
-        failureClosure: @escaping (Error, Bool) -> Void
-    ) throws -> UInt16 where P : Encodable, T : Decodable {
-        UInt16.random(in: Range(1...1000))
+        _: String,
+        params _: P?,
+        updateClosure _: @escaping (T) -> Void,
+        failureClosure _: @escaping (Error, Bool) -> Void
+    ) throws -> UInt16 where P: Encodable, T: Decodable {
+        UInt16.random(in: Range(1 ... 1000))
     }
-    
+
     public var completionResult: Decodable?
-    
+
     public func callMethod<P: Encodable, T: Decodable>(
-        _ method: String,
-        params: P?,
-        options: JSONRPCOptions,
+        _: String,
+        params _: P?,
+        options _: JSONRPCOptions,
         completion closure: ((Result<T, Error>) -> Void)?
-    ) throws -> UInt16 where P : Encodable, T : Decodable {
+    ) throws -> UInt16 where P: Encodable, T: Decodable {
         if let completionResult = completionResult {
             if let result = completionResult as? T {
                 closure?(.success(result))
@@ -36,22 +36,22 @@ public class JSONRPCEngineMock: JSONRPCEngine {
                 closure?(.failure(JSONRPCEngineMockError.typesDoNotMatch))
             }
         }
-        return UInt16.random(in: Range(1...1000))
+        return UInt16.random(in: Range(1 ... 1000))
     }
-    
-    public func cancelForIdentifier(_ identifier: UInt16) {}
-    
+
+    public func cancelForIdentifier(_: UInt16) {}
+
     public func generateRequestId() -> UInt16 {
-        UInt16.random(in: Range(1...1000))
+        UInt16.random(in: Range(1 ... 1000))
     }
-    
-    public func addSubscription(_ subscription: SSFUtils.JSONRPCSubscribing) {}
-    
+
+    public func addSubscription(_: SSFUtils.JSONRPCSubscribing) {}
+
     public func connectIfNeeded() {}
-    
+
     public func disconnectIfNeeded() {}
-    
-    public func unsubsribe(_ identifier: UInt16) {}
-    
+
+    public func unsubsribe(_: UInt16) {}
+
     public func unsubsribeAll() {}
 }

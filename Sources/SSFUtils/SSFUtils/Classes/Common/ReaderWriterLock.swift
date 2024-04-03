@@ -2,7 +2,7 @@ import Foundation
 
 public final class ReaderWriterLock {
     private let queue = DispatchQueue(label: "co.jp.soramitsu.rwLock", attributes: .concurrent)
-    
+
     public init() {}
 
     public func concurrentlyRead<T>(_ block: () throws -> T) rethrows -> T {

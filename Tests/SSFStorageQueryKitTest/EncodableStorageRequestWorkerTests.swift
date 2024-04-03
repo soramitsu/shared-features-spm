@@ -1,10 +1,9 @@
-import XCTest
 import MocksBasket
+import XCTest
 
 @testable import SSFStorageQueryKit
 
 final class EncodableStorageRequestWorkerTests: XCTestCase {
-
     func testEncodableStorageRequestWorker() async throws {
         let worker = EncodableStorageRequestWorker<String>(
             runtimeService: RuntimeCodingServiceProtocolMock(),
@@ -15,7 +14,7 @@ final class EncodableStorageRequestWorkerTests: XCTestCase {
             parametersType: .simple,
             storagePath: StoragePathMock.custom(moduleName: "", itemName: "")
         )
-        
+
         do {
             let _: [StorageResponse<String>] = try await worker.perform(
                 params: request.parametersType.workerType,
@@ -26,7 +25,7 @@ final class EncodableStorageRequestWorkerTests: XCTestCase {
             XCTAssertTrue(true)
         }
     }
-    
+
     func testNMapStorageRequestWorker() async throws {
         let worker = NMapStorageRequestWorker<String>(
             runtimeService: RuntimeCodingServiceProtocolMock(),
@@ -37,7 +36,7 @@ final class EncodableStorageRequestWorkerTests: XCTestCase {
             parametersType: .simple,
             storagePath: StoragePathMock.custom(moduleName: "", itemName: "")
         )
-        
+
         do {
             let _: [StorageResponse<String>] = try await worker.perform(
                 params: request.parametersType.workerType,
@@ -48,7 +47,7 @@ final class EncodableStorageRequestWorkerTests: XCTestCase {
             XCTAssertTrue(true)
         }
     }
-    
+
     func testSimpleStorageRequestWorker() async throws {
         let worker = SimpleStorageRequestWorker<String>(
             runtimeService: RuntimeCodingServiceProtocolMock(),
@@ -59,7 +58,7 @@ final class EncodableStorageRequestWorkerTests: XCTestCase {
             parametersType: .encodable(param: "P"),
             storagePath: StoragePathMock.custom(moduleName: "", itemName: "")
         )
-        
+
         do {
             let _: [StorageResponse<String>] = try await worker.perform(
                 params: request.parametersType.workerType,

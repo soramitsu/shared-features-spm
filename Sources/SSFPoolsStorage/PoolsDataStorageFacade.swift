@@ -1,5 +1,5 @@
-import RobinHood
 import CoreData
+import RobinHood
 import SSFUtils
 
 enum PoolsDataStorageFacadeError: Error {
@@ -50,22 +50,23 @@ public final class PoolsDataStorageFacade: StorageFacadeProtocol {
 
         databaseService = CoreDataService(configuration: configuration)
     }
-    
+
     public func createRepository<T, U>(
         filter: NSPredicate?,
         sortDescriptors: [NSSortDescriptor],
         mapper: AnyCoreDataMapper<T, U>
     ) -> CoreDataRepository<T, U>
-    where T: Identifiable, U: NSManagedObject {
-        return CoreDataRepository(
+        where T: Identifiable, U: NSManagedObject
+    {
+        CoreDataRepository(
             databaseService: databaseService,
             mapper: mapper,
             filter: filter,
             sortDescriptors: sortDescriptors
         )
     }
-    
-    static private func createModelURL() -> URL? {
+
+    private static func createModelURL() -> URL? {
         let bundle = Bundle(for: PoolsDataStorageFacade.self)
 
         let omoURL = bundle.url(
@@ -83,4 +84,3 @@ public final class PoolsDataStorageFacade: StorageFacadeProtocol {
         return omoURL ?? momURL
     }
 }
-

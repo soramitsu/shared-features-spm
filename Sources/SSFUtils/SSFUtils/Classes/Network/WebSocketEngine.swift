@@ -174,7 +174,7 @@ public final class WebSocketEngine {
 
         mutex.unlock()
     }
-    
+
     public func unsubsribe(_ identifier: UInt16) throws {
         mutex.lock()
 
@@ -575,12 +575,15 @@ extension WebSocketEngine {
         connection.disconnect()
         scheduleReconnectionOrDisconnect(NetworkConstants.websocketReconnectAttemptsLimit + 1)
     }
-    
+
     private func processUnsubscription(_ identifier: UInt16) throws {
         guard let subscription = subscriptions[identifier] else { return }
-        
-        let requestInfo = try jsonDecoder.decode(JSONRPCInfo<[[Data]]>.self, from: subscription.requestData)
-        
+
+        let requestInfo = try jsonDecoder.decode(
+            JSONRPCInfo<[[Data]]>.self,
+            from: subscription.requestData
+        )
+
         _ = try callMethod(
             RPCMethod.stateUnsubscribe,
             params: requestInfo.params,

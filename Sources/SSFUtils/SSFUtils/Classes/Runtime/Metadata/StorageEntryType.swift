@@ -23,17 +23,17 @@ public enum StorageEntryType {
             return try nMap.value(using: schemaResolver)
         }
     }
-    
+
     public func keyName(schemaResolver: Schema.Resolver) throws -> String? {
         switch self {
-        case .map(let singleMap):
+        case let .map(singleMap):
             return singleMap.key
-        case .nMap(let nMap):
+        case let .nMap(nMap):
             let keys = try nMap.keys(using: schemaResolver)
             guard keys.count == 1 else {
                 throw StorageEntryTypeError.unableToFetchKey
             }
-            
+
             return keys.first
         default:
             return nil

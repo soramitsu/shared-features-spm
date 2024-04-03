@@ -1,5 +1,5 @@
-import SSFUtils
 import BigInt
+import SSFUtils
 
 struct DepositLiquidityCall: Codable {
     let dexId: String
@@ -11,7 +11,7 @@ struct DepositLiquidityCall: Codable {
     @StringCodable var minB: BigUInt
 
     enum CodingKeys: String, CodingKey {
-        case dexId = "dexId"
+        case dexId
         case assetA = "inputAssetA"
         case assetB = "inputAssetB"
         case desiredA = "inputADesired"

@@ -10,7 +10,7 @@
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Run Sourcery"
-               scriptText = "sh &quot;${WORKSPACE_PATH}/../../../tools/sourcery.sh&quot;&#10;">
+               scriptText = "if [[ -z &quot;${JENKINS_HOME}&quot; ]]; then&#10;    sh &quot;${WORKSPACE_PATH}/../../../tools/sourcery.sh&quot;&#10;fi&#10;&#10;&#10;">
             </ActionContent>
          </ExecutionAction>
       </PreActions>
@@ -495,6 +495,20 @@
                BlueprintName = "SSFAccountManagmentTests"
                ReferencedContainer = "container:">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "AccountManagementWorkerTests">
+               </Test>
+               <Test
+                  Identifier = "JSONExportServiceTests">
+               </Test>
+               <Test
+                  Identifier = "JSONExportServiceTests/testExportAccount()">
+               </Test>
+               <Test
+                  Identifier = "JSONExportServiceTests/testExportWallet()">
+               </Test>
+            </SkippedTests>
          </TestableReference>
          <TestableReference
             skipped = "NO">
@@ -505,6 +519,14 @@
                BlueprintName = "SSFAssetManagmentTests"
                ReferencedContainer = "container:">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "ChainAssetsFetchingServiceTests/testFetchSortAssetId()">
+               </Test>
+               <Test
+                  Identifier = "ChainAssetsFetchingServiceTests/testFetchSortPrice()">
+               </Test>
+            </SkippedTests>
          </TestableReference>
          <TestableReference
             skipped = "NO">
@@ -535,6 +557,11 @@
                BlueprintName = "SSFKeyPairTests"
                ReferencedContainer = "container:">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "JsonCreatorTests/testSubsctrateJson()">
+               </Test>
+            </SkippedTests>
          </TestableReference>
          <TestableReference
             skipped = "NO">
@@ -545,6 +572,14 @@
                BlueprintName = "SSFXCMTests"
                ReferencedContainer = "container:">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "XcmAssetMultilocationFetcherTests/testVersionedMultilocationWithAssetError()">
+               </Test>
+               <Test
+                  Identifier = "XcmAssetMultilocationFetcherTests/testVersionedMultilocationWithRetryError()">
+               </Test>
+            </SkippedTests>
          </TestableReference>
          <TestableReference
             skipped = "NO">

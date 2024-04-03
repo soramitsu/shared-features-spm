@@ -1,6 +1,6 @@
 import Foundation
-import SSFRuntimeCodingService
 import SSFModels
+import SSFRuntimeCodingService
 import SSFUtils
 
 final class NMapKeyEncodingWorker {
@@ -28,16 +28,16 @@ final class NMapKeyEncodingWorker {
         ) else {
             throw StorageKeyEncodingOperationError.invalidStoragePath
         }
-        
+
         guard case let .nMap(nMapEntry) = entry.type else {
             throw StorageKeyEncodingOperationError.incompatibleStorageType
         }
-        
+
         let keyEntries = try nMapEntry.keys(using: codingFactory.metadata.schemaResolver)
         guard keyEntries.count == keyParams.count else {
             throw StorageKeyEncodingOperationError.incompatibleStorageType
         }
-        
+
         var params: [[any NMapKeyParamProtocol]] = []
         for index in 0 ..< keyParams[0].count {
             var array: [any NMapKeyParamProtocol] = []
@@ -46,12 +46,12 @@ final class NMapKeyEncodingWorker {
             }
             params.append(array)
         }
-        
+
         let keys: [Data] = try params.map { params in
             let encodedParams: [Data] = try params.enumerated().map { index, param in
                 try param.encode(encoder: codingFactory.createEncoder(), type: keyEntries[index])
             }
-            
+
             return try storageKeyFactory.createStorageKey(
                 moduleName: path.moduleName,
                 storageName: path.itemName,

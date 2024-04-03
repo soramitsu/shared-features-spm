@@ -204,10 +204,20 @@ let package = Package(
                 "SSFUtils"
             ]
         ),
+        .target(
+            name: "SSFAssetManagmentStorage",
+            dependencies: [
+                "RobinHood",
+                "IrohaCrypto",
+                "SoraKeystore",
+                "SSFUtils"
+            ]
+        ),
         .testTarget(
             name: "SSFAssetManagmentTests",
             dependencies: [
                 "SSFAssetManagment",
+                "SSFAssetManagmentStorage",
                 "SSFUtils",
                 "SSFModels",
                 "RobinHood",
@@ -379,6 +389,7 @@ let package = Package(
                 .process("Resources")
             ]
         ),
+        
     ]
 )
 

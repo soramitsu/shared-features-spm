@@ -1,5 +1,5 @@
-import SSFUtils
 import Foundation
+import SSFUtils
 
 extension StorageKeyFactoryProtocol {
     func accountPoolsKeyForId(_ identifier: Data, baseAssetId: Data) throws -> Data {
@@ -13,7 +13,7 @@ extension StorageKeyFactoryProtocol {
             hasher2: .blake128Concat
         )
     }
-    
+
     func poolReservesKey(asset: Data) throws -> Data {
         let codingPath = StorageCodingPath.poolReserves
         return try createStorageKey(
@@ -23,7 +23,7 @@ extension StorageKeyFactoryProtocol {
             hasher: .blake128Concat
         )
     }
-    
+
     func poolReservesKey(baseAssetId: Data, targetAssetId: Data) throws -> Data {
         let codingPath = StorageCodingPath.poolReserves
         return try createStorageKey(
@@ -35,7 +35,7 @@ extension StorageKeyFactoryProtocol {
             hasher2: .blake128Concat
         )
     }
-    
+
     func xykPoolKeyProperties(asset: Data) throws -> Data {
         let codingPath = StorageCodingPath.poolProperties
         return try createStorageKey(
@@ -45,8 +45,8 @@ extension StorageKeyFactoryProtocol {
             hasher: .blake128Concat
         )
     }
-    
+
     func key(from codingPath: StorageCodingPath) throws -> Data {
         try createStorageKey(moduleName: codingPath.moduleName, storageName: codingPath.itemName)
     }
- }
+}

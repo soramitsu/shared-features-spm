@@ -1,9 +1,9 @@
+import MocksBasket
 import RobinHood
 import SSFAccountManagmentStorage
 import SSFHelpers
 import SSFModels
 import SSFUtils
-import MocksBasket
 import XCTest
 
 @testable import SSFAccountManagment
@@ -50,7 +50,9 @@ final class AccountManagementServiceTests: XCTestCase {
             let currentAccount = self?.service?.getCurrentAccount()
 
             // assert
-            XCTAssertEqual(currentAccount, TestData.account)
+            DispatchQueue.main.async {
+                XCTAssertEqual(currentAccount, TestData.account)
+            }
         })
     }
 
@@ -68,7 +70,10 @@ final class AccountManagementServiceTests: XCTestCase {
                 try self?.service?.update(visible: true, for: chainAsset, completion: {
                     // assert
                     DispatchQueue.main.async {
-                        XCTAssertTrue(self?.accountManagementWorker?.saveAccountCompletionCalled ?? false)
+                        XCTAssertTrue(
+                            self?.accountManagementWorker?
+                                .saveAccountCompletionCalled ?? false
+                        )
                     }
                 })
             } catch {

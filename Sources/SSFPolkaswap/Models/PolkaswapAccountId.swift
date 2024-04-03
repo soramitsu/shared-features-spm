@@ -1,6 +1,6 @@
 import Foundation
-import SSFUtils
 import IrohaCrypto
+import SSFUtils
 
 struct PolkaswapAccountId: ScaleCodable {
     let value: Data

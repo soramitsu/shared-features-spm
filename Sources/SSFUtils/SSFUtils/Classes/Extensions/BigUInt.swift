@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 
 public extension BigUInt {
     init?(string: String) {

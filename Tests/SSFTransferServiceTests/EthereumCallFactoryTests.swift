@@ -1,12 +1,11 @@
-import XCTest
+import SSFHelpers
 import SSFModels
 import Web3
-import SSFHelpers
+import XCTest
 
 @testable import SSFTransferService
 
 final class EthereumCallFactoryTests: XCTestCase {
-    
     private var callFactory: EthereumTransferCallFactory?
 
     override func setUpWithError() throws {
@@ -16,20 +15,32 @@ final class EthereumCallFactoryTests: XCTestCase {
 
     func testSignNative() async throws {
         let chainAsset = createERC20ChainAsset()
-        let transfer = EthereumTransfer(amount: "1000000000000", receiver: "0xccb15402c89b730d930e2ec7e3a4acd7edf724d6")
-        let signedTansaction = try await callFactory?.signNative(transfer: transfer, chainAsset: chainAsset)
-        XCTAssertTrue(signedTansaction?.verifySignature() == true)
-    }
-    
-    func testSignERC20() async throws {
-        let chainAsset = createERC20ChainAsset()
-        let transfer = EthereumTransfer(amount: "1000000000000", receiver: "0xccb15402c89b730d930e2ec7e3a4acd7edf724d6")
-        let signedTansaction = try await callFactory?.signERC20(transfer: transfer, chainAsset: chainAsset)
+        let transfer = EthereumTransfer(
+            amount: "1000000000000",
+            receiver: "0xccb15402c89b730d930e2ec7e3a4acd7edf724d6"
+        )
+        let signedTansaction = try await callFactory?.signNative(
+            transfer: transfer,
+            chainAsset: chainAsset
+        )
         XCTAssertTrue(signedTansaction?.verifySignature() == true)
     }
 
-    //MARK: - Private methods
-    
+    func testSignERC20() async throws {
+        let chainAsset = createERC20ChainAsset()
+        let transfer = EthereumTransfer(
+            amount: "1000000000000",
+            receiver: "0xccb15402c89b730d930e2ec7e3a4acd7edf724d6"
+        )
+        let signedTansaction = try await callFactory?.signERC20(
+            transfer: transfer,
+            chainAsset: chainAsset
+        )
+        XCTAssertTrue(signedTansaction?.verifySignature() == true)
+    }
+
+    // MARK: - Private methods
+
     private func createERC20ChainAsset() -> ChainAsset {
         let chain = ChainModelGenerator.generate(chainId: "1", count: 1).first!
         let asset = ChainModelGenerator.generateAssetWithId(
@@ -41,7 +52,7 @@ final class EthereumCallFactoryTests: XCTestCase {
         let chainAsset = ChainAsset(chain: chain, asset: asset)
         return chainAsset
     }
-    
+
     private func setupEthereumService() -> EthereumService {
         let service = EthereumServiceMock()
         service.queryGasPriceReturnValue = EthereumQuantity(quantity: "1")
@@ -52,12 +63,12 @@ final class EthereumCallFactoryTests: XCTestCase {
         service.connection = Web3(rpcURL: "https//google.com").eth
         return service
     }
-    
+
     private func setupCallFactory() throws {
         let secret = Data(hex: "0x85dedefd3fa46b486db7460be303aa3baa44ce1249c6e42e2731ffdf68a33068")
         let secretKey = try EthereumPrivateKey(privateKey: secret.bytes)
         let ethereumService = setupEthereumService()
-        
+
         let callFactory: EthereumTransferCallFactory = EthereumTransferCallFactoryDefault(
             ethereumService: ethereumService,
             senderAddress: "0xccb15402c89b730d930e2ec7e3a4acd7edf724d6",

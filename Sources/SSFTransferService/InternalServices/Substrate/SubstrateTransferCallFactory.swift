@@ -1,8 +1,8 @@
-import Foundation
-import SSFUtils
-import SSFModels
 import BigInt
+import Foundation
+import SSFModels
 import SSFRuntimeCodingService
+import SSFUtils
 
 protocol SubstrateTransferCallFactory {
     func transfer(
@@ -18,13 +18,13 @@ protocol SubstrateTransferCallFactory {
 
 final class SubstrateTransferCallFactoryDefault: SubstrateTransferCallFactory {
     private let runtimeService: RuntimeProviderProtocol
-    
+
     init(runtimeService: RuntimeProviderProtocol) {
         self.runtimeService = runtimeService
     }
-    
+
     // MARK: - SubstrateCallFactory
-    
+
     func transfer(
         to receiver: AccountId,
         amount: BigUInt,
@@ -92,9 +92,9 @@ final class SubstrateTransferCallFactoryDefault: SubstrateTransferCallFactory {
             args: transfer
         )
     }
-    
+
     // MARK: - Private methods
-    
+
     private func transferNormalAssetWith(
         specific: ChainTransferSpecificParameter,
         receiver: AccountId,
@@ -202,11 +202,17 @@ final class SubstrateTransferCallFactoryDefault: SubstrateTransferCallFactory {
         }
 
         let transferAllowDeathAvailable = try? metadata.modules
-            .first(where: { $0.name.lowercased() == SubstrateCallPath.transferAllowDeath.moduleName.lowercased() })?
+            .first(where: {
+                $0.name.lowercased() == SubstrateCallPath.transferAllowDeath.moduleName
+                    .lowercased()
+            })?
             .calls(using: metadata.schemaResolver)?
-            .first(where: { $0.name.lowercased() == SubstrateCallPath.transferAllowDeath.callName.lowercased() }) != nil
+            .first(where: {
+                $0.name.lowercased() == SubstrateCallPath.transferAllowDeath.callName.lowercased()
+            }) != nil
 
-        let path: SubstrateCallPath = transferAllowDeathAvailable == true ? .transferAllowDeath : .defaultTransfer
+        let path: SubstrateCallPath = transferAllowDeathAvailable == true ? .transferAllowDeath :
+            .defaultTransfer
 
         let args = TransferCall(dest: .accoundId(receiver), value: amount, currencyId: nil)
         return RuntimeCall(
@@ -217,11 +223,11 @@ final class SubstrateTransferCallFactoryDefault: SubstrateTransferCallFactory {
     }
 }
 
-fileprivate enum ChainTransferSpecificParameter {
+private enum ChainTransferSpecificParameter {
     case sora
     case reef
     case `default`
-    
+
     init(from chain: ChainModel) {
         switch chain.knownChainEquivalent {
         case .soraMain, .soraTest:

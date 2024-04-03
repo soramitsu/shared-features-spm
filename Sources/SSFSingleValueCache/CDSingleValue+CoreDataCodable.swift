@@ -1,6 +1,6 @@
+import CoreData
 import Foundation
 import RobinHood
-import CoreData
 
 extension CDSingleValue: CoreDataCodable {
     enum CodingKeys: String, CodingKey {

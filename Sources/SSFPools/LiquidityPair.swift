@@ -1,6 +1,6 @@
+import BigInt
 import Foundation
 import RobinHood
-import BigInt
 
 public struct LiquidityPair: Codable {
     public enum CodingKeys: String, CodingKey {
@@ -11,7 +11,7 @@ public struct LiquidityPair: Codable {
         case rewardAssetId
         case reserves
     }
-    
+
     public let pairId: String
     public let chainId: String?
     public let baseAssetId: String
@@ -20,7 +20,7 @@ public struct LiquidityPair: Codable {
     public let reserves: BigUInt?
     public var apy: Decimal?
     public var reservesId: String?
-    
+
     public init(
         pairId: String,
         chainId: String?,
@@ -38,8 +38,8 @@ public struct LiquidityPair: Codable {
         self.apy = apy
         self.reservesId = reservesId
     }
-    
-     init(pair: LiquidityPair) {
+
+    init(pair: LiquidityPair) {
         self.init(
             pairId: pair.pairId,
             chainId: pair.chainId,
@@ -50,13 +50,13 @@ public struct LiquidityPair: Codable {
             reservesId: pair.reservesId
         )
     }
-    
+
     public func update(reservesId: String?) -> LiquidityPair {
         var copy = LiquidityPair(pair: self)
         copy.reservesId = reservesId
         return copy
     }
-    
+
     public func update(apy: Decimal?) -> LiquidityPair {
         var copy = LiquidityPair(pair: self)
         copy.apy = apy
@@ -69,7 +69,6 @@ extension LiquidityPair: Identifiable {
 }
 
 extension LiquidityPair: Hashable {
-
     public func hash(into hasher: inout Hasher) {
         hasher.combine(pairId)
         hasher.combine(chainId)
@@ -77,10 +76,10 @@ extension LiquidityPair: Hashable {
         hasher.combine(targetAssetId)
     }
 
-    public static func ==(lhs: LiquidityPair, rhs: LiquidityPair) -> Bool {
+    public static func == (lhs: LiquidityPair, rhs: LiquidityPair) -> Bool {
         lhs.pairId == rhs.pairId &&
-        lhs.chainId == rhs.chainId &&
-        lhs.baseAssetId == rhs.baseAssetId &&
-        lhs.targetAssetId == rhs.targetAssetId
+            lhs.chainId == rhs.chainId &&
+            lhs.baseAssetId == rhs.baseAssetId &&
+            lhs.targetAssetId == rhs.targetAssetId
     }
 }

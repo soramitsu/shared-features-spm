@@ -4,7 +4,7 @@ import SSFUtils
 
 public typealias RuntimeMetadataClosure = () throws -> RuntimeMetadata
 
-//sourcery: AutoMockable
+// sourcery: AutoMockable
 public protocol RuntimeCodingServiceProtocol {
     var snapshot: RuntimeSnapshot? { get }
 

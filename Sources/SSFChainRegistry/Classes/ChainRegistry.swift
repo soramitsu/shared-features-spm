@@ -1,10 +1,10 @@
 import Foundation
-import Web3
 import RobinHood
 import SSFChainConnection
 import SSFModels
 import SSFRuntimeCodingService
 import SSFUtils
+import Web3
 
 // sourcery: AutoMockable
 public protocol ChainRegistryProtocol: AnyObject {
@@ -33,7 +33,7 @@ public final class ChainRegistry {
     private let runtimeSyncService: RuntimeSyncServiceProtocol
 
     private let mutex = NSLock()
-    
+
     private lazy var readLock = ReaderWriterLock()
 
     public init(
@@ -72,7 +72,10 @@ extension ChainRegistry: ChainRegistryProtocol {
             runtimeMetadataItem = runtimeItem
         } else {
             let connection = try await connectionPool.setupSubstrateConnection(for: chainModel)
-            runtimeMetadataItem = try await runtimeSyncService.register(chain: chainModel, with: connection)
+            runtimeMetadataItem = try await runtimeSyncService.register(
+                chain: chainModel,
+                with: connection
+            )
         }
         let chainTypes = try await chainsTypesSyncService.getTypes(for: chainId)
         let runtimeProvider = runtimeProviderPool.setupRuntimeProvider(
@@ -95,7 +98,10 @@ extension ChainRegistry: ChainRegistryProtocol {
             runtimeMetadataItem = runtimeItem
         } else {
             let connection = try await connectionPool.setupSubstrateConnection(for: chainModel)
-            runtimeMetadataItem = try await runtimeSyncService.register(chain: chainModel, with: connection)
+            runtimeMetadataItem = try await runtimeSyncService.register(
+                chain: chainModel,
+                with: connection
+            )
         }
         let chainTypes = try await chainsTypesSyncService.getTypes(for: chainId)
         let readySnaphot = try await runtimeProviderPool.readySnaphot(
@@ -105,11 +111,11 @@ extension ChainRegistry: ChainRegistryProtocol {
         )
         return readySnaphot
     }
-    
+
     public func getSubstrateConnection(for chain: ChainModel) async throws -> SubstrateConnection {
         try await connectionPool.setupSubstrateConnection(for: chain)
     }
-    
+
     public func getEthereumConnection(
         for chain: SSFModels.ChainModel
     ) async throws -> Web3EthConnection {

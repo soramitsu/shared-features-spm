@@ -11,10 +11,10 @@ public final class LocalLiquidityPairServiceDefault {
         let newOrUpdatedItems: [LiquidityPair]
         let removedItems: [LiquidityPair]
     }
-    
+
     private let repository: AnyDataProviderRepository<LiquidityPair>
     private let operationManager: OperationManagerProtocol
-    
+
     public init(
         repository: AnyDataProviderRepository<LiquidityPair>,
         operationManager: OperationManagerProtocol
@@ -25,11 +25,10 @@ public final class LocalLiquidityPairServiceDefault {
 }
 
 extension LocalLiquidityPairServiceDefault: LocalLiquidityPairService {
-    
     public func get() async throws -> [LiquidityPair] {
         let fetchOperation = repository.fetchAllOperation(with: RepositoryFetchOptions())
         operationManager.enqueue(operations: [fetchOperation], in: .transient)
-        
+
         return try await withCheckedThrowingContinuation { continuation in
             fetchOperation.completionBlock = {
                 do {
@@ -44,15 +43,18 @@ extension LocalLiquidityPairServiceDefault: LocalLiquidityPairService {
 
     public func sync(remotePairs: [LiquidityPair]) async throws {
         let fetchOperation = repository.fetchAllOperation(with: RepositoryFetchOptions())
-        
+
         let processingOperation: BaseOperation<Changes> = ClosureOperation {
             let remotePairs = Set(remotePairs)
-            let localPairs = Set(try fetchOperation.extractNoCancellableResultData())
+            let localPairs = try Set(fetchOperation.extractNoCancellableResultData())
             let newOrUpdatedItems = remotePairs.subtracting(localPairs)
             let removedItems = localPairs.subtracting(remotePairs)
-            return Changes(newOrUpdatedItems: Array(newOrUpdatedItems), removedItems: Array(removedItems))
+            return Changes(
+                newOrUpdatedItems: Array(newOrUpdatedItems),
+                removedItems: Array(removedItems)
+            )
         }
-        
+
         let localSaveOperation = repository.saveOperation({
             let changes = try processingOperation.extractNoCancellableResultData()
             return changes.newOrUpdatedItems
@@ -60,12 +62,15 @@ extension LocalLiquidityPairServiceDefault: LocalLiquidityPairService {
             let changes = try processingOperation.extractNoCancellableResultData()
             return changes.removedItems.map(\.pairId)
         })
-        
+
         processingOperation.addDependency(fetchOperation)
         localSaveOperation.addDependency(processingOperation)
 
-        operationManager.enqueue(operations: [fetchOperation, processingOperation, localSaveOperation], in: .transient)
-        
+        operationManager.enqueue(
+            operations: [fetchOperation, processingOperation, localSaveOperation],
+            in: .transient
+        )
+
         return try await withCheckedThrowingContinuation { continuation in
             localSaveOperation.completionBlock = {
                 do {

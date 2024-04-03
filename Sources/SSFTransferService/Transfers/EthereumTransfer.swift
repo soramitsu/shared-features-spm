@@ -1,11 +1,11 @@
+import BigInt
 import Foundation
 import SSFModels
-import BigInt
 
 public struct EthereumTransfer {
     public let amount: BigUInt
     public let receiver: String
-    
+
     public init(
         amount: BigUInt,
         receiver: String

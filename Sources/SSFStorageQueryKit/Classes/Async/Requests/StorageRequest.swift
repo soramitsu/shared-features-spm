@@ -10,7 +10,7 @@ public enum StorageRequestParametersType {
     case nMap(params: [[any NMapKeyParamProtocol]])
     case encodable(param: any Encodable)
     case simple
-    
+
     var workerType: StorageRequestWorkerType {
         switch self {
         case let .nMap(params):

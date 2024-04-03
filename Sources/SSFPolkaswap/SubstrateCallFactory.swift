@@ -1,7 +1,7 @@
 import BigInt
-import SSFUtils
 import Foundation
 import IrohaCrypto
+import SSFUtils
 
 protocol SubstrateCallFactory {
     func register(
@@ -9,13 +9,13 @@ protocol SubstrateCallFactory {
         baseAssetId: String,
         targetAssetId: String
     ) throws -> RuntimeCall<PairRegisterCall>
-    
+
     func initializePool(
         dexId: String,
         baseAssetId: String,
         targetAssetId: String
     ) throws -> RuntimeCall<InitializePoolCall>
-    
+
     func depositLiquidity(
         dexId: String,
         assetA: String,
@@ -25,7 +25,7 @@ protocol SubstrateCallFactory {
         minA: BigUInt,
         minB: BigUInt
     ) throws -> RuntimeCall<DepositLiquidityCall>
-    
+
     func withdrawLiquidityCall(
         dexId: String,
         assetA: String,
@@ -37,17 +37,24 @@ protocol SubstrateCallFactory {
 }
 
 final class SubstrateCallFactoryDefault: SubstrateCallFactory {
-    
-    func register(dexId: String, baseAssetId: String, targetAssetId: String) throws -> RuntimeCall<PairRegisterCall> {
+    func register(
+        dexId: String,
+        baseAssetId: String,
+        targetAssetId: String
+    ) throws -> RuntimeCall<PairRegisterCall> {
         let call = PairRegisterCall(
             dexId: dexId,
-            baseAssetId: SoraAssetId(wrappedValue:baseAssetId),
-            targetAssetId: SoraAssetId(wrappedValue:targetAssetId)
+            baseAssetId: SoraAssetId(wrappedValue: baseAssetId),
+            targetAssetId: SoraAssetId(wrappedValue: targetAssetId)
         )
         return RuntimeCall<PairRegisterCall>.register(call)
     }
-    
-    func initializePool(dexId: String, baseAssetId: String, targetAssetId: String) throws -> RuntimeCall<InitializePoolCall> {
+
+    func initializePool(
+        dexId: String,
+        baseAssetId: String,
+        targetAssetId: String
+    ) throws -> RuntimeCall<InitializePoolCall> {
         let call = InitializePoolCall(
             dexId: dexId,
             assetA: SoraAssetId(wrappedValue: baseAssetId),
@@ -55,7 +62,7 @@ final class SubstrateCallFactoryDefault: SubstrateCallFactory {
         )
         return RuntimeCall<InitializePoolCall>.initializePool(call)
     }
-    
+
     func depositLiquidity(
         dexId: String,
         assetA: String,
@@ -76,7 +83,7 @@ final class SubstrateCallFactoryDefault: SubstrateCallFactory {
         )
         return RuntimeCall<DepositLiquidityCall>.depositLiquidity(call)
     }
-    
+
     func withdrawLiquidityCall(
         dexId: String,
         assetA: String,

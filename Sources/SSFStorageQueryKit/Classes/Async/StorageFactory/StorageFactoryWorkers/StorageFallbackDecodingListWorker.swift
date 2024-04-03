@@ -1,8 +1,10 @@
 import Foundation
-import SSFRuntimeCodingService
 import SSFModels
+import SSFRuntimeCodingService
 
-final class StorageFallbackDecodingListWorker<T: Decodable>: StorageDecodable, StorageModifierHandling {
+final class StorageFallbackDecodingListWorker<T: Decodable>: StorageDecodable,
+    StorageModifierHandling
+{
     private let dataList: [Data?]
     private let codingFactory: RuntimeCoderFactoryProtocol
     private let path: any StorageCodingPathProtocol
@@ -20,7 +22,8 @@ final class StorageFallbackDecodingListWorker<T: Decodable>: StorageDecodable, S
     func performDecoding() throws -> [T?] {
         let items: [T?] = try dataList.map { data in
             if let data = data {
-                return try decode(data: data, path: path, codingFactory: codingFactory).map(to: T.self)
+                return try decode(data: data, path: path, codingFactory: codingFactory)
+                    .map(to: T.self)
             } else {
                 return try handleModifier(at: path, codingFactory: codingFactory)?.map(to: T.self)
             }

@@ -1,11 +1,11 @@
+import CoreData
 import Foundation
 import RobinHood
-import CoreData
 import SSFPools
 
 extension CDLiquidityPair: CoreDataCodable {
     var entityIdentifierFieldName: String { #keyPath(CDLiquidityPair.pairId) }
-    
+
     public func populate(from decoder: Decoder, using _: NSManagedObjectContext) throws {
         let container = try decoder.container(keyedBy: LiquidityPair.CodingKeys.self)
 

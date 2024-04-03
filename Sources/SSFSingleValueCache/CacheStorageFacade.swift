@@ -1,6 +1,6 @@
+import CoreData
 import Foundation
 import RobinHood
-import CoreData
 
 protocol StorageFacade: AnyObject {
     var databaseService: CoreDataServiceProtocol { get }
@@ -10,7 +10,7 @@ protocol StorageFacade: AnyObject {
         sortDescriptors: [NSSortDescriptor],
         mapper: AnyCoreDataMapper<T, U>
     ) -> AsyncCoreDataRepositoryDefault<T, U>
-    
+
     func createRepository<T, U>(
         filter: NSPredicate?,
         sortDescriptors: [NSSortDescriptor],
@@ -22,36 +22,35 @@ final class CacheStorageFacade: StorageFacade {
     let databaseService: CoreDataServiceProtocol
 
     init() {
-        guard
-            let baseURL = FileManager.default.urls(
-                for: .documentDirectory,
-                in: .userDomainMask
-            ).first?.appendingPathComponent("CoreData"),
+        guard let baseURL = FileManager.default.urls(
+            for: .documentDirectory,
+            in: .userDomainMask
+        ).first?.appendingPathComponent("CoreData"),
             let modelURL = Bundle.module.url(
                 forResource: "CacheDataModel",
                 withExtension: "momd"
-            )
-        else {
+            ) else
+        {
             preconditionFailure("CacheDataModel.momd not found")
         }
-        
+
         let options = [
             NSMigratePersistentStoresAutomaticallyOption: true,
-            NSInferMappingModelAutomaticallyOption: true
+            NSInferMappingModelAutomaticallyOption: true,
         ]
-        
+
         let persistentSettings = CoreDataPersistentSettings(
             databaseDirectory: baseURL,
             databaseName: "CacheDataModel.sqlite",
             incompatibleModelStrategy: .removeStore,
             options: options
         )
-        
+
         let configuration = CoreDataServiceConfiguration(
             modelURL: modelURL,
             storageType: .persistent(settings: persistentSettings)
         )
-        
+
         databaseService = CoreDataService(configuration: configuration)
     }
 
@@ -67,7 +66,7 @@ final class CacheStorageFacade: StorageFacade {
             sortDescriptors: sortDescriptors
         )
     }
-    
+
     func createRepository<T, U>(
         filter: NSPredicate?,
         sortDescriptors: [NSSortDescriptor],

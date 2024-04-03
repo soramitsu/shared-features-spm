@@ -11,7 +11,7 @@ public protocol ExtrinsicBuilderProtocol: AnyObject {
     func with(shouldUseAtomicBatch: Bool) -> Self
     func adding<T: RuntimeCallable>(call: T) throws -> Self
     func adding(rawCall: Data) throws -> Self
-    
+
     func signing(
         by signer: (Data) throws -> Data,
         of type: CryptoType,
@@ -181,7 +181,7 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
 
         return self
     }
-    
+
     public func adding(rawCall: Data) throws -> Self {
         let json = JSON.stringValue(rawCall.toHex())
         calls.append(json)
@@ -273,7 +273,7 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
 
         return encoded
     }
-    
+
     public func buildSignature(
         encodingBy encoder: DynamicScaleEncoding,
         metadata: RuntimeMetadata

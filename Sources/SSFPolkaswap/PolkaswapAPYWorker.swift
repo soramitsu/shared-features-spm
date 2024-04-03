@@ -1,6 +1,6 @@
 import RobinHood
-import SSFUtils
 import sorawallet
+import SSFUtils
 
 enum PolkaswapAPYWorkerError: Swift.Error {
     case unexpectedError
@@ -12,31 +12,31 @@ public protocol PolkaswapAPYWorker {
 
 public final class PolkaswapAPYWorkerDefault: PolkaswapAPYWorker {
     private var subQueryClient: SoraWalletBlockExplorerInfo?
-    
+
     init(
         networkClient: SoramitsuNetworkClient,
         configBuilder: SoraRemoteConfigBuilder
     ) {
-        self.subQueryClient = SoraWalletBlockExplorerInfo(
+        subQueryClient = SoraWalletBlockExplorerInfo(
             networkClient: networkClient,
             soraRemoteConfigBuilder: configBuilder
         )
     }
-    
+
     public func getAPYInfo() async throws -> [SbApyInfo] {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.main.async { [weak self] in
                 self?.subQueryClient?.getSpApy(completionHandler: { requestResult, error in
                     if let error {
                         continuation.resume(throwing: error)
                         return
                     }
-                    
+
                     if let data = requestResult {
                         continuation.resume(returning: data)
                         return
                     }
-                    
+
                     continuation.resume(throwing: PolkaswapAPYWorkerError.unexpectedError)
                 })
             }

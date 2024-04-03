@@ -1,5 +1,5 @@
-import Foundation
 import BigInt
+import Foundation
 
 struct PolkaswapPoolReserves {
     let reserves: BigUInt

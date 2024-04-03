@@ -12,12 +12,12 @@ public final class RuntimeMetadata {
     public let metaReserved: UInt32
     public let version: UInt8
     public let schemaResolver: Schema.Resolver
-    
+
     public var signatureType: String {
         if version == 13 {
             return KnownType.signature13.rawValue
         }
-        
+
         return KnownType.signature.rawValue
     }
 
@@ -74,21 +74,24 @@ public final class RuntimeMetadata {
         wrapped.modules.first(where: { $0.name.lowercased() == moduleName.lowercased() })?
             .constants.first(where: { $0.name.lowercased() == constantName.lowercased() })
     }
-    
+
     public func checkArgument(
         moduleName: String,
         callName: String,
         argumentName: String
     ) throws -> Bool {
-        return try wrapped.modules
-            .first(where: {$0.name.lowercased() == moduleName.lowercased() })?
+        try wrapped.modules
+            .first(where: { $0.name.lowercased() == moduleName.lowercased() })?
             .calls(using: schemaResolver)?
             .first(where: { $0.name.lowercased() == callName.lowercased() })?
             .arguments
-            .first(where:  { $0.name.lowercased() == argumentName.lowercased() }) != nil
+            .first(where: { $0.name.lowercased() == argumentName.lowercased() }) != nil
     }
-    
-    public func multiAddressParameter(accountId: AccountId, chainFormat: SFChainFormat) -> MultiAddress {
+
+    public func multiAddressParameter(
+        accountId: AccountId,
+        chainFormat: SFChainFormat
+    ) -> MultiAddress {
         switch chainFormat {
         case .sfEthereum:
             return MultiAddress.address20(accountId)

@@ -1,7 +1,7 @@
 import Foundation
 import SSFModels
-import SSFUtils
 import SSFRuntimeCodingService
+import SSFUtils
 
 public enum RuntimeProviderPoolError: Error {
     case missingProvider
@@ -27,7 +27,7 @@ public final class RuntimeProviderPool: RuntimeProviderPoolProtocol {
     private var runtimeProviders: [ChainModel.Id: RuntimeProviderProtocol] = [:]
     private let mutex = NSLock()
     private let lock = ReaderWriterLock()
-    
+
     public init() {}
 
     @discardableResult

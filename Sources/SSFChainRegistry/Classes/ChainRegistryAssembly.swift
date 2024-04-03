@@ -2,7 +2,7 @@ import Foundation
 import SSFNetwork
 import SSFUtils
 
-final public class ChainRegistryAssembly {
+public enum ChainRegistryAssembly {
     public static func createDefaultRegistry(
         chainsUrl: URL = ApplicationSourcesImpl.shared.chainsSourceUrl,
         chainTypesUrls: URL = ApplicationSourcesImpl.shared.chainTypesSourceUrl
@@ -12,13 +12,13 @@ final public class ChainRegistryAssembly {
             operationQueue: OperationQueue(),
             dataFetchFactory: NetworkOperationFactory()
         )
-        
+
         let chainsTypesSyncService = ChainsTypesSyncService(
             url: chainTypesUrls,
             dataOperationFactory: NetworkOperationFactory(),
             operationQueue: OperationQueue()
         )
-        
+
         let runtimeSyncService = RuntimeSyncService(dataOperationFactory: NetworkOperationFactory())
 
         let chainRegistry = ChainRegistry(
