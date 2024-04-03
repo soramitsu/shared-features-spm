@@ -100,7 +100,7 @@ extension ExtrinsicOperationFactoryProtocol {
 
 final class ExtrinsicOperationFactory {
     let accountId: AccountId
-    let cryptoType: SFCryptoType
+    let cryptoType: CryptoType
     let chainFormat: SFChainFormat
     let runtimeRegistry: RuntimeCodingServiceProtocol
     let engine: JSONRPCEngine
@@ -109,7 +109,7 @@ final class ExtrinsicOperationFactory {
     init(
         accountId: AccountId,
         chainFormat: SFChainFormat,
-        cryptoType: SFCryptoType,
+        cryptoType: CryptoType,
         runtimeRegistry: RuntimeCodingServiceProtocol,
         engine: JSONRPCEngine,
         eraOperationFactory: ExtrinsicEraOperationFactoryProtocol = MortalEraOperationFactory()
@@ -214,7 +214,7 @@ final class ExtrinsicOperationFactory {
 
                 builder = try customClosure(builder, index).signing(
                     by: signingClosure,
-                    of: currentCryptoType.utilsType,
+                    of: currentCryptoType,
                     using: codingFactory.createEncoder(),
                     metadata: codingFactory.metadata
                 )

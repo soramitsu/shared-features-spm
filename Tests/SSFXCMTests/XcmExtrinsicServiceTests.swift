@@ -21,7 +21,8 @@ final class XcmExtrinsicServiceTests: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        let signingWrapper = TransactionSigner(
+        let signingWrapper = TransactionSignerAssembly.signer(
+            for: .substrate,
             publicKeyData: Data(),
             secretKeyData: Data(),
             cryptoType: .sr25519
@@ -147,7 +148,8 @@ private extension XcmExtrinsicServiceTests {
             signingWrapperData: .init(
                 publicKeyData: Data(),
                 secretKeyData: Data()
-            )
+            ),
+            chainType: .substrate
         )
 
         static let fromChain = ChainModel(
