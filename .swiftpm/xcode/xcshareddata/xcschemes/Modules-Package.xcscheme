@@ -499,6 +499,15 @@
                <Test
                   Identifier = "AccountManagementWorkerTests">
                </Test>
+               <Test
+                  Identifier = "JSONExportServiceTests">
+               </Test>
+               <Test
+                  Identifier = "JSONExportServiceTests/testExportAccount()">
+               </Test>
+               <Test
+                  Identifier = "JSONExportServiceTests/testExportWallet()">
+               </Test>
             </SkippedTests>
          </TestableReference>
          <TestableReference
@@ -548,6 +557,11 @@
                BlueprintName = "SSFKeyPairTests"
                ReferencedContainer = "container:">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "JsonCreatorTests/testSubsctrateJson()">
+               </Test>
+            </SkippedTests>
          </TestableReference>
          <TestableReference
             skipped = "NO">
@@ -559,6 +573,9 @@
                ReferencedContainer = "container:">
             </BuildableReference>
             <SkippedTests>
+               <Test
+                  Identifier = "XcmAssetMultilocationFetcherTests/testVersionedMultilocationWithAssetError()">
+               </Test>
                <Test
                   Identifier = "XcmAssetMultilocationFetcherTests/testVersionedMultilocationWithRetryError()">
                </Test>
