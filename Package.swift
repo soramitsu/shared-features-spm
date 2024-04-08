@@ -51,7 +51,8 @@ let package = Package(
         .package(url: "https://github.com/daisuke-t-jp/xxHash-Swift", from: "1.1.1"),
         .package(url: "https://github.com/SwiftyBeaver/SwiftyBeaver.git", .upToNextMajor(from: "2.0.0")),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.50.4"),
-        .package(url: "https://github.com/bnsports/Web3.swift.git", branch: "master")
+        .package(url: "https://github.com/bnsports/Web3.swift.git", branch: "master"),
+        .package(url: "https://github.com/protocolbuffers/protobuf", from: "3.5.0")
     ],
     targets: [
         .binaryTarget(name: "blake2lib", path: "Binaries/blake2lib.xcframework"),
@@ -136,7 +137,15 @@ let package = Package(
             publicHeadersPath: "include",
             cSettings: [ .headerSearchPath(".") ]
         ),
-        .target(name: "IrohaCommunication"),
+        .target(
+            name: "IrohaCommunication",
+            dependencies: [
+                "IrohaCrypto",
+                .product(name: "Protobuf", package: "protobuf")
+            ],
+            publicHeadersPath: "include",
+            cSettings: [ .headerSearchPath(".") ]
+        ),
         .target(
             name: "SSFCloudStorage",
             dependencies: [

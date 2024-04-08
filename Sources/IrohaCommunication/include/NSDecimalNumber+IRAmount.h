@@ -4,7 +4,7 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "IRAmount.h"
+#import "../Model/Common/IRAmount.h"
 
 @interface NSDecimalNumber (IRAmount)
 
