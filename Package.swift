@@ -28,6 +28,7 @@ let package = Package(
         .library(name: "SSFAccountManagmentStorage", targets: ["SSFAccountManagmentStorage"]),
         .library(name: "SSFAssetManagment", targets: ["SSFAssetManagment"]),
         .library(name: "IrohaCrypto", targets: ["IrohaCrypto"]),
+        .library(name: "IrohaCommunication", targets: ["IrohaCommunication"]),
         .library(name: "keccak", targets: ["keccak"]), //TODO: generate xcframework
         .library(name: "RobinHood", targets: ["RobinHood"]), //TODO: get from github
         .library(name: "SoraKeystore", targets: ["SoraKeystore"]), //TODO: get from github
@@ -135,6 +136,7 @@ let package = Package(
             publicHeadersPath: "include",
             cSettings: [ .headerSearchPath(".") ]
         ),
+        .target(name: "IrohaCommunication"),
         .target(
             name: "SSFCloudStorage",
             dependencies: [
