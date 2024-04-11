@@ -1,16 +1,22 @@
 import Foundation
-import SSFRuntimeCodingService
 import SSFUtils
+import SSFRuntimeCodingService
 
-final class MultipleSingleStorageResponseValueExtractor: MultipleStorageResponseValueExtractor {
-    
+public protocol PrefixResponseValueExtractor {
+    func extractValue<T: Decodable, K: Decodable & ScaleCodable>(request: PrefixRequest, storageResponse: [StorageResponse<T>]) async throws -> [K: T]?
+}
+
+public final class PrefixStorageResponseValueExtractor: PrefixResponseValueExtractor {
     private let runtimeService: RuntimeCodingServiceProtocol
 
     init(runtimeService: RuntimeCodingServiceProtocol) {
         self.runtimeService = runtimeService
     }
-    
-    func extractValue<T, K>(request: MultipleRequest, storageResponse: [StorageResponse<T>]) async throws -> [K : T] where T : Decodable, K : ScaleDecodable, K : ScaleEncodable, K : Decodable, K : Hashable {
+
+    public func extractValue<T, K>(
+        request: PrefixRequest,
+        storageResponse: [StorageResponse<T>]
+    ) async throws -> [K: T]? where T: Decodable, K: Decodable & ScaleCodable {
         var dict: [K: T] = [:]
         let keyExtractor = StorageKeyDataExtractor(runtimeService: runtimeService)
 

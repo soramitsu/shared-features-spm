@@ -4,7 +4,9 @@ import SSFRuntimeCodingService
 import SSFUtils
 
 final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
-    private lazy var storageKeyFactory: StorageKeyFactoryProtocol = StorageKeyFactory()
+    private lazy var storageKeyFactory: StorageKeyFactoryProtocol = {
+        StorageKeyFactory()
+    }()
 
     // MARK: - AsyncStorageRequestFactory
 
@@ -92,7 +94,7 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
 
     func queryItems<T>(
         engine: JSONRPCEngine,
-        keyParams: [[any NMapKeyParamProtocol]],
+        keyParams: [[[any NMapKeyParamProtocol]]],
         factory: RuntimeCoderFactoryProtocol,
         storagePath: any StorageCodingPathProtocol,
         at blockHash: Data?
@@ -150,6 +152,30 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
             keys: keys
         )
         return mergeResult
+    }
+    
+    func queryItemsByPrefix<T>(
+        engine: JSONRPCEngine,
+        keyParams: [any Encodable],
+        factory: RuntimeCoderFactoryProtocol,
+        storagePath: any StorageCodingPathProtocol,
+        at blockHash: Data?
+    ) async throws -> [StorageResponse<T>] where T: Decodable {
+        let keysWorker = MapKeyEncodingWorker(
+            codingFactory: factory,
+            path: storagePath,
+            storageKeyFactory: storageKeyFactory,
+            keyParams: keyParams
+        )
+        let keys = try keysWorker.performEncoding()
+        
+        return try await queryItemsByPrefix(
+            engine: engine,
+            keys: keys,
+            factory: factory,
+            storagePath: storagePath,
+            at: nil
+        )
     }
 
     // MARK: - Private methods
@@ -263,7 +289,7 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
             of: T.self,
             returning: [T].self,
             body: { group in
-                for worker in workers {
+                workers.forEach { worker in
                     group.addTask {
                         try await worker.performCall()
                     }
