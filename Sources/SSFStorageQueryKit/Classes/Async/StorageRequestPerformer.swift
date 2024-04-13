@@ -16,18 +16,18 @@ public protocol StorageRequestPerformer {
         withCacheOptions: CachedStorageRequestTrigger
     ) async -> AsyncThrowingStream<T?, Error>
 
-    func performMultiple<K: Decodable & ScaleCodable & Hashable, T: Decodable>(
+    func performMultiple<K: Decodable & Hashable, T: Decodable>(
         _ request: MultipleRequest
     ) async throws -> [K:T]?
 
-    func performMultiple<K: Decodable & ScaleCodable & Hashable, T: Decodable>(
+    func performMultiple<K: Decodable & Hashable, T: Decodable>(
         _ request: MultipleRequest,
         withCacheOptions: CachedStorageRequestTrigger
     ) async -> AsyncThrowingStream<[K:T]?, Error>
     
-    func performPrefix<T, K>(
+    func performPrefix<K: Decodable & Hashable, T: Decodable>(
         _ request: PrefixRequest
-    ) async throws -> [K: T]? where T: Decodable, K: Decodable & ScaleCodable, K: Hashable
+    ) async throws -> [K: T]?
 }
 
 public final class StorageRequestPerformerDefault: StorageRequestPerformer {
@@ -56,7 +56,7 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
             runtimeItem: nil
         )
         
-        let connection = try chainRegistry.getSubstrateConnection(for: chain)
+        let connection = try await chainRegistry.getSubstrateConnection(for: chain)
         
         let worker = StorageRequestWorkerBuilderDefault<T>().buildWorker(
             runtimeService: runtimeService,
@@ -107,16 +107,16 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
         }
     }
 
-    public func performMultiple<K, T>(
+    public func performMultiple<K: Decodable & Hashable, T: Decodable>(
         _ request: MultipleRequest
-    ) async throws -> [K:T]? where T: Decodable, K: Decodable & ScaleCodable, K: Hashable {
+    ) async throws -> [K:T]? {
         let runtimeService = try await chainRegistry.getRuntimeProvider(
             chainId: chain.chainId,
             usedRuntimePaths: [:],
             runtimeItem: nil
         )
         
-        let connection = try chainRegistry.getSubstrateConnection(for: chain)
+        let connection = try await chainRegistry.getSubstrateConnection(for: chain)
         
         let worker = StorageRequestWorkerBuilderDefault<T>().buildWorker(
             runtimeService: runtimeService,
@@ -140,7 +140,7 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
         return values
     }
 
-    public func performMultiple<K: Decodable & ScaleCodable & Hashable, T: Decodable>(
+    public func performMultiple<K: Decodable & Hashable, T: Decodable>(
         _ request: MultipleRequest,
         withCacheOptions: CachedStorageRequestTrigger
     ) async -> AsyncThrowingStream<[K:T]?, Error>  {
@@ -168,16 +168,16 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
         }
     }
     
-    public func performPrefix<T, K>(
+    public func performPrefix<K: Decodable & Hashable, T: Decodable>(
         _ request: PrefixRequest
-    ) async throws -> [K: T]? where T: Decodable, K: Decodable & ScaleCodable, K: Hashable {
+    ) async throws -> [K: T]? {
         let runtimeService = try await chainRegistry.getRuntimeProvider(
             chainId: chain.chainId,
             usedRuntimePaths: [:],
             runtimeItem: nil
         )
         
-        let connection = try chainRegistry.getSubstrateConnection(for: chain)
+        let connection = try await chainRegistry.getSubstrateConnection(for: chain)
         
         let worker = StorageRequestWorkerBuilderDefault<T>().buildWorker(
             runtimeService: runtimeService,
@@ -211,10 +211,10 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
         continuation.yield(decoded)
     }
 
-    private func getCacheMultipleValue<K, T>(
+    private func getCacheMultipleValue<K: Decodable & Hashable, T: Decodable>(
         for request: MultipleRequest,
         with continuation: AsyncThrowingStream<[K:T]?, Error>.Continuation
-    ) async throws where T: Decodable, K: Decodable & ScaleCodable, K: Hashable {
+    ) async throws {
         guard let runtimeService else {
             return
         }
@@ -303,6 +303,43 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
             }
             
             try await cacheStorage.save(models: objects)
+        }
+    }
+}
+
+
+extension Sequence {
+    func asyncMap<T>(
+        _ transform: (Element) async throws -> T?
+    ) async rethrows -> [T] {
+        var values = [T]()
+
+        for element in self {
+            if let transformed = try await transform(element) {
+                values.append(transformed)
+            }
+        }
+
+        return values
+    }
+
+    func asyncReduce<T>(
+        _ initialResult: T,
+        _ nextPartialResult:
+        (_ partialResult: T, Element) async throws -> T
+    ) async rethrows -> T {
+        var accumulator = initialResult
+        for element in self {
+            accumulator = try await nextPartialResult(accumulator, element)
+        }
+        return accumulator
+    }
+
+    func asyncForEach(
+        _ operation: (Element) async throws -> Void
+    ) async rethrows {
+        for element in self {
+            try await operation(element)
         }
     }
 }

@@ -3,7 +3,10 @@ import SSFUtils
 import SSFRuntimeCodingService
 
 public protocol PrefixResponseValueExtractor {
-    func extractValue<T: Decodable, K: Decodable & ScaleCodable>(request: PrefixRequest, storageResponse: [StorageResponse<T>]) async throws -> [K: T]?
+    func extractValue<K: Decodable, T: Decodable>(
+        request: PrefixRequest,
+        storageResponse: [StorageResponse<T>]
+    ) async throws -> [K: T]?
 }
 
 public final class PrefixStorageResponseValueExtractor: PrefixResponseValueExtractor {
@@ -13,10 +16,10 @@ public final class PrefixStorageResponseValueExtractor: PrefixResponseValueExtra
         self.runtimeService = runtimeService
     }
 
-    public func extractValue<T, K>(
+    public func extractValue<K: Decodable, T: Decodable>(
         request: PrefixRequest,
         storageResponse: [StorageResponse<T>]
-    ) async throws -> [K: T]? where T: Decodable, K: Decodable & ScaleCodable {
+    ) async throws -> [K: T]? {
         var dict: [K: T] = [:]
         let keyExtractor = StorageKeyDataExtractor(runtimeService: runtimeService)
 
