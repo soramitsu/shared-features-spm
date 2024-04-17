@@ -66,9 +66,4 @@ public enum HistoryServiceAssembly {
             throw HistoryError.missingHistoryType(chainId: chainAsset.chain.chainId)
         }
     }
-    
-    private static func createTxRepository() throws -> AsyncAnyRepository<TransactionHistoryItem> {
-        let repository = try IndexersRepositoryAssemblyDefault().createRepository()
-        return AsyncAnyRepository(repository)
-    }
 }

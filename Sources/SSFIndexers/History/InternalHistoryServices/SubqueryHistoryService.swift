@@ -6,7 +6,7 @@ import SSFChainRegistry
 import SSFRuntimeCodingService
 import SSFNetwork
 
-final class SubqueryHistoryService: HistoryService {
+actor SubqueryHistoryService: HistoryService {
     private let txStorage: AsyncAnyRepository<TransactionHistoryItem>
     private let chainRegistry: ChainRegistryProtocol
     private let networkWorker: NetworkWorker

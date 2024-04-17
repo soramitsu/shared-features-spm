@@ -4,7 +4,7 @@ import SSFUtils
 import SSFModels
 import SSFNetwork
 
-final class ReefSubsquidHistoryService: HistoryService {
+actor ReefSubsquidHistoryService: HistoryService {
     private let txStorage: AsyncAnyRepository<TransactionHistoryItem>
     private let networkWorker: NetworkWorker
 

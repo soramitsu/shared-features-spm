@@ -69,7 +69,12 @@ final class OklinkHistoryService: HistoryService {
         let isNormalAsset = asset.ethereumType == .normal
 
         let transactions = remoteTransactions
-            .filter { isNormalAsset ? true : $0.tokenContractAddress.lowercased() == asset.id.lowercased() }
+            .filter {
+                if isNormalAsset {
+                    return true
+                } else {
+                    $0.tokenContractAddress.lowercased() == asset.id.lowercased()
+                }
             .sorted(by: { $0.transactionTime > $1.transactionTime })
             .map {
                 AssetTransactionData.createTransaction(
