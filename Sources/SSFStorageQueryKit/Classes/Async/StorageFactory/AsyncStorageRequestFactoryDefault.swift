@@ -177,10 +177,8 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
             at: nil
         )
     }
-
-    // MARK: - Private methods
-
-    private func queryWorkersResult(
+    
+    func queryWorkersResult(
         for keys: [Data],
         at blockHash: Data?,
         engine: JSONRPCEngine
@@ -210,6 +208,8 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
         let updates = try await runRPCWorkers(workers)
         return updates
     }
+
+    // MARK: - Private methods
 
     private func mergeResult<T>(
         updates: [[StorageUpdate]],

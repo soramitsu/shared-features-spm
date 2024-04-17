@@ -8,32 +8,40 @@ import SSFChainRegistry
 
 public protocol StorageRequestPerformer {
     func performSingle<T: Decodable>(
-        _ request: StorageRequest
+        _ request: StorageRequest,
+        chain: ChainModel
     ) async throws -> T?
 
     func performSingle<T: Decodable>(
         _ request: StorageRequest,
-        withCacheOptions: CachedStorageRequestTrigger
+        withCacheOptions: CachedStorageRequestTrigger,
+        chain: ChainModel
     ) async -> AsyncThrowingStream<T?, Error>
 
     func performMultiple<K: Decodable & Hashable, T: Decodable>(
-        _ request: MultipleRequest
+        _ request: MultipleRequest,
+        chain: ChainModel
     ) async throws -> [K:T]?
 
     func performMultiple<K: Decodable & Hashable, T: Decodable>(
         _ request: MultipleRequest,
-        withCacheOptions: CachedStorageRequestTrigger
+        withCacheOptions: CachedStorageRequestTrigger,
+        chain: ChainModel
     ) async -> AsyncThrowingStream<[K:T]?, Error>
     
     func performPrefix<K: Decodable & Hashable, T: Decodable>(
-        _ request: PrefixRequest
+        _ request: PrefixRequest,
+        chain: ChainModel
     ) async throws -> [K: T]?
+    
+    func perform(
+        _ requests: [any MixStorageRequest],
+        chain: ChainModel
+    ) async throws -> [MixStorageResponse]
 }
 
-public final class StorageRequestPerformerDefault: StorageRequestPerformer {
+public actor StorageRequestPerformerDefault: StorageRequestPerformer {
     private let chainRegistry: ChainRegistryProtocol
-    private let chain: ChainModel
-    private var runtimeService: RuntimeCodingServiceProtocol?
     
     private lazy var storageRequestFactory: AsyncStorageRequestFactory =
         AsyncStorageRequestDefault()
@@ -42,19 +50,19 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
         SingleValueCacheRepositoryFactoryDefault().createAsyncSingleValueCacheRepository()
     }()
 
-    public init(chainRegistry: ChainRegistryProtocol, chain: ChainModel) {
+    public init(chainRegistry: ChainRegistryProtocol) {
         self.chainRegistry = chainRegistry
-        self.chain = chain
     }
 
     // MARK: - StorageRequestPerformer
 
-    public func performSingle<T: Decodable>(_ request: StorageRequest) async throws -> T? {
-        let runtimeService = try await chainRegistry.getRuntimeProvider(
-            chainId: chain.chainId,
-            usedRuntimePaths: [:],
-            runtimeItem: nil
-        )
+    public func performSingle<T: Decodable>(
+        _ request: StorageRequest,
+        chain: ChainModel
+    ) async throws -> T? {
+        guard let runtimeService = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
+            throw RuntimeProviderError.providerUnavailable
+        }
         
         let connection = try await chainRegistry.getSubstrateConnection(for: chain)
         
@@ -81,24 +89,25 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
 
     public func performSingle<T: Decodable>(
         _ request: StorageRequest,
-        withCacheOptions: CachedStorageRequestTrigger
+        withCacheOptions: CachedStorageRequestTrigger,
+        chain: ChainModel
     ) async -> AsyncThrowingStream<T?, Error> {
         AsyncThrowingStream<T?, Error> { continuation in
             Task {
                 if withCacheOptions == .onAll || withCacheOptions.isEmpty {
-                    try await getCacheSingleValue(for: request, with: continuation)
-                    let value: T? = try await performSingle(request)
+                    try await getCacheSingleValue(for: request, with: continuation, chain: chain)
+                    let value: T? = try await performSingle(request, chain: chain)
                     continuation.yield(value)
                     continuation.finish()
                     return
                 }
                 if withCacheOptions.contains(.onCache) {
-                    try await getCacheSingleValue(for: request, with: continuation)
+                    try await getCacheSingleValue(for: request, with: continuation, chain: chain)
                     continuation.finish()
                     return
                 }
                 if withCacheOptions.contains(.onPerform) {
-                    let value: T? = try await performSingle(request)
+                    let value: T? = try await performSingle(request, chain: chain)
                     continuation.yield(value)
                     continuation.finish()
                     return
@@ -108,13 +117,12 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
     }
 
     public func performMultiple<K: Decodable & Hashable, T: Decodable>(
-        _ request: MultipleRequest
+        _ request: MultipleRequest,
+        chain: ChainModel
     ) async throws -> [K:T]? {
-        let runtimeService = try await chainRegistry.getRuntimeProvider(
-            chainId: chain.chainId,
-            usedRuntimePaths: [:],
-            runtimeItem: nil
-        )
+        guard let runtimeService = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
+            throw RuntimeProviderError.providerUnavailable
+        }
         
         let connection = try await chainRegistry.getSubstrateConnection(for: chain)
         
@@ -142,24 +150,25 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
 
     public func performMultiple<K: Decodable & Hashable, T: Decodable>(
         _ request: MultipleRequest,
-        withCacheOptions: CachedStorageRequestTrigger
+        withCacheOptions: CachedStorageRequestTrigger,
+        chain: ChainModel
     ) async -> AsyncThrowingStream<[K:T]?, Error>  {
         AsyncThrowingStream<[K:T]?, Error> { continuation in
             Task {
                 if withCacheOptions == .onAll || withCacheOptions.isEmpty {
-                    try await getCacheMultipleValue(for: request, with: continuation)
-                    let value: [K:T]? = try await performMultiple(request)
+                    try await getCacheMultipleValue(for: request, with: continuation, chain: chain)
+                    let value: [K:T]? = try await performMultiple(request, chain: chain)
                     continuation.yield(value)
                     continuation.finish()
                     return
                 }
                 if withCacheOptions.contains(.onCache) {
-                    try await getCacheMultipleValue(for: request, with: continuation)
+                    try await getCacheMultipleValue(for: request, with: continuation, chain: chain)
                     continuation.finish()
                     return
                 }
                 if withCacheOptions.contains(.onPerform) {
-                    let value: [K:T]? = try await performMultiple(request)
+                    let value: [K:T]? = try await performMultiple(request, chain: chain)
                     continuation.yield(value)
                     continuation.finish()
                     return
@@ -169,13 +178,12 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
     }
     
     public func performPrefix<K: Decodable & Hashable, T: Decodable>(
-        _ request: PrefixRequest
+        _ request: PrefixRequest,
+        chain: ChainModel
     ) async throws -> [K: T]? {
-        let runtimeService = try await chainRegistry.getRuntimeProvider(
-            chainId: chain.chainId,
-            usedRuntimePaths: [:],
-            runtimeItem: nil
-        )
+        guard let runtimeService = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
+            throw RuntimeProviderError.providerUnavailable
+        }
         
         let connection = try await chainRegistry.getSubstrateConnection(for: chain)
         
@@ -194,16 +202,48 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
         let values: [K: T]? = try await valueExtractor.extractValue(request: request, storageResponse: response)
         return values
     }
+    
+    public func perform(
+        _ requests: [any MixStorageRequest],
+        chain: ChainModel
+    ) async throws -> [MixStorageResponse] {
+        guard let runtimeService = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
+            throw RuntimeProviderError.providerUnavailable
+        }
+        
+        let connection = try await chainRegistry.getSubstrateConnection(for: chain)
+        let codingFactory = try await runtimeService.fetchCoderFactory()
+        let keysBuilder = MixStorageRequestsKeysBuilder(codingFactory: codingFactory)
+        let requesrWorker = MixStorageRequestsWorkerDefault(
+            runtimeService: runtimeService,
+            connection: connection,
+            storageRequestFactory: storageRequestFactory
+        )
+        
+        let keys = try keysBuilder.buildKeys(for: requests)
+        let updates = try await requesrWorker.perform(keys: keys)
+        
+        let decodingWorker = MixStorageDecodingListWorker(
+            requests: requests,
+            updates: updates,
+            codingFactory: codingFactory
+        )
+        let responses = try decodingWorker.performDecoding()
+        
+        return responses
+    }
 
     // MARK: - Private methods
 
     private func getCacheSingleValue<T: Decodable>(
         for request: StorageRequest,
-        with continuation: AsyncThrowingStream<T?, Error>.Continuation
+        with continuation: AsyncThrowingStream<T?, Error>.Continuation,
+        chain: ChainModel
     ) async throws {
         let cache: [Data:T]? = try await getCache(
             params: request.parametersType.workerType,
-            storagePath: request.storagePath
+            storagePath: request.storagePath,
+            chain: chain
         )
         guard let decoded = cache?.first?.value else {
             return
@@ -213,16 +253,18 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
 
     private func getCacheMultipleValue<K: Decodable & Hashable, T: Decodable>(
         for request: MultipleRequest,
-        with continuation: AsyncThrowingStream<[K:T]?, Error>.Continuation
+        with continuation: AsyncThrowingStream<[K:T]?, Error>.Continuation,
+        chain: ChainModel
     ) async throws {
-        guard let runtimeService else {
-            return
+        guard let runtimeService = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
+            throw RuntimeProviderError.providerUnavailable
         }
         let keyExtractor = StorageKeyDataExtractor(runtimeService: runtimeService)
 
         let cache: [Data:T]? = try await getCache(
             params: request.parametersType.workerType,
-            storagePath: request.storagePath
+            storagePath: request.storagePath,
+            chain: chain
         )
         guard let cache = cache else {
             return
@@ -238,13 +280,12 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
     
     private func getCache<T: Decodable>(
         params: StorageRequestWorkerType,
-        storagePath: any StorageCodingPathProtocol
+        storagePath: any StorageCodingPathProtocol,
+        chain: ChainModel
     ) async throws -> [Data:T]? {
-        let runtimeService = try await chainRegistry.getRuntimeProvider(
-            chainId: chain.chainId,
-            usedRuntimePaths: [:],
-            runtimeItem: nil
-        )
+        guard let runtimeService = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
+            throw RuntimeProviderError.providerUnavailable
+        }
         let codingFactory = try await runtimeService.fetchCoderFactory()
         let keysEncoder = StorageRequestKeyEncodingWorkerFactoryDefault().buildFactory(
             storageCodingPath: storagePath,
@@ -302,7 +343,7 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
                 return SingleValueProviderObject(identifier: $0.key.toHex(), payload: data)
             }
             
-            try await cacheStorage.save(models: objects)
+            await cacheStorage.save(models: objects)
         }
     }
 }
