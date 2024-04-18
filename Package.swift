@@ -232,7 +232,8 @@ let package = Package(
                 "SSFCrypto",
                 "SSFChainConnection",
                 "SSFUtils",
-                "SSFSingleValueCache"
+                "SSFSingleValueCache",
+                "SSFChainRegistry"
             ]
         ),
         .testTarget(
