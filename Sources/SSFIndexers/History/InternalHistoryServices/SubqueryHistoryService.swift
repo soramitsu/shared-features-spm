@@ -49,26 +49,19 @@ actor SubqueryHistoryService: HistoryService {
             filters: filters
         )
         
-        var localHistory: [TransactionHistoryItem] = []
-        if pagination.context == nil {
-            localHistory = try await txStorage.fetchAll()
-        }
-
-        let mergeResult = try await merge(
-            remote: remoteHistory,
-            local: localHistory,
-            chainAsset: chainAsset,
-            address: address
+        let filteredTransactions = try await filter(
+            remoteTransactions: remoteTransactions,
+            chainAsset: chainAsset
         )
-
-        if pagination.context == nil {
-            Task {
-                await txStorage.remove(ids: mergeResult.identifiersToRemove)
-            }
+        let transactions: [AssetTransactionData] = filteredTransactions.map { item in
+            item.createTransactionForAddress(
+                address,
+                chainAsset: chainAsset
+            )
         }
-
+        
         let result = await AssetTransactionPageData(
-            transactions: mergeResult.historyItems,
+            transactions: transactions,
             context: try remoteHistory.historyElements.pageInfo.toContext()
         )
         return result
@@ -156,42 +149,6 @@ actor SubqueryHistoryService: HistoryService {
              }
         }
         """
-    }
-
-    private func merge(
-        remote: SubqueryHistoryData,
-        local: [TransactionHistoryItem],
-        chainAsset: ChainAsset,
-        address: String
-    ) async throws -> TransactionHistoryMergeResult {
-        let remoteTransactions = remote.historyElements.nodes
-        
-        if local.isEmpty {
-            let filteredTransactions = try await filter(
-                remoteTransactions: remoteTransactions,
-                chainAsset: chainAsset
-            )
-            let transactions: [AssetTransactionData] = filteredTransactions.map { item in
-                item.createTransactionForAddress(
-                    address,
-                    chainAsset: chainAsset
-                )
-            }
-            
-            return TransactionHistoryMergeResult(
-                historyItems: transactions,
-                identifiersToRemove: []
-            )
-        } else {
-            let manager = TransactionHistoryMergeManager(
-                address: address,
-                chainAsset: chainAsset
-            )
-            return manager.merge(
-                subscanItems: remoteTransactions,
-                localItems: local
-            )
-        }
     }
     
     private func filter(

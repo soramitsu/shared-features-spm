@@ -51,21 +51,40 @@ class SoraSubsquidHistoryService: HistoryService {
             localHistory = try await txStorage.fetchAll()
         }
 
-        let merge = try await createSubqueryHistoryMerge(
-            remote: remoteHistory,
-            local: localHistory,
-            chainAsset: chainAsset,
-            address: address
-        )
-
-        if pagination.context == nil {
-            Task {
-                await txStorage.remove(ids: merge.identifiersToRemove)
+        let filteredTransactions = remoteTransactions
+            .filter { transaction in
+                if chainAsset.asset.symbol.lowercased() == "val", transaction.method?.rawValue == "rewarded" {
+                    return true
+                }
+                
+                if chainAsset.asset.isUtility, transaction.module?.rawValue == "staking", transaction.method?.rawValue != "rewarded" {
+                    return true
+                }
+                
+                if let targetAssetId = transaction.data?.targetAssetId, targetAssetId == chainAsset.asset.currencyId {
+                    return true
+                }
+                
+                if let baseAssetId = transaction.data?.baseAssetId, baseAssetId == chainAsset.asset.currencyId {
+                    return true
+                }
+                
+                if let assetId = transaction.data?.assetId, assetId == chainAsset.asset.currencyId {
+                    return true
+                }
+                
+                return false
             }
+        
+        let transactions: [AssetTransactionData] = filteredTransactions.map { item in
+            item.createTransactionForAddress(
+                address,
+                chainAsset: chainAsset
+            )
         }
 
         return try await AssetTransactionPageData(
-            transactions: merge.historyItems,
+            transactions: transactions,
             context: remoteHistory.historyElementsConnection.pageInfo?.toPaginationContext()
         )
     }
@@ -132,62 +151,5 @@ class SoraSubsquidHistoryService: HistoryService {
             filter: filter,
             count: count
         )
-    }
-
-    private func createSubqueryHistoryMerge(
-        remote: SoraSubsquidHistoryConnectionResponse,
-        local: [TransactionHistoryItem],
-        chainAsset: ChainAsset,
-        address: String
-    ) -> TransactionHistoryMergeResult {
-        let remoteTransactions = remote.historyElementsConnection.edges.map { $0.node }
-
-        if local.isEmpty {
-            let filteredTransactions = remoteTransactions
-                .filter { transaction in
-                    if chainAsset.asset.symbol.lowercased() == "val", transaction.method?.rawValue == "rewarded" {
-                        return true
-                    }
-                    
-                    if chainAsset.asset.isUtility, transaction.module?.rawValue == "staking", transaction.method?.rawValue != "rewarded" {
-                        return true
-                    }
-                    
-                    if let targetAssetId = transaction.data?.targetAssetId, targetAssetId == chainAsset.asset.currencyId {
-                        return true
-                    }
-                    
-                    if let baseAssetId = transaction.data?.baseAssetId, baseAssetId == chainAsset.asset.currencyId {
-                        return true
-                    }
-                    
-                    if let assetId = transaction.data?.assetId, assetId == chainAsset.asset.currencyId {
-                        return true
-                    }
-                    
-                    return false
-                }
-            
-            let transactions: [AssetTransactionData] = filteredTransactions.map { item in
-                item.createTransactionForAddress(
-                    address,
-                    chainAsset: chainAsset
-                )
-            }
-            
-            return TransactionHistoryMergeResult(
-                historyItems: transactions,
-                identifiersToRemove: []
-            )
-        } else {
-            let manager = TransactionHistoryMergeManager(
-                address: address,
-                chainAsset: chainAsset
-            )
-            return manager.merge(
-                subscanItems: remoteTransactions,
-                localItems: local
-            )
-        }
     }
 }

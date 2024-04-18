@@ -44,26 +44,19 @@ final class SubsquidHistoryService: HistoryService {
             filters: filters
         )
         
-        var localHistory: [TransactionHistoryItem] = []
-        if pagination.context == nil {
-            localHistory = try await txStorage.fetchAll()
+        let filteredTransactions = remoteHistory.historyElements.sorted { element1, element2 in
+            element2.timestampInSeconds < element1.timestampInSeconds
         }
         
-        let merge = try await createSubqueryHistoryMerge(
-            remoteHistory: remoteHistory,
-            localHistory: localHistory,
-            chainAsset: chainAsset,
-            address: address
-        )
-        
-        if pagination.context == nil {
-            Task {
-                await txStorage.remove(ids: merge.identifiersToRemove)
-            }
+        let transactions: [AssetTransactionData] = filteredTransactions.map { item in
+            item.createTransactionForAddress(
+                address,
+                chainAsset: chainAsset
+            )
         }
         
         let map = createSubqueryHistoryMap(
-            merge: merge,
+            transactions: transactions,
             pagination: pagination
         )
         return map
@@ -159,47 +152,14 @@ final class SubsquidHistoryService: HistoryService {
         """
     }
 
-    private func createSubqueryHistoryMerge(
-        remoteHistory: SubsquidHistoryResponse,
-        localHistory: [TransactionHistoryItem],
-        chainAsset: ChainAsset,
-        address: String
-    ) throws -> TransactionHistoryMergeResult {
-        if localHistory.isEmpty {
-            let filteredTransactions = remoteHistory.historyElements.sorted { element1, element2 in
-                element2.timestampInSeconds < element1.timestampInSeconds
-            }
-            
-            let transactions: [AssetTransactionData] = filteredTransactions.map { item in
-                item.createTransactionForAddress(
-                    address,
-                    chainAsset: chainAsset
-                )
-            }
-            return TransactionHistoryMergeResult(
-                historyItems: transactions,
-                identifiersToRemove: []
-            )
-        } else {
-            let manager = TransactionHistoryMergeManager(
-                address: address,
-                chainAsset: chainAsset
-            )
-            return manager.merge(
-                subscanItems: remoteHistory.historyElements,
-                localItems: localHistory
-            )
-        }
-    }
-
     private func createSubqueryHistoryMap(
-        merge: TransactionHistoryMergeResult,
+        transactions: [AssetTransactionData],
         pagination: Pagination
     ) -> AssetTransactionPageData? {
         let context = pagination.context
         let endCursor = context.map { (Int($0["endCursor"] ?? "0") ?? 0) + pagination.count } ?? pagination.count
         return AssetTransactionPageData(
-            transactions: merge.historyItems,
+            transactions: transactions,
             context: ["endCursor": "\(endCursor)"]
         )
     }

@@ -48,26 +48,15 @@ final class GiantsquidHistoryService: HistoryService {
             filters: filters
         )
         
-        var localHistory: [TransactionHistoryItem] = []
-        if pagination.context == nil {
-            localHistory = try await txStorage.fetchAll()
-        }
-        
-        let merge = try await createSubqueryHistoryMerge(
-            remoteHistory: remoteHistory,
-            localHistory: localHistory,
-            chainAsset: chainAsset,
-            address: address
-        )
-        
-        if pagination.context == nil {
-            Task {
-                await txStorage.remove(ids: merge.identifiersToRemove)
-            }
+        let transactions: [AssetTransactionData] = remoteHistory.history.map { item in
+            item.createTransactionForAddress(
+                address,
+                chainAsset: chainAsset
+            )
         }
         
         return AssetTransactionPageData(
-            transactions: merge.historyItems,
+            transactions: transactions,
             context: nil
         )
     }
@@ -126,35 +115,5 @@ final class GiantsquidHistoryService: HistoryService {
     ) -> String {
         let filterString = prepareFilter(filters: filters, address: address)
         return GiantsquidHistoryServiceFilter.query(with: filterString)
-    }
-
-    private func createSubqueryHistoryMerge(
-        remoteHistory: GiantsquidResponseData,
-        localHistory: [TransactionHistoryItem],
-        chainAsset: ChainAsset,
-        address: String
-    ) -> TransactionHistoryMergeResult {
-        if localHistory.isEmpty {
-            let transactions: [AssetTransactionData] = remoteHistory.history.map { item in
-                item.createTransactionForAddress(
-                    address,
-                    chainAsset: chainAsset
-                )
-            }
-            
-            return TransactionHistoryMergeResult(
-                historyItems: transactions,
-                identifiersToRemove: []
-            )
-        } else {
-            let manager = TransactionHistoryMergeManager(
-                address: address,
-                chainAsset: chainAsset
-            )
-            return manager.merge(
-                subscanItems: remoteHistory.history,
-                localItems: localHistory
-            )
-        }
     }
 }
