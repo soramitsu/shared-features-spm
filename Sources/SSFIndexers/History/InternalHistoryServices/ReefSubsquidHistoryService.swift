@@ -37,7 +37,7 @@ actor ReefSubsquidHistoryService: HistoryService {
             return nil
         }
         
-        async let subqueryHistory = try await fetchHistory(
+        async let remoteHistory = try await fetchHistory(
             address: address,
             url: baseUrl,
             filters: filters,
@@ -46,18 +46,27 @@ actor ReefSubsquidHistoryService: HistoryService {
             stakingsCursor: pagination.context?["stakingsCursor"]
         )
 
-        let subqueryTransactions: [AssetTransactionData] = subqueryHistory.history.sorted(by: { item1, item2 in
-            item1.itemTimestamp > item2.itemTimestamp
-        }).map { item in
-            item.createTransactionForAddress(
-                address,
-                chainAsset: chainAsset
-            )
+        var localHistory: [TransactionHistoryItem] = []
+        if pagination.context == nil {
+            localHistory = try await txStorage.fetchAll()
+        }
+
+        let merge = try await createSubqueryHistoryMerge(
+            remote: remoteHistory,
+            local: localHistory,
+            chainAsset: chainAsset,
+            address: address
+        )
+
+        if pagination.context == nil {
+            Task {
+                await txStorage.remove(ids: merge.identifiersToRemove)
+            }
         }
 
         let map = try await createHistoryMap(
-            subqueryItems: subqueryTransactions,
-            reef: remoteHistory
+            merge: merge,
+            remote: remoteHistory
         )
         return map
     }
@@ -140,32 +149,66 @@ actor ReefSubsquidHistoryService: HistoryService {
         return ReefSubsquidHistoryServiceFilters.query(with: filterString)
     }
 
+    private func createSubqueryHistoryMerge(
+        remote: ReefResponseData,
+        local: [TransactionHistoryItem],
+        chainAsset: ChainAsset,
+        address: String
+    ) -> TransactionHistoryMergeResult {
+        let remoteTransactions: [WalletRemoteHistoryItemProtocol] = remote.history
+        
+        if local.isEmpty {
+            let transactions: [AssetTransactionData] = remoteTransactions.sorted(by: { item1, item2 in
+                item1.itemTimestamp > item2.itemTimestamp
+            }).map { item in
+                item.createTransactionForAddress(
+                    address,
+                    chainAsset: chainAsset
+                )
+            }
+            
+            return TransactionHistoryMergeResult(
+                historyItems: transactions,
+                identifiersToRemove: []
+            )
+        }
+
+        let manager = TransactionHistoryMergeManager(
+            address: address,
+            chainAsset: chainAsset
+        )
+        return manager.merge(
+            subscanItems: remoteTransactions,
+            localItems: local
+        )
+    }
+
     private func createHistoryMap(
-        subqueryItems: [AssetTransactionData],
-        reefData: ReefResponseData
+        merge: TransactionHistoryMergeResult,
+        remote: ReefResponseData
     ) -> AssetTransactionPageData {
-        let isTransfersHasNextPage = (reefData.transfersConnection?.pageInfo?.hasNextPage).or(false)
-        let isStakingHasNextPage = (reefData.stakingsConnection?.pageInfo?.hasNextPage).or(false)
+        let isTransfersHasNextPage = (remote.transfersConnection?.pageInfo?.hasNextPage).or(false)
+        let isStakingHasNextPage = (remote.stakingsConnection?.pageInfo?.hasNextPage).or(false)
         let hasNextPage = isTransfersHasNextPage || isStakingHasNextPage
         
         guard hasNextPage else {
             return AssetTransactionPageData(
-                transactions: subqueryItems,
+                transactions: merge.historyItems,
                 context: nil
             )
         }
         
         var context: [String: String] = [:]
-        if let transfersCursor = reefData.transfersConnection?.pageInfo?.endCursor {
+        if let transfersCursor = remote.transfersConnection?.pageInfo?.endCursor {
             context["transfersCursor"] = transfersCursor
         }
         
-        if let stakingsCursor = reefData.stakingsConnection?.pageInfo?.endCursor {
+        if let stakingsCursor = remote.stakingsConnection?.pageInfo?.endCursor {
             context["stakingsCursor"] = stakingsCursor
         }
 
         return AssetTransactionPageData(
-            transactions: subqueryItems,
+            transactions: merge.historyItems,
             context: context
         )
     }
