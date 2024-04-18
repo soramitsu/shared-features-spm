@@ -9,7 +9,7 @@ public enum HistoryError: Error {
     case missingHistoryType(chainId: ChainModel.Id)
 }
 
-public protocol HistoryService {
+public protocol HistoryService: Actor {
     func fetchTransactionHistory(
         chainAsset: ChainAsset,
         address: String,
@@ -22,48 +22,41 @@ public enum HistoryServiceAssembly {
     public static func createService(
         for chainAsset: ChainAsset
     ) async throws -> HistoryService {
-        let networkWorker = NetworkWorkerDefault()
+        let factory = HistoryServicesFactory()
         switch chainAsset.chain.externalApi?.history?.type {
         case .subquery:
-            let chainRegistry = ChainRegistryAssembly.createDefaultRegistry()
             let txStorage = try Self.createTxRepository()
-            return SubqueryHistoryService(
+            return try factory.createSubqueryService(
                 txStorage: txStorage,
-                chainRegistry: chainRegistry,
-                networkWorker: networkWorker
+                chainRegistry: ChainRegistryAssembly.createDefaultRegistry()
             )
         case .subsquid:
             let txStorage = try Self.createTxRepository()
-            return SubsquidHistoryService(
-                txStorage: txStorage,
-                networkWorker: networkWorker
-            )
+            return try factory.createSubsquidService(txStorage: txStorage)
         case .giantsquid:
             let txStorage = try Self.createTxRepository()
-            return GiantsquidHistoryService(
-                txStorage: txStorage,
-                networkWorker: networkWorker
-            )
+            return try factory.createGiantsquidService(txStorage: txStorage)
         case .sora:
             let txStorage = try Self.createTxRepository()
-            return SoraSubsquidHistoryService(
-                txStorage: txStorage,
-                networkWorker: networkWorker
-            )
+            return try factory.createSoraService(txStorage: txStorage)
         case .etherscan:
-            return EtherscanHistoryService(networkWorker: networkWorker)
+            return try factory.createEtherscanService()
         case .oklink:
-            return OklinkHistoryService(networkWorker: networkWorker)
+            return try factory.createOklinkService()
         case .reef:
             let txStorage = try Self.createTxRepository()
-            return ReefSubsquidHistoryService(
-                txStorage: txStorage,
-                networkWorker: networkWorker
-            )
+            return try factory.createReefService(txStorage: txStorage)
         case .zeta:
-            return ZetaHistoryService(networkWorker: networkWorker)
+            return try factory.createZetaService()
         case .none:
             throw HistoryError.missingHistoryType(chainId: chainAsset.chain.chainId)
         }
+    }
+}
+
+private extension HistoryServiceAssembly {
+    private static func createTxRepository() throws -> AsyncAnyRepository<TransactionHistoryItem> {
+        let repository = try IndexersRepositoryAssemblyDefault().createRepository()
+        return AsyncAnyRepository(repository)
     }
 }
