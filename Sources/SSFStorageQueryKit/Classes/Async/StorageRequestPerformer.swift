@@ -28,12 +28,16 @@ public protocol StorageRequestPerformer {
     func performPrefix<T, K>(
         _ request: PrefixRequest
     ) async throws -> [K: T]? where T: Decodable, K: Decodable & ScaleCodable, K: Hashable
+    
+    func performPrefix<K: Decodable & ScaleCodable & Hashable, T: Decodable>(
+        _ request: PrefixRequest,
+        withCacheOptions: CachedStorageRequestTrigger
+    ) async -> AsyncThrowingStream<[K:T]?, Error>
 }
 
 public final class StorageRequestPerformerDefault: StorageRequestPerformer {
     private let chainRegistry: ChainRegistryProtocol
     private let chain: ChainModel
-    private var runtimeService: RuntimeCodingServiceProtocol?
     
     private lazy var storageRequestFactory: AsyncStorageRequestFactory =
         AsyncStorageRequestDefault()
@@ -46,16 +50,23 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
         self.chainRegistry = chainRegistry
         self.chain = chain
     }
-
-    // MARK: - StorageRequestPerformer
-
-    public func performSingle<T: Decodable>(_ request: StorageRequest) async throws -> T? {
-        let runtimeService = try await chainRegistry.getRuntimeProvider(
+    
+    private func getRuntimeProvider() async throws -> RuntimeCodingServiceProtocol {
+        if let runtimeService = chainRegistry.getRuntimeProvider(for: chain.chainId) {
+            return runtimeService
+        }
+        
+        return try await chainRegistry.getRuntimeProvider(
             chainId: chain.chainId,
             usedRuntimePaths: [:],
             runtimeItem: nil
         )
-        
+    }
+
+    // MARK: - StorageRequestPerformer
+
+    public func performSingle<T: Decodable>(_ request: StorageRequest) async throws -> T? {
+        let runtimeService = try await getRuntimeProvider()
         let connection = try chainRegistry.getSubstrateConnection(for: chain)
         
         let worker = StorageRequestWorkerBuilderDefault<T>().buildWorker(
@@ -110,12 +121,8 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
     public func performMultiple<K, T>(
         _ request: MultipleRequest
     ) async throws -> [K:T]? where T: Decodable, K: Decodable & ScaleCodable, K: Hashable {
-        let runtimeService = try await chainRegistry.getRuntimeProvider(
-            chainId: chain.chainId,
-            usedRuntimePaths: [:],
-            runtimeItem: nil
-        )
-        
+        let runtimeService = try await getRuntimeProvider()
+
         let connection = try chainRegistry.getSubstrateConnection(for: chain)
         
         let worker = StorageRequestWorkerBuilderDefault<T>().buildWorker(
@@ -171,12 +178,8 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
     public func performPrefix<T, K>(
         _ request: PrefixRequest
     ) async throws -> [K: T]? where T: Decodable, K: Decodable & ScaleCodable, K: Hashable {
-        let runtimeService = try await chainRegistry.getRuntimeProvider(
-            chainId: chain.chainId,
-            usedRuntimePaths: [:],
-            runtimeItem: nil
-        )
-        
+        let runtimeService = try await getRuntimeProvider()
+
         let connection = try chainRegistry.getSubstrateConnection(for: chain)
         
         let worker = StorageRequestWorkerBuilderDefault<T>().buildWorker(
@@ -192,8 +195,43 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
             storagePath: request.storagePath
         )
         let values: [K: T]? = try await valueExtractor.extractValue(request: request, storageResponse: response)
+        save(
+            response: response,
+            params: request.parametersType.workerType,
+            storagePath: request.storagePath
+        )
+
         return values
     }
+    
+    public func performPrefix<K: Decodable & ScaleCodable & Hashable, T: Decodable>(
+        _ request: PrefixRequest,
+        withCacheOptions: CachedStorageRequestTrigger
+    ) async -> AsyncThrowingStream<[K:T]?, Error>  {
+        return AsyncThrowingStream<[K:T]?, Error> { continuation in
+            Task {
+                if withCacheOptions == .onAll || withCacheOptions.isEmpty {
+                    try await getCachePagedValue(for: request, with: continuation)
+                    let value: [K:T]? = try await performPrefix(request)
+                    continuation.yield(value)
+                    continuation.finish()
+                    return
+                }
+                if withCacheOptions.contains(.onCache) {
+                    try await getCachePagedValue(for: request, with: continuation)
+                    continuation.finish()
+                    return
+                }
+                if withCacheOptions.contains(.onPerform) {
+                    let value: [K:T]? = try await performPrefix(request)
+                    continuation.yield(value)
+                    continuation.finish()
+                    return
+                }
+            }
+        }
+    }
+    
 
     // MARK: - Private methods
 
@@ -215,9 +253,7 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
         for request: MultipleRequest,
         with continuation: AsyncThrowingStream<[K:T]?, Error>.Continuation
     ) async throws where T: Decodable, K: Decodable & ScaleCodable, K: Hashable {
-        guard let runtimeService else {
-            return
-        }
+        let runtimeService = try await getRuntimeProvider()
         let keyExtractor = StorageKeyDataExtractor(runtimeService: runtimeService)
 
         let cache: [Data:T]? = try await getCache(
@@ -229,10 +265,46 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
         }
         
         let resultArray: [[K:T]] = try await cache.asyncCompactMap {
-            let key: K = try await keyExtractor.extractKey(storageKey: $0.key, storagePath: request.storagePath, type: request.keyType)
+            let key: K = try await keyExtractor.extractKey(
+                storageKey: $0.key,
+                storagePath: request.storagePath,
+                type: request.keyType
+            )
             return [key: $0.value]
         }
         let result = Dictionary(resultArray.flatMap { $0 }, uniquingKeysWith: { _, last in last })
+        continuation.yield(result)
+    }
+    
+    private func getCachePagedValue<K, T>(
+        for request: PrefixRequest,
+        with continuation: AsyncThrowingStream<[K:T]?, Error>.Continuation
+    ) async throws where T: Decodable, K: Decodable & ScaleCodable, K: Hashable {
+        let runtimeService = try await chainRegistry.getRuntimeProvider(
+            chainId: chain.chainId,
+            usedRuntimePaths: [:],
+            runtimeItem: nil
+        )
+        let keyExtractor = StorageKeyDataExtractor(runtimeService: runtimeService)
+        
+        let cache: [Data:T]? = try await getCache(
+            params: request.parametersType.workerType,
+            storagePath: request.storagePath
+        )
+        guard let cache = cache else {
+            return
+        }
+        
+        let resultArray: [[K:T]] = try await cache.asyncCompactMap {
+            let key: K = try await keyExtractor.extractKey(
+                storageKey: $0.key,
+                storagePath: request.storagePath,
+                type: request.keyType
+            )
+            return [key: $0.value]
+        }
+        let result = Dictionary(resultArray.flatMap { $0 }, uniquingKeysWith: { _, last in last })
+        
         continuation.yield(result)
     }
     
@@ -254,17 +326,16 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
         )
         let keys = try keysEncoder.performEncoding()
         let cache = try await cacheStorage.fetch(by: keys.compactMap { $0.toHex() }, options: RepositoryFetchOptions())
-        
 
-        let caches = try cache.compactMap {
-            let item: [Data:T]? = try decode(
+         let caches = cache.compactMap {
+            let item: [Data:T]? = try? decode(
                 object: $0,
                 codingFactory: codingFactory,
                 path: storagePath
             )
             return item
         }
-    
+            
         return Dictionary(caches.flatMap { $0 }, uniquingKeysWith: { _, last in last })
     }
 
@@ -273,11 +344,10 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
         codingFactory: RuntimeCoderFactoryProtocol,
         path: any StorageCodingPathProtocol
     ) throws -> [Data:T]? {
-        let data = try JSONDecoder().decode(Data.self, from: object.payload)
         let decoder = StorageFallbackDecodingListWorker<T>(
             codingFactory: codingFactory,
             path: path,
-            dataList: [data]
+            dataList: [object.payload]
         )
         guard let value = try decoder.performDecoding().compactMap({ $0 }).first else {
             return nil

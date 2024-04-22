@@ -10,6 +10,7 @@ public enum MapKeyType: String {
     case accountId = "AccountId"
     case assetIds
     case accountPoolsKey
+    case poolProvidersKey
 
     var bytesCount: Int {
         switch self {
@@ -31,6 +32,8 @@ public enum MapKeyType: String {
             return 32
         case .accountPoolsKey:
             return 32
+        case .poolProvidersKey:
+            return 32
         }
     }
     
@@ -51,6 +54,12 @@ public enum MapKeyType: String {
             let parameterLength = bytesCount * bytesPerHexSymbol
             let assetId = String(storageResponseKey.suffix(parameterLength))
             let accountId = String(storageResponseKey.suffix(parameterLength * 2 + hasherBytes)).prefix(parameterLength)
+
+            return accountId + assetId
+        case .poolProvidersKey:
+            let parameterLength = bytesCount * bytesPerHexSymbol
+            let assetId = String(storageResponseKey.suffix(parameterLength))
+            let accountId = String(storageResponseKey.suffix(parameterLength * 2)).prefix(parameterLength)
 
             return accountId + assetId
         }

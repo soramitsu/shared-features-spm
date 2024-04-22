@@ -11,7 +11,7 @@ protocol StorageRequestWorkerBuilder {
     ) -> StorageRequestWorker
 }
 
-enum StorageRequestWorkerType {
+public enum StorageRequestWorkerType {
     case nMap(params: [[[any NMapKeyParamProtocol]]])
     case encodable(params: [any Encodable])
     case simple
