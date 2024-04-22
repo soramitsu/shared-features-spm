@@ -259,6 +259,10 @@ extension WebSocketEngine {
 
         return notifiableRequests
     }
+    
+    func resetPendings() {
+        pendingRequests = []
+    }
 
     func rescheduleActiveSubscriptions() {
         let activeSubscriptions = subscriptions.compactMap {

@@ -10,7 +10,10 @@ final class MultipleSingleStorageResponseValueExtractor: MultipleStorageResponse
         self.runtimeService = runtimeService
     }
     
-    func extractValue<T, K>(request: MultipleRequest, storageResponse: [StorageResponse<T>]) async throws -> [K : T] where T : Decodable, K : ScaleDecodable, K : ScaleEncodable, K : Decodable, K : Hashable {
+    func extractValue<K, T>(
+        request: MultipleRequest,
+        storageResponse: [StorageResponse<T>]
+    ) async throws -> [K : T] where K : Decodable & Hashable, T : Decodable {
         var dict: [K: T] = [:]
         let keyExtractor = StorageKeyDataExtractor(runtimeService: runtimeService)
         

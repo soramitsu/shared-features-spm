@@ -14,7 +14,7 @@ final class StorageKeyDataExtractor {
         self.runtimeService = runtimeService
     }
 
-    func extractKey<T: Decodable & ScaleCodable>(
+    func extractKey<T: Decodable>(
         storageKey: Data,
         storagePath: any StorageCodingPathProtocol,
         type: MapKeyType
