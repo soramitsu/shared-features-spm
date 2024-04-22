@@ -23,7 +23,7 @@ public protocol StorageRequestPerformer {
         chain: ChainModel
     ) async throws -> [K:T]?
 
-    func performMultiple<K: Decodable & Hashable, T: Decodable>(
+    func performMultiple<K: Decodable & ScaleCodable & Hashable, T: Decodable>(
         _ request: MultipleRequest,
         withCacheOptions: CachedStorageRequestTrigger,
         chain: ChainModel
@@ -31,7 +31,8 @@ public protocol StorageRequestPerformer {
     
     func performPrefix<K: Decodable & ScaleCodable & Hashable, T: Decodable>(
         _ request: PrefixRequest,
-        withCacheOptions: CachedStorageRequestTrigger
+        withCacheOptions: CachedStorageRequestTrigger,
+        chain: ChainModel
     ) async -> AsyncThrowingStream<[K:T]?, Error>
 
     func performPrefix<K: Decodable & Hashable, T: Decodable>(
@@ -153,7 +154,7 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         return values
     }
 
-    public func performMultiple<K: Decodable & Hashable, T: Decodable>(
+    public func performMultiple<K: Decodable & ScaleCodable & Hashable, T: Decodable>(
         _ request: MultipleRequest,
         withCacheOptions: CachedStorageRequestTrigger,
         chain: ChainModel
@@ -217,24 +218,25 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
     
     public func performPrefix<K: Decodable & ScaleCodable & Hashable, T: Decodable>(
         _ request: PrefixRequest,
-        withCacheOptions: CachedStorageRequestTrigger
+        withCacheOptions: CachedStorageRequestTrigger,
+        chain: ChainModel
     ) async -> AsyncThrowingStream<[K:T]?, Error>  {
         return AsyncThrowingStream<[K:T]?, Error> { continuation in
             Task {
                 if withCacheOptions == .onAll || withCacheOptions.isEmpty {
-                    try await getCachePagedValue(for: request, with: continuation)
-                    let value: [K:T]? = try await performPrefix(request)
+                    try await getCachePagedValue(for: request, with: continuation, chain: chain)
+                    let value: [K:T]? = try await performPrefix(request, chain: chain)
                     continuation.yield(value)
                     continuation.finish()
                     return
                 }
                 if withCacheOptions.contains(.onCache) {
-                    try await getCachePagedValue(for: request, with: continuation)
+                    try await getCachePagedValue(for: request, with: continuation, chain: chain)
                     continuation.finish()
                     return
                 }
                 if withCacheOptions.contains(.onPerform) {
-                    let value: [K:T]? = try await performPrefix(request)
+                    let value: [K:T]? = try await performPrefix(request, chain: chain)
                     continuation.yield(value)
                     continuation.finish()
                     return
@@ -303,7 +305,8 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
 
         let cache: [Data:T]? = try await getCache(
             params: request.parametersType.workerType,
-            storagePath: request.storagePath
+            storagePath: request.storagePath,
+            chain: chain
         )
         guard let cache = cache else {
             return
@@ -323,7 +326,8 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
     
     private func getCachePagedValue<K, T>(
         for request: PrefixRequest,
-        with continuation: AsyncThrowingStream<[K:T]?, Error>.Continuation
+        with continuation: AsyncThrowingStream<[K:T]?, Error>.Continuation,
+        chain: ChainModel
     ) async throws where T: Decodable, K: Decodable & ScaleCodable, K: Hashable {
         let runtimeService = try await chainRegistry.getRuntimeProvider(
             chainId: chain.chainId,
