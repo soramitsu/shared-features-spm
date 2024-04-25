@@ -1,2 +1,2 @@
 init:
-	git config core.hooksPath .githooks
+	sh scripts/run_init.sh
