@@ -37,7 +37,8 @@ let package = Package(
                     "."
                 ],
                 cSettings: [
-                    .headerSearchPath("./include")
+                    .headerSearchPath("./include"),
+                    
                 ]),
         .target(name: "RobinHood"),
         .target(name: "keccak"),
@@ -251,7 +252,8 @@ let package = Package(
                 "SSFXCM"
             ]
         )
-    ]
+    ],
+    cLanguageStandard: .gnu11
 )
 
 
