@@ -48,6 +48,11 @@ static const NSUInteger BLOCK_SIZE = 8;
                                length);
     
     #else
+    NSLog(@"OLOLO password %@ %@ %@", password, password.bytes, password.length);
+    NSLog(@"OLOLO salt %@ %@ %@", salt, salt.bytes, salt.length);
+    NSLog(@"OLOLO scryptN %@", scryptN);
+    NSLog(@"OLOLO salt %@", scryptR);
+    NSLog(@"OLOLO salt %@", scryptP);
     int status = crypto_scrypt((uint8_t*)(password.bytes),
                                password.length,
                                (uint8_t*)(salt.bytes),
