@@ -48,7 +48,7 @@ static const NSUInteger BLOCK_SIZE = 8;
                                length);
     
     #else
-    NSLog(@"OLOLO password %@ %@ %@", password, password.bytes, password.length);
+    NSLog(@"OLOLO password %@ %@ %@", (uint8_t*)(password), (uint8_t*)(password.bytes), (uint8_t*)(password.length));
     NSLog(@"OLOLO salt %@ %@ %@", salt, salt.bytes, salt.length);
     NSLog(@"OLOLO scryptN %@", scryptN);
     NSLog(@"OLOLO salt %@", scryptR);
