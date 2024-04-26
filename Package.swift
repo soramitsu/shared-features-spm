@@ -33,7 +33,12 @@ let package = Package(
         .binaryTarget(name: "sr25519lib", path: "Binaries/sr25519lib.xcframework"),
         .binaryTarget(name: "MPQRCoreSDK", path: "Binaries/MPQRCoreSDK.xcframework"),
         .target(name: "scrypt",
-                path: "./Sources/scrypt"),
+                sources: [
+                    "."
+                ],
+                cSettings: [
+                    .headerSearchPath("./include")
+                ]),
         .target(name: "RobinHood"),
         .target(name: "keccak"),
         .target(name: "SoraKeystore"),
