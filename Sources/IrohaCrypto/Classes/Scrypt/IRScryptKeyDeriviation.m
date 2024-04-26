@@ -49,16 +49,15 @@ static const NSUInteger BLOCK_SIZE = 8;
     
     #else
 
-    __block int status = 0;
-    
-    NSMutableData *derivedKey = [NSMutableData dataWithLength:64];
-    [password enumerateByteRangesUsingBlock:^(const void * _Nonnull passwordBytes, NSRange passwordRange, BOOL * _Nonnull passwordStop) {
-        [salt enumerateByteRangesUsingBlock:^(const void * _Nonnull saltBytes, NSRange saltRange, BOOL * _Nonnull saltStop) {
-            [derivedKey enumerateByteRangesUsingBlock:^(const void * _Nonnull derivedKeyBytes, NSRange derivedKeyRange, BOOL * _Nonnull stop) {
-                status = crypto_scrypt(passwordBytes, (size_t)passwordRange.length, saltBytes, (size_t)saltRange.length, 1024, 8, 16, derivedKeyBytes, (size_t)derivedKeyRange.length);
-            }];
-        }];
-    }];
+    int status = crypto_scrypt((uint8_t*)(password.bytes),
+                               password.length,
+                               (uint8_t*)(salt.bytes),
+                               salt.length,
+                               scryptN,
+                               (uint32_t)scryptR,
+                               (uint32_t)scryptP,
+                               result,
+                               length);
     #endif
 
     
