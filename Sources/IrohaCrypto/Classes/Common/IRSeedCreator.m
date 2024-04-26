@@ -108,6 +108,8 @@ static NSString* const WORDS_SEPARATOR = @" ";
 
     NSString* normalizedMnemonic = [[mnemonic toString] decomposedStringWithCompatibilityMapping];
 
+    NSLog(@"OLOLO normalizedMnemonic %@", normalizedMnemonic);
+    NSLog(@"OLOLO normalizedMnemonic %@", [normalizedMnemonic dataUsingEncoding:NSUTF8StringEncoding]);
     return [_keyDeriviation deriveKeyFrom:[normalizedMnemonic dataUsingEncoding:NSUTF8StringEncoding]
                                      salt:salt
                                    length:seedLength
