@@ -67,12 +67,17 @@ blkxor(void * dest, const void * src, size_t len)
  * Apply the salsa20/8 core to the provided block.
  */
 static void
-salsa20_8(uint32_t B[16])
+salsa20_8(uint32_t * B)
 {
 	uint32_t x[16];
 	size_t i;
 
 	blkcpy(x, B, 64);
+
+    int loop;
+    for(loop = 0; loop < 10; loop++)
+       printf("%d ", B[loop]);
+
 	for (i = 0; i < 8; i += 2) {
 #define R(a,b) (((a) << (b)) | ((a) >> (32 - (b))))
 		/* Operate on columns. */
