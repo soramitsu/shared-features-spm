@@ -110,7 +110,7 @@ blkxor(void * dest, const void * src, size_t len)
 static void
 salsa20_8(uint32_t * B)
 {
-	uint32_t x[16];
+	uint32_t * x;
 	size_t i;
 
 	blkcpy(&x, B, 64);
