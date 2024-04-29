@@ -27,7 +27,7 @@
  * online backup system.
  */
 #include <stdint.h>
-
+#include <stdio.h>
 #include "sysendian.h"
 
 #include "crypto_scrypt_smix.h"
