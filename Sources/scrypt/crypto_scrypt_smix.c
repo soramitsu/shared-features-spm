@@ -53,7 +53,7 @@ blkcpy(size_t * dest, const void * src, size_t len)
 //       printf("%d ", &src[loop1]);
 //    printf("\n");
     
-    size_t * D = dest;
+    size_t * D = &dest;
     
 //    printf("D before - ");
 //    int loop2;
