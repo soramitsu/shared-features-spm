@@ -113,7 +113,14 @@ salsa20_8(uint32_t * B)
 	uint32_t x[16];
 	size_t i;
 
-	blkcpy(&x, B, 64);
+//	blkcpy(&x, B, 64);
+    
+    size_t L = 64 / sizeof(uint32_t);
+    
+    size_t y;
+
+    for (y = 0; y < L; y++)
+        y[i] = B[y];
     
     printf("B before - ");
     int e;
