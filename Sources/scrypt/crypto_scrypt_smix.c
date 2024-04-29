@@ -122,17 +122,17 @@ salsa20_8(uint32_t * B)
     for (y = 0; y < L; y++)
         x[y] = B[y];
     
-    printf("B before - ");
-    int e;
-    for(e = 0; e < 16; e++)
-       printf("%d ", B[e]);
-    printf("\n");
-    
-    printf("x before - ");
-    int j;
-    for(j = 0; j < 16; j++)
-       printf("%d ", x[j]);
-    printf("\n");
+//    printf("B before - ");
+//    int e;
+//    for(e = 0; e < 16; e++)
+//       printf("%d ", B[e]);
+//    printf("\n");
+//    
+//    printf("x before - ");
+//    int j;
+//    for(j = 0; j < 16; j++)
+//       printf("%d ", x[j]);
+//    printf("\n");
 
 	for (i = 0; i < 8; i += 2) {
 #define R(a,b) (((a) << (b)) | ((a) >> (32 - (b))))
@@ -166,16 +166,16 @@ salsa20_8(uint32_t * B)
 	for (i = 0; i < 16; i++)
 		B[i] += x[i];
     
-    printf("B after - ");
-    int loop;
-    for(loop = 0; loop < 16; loop++)
-       printf("%d ", B[loop]);
-    printf("\n");
-    
-    printf("x after - ");
-    int loop1;
-    for(loop1 = 0; loop1 < 16; loop1++)
-       printf("%d ", x[loop1]);
+//    printf("B after - ");
+//    int loop;
+//    for(loop = 0; loop < 16; loop++)
+//       printf("%d ", B[loop]);
+//    printf("\n");
+//    
+//    printf("x after - ");
+//    int loop1;
+//    for(loop1 = 0; loop1 < 16; loop1++)
+//       printf("%d ", x[loop1]);
 }
 
 /**
