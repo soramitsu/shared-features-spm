@@ -74,10 +74,6 @@ salsa20_8(uint32_t * B)
 
 	blkcpy(x, B, 64);
 
-    int loop;
-    for(loop = 0; loop < 10; loop++)
-       printf("%d ", B[loop]);
-
 	for (i = 0; i < 8; i += 2) {
 #define R(a,b) (((a) << (b)) | ((a) >> (32 - (b))))
 		/* Operate on columns. */
@@ -109,6 +105,14 @@ salsa20_8(uint32_t * B)
 	}
 	for (i = 0; i < 16; i++)
 		B[i] += x[i];
+    
+    int loop;
+    for(loop = 0; loop < 16; loop++)
+       printf("%d ", B[loop]);
+    
+    int loop1;
+    for(loop1 = 0; loop1 < 16; loop1++)
+       printf("%d ", x[loop1]);
 }
 
 /**
