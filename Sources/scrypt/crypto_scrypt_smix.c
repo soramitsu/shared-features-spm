@@ -120,7 +120,7 @@ salsa20_8(uint32_t * B)
     size_t y;
 
     for (y = 0; y < L; y++)
-        y[i] = B[y];
+        x[y] = B[y];
     
     printf("B before - ");
     int e;
