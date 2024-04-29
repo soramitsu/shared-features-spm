@@ -41,13 +41,57 @@ static uint64_t integerify(const void *, size_t);
 static void
 blkcpy(void * dest, const void * src, size_t len)
 {
-	size_t * D = dest;
-	const size_t * S = src;
-	size_t L = len / sizeof(size_t);
-	size_t i;
+    printf("dest before - ");
+    int loop;
+    for(loop = 0; loop < 16; loop++)
+       printf("%d ", &dest[loop]);
+    printf("\n");
+    
+    printf("src before - ");
+    int loop1;
+    for(loop1 = 0; loop1 < 16; loop1++)
+       printf("%d ", &src[loop1]);
+    printf("\n");
+    
+    printf("len - %d\n", len);
+    
+    size_t * D = dest;
+    
+    printf("D before - ");
+    int loop2;
+    for(loop2 = 0; loop2 < 16; loop2++)
+       printf("%d ", &D[loop2]);
+    printf("\n");
+    
+    const size_t * S = src;
+    
+    printf("S before - ");
+    int loop3;
+    for(loop3 = 0; loop3 < 16; loop3++)
+       printf("%d ", &S[loop3]);
+    printf("\n");
+    
+    size_t L = len / sizeof(size_t);
+    
+    printf("L - %d\n", L);
+    
+    size_t i;
 
-	for (i = 0; i < L; i++)
-		D[i] = S[i];
+    for (i = 0; i < L; i++)
+        D[i] = S[i];
+    
+    
+    printf("D after - ");
+    int loop5;
+    for(loop5 = 0; loop5 < 16; loop5++)
+       printf("%d ", &D[loop5]);
+    printf("\n");
+    
+    printf("S after - ");
+    int loop4;
+    for(loop4 = 0; loop4 < 16; loop4++)
+       printf("%d ", &S[loop4]);
+    printf("\n");
 }
 
 static void
