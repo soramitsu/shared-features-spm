@@ -32,14 +32,14 @@
 
 #include "crypto_scrypt_smix.h"
 
-static void blkcpy(void *, const void *, size_t);
+static void blkcpy(size_t *, const void *, size_t);
 static void blkxor(void *, const void *, size_t);
 static void salsa20_8(uint32_t[16]);
 static void blockmix_salsa8(const uint32_t *, uint32_t *, uint32_t *, size_t);
 static uint64_t integerify(const void *, size_t);
 
 static void
-blkcpy(void * dest, const void * src, size_t len)
+blkcpy(size_t * dest, const void * src, size_t len)
 {
 //    printf("dest before - ");
 //    int loop;
@@ -110,10 +110,10 @@ blkxor(void * dest, const void * src, size_t len)
 static void
 salsa20_8(uint32_t * B)
 {
-	uint32_t * x[16];
+	uint32_t x[16];
 	size_t i;
 
-	blkcpy(&x, B, 64);
+	blkcpy(x, B, 64);
     
     printf("B before - ");
     int e;
