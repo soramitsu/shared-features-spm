@@ -41,11 +41,11 @@ static uint64_t integerify(const void *, size_t);
 static void
 blkcpy(size_t * dest, const void * src, size_t len)
 {
-    printf("dest before - ");
-    int loop;
-    for(loop = 0; loop < 16; loop++)
-       printf("%d ", &dest[loop]);
-    printf("\n");
+//    printf("dest before - ");
+//    int loop;
+//    for(loop = 0; loop < 16; loop++)
+//       printf("%d ", &dest[loop]);
+//    printf("\n");
 //    
 //    printf("src before - ");
 //    int loop1;
