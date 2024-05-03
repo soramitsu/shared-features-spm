@@ -25,7 +25,7 @@ extension XcmAssemblyTests {
             signingWrapperData: .init(
                 publicKeyData: Data(),
                 secretKeyData: Data()
-            ), 
+            ),
             chainType: .substrate
         )
     }
