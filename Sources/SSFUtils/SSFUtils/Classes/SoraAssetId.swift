@@ -1,10 +1,18 @@
 import Foundation
 
-public struct SoraAssetId: Codable, Equatable {
+public struct SoraAssetId: Codable, Equatable, Hashable, ScaleCodable {
     @ArrayCodable public var value: String
 
     public init(wrappedValue: String) {
         value = wrappedValue
+    }
+    
+    public init(scaleDecoder: ScaleDecoding) throws {
+        value = try scaleDecoder.readAndConfirm(count: 32).toHex(includePrefix: true)
+    }
+    
+    public func encode(scaleEncoder: ScaleEncoding) throws {
+        scaleEncoder.appendRaw(data: try Data(hexStringSSF: value))
     }
 
     public init(from decoder: Decoder) throws {
@@ -24,5 +32,9 @@ public struct SoraAssetId: Codable, Equatable {
             throw EncodingError.invalidValue(value, context)
         }
         try container.encode(["code": bytes])
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(value)
     }
 }

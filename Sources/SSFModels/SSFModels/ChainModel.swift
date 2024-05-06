@@ -426,24 +426,28 @@ public extension ChainModel {
         public let history: BlockExplorer?
         public let crowdloans: ExternalResource?
         public let explorers: [ExternalApiExplorer]?
+        public let pricing: BlockExplorer?
 
         public init(
             staking: ChainModel.BlockExplorer? = nil,
             history: ChainModel.BlockExplorer? = nil,
             crowdloans: ChainModel.ExternalResource? = nil,
-            explorers: [ChainModel.ExternalApiExplorer]? = nil
+            explorers: [ChainModel.ExternalApiExplorer]? = nil,
+            pricing: ChainModel.BlockExplorer? = nil
         ) {
             self.staking = staking
             self.history = history
             self.crowdloans = crowdloans
             self.explorers = explorers
+            self.pricing = pricing
         }
 
         public static func == (lhs: ExternalApiSet, rhs: ExternalApiSet) -> Bool {
             lhs.staking == rhs.staking &&
                 lhs.history == rhs.history &&
                 lhs.crowdloans == rhs.crowdloans &&
-                Set(lhs.explorers ?? []) == Set(rhs.explorers ?? [])
+                Set(lhs.explorers ?? []) == Set(rhs.explorers ?? []) &&
+            lhs.pricing == rhs.pricing
         }
     }
 

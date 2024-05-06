@@ -272,6 +272,11 @@ public final class ChainModelMapper {
         if let type = entity.crowdloansApiType, let url = entity.crowdloansApiUrl {
             crowdloans = ChainModel.ExternalResource(type: type, url: url)
         }
+        
+        var pricing: ChainModel.BlockExplorer?
+        if let type = entity.pricingApiType, let url = entity.pricingApiUrl {
+            pricing = ChainModel.BlockExplorer(type: type, url: url)
+        }
 
         let explorers = createExplorers(from: entity)
 
@@ -280,7 +285,8 @@ public final class ChainModelMapper {
                 staking: staking,
                 history: history,
                 crowdloans: crowdloans,
-                explorers: explorers
+                explorers: explorers,
+                pricing: pricing
             )
         } else {
             return nil
@@ -381,6 +387,9 @@ public final class ChainModelMapper {
 
         entity.crowdloansApiType = apis?.crowdloans?.type
         entity.crowdloansApiUrl = apis?.crowdloans?.url
+        
+        entity.pricingApiType = apis?.pricing?.type.rawValue
+        entity.pricingApiUrl = apis?.pricing?.url
     }
 
     private func createChainAssetModelType(from rawValue: String?) -> SubstrateAssetType? {

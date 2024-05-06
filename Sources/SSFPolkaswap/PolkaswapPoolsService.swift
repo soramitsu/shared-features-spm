@@ -9,31 +9,7 @@ enum PolkaswapServiceError: Error {
     case unexpectedError
 }
 
-protocol PoolsService {
-    func getAllPairs() async throws -> [LiquidityPair]
-
-    func getAccountPools(accountId: Data) async throws -> [AccountPool]
-
-    func getAccountPoolDetails(
-        accountId: Data,
-        baseAsset: PooledAssetInfo,
-        targetAsset: PooledAssetInfo
-    ) async throws -> AccountPool?
-
-    func subscribeAccountPools(
-        accountId: Data
-    ) async throws -> (ids: [UInt16], publisher: PassthroughSubject<[AccountPool], Error>)
-
-    func subscribeAccountPoolDetails(
-        accountId: Data,
-        baseAsset: PooledAssetInfo,
-        targetAsset: PooledAssetInfo
-    ) throws -> (id: UInt16, publisher: PassthroughSubject<AccountPool, Error>)
-
-    func unsubscribe(id: UInt16) throws
-}
-
-final class PolkaswapService {
+public final class PolkaswapService {
     private let remoteService: RemotePolkaswapPoolsService
     private let localPairService: LocalLiquidityPairService
     private let localAccountPoolService: LocalAccountPoolsService
@@ -53,7 +29,7 @@ final class PolkaswapService {
 }
 
 extension PolkaswapService: PoolsService {
-    func subscribeAccountPools(
+    public func subscribeAccountPools(
         accountId: Data
     ) async throws -> (ids: [UInt16], publisher: PassthroughSubject<[AccountPool], Error>) {
         let publisher = PassthroughSubject<[AccountPool], Error>()
@@ -79,7 +55,7 @@ extension PolkaswapService: PoolsService {
         return (ids: ids, publisher: publisher)
     }
 
-    func getAccountPools(accountId: Data) async throws -> [AccountPool] {
+    public func getAccountPools(accountId: Data) async throws -> [AccountPool] {
         do {
             var accountPools = try await remoteService.getAccountPools(accountId: accountId)
 
@@ -96,11 +72,11 @@ extension PolkaswapService: PoolsService {
         }
     }
 
-    func subscribeAccountPoolDetails(
+    public func subscribeAccountPoolDetails(
         accountId: Data,
-        baseAsset: PooledAssetInfo,
-        targetAsset: PooledAssetInfo
-    ) throws -> (id: UInt16, publisher: PassthroughSubject<AccountPool, Error>) {
+        baseAsset: SSFPools.PooledAssetInfo,
+        targetAsset: SSFPools.PooledAssetInfo
+    ) throws -> (id: UInt16, publisher: PassthroughSubject<SSFPools.AccountPool, Error>) {
         let publisher = PassthroughSubject<AccountPool, Error>()
 
         let updateClosure: (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void = { [weak self] _ in
@@ -128,11 +104,11 @@ extension PolkaswapService: PoolsService {
         return (id: id, publisher: publisher)
     }
 
-    func getAccountPoolDetails(
+    public func getAccountPoolDetails(
         accountId: Data,
-        baseAsset: PooledAssetInfo,
-        targetAsset: PooledAssetInfo
-    ) async throws -> AccountPool? {
+        baseAsset: SSFPools.PooledAssetInfo,
+        targetAsset: SSFPools.PooledAssetInfo
+    ) async throws -> SSFPools.AccountPool? {
         do {
             let poolDetails = try await remoteService.getPoolDetails(
                 accountId: accountId,
@@ -148,7 +124,7 @@ extension PolkaswapService: PoolsService {
         }
     }
 
-    func getAllPairs() async throws -> [LiquidityPair] {
+    public func getAllPairs() async throws -> [LiquidityPair] {
         do {
             var liquidityPairs = try await remoteService.getAllPairs()
 
@@ -165,7 +141,7 @@ extension PolkaswapService: PoolsService {
         }
     }
 
-    func unsubscribe(id: UInt16) throws {
+    public func unsubscribe(id: UInt16) throws {
         try subscriptionService.unsubscribe(id: id)
     }
 }

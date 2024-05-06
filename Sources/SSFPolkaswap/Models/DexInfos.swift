@@ -1,12 +1,26 @@
 import Foundation
 import SSFUtils
 
-struct DexInfos: Decodable {
+public struct DexInfos: Decodable {
     var baseAssetId: PolkaswapDexInfoAssetId
     var syntheticBaseAssetId: PolkaswapDexInfoAssetId
     var isPublic: Bool
 }
 
-struct PolkaswapDexInfoAssetId: Codable {
-    @StringCodable var code: String
+public struct PolkaswapDexInfoAssetId: Codable, Hashable {
+    @ArrayCodable public var code: String
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(code)
+    }
+}
+
+extension PolkaswapDexInfoAssetId: ScaleCodable {
+    public func encode(scaleEncoder: ScaleEncoding) throws {
+        try code.encode(scaleEncoder: scaleEncoder)
+    }
+    
+    public init(scaleDecoder: ScaleDecoding) throws {
+        code = try String(scaleDecoder: scaleDecoder)
+    }
 }

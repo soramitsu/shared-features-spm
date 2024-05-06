@@ -17,4 +17,5 @@ extension PriceProvider: Equatable {}
 public enum PriceProviderType: String, Codable {
     case chainlink
     case coingecko
+    case sorasubquery
 }

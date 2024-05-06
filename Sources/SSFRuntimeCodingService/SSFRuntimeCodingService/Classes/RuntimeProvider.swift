@@ -43,7 +43,6 @@ public protocol RuntimeProviderProtocol: AnyObject, RuntimeCodingServiceProtocol
     func setup()
     func readySnapshot() async throws -> RuntimeSnapshot
     func cleanup()
-    
     func setupHot()
 }
 
