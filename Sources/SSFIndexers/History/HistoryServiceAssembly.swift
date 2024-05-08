@@ -3,7 +3,6 @@ import SSFModels
 import RobinHood
 import SSFChainRegistry
 import SSFNetwork
-import SSFIndexersStorage
 
 public enum HistoryError: Error {
     case urlMissing

@@ -125,5 +125,6 @@ protocol HistoryServiceFactoryProtocol {
 final class HistoryServicesFactory: HistoryServiceFactoryProtocol {
     func createService(factoryType: HistoryServiceFactoryType) throws -> HistoryService {
 //        problem: We don't know about services if we have factory here or we don't know about factory if it moved to its package
+        throw HistoryServiceFactoryError.unexpectedType
     }
 }
