@@ -7,7 +7,19 @@ public protocol NetworkWorker {
 }
 
 public final class NetworkWorkerDefault: NetworkWorker {
-    public init() {}
+    private let requestSignerFactory: RequestSignerFactory
+    private let networkClientFactory: NetworkClientFactory
+    private let responseDecoderFactory: ResponseDecodersFactory
+    
+    public init(
+        requestSignerFactory: RequestSignerFactory = BaseRequestSignerFactory(),
+        networkClientFactory: NetworkClientFactory = BaseNetworkClientFactory(),
+        responseDecoderFactory: ResponseDecodersFactory = BaseResponseDecoderFactory()
+    ) {
+        self.requestSignerFactory = requestSignerFactory
+        self.networkClientFactory = networkClientFactory
+        self.responseDecoderFactory = responseDecoderFactory
+    }
 
     public func performRequest<T: Decodable>(
         with config: RequestConfig
@@ -17,9 +29,9 @@ public final class NetworkWorkerDefault: NetworkWorker {
             with: config.requestType,
             baseURL: config.baseURL
         )
-        let requestSigner = try BaseRequestSignerFactory().buildRequestSigner(with: config.signingType)
-        let networkClient = BaseNetworkClientFactory().buildNetworkClient(with: config.networkClientType)
-        let responseDecoder = BaseResponseDecoderFactory().buildResponseDecoder(with: config.decoderType)
+        let requestSigner = try requestSignerFactory.buildRequestSigner(with: config.signingType)
+        let networkClient = networkClientFactory.buildNetworkClient(with: config.networkClientType)
+        let responseDecoder = responseDecoderFactory.buildResponseDecoder(with: config.decoderType)
 
         var request = try requestConfigurator.buildRequest(with: config)
         try requestSigner?.sign(request: &request, config: config)

@@ -37,12 +37,6 @@ extension RESTRequestConfigurator: RequestConfigurator {
             urlRequest.addValue($0.value, forHTTPHeaderField: $0.field)
         }
 
-//        #if DEBUG
-//            if let bodyData = config.body {
-//                Logger.shared.debug("URL Request: \(urlComponents.url?.absoluteString) ; BODY: \n \(try JSONSerialization.jsonObject(with: bodyData))")
-//            }
-//        #endif
-
         return urlRequest
     }
 }

@@ -4,12 +4,14 @@ enum RequestSignerFactoryError: Error {
     case signingTypeNotSupported
 }
 
-protocol RequestSignerFactory {
+public protocol RequestSignerFactory {
     func buildRequestSigner(with type: RequestSigningType) throws -> RequestSigner?
 }
 
-final class BaseRequestSignerFactory: RequestSignerFactory {
-    func buildRequestSigner(with type: RequestSigningType) throws -> RequestSigner? {
+public final class BaseRequestSignerFactory: RequestSignerFactory {
+    public init() {}
+    
+    public func buildRequestSigner(with type: RequestSigningType) throws -> RequestSigner? {
         switch type {
         case .none:
             return nil

@@ -4,11 +4,11 @@ import SSFUtils
 import SSFModels
 import SSFNetwork
 
-enum OklinkHistoryServiceError: Error {
+enum EtherscanHistoryServiceError: Error {
     case remoteResultNotFetched
 }
 
-final class OklinkHistoryService: HistoryService {
+final actor EtherscanHistoryService: HistoryService {
     
     private let networkWorker: NetworkWorker
     
@@ -17,7 +17,7 @@ final class OklinkHistoryService: HistoryService {
     }
     
     // MARK: - HistoryService
-
+    
     func fetchTransactionHistory(
         chainAsset: ChainAsset,
         address: String,
@@ -28,7 +28,6 @@ final class OklinkHistoryService: HistoryService {
             address: address,
             chainAsset: chainAsset
         )
-        
         let map = try createMap(
             remote: remote,
             address: address,
@@ -38,44 +37,42 @@ final class OklinkHistoryService: HistoryService {
     }
     
     // MARK: - Private methods
-    
+
     private func fetchHistory(
         address: String,
         chainAsset: ChainAsset
-    ) async throws -> OklinkHistoryResponse {
-        guard let historyUrl = chainAsset.chain.externalApi?.history?.url else {
+    ) async throws -> EtherscanHistoryResponse {
+        guard let baseURL = chainAsset.chain.externalApi?.history?.url else {
             throw HistoryError.urlMissing
         }
-
-        let request = OklinkHistoryRequest(
-            baseUrl: historyUrl,
+        
+        let request = EtherscanHistoryRequest(
+            baseURL: baseURL,
             chainAsset: chainAsset,
             address: address
         )
-
-        let response: OklinkHistoryResponse = try await networkWorker.performRequest(with: request)
+        
+        let response: EtherscanHistoryResponse = try await networkWorker.performRequest(with: request)
         return response
     }
 
     private func createMap(
-        remote: OklinkHistoryResponse,
+        remote: EtherscanHistoryResponse,
         address: String,
         chainAsset: ChainAsset
     ) throws -> AssetTransactionPageData {
-        guard let remoteTransactions = remote.data.first?.transactionLists else {
-            throw OklinkHistoryServiceError.remoteResultNotFetched
+        guard let result = remote.result else {
+            throw EtherscanHistoryServiceError.remoteResultNotFetched
         }
         let asset = chainAsset.asset
-        let isNormalAsset = asset.ethereumType == .normal
-
-        let transactions = remoteTransactions
-            .filter {
-                if isNormalAsset {
+        let transactions = result
+            .filter { element in
+                guard asset.ethereumType != .normal else {
                     return true
-                } else {
-                    $0.tokenContractAddress.lowercased() == asset.id.lowercased()
                 }
-            .sorted(by: { $0.transactionTime > $1.transactionTime })
+                return element.contractAddress?.lowercased() == asset.id.lowercased()
+            }
+            .sorted(by: { $0.timestampInSeconds > $1.timestampInSeconds })
             .map {
                 AssetTransactionData.createTransaction(
                     from: $0,

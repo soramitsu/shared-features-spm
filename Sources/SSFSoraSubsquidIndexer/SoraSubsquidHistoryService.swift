@@ -6,7 +6,7 @@ import SSFChainRegistry
 import SSFRuntimeCodingService
 import SSFNetwork
 
-class SoraSubsquidHistoryService: HistoryService {
+actor SoraSubsquidHistoryService: HistoryService {
     private let txStorage: AsyncAnyRepository<TransactionHistoryItem>
     private let networkWorker: NetworkWorker
 
@@ -46,10 +46,7 @@ class SoraSubsquidHistoryService: HistoryService {
                 filters: filters
             )
         
-        var localHistory: [TransactionHistoryItem] = []
-        if pagination.context == nil {
-            localHistory = try await txStorage.fetchAll()
-        }
+        let remoteTransactions = try await remoteHistory.historyElementsConnection.edges.map { $0.node }
 
         let filteredTransactions = remoteTransactions
             .filter { transaction in

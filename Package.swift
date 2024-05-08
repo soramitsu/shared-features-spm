@@ -379,7 +379,14 @@ let package = Package(
             resources: [
                 .process("Resources")
             ]
-        )
+        ),
+        .target(name: "SSFEtherscanIndexer", dependencies: ["SSFIndexers"]),
+        .target(name: "SSFGiantsquidIndexer", dependencies: ["SSFIndexers"]),
+        .target(name: "SSFOklinkIndexer", dependencies: ["SSFIndexers"]),
+        .target(name: "SSFReefIndexer", dependencies: ["SSFIndexers"]),
+        .target(name: "SSFSoraSubsquidIndexer", dependencies: ["SSFIndexers"]),
+        .target(name: "SSFSubqueryIndexer", dependencies: ["SSFIndexers"]),
+        .target(name: "SSFSubsquidIndexer", dependencies: ["SSFIndexers"])
     ]
 )
 

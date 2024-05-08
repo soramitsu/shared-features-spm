@@ -50,7 +50,7 @@ actor SubqueryHistoryService: HistoryService {
         )
         
         let filteredTransactions = try await filter(
-            remoteTransactions: remoteTransactions,
+            remoteTransactions: remoteHistory.historyElements.nodes,
             chainAsset: chainAsset
         )
         let transactions: [AssetTransactionData] = filteredTransactions.map { item in

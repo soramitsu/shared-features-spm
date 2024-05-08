@@ -5,7 +5,7 @@ import SSFModels
 import BigInt
 import SSFNetwork
 
-final class ZetaHistoryService: HistoryService {
+final actor ZetaHistoryService: HistoryService {
     
     private let networkWorker: NetworkWorker
     

@@ -1,12 +1,14 @@
 import Foundation
 //import SSFUtils
 
-protocol ResponseDecodersFactory {
+public protocol ResponseDecodersFactory {
     func buildResponseDecoder(with type: ResponseDecoderType) -> any ResponseDecoder
 }
 
-final class BaseResponseDecoderFactory: ResponseDecodersFactory {
-    func buildResponseDecoder(with type: ResponseDecoderType) -> any ResponseDecoder {
+public final class BaseResponseDecoderFactory: ResponseDecodersFactory {
+    public init() {}
+    
+    public func buildResponseDecoder(with type: ResponseDecoderType) -> any ResponseDecoder {
         switch type {
         case let .codable(jsonDecoder):
             return JSONResponseDecoder(jsonDecoder: jsonDecoder)

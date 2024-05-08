@@ -4,7 +4,7 @@ import SSFUtils
 import SSFModels
 import SSFNetwork
 
-final class GiantsquidHistoryService: HistoryService {
+final actor GiantsquidHistoryService: HistoryService {
     
     private enum GiantsquidConfig {
         static let giantsquidRewardsEnabled = false
@@ -48,7 +48,7 @@ final class GiantsquidHistoryService: HistoryService {
             filters: filters
         )
         
-        let transactions: [AssetTransactionData] = remoteHistory.history.map { item in
+        let transactions: [AssetTransactionData] = try await remoteHistory.history.map { item in
             item.createTransactionForAddress(
                 address,
                 chainAsset: chainAsset

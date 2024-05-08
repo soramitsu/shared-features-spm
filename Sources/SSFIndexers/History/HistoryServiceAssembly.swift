@@ -3,6 +3,7 @@ import SSFModels
 import RobinHood
 import SSFChainRegistry
 import SSFNetwork
+import SSFIndexersStorage
 
 public enum HistoryError: Error {
     case urlMissing
@@ -26,28 +27,28 @@ public enum HistoryServiceAssembly {
         switch chainAsset.chain.externalApi?.history?.type {
         case .subquery:
             let txStorage = try Self.createTxRepository()
-            return try factory.createSubqueryService(
+            return try factory.createService(factoryType: .subquery(
                 txStorage: txStorage,
-                chainRegistry: ChainRegistryAssembly.createDefaultRegistry()
-            )
+                chainRegistry:  ChainRegistryAssembly.createDefaultRegistry()
+            ))
         case .subsquid:
             let txStorage = try Self.createTxRepository()
-            return try factory.createSubsquidService(txStorage: txStorage)
+            return try factory.createService(factoryType: .subsquid(txStorage: txStorage))
         case .giantsquid:
             let txStorage = try Self.createTxRepository()
-            return try factory.createGiantsquidService(txStorage: txStorage)
+            return try factory.createService(factoryType: .giansquid(txStorage: txStorage))
         case .sora:
             let txStorage = try Self.createTxRepository()
-            return try factory.createSoraService(txStorage: txStorage)
+            return try factory.createService(factoryType: .sora(txStorage: txStorage))
         case .etherscan:
-            return try factory.createEtherscanService()
+            return try factory.createService(factoryType: .etherscan)
         case .oklink:
-            return try factory.createOklinkService()
+            return try factory.createService(factoryType: .oklink)
         case .reef:
             let txStorage = try Self.createTxRepository()
-            return try factory.createReefService(txStorage: txStorage)
+            return try factory.createService(factoryType: .reef(txStorage: txStorage))
         case .zeta:
-            return try factory.createZetaService()
+            return try factory.createService(factoryType: .zeta)
         case .none:
             throw HistoryError.missingHistoryType(chainId: chainAsset.chain.chainId)
         }

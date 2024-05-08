@@ -46,7 +46,7 @@ actor ReefSubsquidHistoryService: HistoryService {
             stakingsCursor: pagination.context?["stakingsCursor"]
         )
 
-        let subqueryTransactions: [AssetTransactionData] = subqueryHistory.history.sorted(by: { item1, item2 in
+        let subqueryTransactions: [AssetTransactionData] = try await subqueryHistory.history.sorted(by: { item1, item2 in
             item1.itemTimestamp > item2.itemTimestamp
         }).map { item in
             item.createTransactionForAddress(
@@ -57,7 +57,7 @@ actor ReefSubsquidHistoryService: HistoryService {
 
         let map = try await createHistoryMap(
             subqueryItems: subqueryTransactions,
-            reef: remoteHistory
+            reefData: subqueryHistory
         )
         return map
     }
