@@ -57,7 +57,7 @@ extension XcmDependencyContainerTests {
             signingWrapperData: .init(
                 publicKeyData: Data(),
                 secretKeyData: Data()
-            ), 
+            ),
             chainType: .substrate
         )
 
