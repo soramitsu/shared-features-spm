@@ -326,6 +326,7 @@ public enum ChainOptions: String, Codable {
     case nft
     case utilityFeePayment
     case chainlinkProvider
+    case checkAppId
 
     case unsupported
 

@@ -8,6 +8,7 @@ public protocol ExtrinsicBuilderProtocol: AnyObject {
     func with(nonce: UInt32) -> Self
     func with(era: Era, blockHash: String) -> Self
     func with(tip: BigUInt) -> Self
+    func with(appId: BigUInt) -> Self
     func with(shouldUseAtomicBatch: Bool) -> Self
     func adding<T: RuntimeCallable>(call: T) throws -> Self
     func adding(rawCall: Data) throws -> Self
@@ -53,6 +54,7 @@ public final class ExtrinsicBuilder {
     private var nonce: UInt32?
     private var era: Era
     private var tip: BigUInt
+    private var appId: BigUInt?
     private var signature: ExtrinsicSignature?
     private var shouldUseAtomicBatch: Bool = true
 
@@ -96,7 +98,7 @@ public final class ExtrinsicBuilder {
     }
 
     private func appendExtraToPayload(encodingBy encoder: DynamicScaleEncoding) throws {
-        let extra = ExtrinsicSignedExtra(era: era, nonce: nonce ?? 0, tip: tip)
+        let extra = ExtrinsicSignedExtra(era: era, nonce: nonce ?? 0, tip: tip, appId: appId)
         try encoder.append(extra, ofType: GenericType.extrinsicExtra.name)
     }
 
@@ -169,6 +171,15 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
 
         return self
     }
+    
+    
+    public func with(appId: BigUInt) -> Self {
+        self.appId = appId
+        self.signature = nil
+
+        return self
+    }
+
 
     public func with(shouldUseAtomicBatch: Bool) -> Self {
         self.shouldUseAtomicBatch = shouldUseAtomicBatch
@@ -242,7 +253,7 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
             signatureJson = try signature.toScaleCompatibleJSON()
         }
 
-        let extra = ExtrinsicSignedExtra(era: era, nonce: nonce ?? 0, tip: tip)
+        let extra = ExtrinsicSignedExtra(era: era, nonce: nonce ?? 0, tip: tip, appId: appId)
         signature = ExtrinsicSignature(
             address: address,
             signature: signatureJson,
