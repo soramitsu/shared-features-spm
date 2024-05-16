@@ -396,6 +396,7 @@ public extension ChainModel {
         case polkascan
         case etherscan
         case reef
+        case oklink
         case unknown
 
         public init(from decoder: Decoder) throws {
@@ -513,7 +514,7 @@ public extension ChainModel.ExternalApiExplorer {
 
     var transactionType: ChainModel.SubscanType {
         switch type {
-        case .etherscan:
+        case .etherscan, .oklink:
             return .tx
         default:
             return .extrinsic
