@@ -4,6 +4,11 @@ public struct StorageQuery: Codable {
     public let keys: [Data]
     public let blockHash: Data?
 
+    public init(keys: [Data], blockHash: Data?) {
+        self.keys = keys
+        self.blockHash = blockHash
+    }
+
     public func encode(to encoder: Encoder) throws {
         var unkeyedContainer = encoder.unkeyedContainer()
 
