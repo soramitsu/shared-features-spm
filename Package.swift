@@ -36,7 +36,8 @@ let package = Package(
         .library(name: "SSFSingleValueCache", targets: ["SSFSingleValueCache"]),
         .library(name: "SSFPolkaswap", targets: ["SSFPolkaswap"]),
         .library(name: "SSFPools", targets: ["SSFPools"]),
-        .library(name: "SSFPoolsStorage", targets: ["SSFPoolsStorage"])
+        .library(name: "SSFPoolsStorage", targets: ["SSFPoolsStorage"]),
+        .library(name: "MPQRCoreSDK", targets: ["MPQRCoreSDK"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
