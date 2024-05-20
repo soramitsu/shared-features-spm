@@ -29,7 +29,7 @@ public enum StorageEntryType {
         case let .map(singleMap):
             return singleMap.key
         case let .nMap(nMap):
-            let keys = try nMap.keys(using: schemaResolver)
+            let keys = try nMap.keyEntries.map { try $0.value(using: schemaResolver) }
             guard keys.count == 1 else {
                 throw StorageEntryTypeError.unableToFetchKey
             }
@@ -37,6 +37,19 @@ public enum StorageEntryType {
             return keys.first
         default:
             return nil
+        }
+    }
+    
+    public func hashers(schemaResolver: Schema.Resolver) throws -> [StorageHasher] {
+        switch self {
+        case .plain:
+            return []
+        case .map(let value):
+            return [value.hasher]
+        case .doubleMap(let value):
+            return [value.hasher, value.key2Hasher]
+        case .nMap(let value):
+            return value.hashers
         }
     }
 }
@@ -217,7 +230,7 @@ extension DoubleMapEntry: ScaleCodable {
 
 public struct NMapEntry {
     fileprivate let v14: Bool
-    private let keyEntries: [PlainEntry]
+    public let keyEntries: [PlainEntry]
     public let hashers: [StorageHasher]
     private let valueEntry: PlainEntry
 

@@ -22,6 +22,7 @@ public final class PrefixStorageResponseValueExtractor: PrefixResponseValueExtra
     ) async throws -> [K: T]? {
         var dict: [K: T] = [:]
         let keyExtractor = StorageKeyDataExtractor(runtimeService: runtimeService)
+        print("[\(request.storagePath)] storage response: ", storageResponse.count)
 
         try await storageResponse.asyncForEach {
             let id: K = try await keyExtractor.extractKey(
@@ -32,6 +33,8 @@ public final class PrefixStorageResponseValueExtractor: PrefixResponseValueExtra
 
             dict[id] = $0.value
         }
+        
+        print("[\(request.storagePath)] result dict: ", dict.count)
 
         return dict
     }

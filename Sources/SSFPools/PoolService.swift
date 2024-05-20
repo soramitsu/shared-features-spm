@@ -2,21 +2,9 @@ import Combine
 import Foundation
 
 public protocol PoolsService {
-    var pairsPublisher: Published<[LiquidityPair]>.Publisher { get }
-    func subscribeAllPairs() async throws
     func getAllPairs() async throws -> [LiquidityPair]
 
-    var accountPoolsPublisher: Published<[AccountPool]>.Publisher { get }
-    func subscribeAccountPools(accountId: Data) async throws -> [UInt16]
     func getAccountPools(accountId: Data) async throws -> [AccountPool]
-
-    var poolDetailsPublisher: Published<AccountPool?>.Publisher { get }
-
-    func subscribeAccountPoolDetails(
-        accountId: Data,
-        baseAsset: PooledAssetInfo,
-        targetAsset: PooledAssetInfo
-    ) throws -> UInt16
 
     func getAccountPoolDetails(
         accountId: Data,
@@ -24,5 +12,15 @@ public protocol PoolsService {
         targetAsset: PooledAssetInfo
     ) async throws -> AccountPool?
 
-    func unsubscribe(id: UInt16)
+    func subscribeAccountPools(
+        accountId: Data
+    ) async throws -> (ids: [UInt16], publisher: PassthroughSubject<[AccountPool], Error>)
+
+    func subscribeAccountPoolDetails(
+        accountId: Data,
+        baseAsset: PooledAssetInfo,
+        targetAsset: PooledAssetInfo
+    ) throws -> (id: UInt16, publisher: PassthroughSubject<AccountPool, Error>)
+
+    func unsubscribe(id: UInt16) throws
 }

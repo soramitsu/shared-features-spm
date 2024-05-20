@@ -13,7 +13,7 @@ public protocol PolkaswapAPYWorker {
 public final class PolkaswapAPYWorkerDefault: PolkaswapAPYWorker {
     private var subQueryClient: SoraWalletBlockExplorerInfo?
 
-    init(
+    public init(
         networkClient: SoramitsuNetworkClient,
         configBuilder: SoraRemoteConfigBuilder
     ) {

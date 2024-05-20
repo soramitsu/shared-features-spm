@@ -23,8 +23,21 @@ private final class ReachabilityListenerWrapper {
 public final class ReachabilityManager {
     public static let shared: ReachabilityManager? = ReachabilityManager()
 
-    private var listeners: [ReachabilityListenerWrapper] = []
+    private var _listeners: [ReachabilityListenerWrapper] = []
+    private var listeners: [ReachabilityListenerWrapper] {
+        get {
+            lock.concurrentlyRead {
+                return _listeners
+            }
+        }
+        set {
+            lock.exclusivelyWrite { [unowned self] in
+                self._listeners = newValue
+            }
+        }
+    }
     private var reachability: Reachability
+    private let lock = ReaderWriterLock()
 
     private init?() {
         guard let newReachability = try? Reachability() else {

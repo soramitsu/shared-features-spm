@@ -24,11 +24,11 @@ public struct AssetModel: Equatable, Codable, Hashable {
 
     public let coingeckoPriceId: PriceId?
     public var priceId: PriceId? {
-        if priceProvider?.type == .chainlink {
-            return priceProvider?.id
-        } else {
-            return coingeckoPriceId
+        if let priceProvider = priceProvider {
+            return priceProvider.id
         }
+        
+        return coingeckoPriceId
     }
 
     public var symbolUppercased: String {

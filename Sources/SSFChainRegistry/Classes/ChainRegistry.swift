@@ -13,9 +13,9 @@ public protocol ChainRegistryProtocol: AnyObject {
         usedRuntimePaths: [String: [String]],
         runtimeItem: RuntimeMetadataItemProtocol?
     ) async throws -> RuntimeProviderProtocol
-    func getSubstrateConnection(for chain: ChainModel) async throws -> SubstrateConnection
-    func getEthereumConnection(for chain: ChainModel) async throws -> Web3EthConnection
     func getRuntimeProvider(for chainId: ChainModel.Id) -> RuntimeProviderProtocol?
+    func getSubstrateConnection(for chain: ChainModel) throws -> SubstrateConnection
+    func getEthereumConnection(for chain: ChainModel) throws -> Web3EthConnection
     func getChain(for chainId: ChainModel.Id) async throws -> ChainModel
     func getChains() async throws -> [ChainModel]
     func getReadySnapshot(
@@ -65,13 +65,17 @@ extension ChainRegistry: ChainRegistryProtocol {
         usedRuntimePaths: [String: [String]],
         runtimeItem: RuntimeMetadataItemProtocol?
     ) async throws -> RuntimeProviderProtocol {
+        if let cachedProvider = runtimeProviderPool.getRuntimeProvider(for: chainId) {
+            return cachedProvider
+        }
+        
         let chainModel = try await chainSyncService.getChainModel(for: chainId)
 
         let runtimeMetadataItem: RuntimeMetadataItemProtocol
         if let runtimeItem = runtimeItem {
             runtimeMetadataItem = runtimeItem
         } else {
-            let connection = try await connectionPool.setupSubstrateConnection(for: chainModel)
+            let connection = try connectionPool.setupSubstrateConnection(for: chainModel)
             runtimeMetadataItem = try await runtimeSyncService.register(
                 chain: chainModel,
                 with: connection
@@ -97,7 +101,7 @@ extension ChainRegistry: ChainRegistryProtocol {
         if let runtimeItem = runtimeItem {
             runtimeMetadataItem = runtimeItem
         } else {
-            let connection = try await connectionPool.setupSubstrateConnection(for: chainModel)
+            let connection = try connectionPool.setupSubstrateConnection(for: chainModel)
             runtimeMetadataItem = try await runtimeSyncService.register(
                 chain: chainModel,
                 with: connection
@@ -112,14 +116,14 @@ extension ChainRegistry: ChainRegistryProtocol {
         return readySnaphot
     }
 
-    public func getSubstrateConnection(for chain: ChainModel) async throws -> SubstrateConnection {
-        try await connectionPool.setupSubstrateConnection(for: chain)
+    public func getSubstrateConnection(for chain: ChainModel) throws -> SubstrateConnection {
+        try connectionPool.setupSubstrateConnection(for: chain)
     }
 
     public func getEthereumConnection(
         for chain: SSFModels.ChainModel
-    ) async throws -> Web3EthConnection {
-        try await connectionPool.setupWeb3EthereumConnection(for: chain)
+    ) throws -> Web3EthConnection {
+        try connectionPool.setupWeb3EthereumConnection(for: chain)
     }
 
     public func getRuntimeProvider(for chainId: ChainModel.Id) -> RuntimeProviderProtocol? {

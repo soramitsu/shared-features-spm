@@ -4,6 +4,7 @@ import IrohaCrypto
 import SSFCrypto
 import SSFModels
 import SSFPools
+import SSFStorageQueryKit
 
 enum RemotePolkaswapPoolsServiceError: Error {
     case reservesIdNotFound
@@ -27,17 +28,20 @@ actor RemotePolkaswapPoolsServiceDefault {
     private let apyService: PolkaswapAPYService
     private let addressFactory: AddressFactory
     private let chain: ChainModel
+    private let storageRequestPerformer: StorageRequestPerformer
 
     init(
         chain: ChainModel,
         worker: PolkaswapWorker,
         apyService: PolkaswapAPYService,
-        addressFactory: AddressFactory
+        addressFactory: AddressFactory,
+        storageRequestPerformer: StorageRequestPerformer
     ) {
         self.chain = chain
         self.worker = worker
         self.apyService = apyService
         self.addressFactory = addressFactory
+        self.storageRequestPerformer = storageRequestPerformer
     }
 }
 
