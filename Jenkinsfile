@@ -8,7 +8,6 @@ def pipeline = new org.ios.AppPipeline(
     appTests: false,
     disableUpdatePods: true,
     disableInstallPods: true,
-    label: "mac-sora",
     statusNotif: false,
     dojoProductType: 'sora-mobile'
 )
