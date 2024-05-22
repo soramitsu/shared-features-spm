@@ -11,15 +11,20 @@ typealias BaseAssetId = String
 
 public enum PolkaswapLiquidityPoolServiceError: Swift.Error {
     case missingReservesAccountId
+    case userPoolNotFound(poolId: String)
 }
 
 public protocol PolkaswapLiquidityPoolService {
     func subscribeAvailablePools() async throws -> AsyncThrowingStream<CachedStorageResponse<[LiquidityPair]>, Swift.Error>
     func subscribeUserPools(accountId: AccountId) async throws -> AsyncThrowingStream<CachedStorageResponse<[LiquidityPair]>, Swift.Error>
-    func subscribePoolReserves(pools: [LiquidityPair]) async throws -> AsyncThrowingStream<CachedStorageResponse<[PolkaswapPoolReservesInfo]>, Swift.Error>
+    func subscribePoolsReserves(pools: [LiquidityPair]) async throws -> AsyncThrowingStream<CachedStorageResponse<[PolkaswapPoolReservesInfo]>, Swift.Error>
     
+    func subscribeLiquidityPool(assetIdPair: AssetIdPair) async throws -> AsyncThrowingStream<CachedStorageResponse<LiquidityPair>, Swift.Error>
+    func subscribePoolReserves(assetIdPair: AssetIdPair) async throws -> AsyncThrowingStream<CachedStorageResponse<PolkaswapPoolReservesInfo>, Swift.Error>
+
     func fetchAvailablePools() async throws -> [LiquidityPair]
     func fetchUserPools(accountId: AccountId) async throws -> [AccountPool]
+    func fetchUserPool(assetIdPair: AssetIdPair, accountId: AccountId) async throws -> AccountPool
     func fetchPoolsAPY() async throws -> [PoolApyInfo]
     func fetchReserves(pools: [LiquidityPair]) async throws -> [PolkaswapPoolReservesInfo]
 }
@@ -44,6 +49,16 @@ public final class PolkaswapLiquidityPoolServiceDefault {
 }
 
 extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
+    public func fetchUserPool(assetIdPair: AssetIdPair, accountId: AccountId) async throws -> AccountPool {
+        let pool = try await fetchUserPools(accountId: accountId).first(where: { $0.poolId == assetIdPair.poolId })
+        
+        guard let pool else {
+            throw PolkaswapLiquidityPoolServiceError.userPoolNotFound(poolId: assetIdPair.poolId)
+        }
+        
+        return pool
+    }
+    
     public func fetchUserPools(accountId: AccountId) async throws -> [AccountPool] {
         async let totalIssuanceByReservesIdPromise = try await poolXykStorage.totalIssuance(chain: chain)
         
@@ -242,16 +257,58 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
         }
     }
     
-    public func subscribePoolReserves(pools: [LiquidityPair]) async throws -> AsyncThrowingStream<CachedStorageResponse<[PolkaswapPoolReservesInfo]>, Swift.Error> {
+    public func subscribePoolsReserves(pools: [LiquidityPair]) async throws -> AsyncThrowingStream<CachedStorageResponse<[PolkaswapPoolReservesInfo]>, Swift.Error> {
         AsyncThrowingStream<CachedStorageResponse<[PolkaswapPoolReservesInfo]>, Swift.Error> { continuation in
             Task {
                 let assetPairs = pools.compactMap {
                     AssetIdPair(baseAssetIdCode: $0.baseAssetId, targetAssetIdCode: $0.targetAssetId)
                 }
-                let stream = try await self.poolXykStorage.subscribeReserves(pairs: assetPairs, chain: self.chain)
+                let stream = try await self.poolXykStorage.subscribePoolsReserves(pairs: assetPairs, chain: self.chain)
                 
                 for try await reserves in stream {
                     let reservesInfo = reserves.value?.compactMap { PolkaswapPoolReservesInfo(poolId: $0.key.poolId, reserves: $0.value) }
+                    let response = CachedStorageResponse(value: reservesInfo, type: reserves.type)
+                    
+                    continuation.yield(response)
+                }
+            }
+        }
+    }
+    
+    public func subscribeLiquidityPool(assetIdPair: AssetIdPair) async throws -> AsyncThrowingStream<CachedStorageResponse<LiquidityPair>, Swift.Error> {
+        AsyncThrowingStream<CachedStorageResponse<LiquidityPair>, Swift.Error> { continuation in
+            Task {
+                let poolPropertiesStream = try await poolXykStorage.subscribePoolProperties(pair: assetIdPair, chain: chain)
+                for try await properties in poolPropertiesStream {
+                    let reservesAccountId = properties.value?.reservesId
+                    let reservesId = reservesAccountId?.toHex()
+                    let liquidityPair = LiquidityPair(
+                        pairId: "\(assetIdPair.baseAssetId.code)-\(assetIdPair.targetAssetId.code)",
+                        chainId: nil,
+                        baseAssetId: assetIdPair.baseAssetId.code,
+                        targetAssetId: assetIdPair.targetAssetId.code,
+                        reservesId: reservesId
+                    )
+                    
+                    let response = CachedStorageResponse(value: liquidityPair, type: properties.type)
+                    
+                    continuation.yield(response)
+                }
+            }
+        }
+    }
+    
+    public func subscribePoolReserves(assetIdPair: AssetIdPair) async throws -> AsyncThrowingStream<CachedStorageResponse<PolkaswapPoolReservesInfo>, Swift.Error> {
+        AsyncThrowingStream<CachedStorageResponse<PolkaswapPoolReservesInfo>, Swift.Error> { continuation in
+            Task {
+                let stream = try await self.poolXykStorage.subscribePoolReserves(pair: assetIdPair, chain: self.chain)
+                
+                for try await reserves in stream {
+                    guard let reservesValue = reserves.value else {
+                        continuation.yield(with: .failure(PoolXykStorageError.reservesNotFound(pairs: [assetIdPair])))
+                        return
+                    }
+                    let reservesInfo = PolkaswapPoolReservesInfo(poolId: assetIdPair.poolId, reserves: reservesValue)
                     let response = CachedStorageResponse(value: reservesInfo, type: reserves.type)
                     
                     continuation.yield(response)

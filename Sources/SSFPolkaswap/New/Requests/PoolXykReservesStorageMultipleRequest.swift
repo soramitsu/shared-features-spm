@@ -2,7 +2,7 @@ import Foundation
 import SSFStorageQueryKit
 import SSFModels
 
-struct PoolXykReservesStorageRequest: MultipleRequest {
+struct PoolXykReservesStorageMultipleRequest: MultipleRequest {
     let pairs: [AssetIdPair]
 
     var keyType: SSFStorageQueryKit.MapKeyType {

@@ -27,7 +27,9 @@ public protocol PoolXykStorage {
     func subscribeProperties(baseAssetIds: [PolkaswapDexInfoAssetId], chain: ChainModel) async ->  AsyncThrowingStream<CachedStorageResponse<[AssetIdPair: LiquidityPoolProperties]>, Error>
     func subscribeAccountPools(accountId: AccountId, chain: ChainModel) async -> AsyncThrowingStream<CachedStorageResponse<[ScaleTuple<Data,SoraAssetId>: [SoraAssetId]]>, Swift.Error>
     func subscribeProperties(pairs: [AssetIdPair], chain: ChainModel) async throws -> AsyncThrowingStream<CachedStorageResponse<[AssetIdPair: LiquidityPoolProperties]>, Swift.Error>
-    func subscribeReserves(pairs: [AssetIdPair], chain: ChainModel) async throws -> AsyncThrowingStream<CachedStorageResponse<[AssetIdPair: PolkaswapPoolReserves]>, Error>
+    func subscribePoolsReserves(pairs: [AssetIdPair], chain: ChainModel) async throws -> AsyncThrowingStream<CachedStorageResponse<[AssetIdPair: PolkaswapPoolReserves]>, Error>
+    func subscribePoolProperties(pair: AssetIdPair, chain: ChainModel) async throws -> AsyncThrowingStream<CachedStorageResponse<LiquidityPoolProperties>, Error>
+    func subscribePoolReserves(pair: AssetIdPair, chain: ChainModel) async throws -> AsyncThrowingStream<CachedStorageResponse<PolkaswapPoolReserves>, Error>
 }
 
 public final class PoolXykStorageDefaultL: PoolXykStorage {
@@ -97,7 +99,7 @@ public final class PoolXykStorageDefaultL: PoolXykStorage {
     }
     
     public func reserves(pairs: [AssetIdPair], chain: ChainModel) async throws -> [PolkaswapPoolReservesInfo] {
-        let poolReservesRequest = PoolXykReservesStorageRequest(pairs: pairs)
+        let poolReservesRequest = PoolXykReservesStorageMultipleRequest(pairs: pairs)
         let poolReservesByPair: [AssetIdPair: PolkaswapPoolReserves]? = try await storageRequestPerformer.performMultiple(poolReservesRequest, chain: chain)
         
         guard let poolReservesByPair else {
@@ -145,9 +147,21 @@ public final class PoolXykStorageDefaultL: PoolXykStorage {
         return properties
     }
     
-    public func subscribeReserves(pairs: [AssetIdPair], chain: ChainModel) async throws -> AsyncThrowingStream<CachedStorageResponse<[AssetIdPair: PolkaswapPoolReserves]>, Error> {
-        let poolReservesRequest = PoolXykReservesStorageRequest(pairs: pairs)
+    public func subscribePoolsReserves(pairs: [AssetIdPair], chain: ChainModel) async throws -> AsyncThrowingStream<CachedStorageResponse<[AssetIdPair: PolkaswapPoolReserves]>, Error> {
+        let poolReservesRequest = PoolXykReservesStorageMultipleRequest(pairs: pairs)
         let poolReservesByPair: AsyncThrowingStream<CachedStorageResponse<[AssetIdPair: PolkaswapPoolReserves]>, Error> = await storageRequestPerformer.performMultiple(poolReservesRequest, withCacheOptions: .onAll, chain: chain)
+        return poolReservesByPair
+    }
+    
+    public func subscribePoolProperties(pair: AssetIdPair, chain: ChainModel) async throws -> AsyncThrowingStream<CachedStorageResponse<LiquidityPoolProperties>, Error> {
+        let propertiesRequest = PoolXykPoolProvidersStorageSingleRequest(pair: pair)
+        let properties: AsyncThrowingStream<CachedStorageResponse<LiquidityPoolProperties>, Swift.Error> = await storageRequestPerformer.performSingle(propertiesRequest, withCacheOptions: .onAll, chain: chain)
+        return properties
+    }
+    
+    public func subscribePoolReserves(pair: AssetIdPair, chain: ChainModel) async throws -> AsyncThrowingStream<CachedStorageResponse<PolkaswapPoolReserves>, Error> {
+        let poolReservesRequest = PoolXykReservesStorageSingleRequest(pair: pair)
+        let poolReservesByPair: AsyncThrowingStream<CachedStorageResponse<PolkaswapPoolReserves>, Error> = await storageRequestPerformer.performSingle(poolReservesRequest, withCacheOptions: .onAll, chain: chain)
         return poolReservesByPair
     }
 }
