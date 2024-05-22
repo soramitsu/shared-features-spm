@@ -12,4 +12,4 @@ def pipeline = new org.ios.AppPipeline(
     dojoProductType: 'sora-mobile'
 )
 
-pipeline.runPipeline()
+pipeline.runPipeline('shared-features-spm')
