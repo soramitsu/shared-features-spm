@@ -1,4 +1,4 @@
-@Library('jenkins-library@feature/DOPS-3035') _
+@Library('jenkins-library@feature/DOPS-3035-setup-ci') _
 
 def pipeline = new org.ios.AppPipeline(
     steps: this,
