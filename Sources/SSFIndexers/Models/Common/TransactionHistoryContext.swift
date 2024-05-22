@@ -1,6 +1,6 @@
 import Foundation
 
-struct TransactionHistorySourceContext {
+public struct TransactionHistorySourceContext {
     static let pageKey = "history.page"
     static let rowKey = "history.row"
     static let completeKey = "history.complete"
@@ -77,7 +77,7 @@ struct TransactionHistorySourceContext {
     }
 }
 
-struct TransactionHistoryContext {
+public struct TransactionHistoryContext {
     static let cursor = "cursor"
     static let isComplete = "isComplete"
 
@@ -90,7 +90,7 @@ struct TransactionHistoryContext {
     let extrinsics: TransactionHistorySourceContext
     let defaultRow: Int
 
-    var isComplete: Bool { transfers.isComplete && rewards.isComplete && extrinsics.isComplete }
+    public var isComplete: Bool { transfers.isComplete && rewards.isComplete && extrinsics.isComplete }
 
     var soraCursor: Int?
     var soraIsComplete: Bool = false
@@ -108,7 +108,7 @@ struct TransactionHistoryContext {
     }
 }
 
-extension TransactionHistoryContext {
+public extension TransactionHistoryContext {
     init(context: [String: String], defaultRow: Int) {
         self.defaultRow = defaultRow
 

@@ -2,6 +2,7 @@ import Foundation
 import BigInt
 import SSFCrypto
 import SSFModels
+import SSFIndexers
 
 extension AssetTransactionData {
     static func createTransaction(

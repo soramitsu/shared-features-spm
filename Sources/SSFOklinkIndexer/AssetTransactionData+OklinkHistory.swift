@@ -1,9 +1,10 @@
 import Foundation
 import SSFModels
+import SSFIndexers
 
 extension AssetTransactionData {
     static func createTransaction(
-        from item: EtherscanHistoryElement,
+        from item: OklinkTransactionItem,
         address: String,
         chainAsset: ChainAsset
     ) -> AssetTransactionData {
@@ -11,40 +12,29 @@ extension AssetTransactionData {
         let type: TransactionType = item.from == address ? .outgoing : .incoming
 
         let timestamp: Int64? = {
-            guard let timestampValue = item.timeStamp else {
+            guard let timestamp = Int64(item.transactionTime) else {
                 return nil
             }
-
-            return Int64(timestampValue)
+            return timestamp / 1000
         }()
-
-        let feeValue = item.gasUsed * item.gasPrice
-
-        let utilityAsset = chainAsset.chain.utilityChainAssets().first?.asset ?? chainAsset.asset
 
         let fee = AssetTransactionFee(
             identifier: chainAsset.asset.id,
             assetId: chainAsset.asset.id,
-            amount: SubstrateAmountDecimal(
-                big: feeValue,
-                precision: utilityAsset.precision
-            ),
+            amount: SubstrateAmountDecimal(string: item.txFee),
             context: nil
         )
 
         return AssetTransactionData(
-            transactionId: item.hash ?? "",
+            transactionId: item.blockHash,
             status: .commited,
-            assetId: item.contractAddress,
+            assetId: item.tokenContractAddress,
             peerId: nil,
             peerFirstName: nil,
             peerLastName: nil,
             peerName: peerAddress,
             details: nil,
-            amount: SubstrateAmountDecimal(
-                big: item.value,
-                precision: chainAsset.asset.precision
-            ),
+            amount: SubstrateAmountDecimal(string: item.amount),
             fees: [fee],
             timestamp: timestamp,
             type: type.rawValue,

@@ -14,7 +14,7 @@ protocol WalletRemoteHistoryItemProtocol {
     ) -> AssetTransactionData
 }
 
-enum WalletRemoteHistorySourceLabel: Int, CaseIterable {
+public enum WalletRemoteHistorySourceLabel: Int, CaseIterable {
     case transfers
     case rewards
     case extrinsics

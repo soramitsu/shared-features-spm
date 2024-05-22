@@ -3,8 +3,8 @@ import SSFNetwork
 import RobinHood
 import SSFUtils
 
-final class HistoryRequest: RequestConfig {
-    init(
+public final class HistoryRequest: RequestConfig {
+    public init(
         url: URL,
         query: String
     ) throws {

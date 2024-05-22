@@ -1,5 +1,6 @@
 import Foundation
 import SSFModels
+import SSFIndexers
 
 extension AssetTransactionData {
     static func createTransaction(

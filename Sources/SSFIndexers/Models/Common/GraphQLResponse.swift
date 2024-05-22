@@ -1,7 +1,7 @@
 import Foundation
 import SSFUtils
 
-struct GraphQLErrors: Error, Decodable {
+public struct GraphQLErrors: Error, Decodable {
     struct GraphQLError: Error, Decodable {
         let message: String
     }
@@ -9,11 +9,11 @@ struct GraphQLErrors: Error, Decodable {
     let errors: [GraphQLError]
 }
 
-enum GraphQLResponse<D: Decodable>: Decodable {
+public enum GraphQLResponse<D: Decodable>: Decodable {
     case data(_ value: D)
     case errors(_ value: GraphQLErrors)
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
 
         let json = try container.decode(JSON.self)
@@ -32,7 +32,7 @@ enum GraphQLResponse<D: Decodable>: Decodable {
         }
     }
     
-    func result() throws -> D {
+    public func result() throws -> D {
         switch self {
         case let .errors(error):
             throw error

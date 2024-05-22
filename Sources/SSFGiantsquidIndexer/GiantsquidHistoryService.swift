@@ -3,6 +3,7 @@ import RobinHood
 import SSFUtils
 import SSFModels
 import SSFNetwork
+import SSFIndexers
 
 final actor GiantsquidHistoryService: HistoryService {
     
