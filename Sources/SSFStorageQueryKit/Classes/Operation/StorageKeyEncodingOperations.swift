@@ -13,6 +13,10 @@ public protocol NMapKeyParamProtocol {
 public struct NMapKeyParam<T: Encodable>: NMapKeyParamProtocol {
     public var value: T
 
+    public init(value: T) {
+        self.value = value
+    }
+
     public func encode(encoder: DynamicScaleEncoding, type: String) throws -> Data {
         try encoder.append(value, ofType: type)
         return try encoder.encode()

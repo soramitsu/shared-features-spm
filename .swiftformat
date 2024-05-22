@@ -1,10 +1,11 @@
 # file options
 
---exclude Tests/XCTestManifests.swift,Tests/BadConfig,Snapshots,Build,PluginTests
+--exclude Tests/XCTestManifests.swift,Tests/BadConfig,Snapshots,Build,PluginTests,Sources/MocksBasket
 
 # format options
 
 --allman false
+--anonymousforeach ignore
 --binarygrouping 4,8
 --commas always
 --decimalgrouping 3,6

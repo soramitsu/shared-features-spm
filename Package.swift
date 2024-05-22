@@ -27,7 +27,6 @@ let package = Package(
         .library(name: "SSFAccountManagment", targets: ["SSFAccountManagment"]),
         .library(name: "SSFAccountManagmentStorage", targets: ["SSFAccountManagmentStorage"]),
         .library(name: "SSFAssetManagment", targets: ["SSFAssetManagment"]),
-        .library(name: "SSFAssetManagmentStorage", targets: ["SSFAssetManagmentStorage"]),
         .library(name: "IrohaCrypto", targets: ["IrohaCrypto"]),
         .library(name: "keccak", targets: ["keccak"]), //TODO: generate xcframework
         .library(name: "RobinHood", targets: ["RobinHood"]), //TODO: get from github
@@ -35,11 +34,13 @@ let package = Package(
         .library(name: "SSFQRService", targets: ["SSFQRService"]),
         .library(name: "SSFTransferService", targets: ["SSFTransferService"]),
         .library(name: "SSFSingleValueCache", targets: ["SSFSingleValueCache"]),
+        .library(name: "SSFPolkaswap", targets: ["SSFPolkaswap"]),
+        .library(name: "SSFPools", targets: ["SSFPools"]),
+        .library(name: "SSFPoolsStorage", targets: ["SSFPoolsStorage"]),
         .library(name: "SSFIndexers", targets: ["SSFIndexers"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
-        .package(url: "https://github.com/v57/scrypt.c.git", from: "0.1.0"),
         .package(url: "https://github.com/bitmark-inc/tweetnacl-swiftwrap", from: "1.1.0"),
         .package(url: "https://github.com/ashleymills/Reachability.swift", from: "5.0.0"),
         .package(url: "https://github.com/soramitsu/fearless-starscream", from: "4.0.8"),
@@ -55,7 +56,17 @@ let package = Package(
         .binaryTarget(name: "blake2lib", path: "Binaries/blake2lib.xcframework"),
         .binaryTarget(name: "libed25519", path: "Binaries/libed25519.xcframework"),
         .binaryTarget(name: "sr25519lib", path: "Binaries/sr25519lib.xcframework"),
+        .binaryTarget(name: "sorawallet", path: "Binaries/sorawallet.xcframework"),
         .binaryTarget(name: "MPQRCoreSDK", path: "Binaries/MPQRCoreSDK.xcframework"),
+        .target(
+            name: "scrypt",
+            sources: [
+                "."
+            ],
+            cSettings: [
+                .headerSearchPath("./include"),
+            ]
+        ),
         .target(name: "RobinHood"),
         .target(name: "keccak"),
         .target(name: "SoraKeystore"),
@@ -128,7 +139,7 @@ let package = Package(
                 .byName(name: "sr25519lib"),
                 .byName(name: "blake2lib"),
                 .product(name: "secp256k1", package: "secp256k1.swift"),
-                .product(name: "scrypt", package: "scrypt.c")
+                "scrypt"
             ],
             publicHeadersPath: "include",
             cSettings: [ .headerSearchPath(".") ]
@@ -202,6 +213,15 @@ let package = Package(
                 "SSFUtils"
             ]
         ),
+        .target(
+            name: "SSFAssetManagmentStorage",
+            dependencies: [
+                "RobinHood",
+                "IrohaCrypto",
+                "SoraKeystore",
+                "SSFUtils"
+            ]
+        ),
         .testTarget(
             name: "SSFAssetManagmentTests",
             dependencies: [
@@ -212,15 +232,6 @@ let package = Package(
                 "RobinHood",
                 "SSFHelpers",
                 "MocksBasket"
-            ]
-        ),
-        .target(
-            name: "SSFAssetManagmentStorage",
-            dependencies: [
-                "RobinHood",
-                "IrohaCrypto",
-                "SoraKeystore",
-                "SSFUtils"
             ]
         ),
         .target(
@@ -310,6 +321,37 @@ let package = Package(
                 "SSFChainRegistry"
             ]
         ),
+        .target(
+            name: "SSFPolkaswap",
+            dependencies: [
+                "SSFUtils",
+                "SSFChainRegistry",
+                "RobinHood",
+                "SSFModels",
+                "SSFStorageQueryKit",
+                "SSFPools",
+                "sorawallet",
+                "SSFPoolsStorage"
+            ]
+        ),
+        .target(
+            name: "SSFPools",
+            dependencies: [
+                "RobinHood",
+                "SSFUtils",
+                "SSFStorageQueryKit"
+            ]
+        ),
+        .target(
+            name: "SSFPoolsStorage",
+            dependencies: [
+                "SSFUtils",
+                "RobinHood",
+                "SSFPools"
+            ]
+        ),
+
+        //Tests targets
         .testTarget(
             name: "SSFXCMTests",
             dependencies: [
@@ -386,8 +428,10 @@ let package = Package(
         .target(name: "SSFReefIndexer", dependencies: ["SSFIndexers"]),
         .target(name: "SSFSoraSubsquidIndexer", dependencies: ["SSFIndexers"]),
         .target(name: "SSFSubqueryIndexer", dependencies: ["SSFIndexers"]),
-        .target(name: "SSFSubsquidIndexer", dependencies: ["SSFIndexers"])
-    ]
+        .target(name: "SSFSubsquidIndexer", dependencies: ["SSFIndexers"]) 
+    ],
+    cLanguageStandard: .gnu11,
+    cxxLanguageStandard: .gnucxx14
 )
 
 func mockDeps() -> [Target.Dependency] {

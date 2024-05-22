@@ -1,7 +1,7 @@
 import BigInt
 import SSFModels
-import XCTest
 import SSFUtils
+import XCTest
 
 @testable import SSFXCM
 

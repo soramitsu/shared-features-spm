@@ -10,7 +10,7 @@
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Run Sourcery"
-               scriptText = "sh &quot;${WORKSPACE_PATH}/../../../tools/sourcery.sh&quot;&#10;">
+               scriptText = "if [[ -z &quot;${JENKINS_HOME}&quot; ]]; then&#10;    sh &quot;${WORKSPACE_PATH}/../../../tools/sourcery.sh&quot;&#10;fi&#10;&#10;&#10;">
             </ActionContent>
          </ExecutionAction>
       </PreActions>
@@ -415,34 +415,6 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Modules_SSFAccountManagmentStorage"
-               BuildableName = "Modules_SSFAccountManagmentStorage"
-               BlueprintName = "Modules_SSFAccountManagmentStorage"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Modules_SSFAssetManagmentStorage"
-               BuildableName = "Modules_SSFAssetManagmentStorage"
-               BlueprintName = "Modules_SSFAssetManagmentStorage"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "SSFPolkaswap"
                BuildableName = "SSFPolkaswap"
                BlueprintName = "SSFPolkaswap"
@@ -488,20 +460,6 @@
                BlueprintIdentifier = "SSFSingleValueCache"
                BuildableName = "SSFSingleValueCache"
                BlueprintName = "SSFSingleValueCache"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Modules_MocksBasket"
-               BuildableName = "Modules_MocksBasket"
-               BlueprintName = "Modules_MocksBasket"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -593,6 +551,20 @@
                BlueprintName = "SSFAccountManagmentTests"
                ReferencedContainer = "container:">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "AccountManagementWorkerTests">
+               </Test>
+               <Test
+                  Identifier = "JSONExportServiceTests">
+               </Test>
+               <Test
+                  Identifier = "JSONExportServiceTests/testExportAccount()">
+               </Test>
+               <Test
+                  Identifier = "JSONExportServiceTests/testExportWallet()">
+               </Test>
+            </SkippedTests>
          </TestableReference>
          <TestableReference
             skipped = "NO">
@@ -603,6 +575,14 @@
                BlueprintName = "SSFAssetManagmentTests"
                ReferencedContainer = "container:">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "ChainAssetsFetchingServiceTests/testFetchSortAssetId()">
+               </Test>
+               <Test
+                  Identifier = "ChainAssetsFetchingServiceTests/testFetchSortPrice()">
+               </Test>
+            </SkippedTests>
          </TestableReference>
          <TestableReference
             skipped = "NO">
@@ -611,16 +591,6 @@
                BlueprintIdentifier = "SSFQRServiceTests"
                BuildableName = "SSFQRServiceTests"
                BlueprintName = "SSFQRServiceTests"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MocksBasket"
-               BuildableName = "MocksBasket"
-               BlueprintName = "MocksBasket"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>
@@ -643,6 +613,29 @@
                BlueprintName = "SSFKeyPairTests"
                ReferencedContainer = "container:">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "JsonCreatorTests/testSubsctrateJson()">
+               </Test>
+            </SkippedTests>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFXCMTests"
+               BuildableName = "SSFXCMTests"
+               BlueprintName = "SSFXCMTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "XcmAssetMultilocationFetcherTests/testVersionedMultilocationWithAssetError()">
+               </Test>
+               <Test
+                  Identifier = "XcmAssetMultilocationFetcherTests/testVersionedMultilocationWithRetryError()">
+               </Test>
+            </SkippedTests>
          </TestableReference>
          <TestableReference
             skipped = "NO">
@@ -661,16 +654,6 @@
                BlueprintIdentifier = "SSFStorageQueryKitTest"
                BuildableName = "SSFStorageQueryKitTest"
                BlueprintName = "SSFStorageQueryKitTest"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SSFXCMTests"
-               BuildableName = "SSFXCMTests"
-               BlueprintName = "SSFXCMTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>

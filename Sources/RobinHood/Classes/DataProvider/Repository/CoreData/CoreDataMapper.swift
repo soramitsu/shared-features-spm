@@ -44,8 +44,17 @@ public protocol CoreDataMapperProtocol: AnyObject {
         using context: NSManagedObjectContext
     ) throws
 
+    /// Create dict value for batch saves (Optional for mappers)
+    /// - Parameter model: Swift model to populate NSManagedObject from.
+    /// - Returns: [String: Any]
+    func dict(for model: DataProviderModel) throws -> [String: Any]
+
     /// Name of idetifier field to access NSManagedObject by.
     var entityIdentifierFieldName: String { get }
+}
+
+public extension CoreDataMapperProtocol {
+    func dict(for _: DataProviderModel) throws -> [String: Any] { [:] }
 }
 
 /**
@@ -59,6 +68,7 @@ public final class AnyCoreDataMapper<T: Identifiable, U: NSManagedObject>: CoreD
     private let _transform: (CoreDataEntity) throws -> DataProviderModel
     private let _populate: (CoreDataEntity, DataProviderModel, NSManagedObjectContext) throws
         -> Void
+    private let _dict: (DataProviderModel) throws -> [String: Any]
     private let _entityIdentifierFieldName: String
 
     /**
@@ -74,6 +84,7 @@ public final class AnyCoreDataMapper<T: Identifiable, U: NSManagedObject>: CoreD
         _transform = mapper.transform
         _populate = mapper.populate
         _entityIdentifierFieldName = mapper.entityIdentifierFieldName
+        _dict = mapper.dict
     }
 
     public func transform(entity: CoreDataEntity) throws -> DataProviderModel {

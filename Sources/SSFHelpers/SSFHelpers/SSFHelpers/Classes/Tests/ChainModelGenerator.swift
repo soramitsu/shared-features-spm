@@ -186,8 +186,8 @@ public enum ChainModelGenerator {
     public static func generateAssetWithId(
         _ identifier: AssetModel.Id,
         symbol: String,
-        assetPresicion: UInt16 = (9...18).randomElement()!,
-        chainId: String = "",
+        assetPresicion: UInt16 = (9 ... 18).randomElement()!,
+        chainId _: String = "",
         substrateAssetType: SubstrateAssetType = .normal,
         currencyId: String? = nil
     ) -> AssetModel {

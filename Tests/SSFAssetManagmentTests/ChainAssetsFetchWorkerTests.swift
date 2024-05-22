@@ -62,11 +62,14 @@ private extension ChainAssetsFetchWorkerTests {
 
 // TODO: Remove after MocksBasket merge
 class ApiKeyInjectorMock: ApiKeyInjector {
-    func getBlockExplorerKey(for type: SSFModels.BlockExplorerType, chainId: SSFModels.ChainModel.Id) -> String? {
+    func getBlockExplorerKey(
+        for _: SSFModels.BlockExplorerType,
+        chainId _: SSFModels.ChainModel.Id
+    ) -> String? {
         nil
     }
-    
-    func getNodeApiKey(for chainId: String, apiKeyName: String) -> String? {
+
+    func getNodeApiKey(for _: String, apiKeyName _: String) -> String? {
         nil
     }
 }

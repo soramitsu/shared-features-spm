@@ -1,15 +1,14 @@
 import Foundation
-import SSFExtrinsicKit
-import SSFModels
 import SSFChainConnection
 import SSFChainRegistry
-import SSFNetwork
 import SSFCrypto
+import SSFExtrinsicKit
+import SSFModels
+import SSFNetwork
 import SSFSigner
 import SSFUtils
 
 final class SubstrateTransferAssembly {
-    
     func createSubstrateService(
         wallet: MetaAccountModel,
         chain: ChainModel,
@@ -29,22 +28,20 @@ final class SubstrateTransferAssembly {
         )
 
         let operationManager = OperationManagerFacade.sharedManager
-        
-        let cryptoType = SFCryptoType(accountResponse.cryptoType)
         let extrinsicService = SSFExtrinsicKit.ExtrinsicService(
             accountId: accountResponse.accountId,
             chainFormat: chain.chainFormat,
-            cryptoType: cryptoType,
+            cryptoType: accountResponse.cryptoType,
             runtimeRegistry: runtimeService,
             engine: connection,
             operationManager: operationManager
         )
-        
+
         let callFactory = SubstrateTransferCallFactoryDefault(runtimeService: runtimeService)
-        let signer = TransactionSigner(
+        let signer = SubstrateTransactionSigner(
             publicKeyData: accountResponse.publicKey,
             secretKeyData: secretKeyData,
-            cryptoType: cryptoType
+            cryptoType: accountResponse.cryptoType
         )
         return SubstrateTransferServiceDefault(
             extrinsicService: extrinsicService,

@@ -1,18 +1,43 @@
 import Foundation
 import RobinHood
 
-public typealias SingleValueRepository = AsyncCoreDataRepositoryDefault<SingleValueProviderObject, CDSingleValue>
+public typealias AsyncSingleValueRepository = AsyncCoreDataRepositoryDefault<
+    SingleValueProviderObject,
+    CDSingleValue
+>
+public typealias SingleValueRepository = CoreDataRepository<
+    SingleValueProviderObject,
+    CDSingleValue
+>
 
 public protocol SingleValueCacheRepositoryAssembly {
-    func createSingleValueCasheRepository() throws -> SingleValueRepository
+    func createSingleValueCacheRepository() -> SingleValueRepository
+    func createAsyncSingleValueCacheRepository() -> AsyncSingleValueRepository
 }
 
 public final class SingleValueCacheRepositoryFactoryDefault: SingleValueCacheRepositoryAssembly {
     public init() {}
 
-    public func createSingleValueCasheRepository() throws -> SingleValueRepository {
-        let facade = try CacheStorageFacade()
-        let mapper = AnyCoreDataMapper(CodableCoreDataMapper<SingleValueProviderObject, CDSingleValue>())
+    public func createAsyncSingleValueCacheRepository() -> AsyncSingleValueRepository {
+        let facade = CacheStorageFacade()
+        let mapper = AnyCoreDataMapper(CodableCoreDataMapper<
+            SingleValueProviderObject,
+            CDSingleValue
+        >())
+        let repository = facade.createAsyncRepository(
+            filter: nil,
+            sortDescriptors: [],
+            mapper: mapper
+        )
+        return repository
+    }
+
+    public func createSingleValueCacheRepository() -> SingleValueRepository {
+        let facade = CacheStorageFacade()
+        let mapper = AnyCoreDataMapper(CodableCoreDataMapper<
+            SingleValueProviderObject,
+            CDSingleValue
+        >())
         let repository = facade.createRepository(
             filter: nil,
             sortDescriptors: [],

@@ -2,8 +2,11 @@ import Foundation
 import IrohaCrypto
 import SSFModels
 
-enum UtilsAddressFactory {
-    static func accountId(from address: AccountAddress, chainFormat: SFChainFormat) throws -> AccountId {
+enum AddressFactory {
+    static func accountId(
+        from address: AccountAddress,
+        chainFormat: SFChainFormat
+    ) throws -> AccountId {
         try address.toAccountId(using: chainFormat)
     }
 }

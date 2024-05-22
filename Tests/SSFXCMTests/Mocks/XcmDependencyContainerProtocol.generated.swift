@@ -3,29 +3,30 @@
 // swiftlint:disable all
 
 import UIKit
-@testable import SSFXCM
-@testable import SSFUtils
-@testable import SSFNetwork
-@testable import SSFModels
-@testable import RobinHood
 @testable import BigInt
-@testable import SSFExtrinsicKit
+@testable import RobinHood
+@testable import SSFChainConnection
 @testable import SSFChainRegistry
+@testable import SSFExtrinsicKit
+@testable import SSFModels
+@testable import SSFNetwork
 @testable import SSFRuntimeCodingService
 @testable import SSFSigner
-@testable import SSFChainConnection
 @testable import SSFStorageQueryKit
+@testable import SSFUtils
+@testable import SSFXCM
 
 public class XcmDependencyContainerProtocolMock: XcmDependencyContainerProtocol {
-public init() {}
+    public init() {}
 
-    //MARK: - prepareDeps
+    // MARK: - prepareDeps
 
     public var prepareDepsThrowableError: Error?
     public var prepareDepsCallsCount = 0
     public var prepareDepsCalled: Bool {
-        return prepareDepsCallsCount > 0
+        prepareDepsCallsCount > 0
     }
+
     public var prepareDepsReturnValue: XcmDeps!
     public var prepareDepsClosure: (() throws -> XcmDeps)?
 
@@ -34,7 +35,6 @@ public init() {}
             throw error
         }
         prepareDepsCallsCount += 1
-        return try prepareDepsClosure.map({ try $0() }) ?? prepareDepsReturnValue
+        return try prepareDepsClosure.map { try $0() } ?? prepareDepsReturnValue
     }
-
 }

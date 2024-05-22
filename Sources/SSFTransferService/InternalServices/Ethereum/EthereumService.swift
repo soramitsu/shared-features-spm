@@ -2,11 +2,11 @@ import Foundation
 import Web3
 import Web3ContractABI
 
-//sourcery: AutoMockable
+// sourcery: AutoMockable
 public protocol EthereumService {
     var connection: Web3.Eth { get }
     var hasSubscription: Bool { get }
-    
+
     func send(
         _ transaction: EthereumSignedTransaction
     ) async throws -> EthereumData
@@ -33,15 +33,14 @@ public protocol EthereumService {
 
 public final class EthereumServiceDefault: EthereumService {
     public let connection: Web3.Eth
-    
-    public lazy var hasSubscription: Bool = {
-        connection.properties.provider as? Web3BidirectionalProvider != nil
-    }()
-    
+
+    public lazy var hasSubscription: Bool = connection.properties
+        .provider as? Web3BidirectionalProvider != nil
+
     public init(connection: Web3.Eth) {
         self.connection = connection
     }
-    
+
     public func send(
         _ transaction: EthereumSignedTransaction
     ) async throws -> EthereumData {
@@ -60,7 +59,7 @@ public final class EthereumServiceDefault: EthereumService {
             }
         }
     }
-    
+
     public func queryGasLimit(
         call: EthereumCall
     ) async throws -> EthereumQuantity {
@@ -75,7 +74,7 @@ public final class EthereumServiceDefault: EthereumService {
             }
         }
     }
-    
+
     public func queryGasLimit(
         from: EthereumAddress?,
         amount: EthereumQuantity?,
@@ -94,7 +93,7 @@ public final class EthereumServiceDefault: EthereumService {
             }
         }
     }
-    
+
     public func queryGasPrice() async throws -> EthereumQuantity {
         try await withUnsafeThrowingContinuation { continuation in
             connection.gasPrice { resp in
@@ -107,7 +106,7 @@ public final class EthereumServiceDefault: EthereumService {
             }
         }
     }
-    
+
     public func queryMaxPriorityFeePerGas() async throws -> EthereumQuantity {
         try await withUnsafeThrowingContinuation { continuation in
             connection.maxPriorityFeePerGas { resp in
@@ -120,7 +119,7 @@ public final class EthereumServiceDefault: EthereumService {
             }
         }
     }
-    
+
     public func queryNonce(
         ethereumAddress: EthereumAddress
     ) async throws -> EthereumQuantity {
@@ -135,7 +134,7 @@ public final class EthereumServiceDefault: EthereumService {
             }
         }
     }
-    
+
     public func checkChainSupportEip1559() async -> Bool {
         do {
             _ = try await queryMaxPriorityFeePerGas()
@@ -144,7 +143,7 @@ public final class EthereumServiceDefault: EthereumService {
             return false
         }
     }
-    
+
     @discardableResult
     public func unsubscribe(subscriptionId: String) async throws -> Bool {
         try await withUnsafeThrowingContinuation { continuation in
@@ -157,13 +156,16 @@ public final class EthereumServiceDefault: EthereumService {
             }
         }
     }
-    
+
     public func getBlockByNumber(
         block: EthereumQuantityTag,
         fullTransactionObjects: Bool
     ) async throws -> EthereumBlockObject? {
-        try await withUnsafeThrowingContinuation({ continuation in
-            connection.getBlockByNumber(block: block, fullTransactionObjects: fullTransactionObjects) { resp in
+        try await withUnsafeThrowingContinuation { continuation in
+            connection.getBlockByNumber(
+                block: block,
+                fullTransactionObjects: fullTransactionObjects
+            ) { resp in
                 switch resp.status {
                 case let .success(block):
                     continuation.resume(returning: block)
@@ -171,6 +173,6 @@ public final class EthereumServiceDefault: EthereumService {
                     continuation.resume(throwing: error)
                 }
             }
-        })
+        }
     }
 }

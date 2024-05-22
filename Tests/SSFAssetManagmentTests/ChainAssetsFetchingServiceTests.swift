@@ -1,6 +1,6 @@
+import MocksBasket
 import SSFModels
 import XCTest
-import MocksBasket
 
 @testable import SSFAssetManagment
 
@@ -449,7 +449,7 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
         // act
         let chainAssets = await service.fetch(
             filters: [],
-            sorts: [.price(.ascending)],
+            sorts: [.price(.descending)],
             forceUpdate: false
         )
 
@@ -617,7 +617,7 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
         // act
         let chainAssets = await service.fetch(
             filters: [],
-            sorts: [.assetId(.ascending)],
+            sorts: [.assetId(.descending)],
             forceUpdate: false
         )
 
@@ -657,7 +657,7 @@ private extension ChainAssetsFetchingServiceTests {
             symbol: "XOR",
             precision: 1,
             icon: nil,
-            price: Decimal(integerLiteral: 1),
+            price: Decimal(string: "1"),
             fiatDayChange: nil,
             currencyId: nil,
             existentialDeposit: nil,
@@ -698,7 +698,7 @@ private extension ChainAssetsFetchingServiceTests {
             symbol: "XOR2",
             precision: 1,
             icon: nil,
-            price: Decimal(integerLiteral: 2),
+            price: Decimal(string: "2"),
             fiatDayChange: nil,
             currencyId: nil,
             existentialDeposit: nil,

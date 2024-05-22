@@ -1,10 +1,10 @@
-import XCTest
-import RobinHood
-import SSFKeyPair
 import IrohaCrypto
-import SSFModels
-import SoraKeystore
 import MocksBasket
+import RobinHood
+import SoraKeystore
+import SSFKeyPair
+import SSFModels
+import XCTest
 
 @testable import SSFAccountManagment
 

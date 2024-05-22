@@ -21,6 +21,8 @@ public final class AnyDataProviderRepository<T: Identifiable>: DataProviderRepos
         -> BaseOperation<[Model]>
     private let _save: (@escaping () throws -> [Model], @escaping () throws -> [String])
         -> BaseOperation<Void>
+    private let _saveBatch: (@escaping () throws -> [Model], @escaping () throws -> [String])
+        -> BaseOperation<Void>
     private let _replace: (@escaping () throws -> [Model]) -> BaseOperation<Void>
     private let _deleteAll: () -> BaseOperation<Void>
     private let _fetchCount: () -> BaseOperation<Int>
@@ -41,6 +43,7 @@ public final class AnyDataProviderRepository<T: Identifiable>: DataProviderRepos
         _deleteAll = repository.deleteAllOperation
         _fetchCount = repository.fetchCountOperation
         _fetchByModelIds = repository.fetchOperation
+        _saveBatch = repository.saveBatchOperation
     }
 
     public func fetchOperation(
@@ -75,6 +78,13 @@ public final class AnyDataProviderRepository<T: Identifiable>: DataProviderRepos
         -> BaseOperation<Void>
     {
         _save(updateModelsBlock, deleteIdsBlock)
+    }
+
+    public func saveBatchOperation(
+        _ updateModelsBlock: @escaping () throws -> [T],
+        _ deleteIdsBlock: @escaping () throws -> [String]
+    ) -> BaseOperation<Void> {
+        _saveBatch(updateModelsBlock, deleteIdsBlock)
     }
 
     public func replaceOperation(_ newModelsBlock: @escaping () throws -> [T])

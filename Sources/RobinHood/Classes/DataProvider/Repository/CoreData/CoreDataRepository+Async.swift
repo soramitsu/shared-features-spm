@@ -223,6 +223,36 @@ extension CoreDataRepository {
         }
     }
 
+    func saveBatch(
+        updating updatedModels: [Model],
+        deleting deletedIds: [String],
+        runCompletionIn queue: DispatchQueue?,
+        executing block: @escaping (Error?) -> Void
+    ) {
+        databaseService.performAsync { optionalContext, optionalError in
+
+            guard let context = optionalContext else {
+                self.call(block: block, error: optionalError, queue: queue)
+                return
+            }
+
+            do {
+                try self.saveBatch(models: updatedModels, in: context)
+
+                try self.delete(modelIds: deletedIds, in: context)
+
+                try context.save()
+
+                self.call(block: block, error: nil, queue: queue)
+
+            } catch {
+                context.rollback()
+
+                self.call(block: block, error: error, queue: queue)
+            }
+        }
+    }
+
     func replace(
         with newModels: [Model],
         runCompletionIn queue: DispatchQueue?,

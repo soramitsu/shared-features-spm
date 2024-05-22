@@ -1,8 +1,8 @@
 import Foundation
-import Web3
-import SSFModels
-import SSFCrypto
 import SSFChainRegistry
+import SSFCrypto
+import SSFModels
+import Web3
 
 final class EthereumTransferServiceAssembly {
     func createEthereumTransferService(
@@ -18,9 +18,9 @@ final class EthereumTransferServiceAssembly {
         let connection = try await chainRegistry.getEthereumConnection(for: chain)
         let privateKey = try EthereumPrivateKey(privateKey: secretKeyData.bytes)
         let address = try accountResponse.accountId.toAddress(using: .sfEthereum)
-        
+
         let ethereumService = EthereumServiceDefault(connection: connection)
-        
+
         let callFactory = EthereumTransferCallFactoryDefault(
             ethereumService: ethereumService,
             senderAddress: address,

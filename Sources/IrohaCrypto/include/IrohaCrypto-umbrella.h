@@ -47,6 +47,10 @@
 #import "SNSignatureVerifier.h"
 #import "SNSigner.h"
 #import "SS58AddressFactory.h"
+#import "IRIrohaPrivateKey.h"
+#import "IRIrohaKeyFactory.h"
+#import "IRIrohaSigner.h"
+#import "NSData+SHA3.h"
 
 FOUNDATION_EXPORT double IrohaCryptoVersionNumber;
 FOUNDATION_EXPORT const unsigned char IrohaCryptoVersionString[];

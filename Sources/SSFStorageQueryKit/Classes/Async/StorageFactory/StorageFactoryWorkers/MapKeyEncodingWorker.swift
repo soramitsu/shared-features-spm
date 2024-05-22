@@ -1,6 +1,6 @@
 import Foundation
-import SSFRuntimeCodingService
 import SSFModels
+import SSFRuntimeCodingService
 import SSFUtils
 
 final class MapKeyEncodingWorker {
@@ -28,10 +28,10 @@ final class MapKeyEncodingWorker {
         ) else {
             throw StorageKeyEncodingOperationError.invalidStoragePath
         }
-        
+
         let keyType: String
         let hasher: StorageHasher
-        
+
         switch entry.type {
         case let .map(mapEntry):
             keyType = mapEntry.key
@@ -40,25 +40,25 @@ final class MapKeyEncodingWorker {
             keyType = doubleMapEntry.key1
             hasher = doubleMapEntry.hasher
         case let .nMap(nMapEntry):
-            guard
-                let firstKey = try nMapEntry.keys(using: codingFactory.metadata.schemaResolver).first,
-                let firstHasher = nMapEntry.hashers.first
-            else {
+            guard let firstKey = try nMapEntry.keys(using: codingFactory.metadata.schemaResolver)
+                .first,
+                let firstHasher = nMapEntry.hashers.first else
+            {
                 throw StorageKeyEncodingOperationError.missingRequiredParams
             }
-            
+
             keyType = firstKey
             hasher = firstHasher
         case .plain:
             throw StorageKeyEncodingOperationError.incompatibleStorageType
         }
-        
+
         let keys: [Data] = try keyParams.map { keyParam in
             let encoder = codingFactory.createEncoder()
             try encoder.append(keyParam, ofType: keyType)
-            
+
             let encodedParam = try encoder.encode()
-            
+
             return try storageKeyFactory.createStorageKey(
                 moduleName: path.moduleName,
                 storageName: path.itemName,

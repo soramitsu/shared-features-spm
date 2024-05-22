@@ -1,7 +1,7 @@
 import Foundation
+import SSFModels
 import SSFRuntimeCodingService
 import SSFUtils
-import SSFModels
 
 final class SimpleStorageRequestWorker<P: Decodable>: StorageRequestWorker {
     private let runtimeService: RuntimeCodingServiceProtocol
@@ -21,7 +21,7 @@ final class SimpleStorageRequestWorker<P: Decodable>: StorageRequestWorker {
     func perform<T>(
         params: StorageRequestWorkerType,
         storagePath: any StorageCodingPathProtocol
-    ) async throws -> [StorageResponse<T>] where T : Decodable {
+    ) async throws -> [StorageResponse<T>] where T: Decodable {
         guard case StorageRequestWorkerType.simple = params else {
             throw StorageRequestWorkerError.invalidParameters(
                 moduleName: storagePath.moduleName,

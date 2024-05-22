@@ -5,12 +5,15 @@ import SSFUtils
 
 public enum AddressFactory {
     private static let substrateFactory = SS58AddressFactory()
-    
+
     private static func chainFormat(of chain: ChainModel) -> SFChainFormat {
         chain.isEthereumBased ? .sfEthereum : .sfSubstrate(chain.addressPrefix)
     }
-    
-    public static func address(for accountId: AccountId, chainFormat: SFChainFormat) throws -> AccountAddress {
+
+    public static func address(
+        for accountId: AccountId,
+        chainFormat: SFChainFormat
+    ) throws -> AccountAddress {
         try accountId.toAddress(using: chainFormat)
     }
 
@@ -20,8 +23,11 @@ public enum AddressFactory {
     ) throws -> AccountId {
         try address.toAccountId(using: chainFormat)
     }
-    
-    public static func accountId(from address: AccountAddress, chain: ChainModel) throws -> AccountId {
+
+    public static func accountId(
+        from address: AccountAddress,
+        chain: ChainModel
+    ) throws -> AccountId {
         try address.toAccountId(using: chainFormat(of: chain))
     }
 

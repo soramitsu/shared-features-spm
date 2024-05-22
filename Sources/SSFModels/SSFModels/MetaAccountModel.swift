@@ -97,10 +97,13 @@ extension MetaAccountModel {
 
         return responseForSubstrate(request)
     }
-    
+
     // MARK: - Private methods
-    
-    private func response(for chainAccount: ChainAccountModel, request: ChainAccountRequest) -> ChainAccountResponse? {
+
+    private func response(
+        for chainAccount: ChainAccountModel,
+        request: ChainAccountRequest
+    ) -> ChainAccountResponse? {
         guard let cryptoType = CryptoType(rawValue: chainAccount.cryptoType) else {
             return nil
         }
@@ -117,7 +120,7 @@ extension MetaAccountModel {
             walletId: metaId
         )
     }
-    
+
     private func responseForEthereumBased(_ request: ChainAccountRequest) -> ChainAccountResponse? {
         guard let publicKey = ethereumPublicKey, let accountId = ethereumAddress else {
             return nil
@@ -135,7 +138,7 @@ extension MetaAccountModel {
             walletId: metaId
         )
     }
-    
+
     private func responseForSubstrate(_ request: ChainAccountRequest) -> ChainAccountResponse? {
         guard let cryptoType = CryptoType(rawValue: substrateCryptoType) else {
             return nil

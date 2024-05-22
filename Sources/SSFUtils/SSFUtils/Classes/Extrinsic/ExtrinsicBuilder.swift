@@ -10,6 +10,7 @@ public protocol ExtrinsicBuilderProtocol: AnyObject {
     func with(tip: BigUInt) -> Self
     func with(shouldUseAtomicBatch: Bool) -> Self
     func adding<T: RuntimeCallable>(call: T) throws -> Self
+    func adding(rawCall: Data) throws -> Self
 
     func signing(
         by signer: (Data) throws -> Data,
@@ -19,6 +20,10 @@ public protocol ExtrinsicBuilderProtocol: AnyObject {
     ) throws -> Self
 
     func build(encodingBy encoder: DynamicScaleEncoding, metadata: RuntimeMetadata) throws -> Data
+    func buildSignature(
+        encodingBy encoder: DynamicScaleEncoding,
+        metadata: RuntimeMetadata
+    ) throws -> Data
 }
 
 public enum ExtrinsicBuilderError: Error {
@@ -177,6 +182,13 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
         return self
     }
 
+    public func adding(rawCall: Data) throws -> Self {
+        let json = JSON.stringValue(rawCall.toHex())
+        calls.append(json)
+
+        return self
+    }
+
     public func signing(
         by signer: (Data) throws -> Data,
         of type: CryptoType,
@@ -260,6 +272,13 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
         Log.disable(kind: "DynamicScale")
 
         return encoded
+    }
+
+    public func buildSignature(
+        encodingBy encoder: DynamicScaleEncoding,
+        metadata: RuntimeMetadata
+    ) throws -> Data {
+        try prepareSignaturePayload(encodingBy: encoder, using: metadata)
     }
 }
 

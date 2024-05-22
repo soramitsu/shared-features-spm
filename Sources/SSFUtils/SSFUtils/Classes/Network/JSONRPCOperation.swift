@@ -5,7 +5,7 @@ enum JSONRPCOperationError: Error {
     case timeout
 }
 
-public class JSONRPCOperation<P: Encodable, T: Decodable>: BaseOperation<T> {
+public class JSONRPCOperation<P: Codable, T: Decodable>: BaseOperation<T> {
     public let engine: JSONRPCEngine
     private(set) var requestId: UInt16?
     public let method: String
@@ -86,3 +86,16 @@ public class JSONRPCOperation<P: Encodable, T: Decodable>: BaseOperation<T> {
 }
 
 public final class JSONRPCListOperation<T: Decodable>: JSONRPCOperation<[String], T> {}
+
+public extension JSONRPCOperation {
+    static func failureOperation(_ error: Error) -> JSONRPCOperation<P, T> {
+        let mockEngine = WebSocketEngine(
+            connectionName: nil,
+            url: URL(string: "https://wiki.fearlesswallet.io")!,
+            autoconnect: false
+        )
+        let operation = JSONRPCOperation<P, T>(engine: mockEngine, method: "")
+        operation.result = .failure(error)
+        return operation
+    }
+}

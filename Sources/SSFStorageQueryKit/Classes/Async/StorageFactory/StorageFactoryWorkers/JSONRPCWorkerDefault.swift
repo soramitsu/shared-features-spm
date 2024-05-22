@@ -1,14 +1,14 @@
 import Foundation
 import SSFUtils
 
-class JSONRPCWorker<P: Encodable, T: Decodable> {
+class JSONRPCWorker<P: Codable, T: Decodable> {
     private let engine: JSONRPCEngine
     private let method: String
     private let parameters: P
     private let timeout: TimeInterval
-    
+
     private var requestId: UInt16?
-    private var currentTask: Task<(), Error>?
+    private var currentTask: Task<Void, Error>?
 
     init(
         engine: JSONRPCEngine,
@@ -21,7 +21,7 @@ class JSONRPCWorker<P: Encodable, T: Decodable> {
         self.parameters = parameters
         self.timeout = timeout
     }
-    
+
     func performCall() async throws -> T {
         try await withCheckedThrowingContinuation { continuation in
             currentTask = Task {
@@ -30,7 +30,7 @@ class JSONRPCWorker<P: Encodable, T: Decodable> {
                     try await Task.sleep(nanoseconds: duration)
                     continuation.resume(throwing: JSONRPCWorkerContinuationError())
                 }
-                
+
                 do {
                     requestId = try engine.callMethod(
                         method,
@@ -45,7 +45,7 @@ class JSONRPCWorker<P: Encodable, T: Decodable> {
             }
         }
     }
-    
+
     func cancel() {
         currentTask?.cancel()
     }

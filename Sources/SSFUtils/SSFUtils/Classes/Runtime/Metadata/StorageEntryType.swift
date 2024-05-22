@@ -1,6 +1,10 @@
 import BigInt
 import Foundation
 
+public enum StorageEntryTypeError: Error {
+    case unableToFetchKey
+}
+
 public enum StorageEntryType {
     case plain(_ value: PlainEntry)
     case map(_ value: MapEntry)
@@ -17,6 +21,22 @@ public enum StorageEntryType {
             return doubleMap.value
         case let .nMap(nMap):
             return try nMap.value(using: schemaResolver)
+        }
+    }
+
+    public func keyName(schemaResolver: Schema.Resolver) throws -> String? {
+        switch self {
+        case let .map(singleMap):
+            return singleMap.key
+        case let .nMap(nMap):
+            let keys = try nMap.keys(using: schemaResolver)
+            guard keys.count == 1 else {
+                throw StorageEntryTypeError.unableToFetchKey
+            }
+
+            return keys.first
+        default:
+            return nil
         }
     }
 }

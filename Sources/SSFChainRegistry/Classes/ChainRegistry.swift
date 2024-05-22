@@ -1,10 +1,10 @@
 import Foundation
-import Web3
 import RobinHood
 import SSFChainConnection
 import SSFModels
 import SSFRuntimeCodingService
 import SSFUtils
+import Web3
 
 // sourcery: AutoMockable
 public protocol ChainRegistryProtocol: AnyObject {
@@ -15,6 +15,7 @@ public protocol ChainRegistryProtocol: AnyObject {
     ) async throws -> RuntimeProviderProtocol
     func getSubstrateConnection(for chain: ChainModel) async throws -> SubstrateConnection
     func getEthereumConnection(for chain: ChainModel) async throws -> Web3EthConnection
+    func getRuntimeProvider(for chainId: ChainModel.Id) -> RuntimeProviderProtocol?
     func getChain(for chainId: ChainModel.Id) async throws -> ChainModel
     func getChains() async throws -> [ChainModel]
     func getReadySnapshot(
@@ -32,6 +33,8 @@ public final class ChainRegistry {
     private let runtimeSyncService: RuntimeSyncServiceProtocol
 
     private let mutex = NSLock()
+
+    private lazy var readLock = ReaderWriterLock()
 
     public init(
         runtimeProviderPool: RuntimeProviderPoolProtocol,
@@ -69,7 +72,10 @@ extension ChainRegistry: ChainRegistryProtocol {
             runtimeMetadataItem = runtimeItem
         } else {
             let connection = try await connectionPool.setupSubstrateConnection(for: chainModel)
-            runtimeMetadataItem = try await runtimeSyncService.register(chain: chainModel, with: connection)
+            runtimeMetadataItem = try await runtimeSyncService.register(
+                chain: chainModel,
+                with: connection
+            )
         }
         let chainTypes = try await chainsTypesSyncService.getTypes(for: chainId)
         let runtimeProvider = runtimeProviderPool.setupRuntimeProvider(
@@ -92,7 +98,10 @@ extension ChainRegistry: ChainRegistryProtocol {
             runtimeMetadataItem = runtimeItem
         } else {
             let connection = try await connectionPool.setupSubstrateConnection(for: chainModel)
-            runtimeMetadataItem = try await runtimeSyncService.register(chain: chainModel, with: connection)
+            runtimeMetadataItem = try await runtimeSyncService.register(
+                chain: chainModel,
+                with: connection
+            )
         }
         let chainTypes = try await chainsTypesSyncService.getTypes(for: chainId)
         let readySnaphot = try await runtimeProviderPool.readySnaphot(
@@ -102,15 +111,19 @@ extension ChainRegistry: ChainRegistryProtocol {
         )
         return readySnaphot
     }
-    
+
     public func getSubstrateConnection(for chain: ChainModel) async throws -> SubstrateConnection {
         try await connectionPool.setupSubstrateConnection(for: chain)
     }
-    
+
     public func getEthereumConnection(
         for chain: SSFModels.ChainModel
     ) async throws -> Web3EthConnection {
         try await connectionPool.setupWeb3EthereumConnection(for: chain)
+    }
+
+    public func getRuntimeProvider(for chainId: ChainModel.Id) -> RuntimeProviderProtocol? {
+        readLock.concurrentlyRead { runtimeProviderPool.getRuntimeProvider(for: chainId) }
     }
 
     public func getChain(for chainId: ChainModel.Id) async throws -> ChainModel {

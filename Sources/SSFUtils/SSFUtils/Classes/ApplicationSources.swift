@@ -8,7 +8,7 @@ public protocol ApplicationSources {
 public final class ApplicationSourcesImpl: ApplicationSources {
     public static let shared = ApplicationSourcesImpl()
     private init() {}
-    
+
     public var chainsSourceUrl: URL {
         #if DEBUG
             GitHubUrl.url(suffix: "chains/v6/chains_dev.json", branch: .developFree)

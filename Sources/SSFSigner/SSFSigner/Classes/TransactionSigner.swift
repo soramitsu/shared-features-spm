@@ -1,9 +1,10 @@
 import IrohaCrypto
 import SSFCrypto
+import SSFModels
 
 public protocol TransactionSignerProtocol: IRSignatureCreatorProtocol {}
 
-extension TransactionSignerProtocol {
+public extension TransactionSignerProtocol {
     func signSr25519(
         _ originalData: Data,
         secretKeyData: Data,
@@ -62,47 +63,5 @@ extension TransactionSignerProtocol {
 
         let hashedData = try originalData.keccak256()
         return try signer.sign(hashedData)
-    }
-}
-
-public final class TransactionSigner: TransactionSignerProtocol {
-    private let publicKeyData: Data
-    private let secretKeyData: Data
-    private let cryptoType: SFCryptoType
-
-    public init(
-        publicKeyData: Data,
-        secretKeyData: Data,
-        cryptoType: SFCryptoType
-    ) {
-        self.publicKeyData = publicKeyData
-        self.secretKeyData = secretKeyData
-        self.cryptoType = cryptoType
-    }
-
-    public func sign(_ originalData: Data) throws -> IRSignatureProtocol {
-        switch cryptoType {
-        case .sr25519:
-            return try signSr25519(
-                originalData,
-                secretKeyData: secretKeyData,
-                publicKeyData: publicKeyData
-            )
-        case .ed25519:
-            return try signEd25519(
-                originalData,
-                secretKey: secretKeyData
-            )
-        case .ecdsa:
-            return try signEcdsa(
-                originalData,
-                secretKey: secretKeyData
-            )
-        case .ethereumEcdsa:
-            return try signEthereumEcdsa(
-                originalData,
-                secretKey: secretKeyData
-            )
-        }
     }
 }

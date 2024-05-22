@@ -9,7 +9,7 @@ public protocol MultipleRequest {
 public enum MultipleStorageRequestParametersType {
     case multipleNMap(params: [[any NMapKeyParamProtocol]])
     case multipleEncodable(params: [any Encodable])
-    
+
     var workerType: StorageRequestWorkerType {
         switch self {
         case let .multipleNMap(params):

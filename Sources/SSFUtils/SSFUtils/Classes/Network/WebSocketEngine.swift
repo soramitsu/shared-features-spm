@@ -174,6 +174,14 @@ public final class WebSocketEngine {
 
         mutex.unlock()
     }
+
+    public func unsubsribe(_ identifier: UInt16) throws {
+        mutex.lock()
+
+        try processUnsubscription(identifier)
+
+        mutex.unlock()
+    }
 }
 
 // MARK: Internal
@@ -305,7 +313,7 @@ extension WebSocketEngine {
         subscriptions[subscription.requestId] = subscription
     }
 
-    func prepareRequest<P: Encodable, T: Decodable>(
+    func prepareRequest<P: Codable, T: Decodable>(
         method: String,
         params: P?,
         options: JSONRPCOptions,
@@ -566,5 +574,23 @@ extension WebSocketEngine {
     private func handleNodeNotHealthy() {
         connection.disconnect()
         scheduleReconnectionOrDisconnect(NetworkConstants.websocketReconnectAttemptsLimit + 1)
+    }
+
+    private func processUnsubscription(_ identifier: UInt16) throws {
+        guard let subscription = subscriptions[identifier] else { return }
+
+        let requestInfo = try jsonDecoder.decode(
+            JSONRPCInfo<[[Data]]>.self,
+            from: subscription.requestData
+        )
+
+        _ = try callMethod(
+            RPCMethod.stateUnsubscribe,
+            params: requestInfo.params,
+            options: JSONRPCOptions(resendOnReconnect: false)
+        ) { [weak self] (result: Result<Data, Error>) in
+            guard case .success = result else { return }
+            self?.subscriptions.removeValue(forKey: identifier)
+        }
     }
 }

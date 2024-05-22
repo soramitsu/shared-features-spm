@@ -1,6 +1,7 @@
 import Foundation
 import SSFModels
 import SSFRuntimeCodingService
+import SSFUtils
 
 public enum RuntimeProviderPoolError: Error {
     case missingProvider
@@ -14,7 +15,7 @@ public protocol RuntimeProviderPoolProtocol {
         usedRuntimePaths: [String: [String]]
     ) -> RuntimeProviderProtocol
     func destroyRuntimeProvider(for chainId: ChainModel.Id)
-    func getRuntimeProvider(for chainId: ChainModel.Id) throws -> RuntimeProviderProtocol
+    func getRuntimeProvider(for chainId: ChainModel.Id) -> RuntimeProviderProtocol?
     func readySnaphot(
         for chainMetadata: RuntimeMetadataItemProtocol,
         chainTypes: Data,
@@ -25,6 +26,7 @@ public protocol RuntimeProviderPoolProtocol {
 public final class RuntimeProviderPool: RuntimeProviderPoolProtocol {
     private var runtimeProviders: [ChainModel.Id: RuntimeProviderProtocol] = [:]
     private let mutex = NSLock()
+    private let lock = ReaderWriterLock()
 
     public init() {}
 
@@ -93,16 +95,9 @@ public final class RuntimeProviderPool: RuntimeProviderPoolProtocol {
         runtimeProviders[chainId] = nil
     }
 
-    public func getRuntimeProvider(for chainId: ChainModel.Id) throws -> RuntimeProviderProtocol {
-        mutex.lock()
-
-        defer {
-            mutex.unlock()
+    public func getRuntimeProvider(for chainId: ChainModel.Id) -> RuntimeProviderProtocol? {
+        lock.concurrentlyRead {
+            runtimeProviders[chainId]
         }
-
-        guard let provider = runtimeProviders[chainId] else {
-            throw RuntimeProviderPoolError.missingProvider
-        }
-        return provider
     }
 }

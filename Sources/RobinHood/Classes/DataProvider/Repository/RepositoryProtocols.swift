@@ -83,6 +83,11 @@ public protocol DataProviderRepositoryProtocol {
         _ deleteIdsBlock: @escaping () throws -> [String]
     ) -> BaseOperation<Void>
 
+    func saveBatchOperation(
+        _ updateModelsBlock: @escaping () throws -> [Model],
+        _ deleteIdsBlock: @escaping () throws -> [String]
+    ) -> BaseOperation<Void>
+
     /**
      *  Creates operation which that replaces persisted list of objects.
      *

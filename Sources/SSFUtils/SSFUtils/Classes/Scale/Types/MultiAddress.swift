@@ -79,12 +79,12 @@ extension MultiAddress: Codable {
         case let .accountTo(value):
             var container = encoder.singleValueContainer()
             try container.encode(value)
-        case .indexedString(let value):
+        case let .indexedString(value):
             var container = encoder.singleValueContainer()
             let null = Data([0])
             let full = null + value
             try container.encode(full.toHex(includePrefix: true))
-        case .rawString(let value):
+        case let .rawString(value):
             var container = encoder.singleValueContainer()
             try container.encode(value.toHex(includePrefix: true))
         }

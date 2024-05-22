@@ -1,11 +1,10 @@
-import XCTest
 import MocksBasket
 import SSFModels
+import XCTest
 
 @testable import SSFStorageQueryKit
 
 final class StorageRequestWorkerBuilderTests: XCTestCase {
-
     func testSimple() throws {
         let builder = StorageRequestWorkerBuilderDefault<String>()
         let simpleWorker = builder.buildWorker(
@@ -16,7 +15,7 @@ final class StorageRequestWorkerBuilderTests: XCTestCase {
         )
         XCTAssertTrue(simpleWorker is SimpleStorageRequestWorker<String>)
     }
-    
+
     func testNMap() throws {
         let builder = StorageRequestWorkerBuilderDefault<String>()
         let simpleWorker = builder.buildWorker(
@@ -27,7 +26,7 @@ final class StorageRequestWorkerBuilderTests: XCTestCase {
         )
         XCTAssertTrue(simpleWorker is NMapStorageRequestWorker<String>)
     }
-    
+
     func testEnocodable() throws {
         let builder = StorageRequestWorkerBuilderDefault<String>()
         let simpleWorker = builder.buildWorker(
