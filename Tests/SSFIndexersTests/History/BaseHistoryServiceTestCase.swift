@@ -1,7 +1,7 @@
-import XCTest
-import SSFNetwork
-import SSFModels
 import RobinHood
+import SSFModels
+import SSFNetwork
+import XCTest
 
 @testable import SSFIndexers
 
@@ -10,10 +10,9 @@ enum BaseHistoryServiceError: Error {
 }
 
 class BaseHistoryServiceTestCase: XCTestCase {
-    
     var networkWorker: NetworkWorker?
     var historyService: HistoryService?
-    
+
     func chainAsset(
         blockExplorerType: BlockExplorerType,
         assetSymbol: String,
@@ -27,7 +26,7 @@ class BaseHistoryServiceTestCase: XCTestCase {
             apiKey: ""
         )
         let externalApi = ChainModel.ExternalApiSet(history: historyBlockExplorer)
-        
+
         let asset = AssetModel(
             id: contractaddress ?? "2",
             name: "asset name",
@@ -38,7 +37,7 @@ class BaseHistoryServiceTestCase: XCTestCase {
             type: .normal,
             ethereumType: ethereumType
         )
-        
+
         let chain = ChainModel(
             rank: nil,
             disabled: false,
@@ -58,14 +57,14 @@ class BaseHistoryServiceTestCase: XCTestCase {
             customNodes: nil,
             iosMinAppVersion: nil
         )
-        
+
         let chainAsset = ChainAsset(
             chain: chain,
             asset: asset
         )
         return chainAsset
     }
-    
+
     func getResponse<T: Decodable>(file name: String) throws -> T {
         guard let url = Bundle.module.url(forResource: name, withExtension: "json") else {
             throw BaseHistoryServiceError.fileNotFound(name: name)

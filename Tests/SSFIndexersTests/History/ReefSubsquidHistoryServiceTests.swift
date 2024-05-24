@@ -1,13 +1,12 @@
-import XCTest
-import SSFNetwork
 import MocksBasket
-import SSFModels
 import RobinHood
+import SSFModels
+import SSFNetwork
+import XCTest
 
 @testable import SSFIndexers
 
 final class ReefSubsquidHistoryServiceTests: BaseHistoryServiceTestCase {
-    
     private var expectedResponse: GraphQLResponse<ReefResponseData> {
         get throws {
             try getResponse(file: "reefSubsquid")
@@ -31,16 +30,16 @@ final class ReefSubsquidHistoryServiceTests: BaseHistoryServiceTestCase {
             ethereumType: nil,
             contractaddress: nil
         )
-        
+
         let history = try await historyService?.fetchTransactionHistory(
             chainAsset: chainAsset,
             address: "5GecoStYi2bHzKz6LwE2LWa8MWJxaZYAGjx2WeH8r4RTnQ6e",
             filters: [.init(type: .transfer)],
-            pagination: Pagination.init(count: 100)
+            pagination: Pagination(count: 100)
         )
         XCTAssertEqual(history?.transactions.count, 11)
     }
-    
+
     private func setupServices() throws {
         guard historyService == nil || networkWorker == nil else {
             return
@@ -48,7 +47,7 @@ final class ReefSubsquidHistoryServiceTests: BaseHistoryServiceTestCase {
         let networkWorker = NetworkWorkerMock<GraphQLResponse<ReefResponseData>>()
         networkWorker.performRequestWithReturnValue = try expectedResponse
         super.networkWorker = networkWorker
-        
+
         let repository = try IndexersRepositoryAssemblyDefault().createRepository()
         let txStorage = AsyncAnyRepository(repository)
 

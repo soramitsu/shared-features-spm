@@ -1,7 +1,7 @@
+import BigInt
 import Foundation
 import RobinHood
 import SSFModels
-import BigInt
 
 public struct TransactionHistoryItem: Codable {
     public enum CodingKeys: String, CodingKey {

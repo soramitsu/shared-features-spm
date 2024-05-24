@@ -6,14 +6,14 @@ final class RESTNetworkClient: NetworkClient {
     init(session: URLSession) {
         self.session = session
     }
-    
+
     // MARK: - NetworkClient
-    
+
     func perform(request: URLRequest) async throws -> Data {
         let (data, response) = try await session.data(for: request)
         return try processDataResponse(data: data, response: response)
     }
-    
+
     // MARK: - Private methods
 
     private func processDataResponse(
@@ -21,7 +21,7 @@ final class RESTNetworkClient: NetworkClient {
         response: URLResponse
     ) throws -> Data {
         guard let statusCode = (response as? HTTPURLResponse)?.statusCode else {
-            throw NetworkingError.init(status: .unknown)
+            throw NetworkingError(status: .unknown)
         }
         guard 200 ..< 299 ~= statusCode else {
             throw NetworkingError(errorCode: statusCode)

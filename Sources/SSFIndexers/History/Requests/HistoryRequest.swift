@@ -1,6 +1,6 @@
 import Foundation
-import SSFNetwork
 import RobinHood
+import SSFNetwork
 import SSFUtils
 
 public final class HistoryRequest: RequestConfig {
@@ -12,7 +12,7 @@ public final class HistoryRequest: RequestConfig {
             HTTPHeader(
                 field: HttpHeaderKey.contentType.rawValue,
                 value: HttpContentType.json.rawValue
-            )
+            ),
         ]
 
         let info = JSON.dictionaryValue(["query": JSON.stringValue(query)])

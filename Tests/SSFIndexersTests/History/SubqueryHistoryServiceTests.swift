@@ -1,13 +1,12 @@
-import XCTest
-import SSFNetwork
 import MocksBasket
-import SSFModels
 import RobinHood
+import SSFModels
+import SSFNetwork
+import XCTest
 
 @testable import SSFIndexers
 
 final class SubqueryHistoryServiceTests: BaseHistoryServiceTestCase {
-
     private var expectedResponse: GraphQLResponse<SubqueryHistoryData> {
         get throws {
             try getResponse(file: "subquery")
@@ -36,7 +35,7 @@ final class SubqueryHistoryServiceTests: BaseHistoryServiceTestCase {
             chainAsset: chainAsset,
             address: "cnTPdZkShU3Nc8inmZsQnBiCLRVp9CT2xv1jeXZeuvjNGP8cj",
             filters: [.init(type: .transfer)],
-            pagination: Pagination.init(count: 100)
+            pagination: Pagination(count: 100)
         )
         XCTAssertEqual(history?.transactions.count, 100)
     }
@@ -51,12 +50,13 @@ final class SubqueryHistoryServiceTests: BaseHistoryServiceTestCase {
 
         let repository = try IndexersRepositoryAssemblyDefault().createRepository()
         let txStorage = AsyncAnyRepository(repository)
-        
+
         let runtimeService = RuntimeProviderProtocolMock()
         runtimeService.fetchCoderFactoryReturnValue = RuntimeCoderFactoryProtocolMock()
 
         let chainRegistry = ChainRegistryProtocolMock()
-        chainRegistry.getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReturnValue = runtimeService
+        chainRegistry
+            .getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReturnValue = runtimeService
         let service = SubqueryHistoryService(
             txStorage: txStorage,
             chainRegistry: chainRegistry,

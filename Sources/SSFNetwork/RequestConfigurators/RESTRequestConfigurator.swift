@@ -25,7 +25,9 @@ extension RESTRequestConfigurator: RequestConfigurator {
             throw RESTRequestConfiguratorError.badURL
         }
 
-        if let endpoint = config.endpoint, let urlWithEndpoint = urlComponents.url?.appendingPathComponent(endpoint) {
+        if let endpoint = config.endpoint,
+           let urlWithEndpoint = urlComponents.url?.appendingPathComponent(endpoint)
+        {
             url = urlWithEndpoint
         }
 

@@ -13,7 +13,7 @@ public final class ChainModelMapper {
 
     public typealias DataProviderModel = ChainModel
     public typealias CoreDataEntity = CDChain
-    
+
     private let apiKeyInjector: ApiKeyInjector
 
     public init(apiKeyInjector: ApiKeyInjector) {
@@ -442,12 +442,11 @@ public final class ChainModelMapper {
 
         entity.xcmConfig = configEntity
     }
-    
+
     private func getBlockExplorerApiKey(for type: String, chainId: ChainModel.Id?) -> String? {
-        guard
-            let blockExplorerType = BlockExplorerType(rawValue: type),
-            let chainId
-        else {
+        guard let blockExplorerType = BlockExplorerType(rawValue: type),
+              let chainId else
+        {
             return nil
         }
         return apiKeyInjector.getBlockExplorerKey(for: blockExplorerType, chainId: chainId)

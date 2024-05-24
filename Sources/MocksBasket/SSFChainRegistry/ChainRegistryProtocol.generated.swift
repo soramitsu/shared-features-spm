@@ -82,6 +82,24 @@ public init() {}
         return try getEthereumConnectionForClosure.map({ try $0(chain) }) ?? getEthereumConnectionForReturnValue
     }
 
+    //MARK: - getRuntimeProvider
+
+    public var getRuntimeProviderForCallsCount = 0
+    public var getRuntimeProviderForCalled: Bool {
+        return getRuntimeProviderForCallsCount > 0
+    }
+    public var getRuntimeProviderForReceivedChainId: ChainModel.Id?
+    public var getRuntimeProviderForReceivedInvocations: [ChainModel.Id] = []
+    public var getRuntimeProviderForReturnValue: RuntimeProviderProtocol?
+    public var getRuntimeProviderForClosure: ((ChainModel.Id) -> RuntimeProviderProtocol?)?
+
+    public func getRuntimeProvider(for chainId: ChainModel.Id) -> RuntimeProviderProtocol? {
+        getRuntimeProviderForCallsCount += 1
+        getRuntimeProviderForReceivedChainId = chainId
+        getRuntimeProviderForReceivedInvocations.append(chainId)
+        return getRuntimeProviderForClosure.map({ $0(chainId) }) ?? getRuntimeProviderForReturnValue
+    }
+
     //MARK: - getChain
 
     public var getChainForThrowableError: Error?

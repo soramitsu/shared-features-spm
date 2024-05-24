@@ -31,7 +31,7 @@ public enum GraphQLResponse<D: Decodable>: Decodable {
             )
         }
     }
-    
+
     public func result() throws -> D {
         switch self {
         case let .errors(error):

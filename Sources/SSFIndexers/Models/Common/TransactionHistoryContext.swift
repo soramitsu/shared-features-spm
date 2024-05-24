@@ -14,7 +14,11 @@ public struct TransactionHistorySourceContext {
         self.keySuffix = keySuffix
         page = Self.extract(for: Self.pageKey + keySuffix, from: context, defaultValue: 0)
         row = Self.extract(for: Self.rowKey + keySuffix, from: context, defaultValue: defaultRow)
-        isComplete = Self.extract(for: Self.completeKey + keySuffix, from: context, defaultValue: false)
+        isComplete = Self.extract(
+            for: Self.completeKey + keySuffix,
+            from: context,
+            defaultValue: false
+        )
     }
 
     init(
@@ -33,7 +37,7 @@ public struct TransactionHistorySourceContext {
         [
             Self.pageKey + keySuffix: String(page),
             Self.rowKey + keySuffix: String(row),
-            Self.completeKey + keySuffix: String(isComplete)
+            Self.completeKey + keySuffix: String(isComplete),
         ]
     }
 
@@ -90,7 +94,9 @@ public struct TransactionHistoryContext {
     let extrinsics: TransactionHistorySourceContext
     let defaultRow: Int
 
-    public var isComplete: Bool { transfers.isComplete && rewards.isComplete && extrinsics.isComplete }
+    public var isComplete: Bool {
+        transfers.isComplete && rewards.isComplete && extrinsics.isComplete
+    }
 
     var soraCursor: Int?
     var soraIsComplete: Bool = false
@@ -137,7 +143,9 @@ public extension TransactionHistoryContext {
         }
     }
 
-    func byReplacingTransfers(_ value: TransactionHistorySourceContext) -> TransactionHistoryContext {
+    func byReplacingTransfers(_ value: TransactionHistorySourceContext)
+        -> TransactionHistoryContext
+    {
         TransactionHistoryContext(
             transfers: value,
             rewards: rewards,
@@ -155,7 +163,9 @@ public extension TransactionHistoryContext {
         )
     }
 
-    func byReplacingExtrinsics(_ value: TransactionHistorySourceContext) -> TransactionHistoryContext {
+    func byReplacingExtrinsics(_ value: TransactionHistorySourceContext)
+        -> TransactionHistoryContext
+    {
         TransactionHistoryContext(
             transfers: transfers,
             rewards: rewards,
@@ -164,7 +174,9 @@ public extension TransactionHistoryContext {
         )
     }
 
-    func sourceContext(for label: WalletRemoteHistorySourceLabel) -> TransactionHistorySourceContext {
+    func sourceContext(for label: WalletRemoteHistorySourceLabel)
+        -> TransactionHistorySourceContext
+    {
         switch label {
         case .transfers:
             return transfers

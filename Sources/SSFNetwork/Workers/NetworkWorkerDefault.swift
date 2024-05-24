@@ -10,7 +10,7 @@ public final class NetworkWorkerDefault: NetworkWorker {
     private let requestSignerFactory: RequestSignerFactory
     private let networkClientFactory: NetworkClientFactory
     private let responseDecoderFactory: ResponseDecodersFactory
-    
+
     public init(
         requestSignerFactory: RequestSignerFactory = BaseRequestSignerFactory(),
         networkClientFactory: NetworkClientFactory = BaseNetworkClientFactory(),

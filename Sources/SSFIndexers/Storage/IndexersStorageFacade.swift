@@ -1,6 +1,6 @@
+import CoreData
 import Foundation
 import RobinHood
-import CoreData
 
 public enum IndexersStorageFacadeError: Error {
     case coreDataUrlMissed
@@ -8,38 +8,37 @@ public enum IndexersStorageFacadeError: Error {
 
 public final class IndexersStorageFacade: StorageFacade {
     public var databaseService: CoreDataServiceProtocol
-    
+
     public init() throws {
-        guard
-            let baseURL = FileManager.default.urls(
-                for: .documentDirectory,
-                in: .userDomainMask
-            ).first?.appendingPathComponent("CoreData"),
+        guard let baseURL = FileManager.default.urls(
+            for: .documentDirectory,
+            in: .userDomainMask
+        ).first?.appendingPathComponent("CoreData"),
             let modelURL = Bundle.module.url(
                 forResource: "IndexersDataModel",
                 withExtension: "momd"
-            )
-        else {
+            ) else
+        {
             throw IndexersStorageFacadeError.coreDataUrlMissed
         }
-        
+
         let options = [
             NSMigratePersistentStoresAutomaticallyOption: true,
-            NSInferMappingModelAutomaticallyOption: true
+            NSInferMappingModelAutomaticallyOption: true,
         ]
-        
+
         let persistentSettings = CoreDataPersistentSettings(
             databaseDirectory: baseURL,
             databaseName: "IndexersDataModel.sqlite",
             incompatibleModelStrategy: .removeStore,
             options: options
         )
-        
+
         let configuration = CoreDataServiceConfiguration(
             modelURL: modelURL,
             storageType: .persistent(settings: persistentSettings)
         )
-        
+
         databaseService = CoreDataService(configuration: configuration)
     }
 

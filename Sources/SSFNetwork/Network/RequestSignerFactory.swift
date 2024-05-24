@@ -10,7 +10,7 @@ public protocol RequestSignerFactory {
 
 public final class BaseRequestSignerFactory: RequestSignerFactory {
     public init() {}
-    
+
     public func buildRequestSigner(with type: RequestSigningType) throws -> RequestSigner? {
         switch type {
         case .none:

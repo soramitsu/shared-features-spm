@@ -1,12 +1,11 @@
-import XCTest
-import SSFNetwork
 import MocksBasket
 import SSFModels
+import SSFNetwork
+import XCTest
 
 @testable import SSFIndexers
 
 final class ZetaHistoryServiceTests: BaseHistoryServiceTestCase {
-    
     private var expectedResponse: ZetaHistoryResponse {
         get throws {
             try getResponse(file: "zeta")
@@ -30,16 +29,16 @@ final class ZetaHistoryServiceTests: BaseHistoryServiceTestCase {
             ethereumType: nil,
             contractaddress: "13"
         )
-        
+
         let history = try await historyService?.fetchTransactionHistory(
             chainAsset: chainAsset,
             address: "0xa150ea05b1a515433a6426f309ab1bc5dc62a014",
             filters: [],
-            pagination: Pagination.init(count: 100)
+            pagination: Pagination(count: 100)
         )
         XCTAssertEqual(history?.transactions.count, 13)
     }
-    
+
     private func setupServices() throws {
         guard historyService == nil || networkWorker == nil else {
             return

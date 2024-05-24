@@ -6,7 +6,7 @@ public protocol NetworkClientFactory {
 
 public final class BaseNetworkClientFactory: NetworkClientFactory {
     public init() {}
-    
+
     public func buildNetworkClient(with type: NetworkClientType) -> NetworkClient {
         switch type {
         case .plain:

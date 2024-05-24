@@ -1,12 +1,11 @@
-import XCTest
-import SSFNetwork
 import MocksBasket
 import SSFModels
+import SSFNetwork
+import XCTest
 
 @testable import SSFIndexers
 
 final class OklinkHistoryServiceTests: BaseHistoryServiceTestCase {
-    
     private var expectedResponse: OklinkHistoryResponse {
         get throws {
             try getResponse(file: "oklink")
@@ -30,16 +29,16 @@ final class OklinkHistoryServiceTests: BaseHistoryServiceTestCase {
             ethereumType: nil,
             contractaddress: "13"
         )
-        
+
         let history = try await historyService?.fetchTransactionHistory(
             chainAsset: chainAsset,
             address: "0x85c6627c4ed773cb7c32644b041f58a058b00d30",
             filters: [],
-            pagination: Pagination.init(count: 100)
+            pagination: Pagination(count: 100)
         )
         XCTAssertEqual(history?.transactions.count, 1)
     }
-    
+
     private func setupServices() throws {
         guard historyService == nil || networkWorker == nil else {
             return

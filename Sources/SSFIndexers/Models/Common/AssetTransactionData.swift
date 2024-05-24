@@ -2,7 +2,6 @@ import Foundation
 import SSFModels
 
 public struct AssetTransactionData: Equatable {
-    
     public let transactionId: String
     public let status: AssetTransactionStatus
     public let assetId: String?
@@ -17,7 +16,7 @@ public struct AssetTransactionData: Equatable {
     public let type: String
     public let reason: String?
     public let context: [String: String]?
-    
+
     public init(
         transactionId: String,
         status: AssetTransactionStatus,

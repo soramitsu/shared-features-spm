@@ -3,7 +3,7 @@ import Foundation
 public struct AssetTransactionPageData: Equatable {
     public let transactions: [AssetTransactionData]
     public let context: PaginationContext?
-    
+
     public init(
         transactions: [AssetTransactionData],
         context: PaginationContext? = nil
