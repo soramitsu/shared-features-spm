@@ -12,6 +12,7 @@ typealias BaseAssetId = String
 public enum PolkaswapLiquidityPoolServiceError: Swift.Error {
     case missingReservesAccountId
     case userPoolNotFound(poolId: String)
+    case dexIdNotFound(baseAssetId: String)
 }
 
 public protocol PolkaswapLiquidityPoolService {
@@ -27,6 +28,7 @@ public protocol PolkaswapLiquidityPoolService {
     func fetchUserPool(assetIdPair: AssetIdPair, accountId: AccountId) async throws -> AccountPool
     func fetchPoolsAPY() async throws -> [PoolApyInfo]
     func fetchReserves(pools: [LiquidityPair]) async throws -> [PolkaswapPoolReservesInfo]
+    func fetchDexId(baseAssetId: String) async throws -> String
 }
 
 public final class PolkaswapLiquidityPoolServiceDefault {
@@ -49,6 +51,18 @@ public final class PolkaswapLiquidityPoolServiceDefault {
 }
 
 extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
+    public func fetchDexId(baseAssetId: String) async throws -> String {
+        let dexInfos = try await dexManagerStorage.dexInfos(chain: chain)
+        
+        let dexInfosArray = dexInfos.compactMap { [$0.value.baseAssetId.code: $0.key] }
+        let dexIdByBaseAssetId = Dictionary(dexInfosArray.flatMap { $0 }, uniquingKeysWith: { _, last in last })
+        guard let dexId = dexIdByBaseAssetId[baseAssetId] else {
+            throw PolkaswapLiquidityPoolServiceError.dexIdNotFound(baseAssetId: baseAssetId)
+        }
+        
+        return dexId
+    }
+    
     public func fetchUserPool(assetIdPair: AssetIdPair, accountId: AccountId) async throws -> AccountPool {
         let pool = try await fetchUserPools(accountId: accountId).first(where: { $0.poolId == assetIdPair.poolId })
         

@@ -90,16 +90,6 @@ public enum XcmAssembly {
 }
 
 public extension XcmAssembly {
-    struct SigningWrapperData: Equatable {
-        public let publicKeyData: Data
-        public let secretKeyData: Data
-
-        public init(publicKeyData: Data, secretKeyData: Data) {
-            self.publicKeyData = publicKeyData
-            self.secretKeyData = secretKeyData
-        }
-    }
-
     struct FromChainData {
         public let chainId: String
         public let cryptoType: CryptoType
@@ -113,7 +103,7 @@ public extension XcmAssembly {
             cryptoType: CryptoType,
             chainMetadata: RuntimeMetadataItemProtocol?,
             accountId: AccountId,
-            signingWrapperData: XcmAssembly.SigningWrapperData,
+            signingWrapperData: SigningWrapperData,
             chainType: ChainBaseType
         ) {
             self.chainId = chainId

@@ -7,7 +7,7 @@ enum PoolsExtrinsicBuilderError: Error {
     case unexpectedError
 }
 
-protocol PoolsExtrinsicBuilder {
+public protocol PoolsExtrinsicBuilder {
     func depositLiqudityExtrinsic(
         pairs: [LiquidityPair],
         model: SupplyLiquidityInfo
@@ -16,7 +16,7 @@ protocol PoolsExtrinsicBuilder {
     func removeLiqudityExtrinsic(model: RemoveLiquidityInfo) throws -> ExtrinsicBuilderClosure
 }
 
-final class PolkaswapExtrinsicBuilder {
+public final class PolkaswapExtrinsicBuilder {
     private let callFactory: SubstrateCallFactory
 
     init(callFactory: SubstrateCallFactory) {
@@ -25,7 +25,7 @@ final class PolkaswapExtrinsicBuilder {
 }
 
 extension PolkaswapExtrinsicBuilder: PoolsExtrinsicBuilder {
-    func depositLiqudityExtrinsic(
+    public func depositLiqudityExtrinsic(
         pairs: [LiquidityPair],
         model: SupplyLiquidityInfo
     ) throws -> ExtrinsicBuilderClosure {
@@ -82,7 +82,7 @@ extension PolkaswapExtrinsicBuilder: PoolsExtrinsicBuilder {
         }
     }
 
-    func removeLiqudityExtrinsic(model: RemoveLiquidityInfo) throws -> ExtrinsicBuilderClosure {
+    public func removeLiqudityExtrinsic(model: RemoveLiquidityInfo) throws -> ExtrinsicBuilderClosure {
         guard let amountMinA = model.amountMinA
             .toSubstrateAmount(precision: model.baseAsset.precision),
             let amountMinB = model.amountMinB

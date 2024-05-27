@@ -8,7 +8,7 @@ struct ChainAccountRequest {
     let accountId: AccountId?
 }
 
-enum ChainAccountFetchingError: Error {
+public enum ChainAccountFetchingError: Error {
     case accountNotExists
 }
 
