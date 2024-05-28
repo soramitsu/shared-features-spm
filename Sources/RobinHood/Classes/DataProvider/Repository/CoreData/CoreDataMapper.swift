@@ -174,4 +174,13 @@ public final class CodableCoreDataMapper<
         )
         try container.populate(entity: entity, using: context)
     }
+
+    public func dict(for model: T) throws -> [String : Any] {
+        let data = try JSONEncoder().encode(model)
+        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        guard let json = json else {
+            throw CoreDataRepositoryError.creationFailed
+        }
+        return json
+    }
 }
