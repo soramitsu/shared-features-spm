@@ -102,6 +102,10 @@ public final class AnyCoreDataMapper<T: Identifiable, U: NSManagedObject>: CoreD
     public var entityIdentifierFieldName: String {
         _entityIdentifierFieldName
     }
+    
+    public func dict(for model: DataProviderModel) throws -> [String: Any] {
+        try _dict(model)
+    }
 }
 
 /**
