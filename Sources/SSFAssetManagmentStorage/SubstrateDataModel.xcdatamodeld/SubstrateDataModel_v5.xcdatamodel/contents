@@ -30,6 +30,7 @@
         <attribute name="historyApiType" optional="YES" attributeType="String"/>
         <attribute name="historyApiUrl" optional="YES" attributeType="URI"/>
         <attribute name="icon" optional="YES" attributeType="URI"/>
+        <attribute name="identityChain" optional="YES" attributeType="String"/>
         <attribute name="isEthereumBased" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="isOrml" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="isTestnet" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
