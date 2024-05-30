@@ -107,7 +107,7 @@ public final class ExtrinsicBuilder {
         metadata: RuntimeMetadata
     ) throws {
         for checkString in try metadata.extrinsic.signedExtensions(using: metadata.schemaResolver) {
-            guard let check = ExtrinsicCheck(rawValue: checkString) else {
+            guard let check = ExtrinsicCheck.from(string: checkString, runtimeMetadata: metadata) else {
                 continue
             }
 
@@ -215,7 +215,7 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
         let rawSignature = try signer(data)
 
         var signatureJson = JSON.null
-        var signatureTypeString = KnownType.signature.rawValue
+        var signatureTypeString = metadata.signatureType
 
         // Some networks like Moonbeam/Moonriver have signature as direct byte-array rather than
         // MultiSignature enum
@@ -271,7 +271,7 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
         let call = try prepareExtrinsicCall(for: metadata)
 
         Log.enable(kind: "DynamicScale")
-        let extrinsic = Extrinsic(signature: signature, call: call)
+        let extrinsic = Extrinsic(call: call, signature: signature)
 
         try encoder.append(extrinsic, ofType: GenericType.extrinsic.name)
 
