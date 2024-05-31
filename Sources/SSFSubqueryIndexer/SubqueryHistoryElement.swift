@@ -1,5 +1,6 @@
 import Foundation
 import SSFModels
+import SSFIndexers
 
 struct SubqueryHistoryElement: Decodable, RewardOrSlashData {
     enum CodingKeys: String, CodingKey {

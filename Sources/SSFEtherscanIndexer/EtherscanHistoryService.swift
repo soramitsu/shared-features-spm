@@ -3,6 +3,7 @@ import RobinHood
 import SSFUtils
 import SSFModels
 import SSFNetwork
+import SSFIndexers
 
 enum EtherscanHistoryServiceError: Error {
     case remoteResultNotFetched

@@ -3,8 +3,9 @@ import RobinHood
 import SSFModels
 import SSFNetwork
 import XCTest
+import SSFIndexers
 
-@testable import SSFIndexers
+@testable import SSFSoraSubsquidIndexer
 
 final class SoraSubsquidHistoryServiceTests: BaseHistoryServiceTestCase {
     private var expectedResponse: GraphQLResponse<SoraSubsquidHistoryConnectionResponse> {

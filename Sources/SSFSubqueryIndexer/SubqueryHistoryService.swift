@@ -5,6 +5,7 @@ import SSFModels
 import SSFChainRegistry
 import SSFRuntimeCodingService
 import SSFNetwork
+import SSFIndexers
 
 actor SubqueryHistoryService: HistoryService {
     private let txStorage: AsyncAnyRepository<TransactionHistoryItem>

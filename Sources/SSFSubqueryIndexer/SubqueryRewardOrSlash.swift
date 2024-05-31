@@ -1,4 +1,5 @@
 import Foundation
+import SSFIndexers
 
 struct SubqueryRewardOrSlash: Decodable, RewardOrSlash {
     enum CodingKeys: String, CodingKey {

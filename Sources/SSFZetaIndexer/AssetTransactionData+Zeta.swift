@@ -39,10 +39,21 @@ extension AssetTransactionData {
             details: nil,
             amount: amount,
             fees: [fee],
-            timestamp: Self.convertGiantsquid(timestamp: item.timestamp),
+            timestamp: Self.convertZeta(timestamp: item.timestamp),
             type: type.rawValue,
             reason: nil,
             context: nil
         )
+    }
+    
+    static func convertZeta(timestamp: String) -> Int64? {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"
+        let date = dateFormatter.date(from: timestamp)
+        guard let dateStamp = date?.timeIntervalSince1970 else {
+            return nil
+        }
+        let timestamp = Int64(dateStamp)
+        return timestamp
     }
 }

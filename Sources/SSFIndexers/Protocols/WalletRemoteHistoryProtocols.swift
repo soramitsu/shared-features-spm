@@ -1,7 +1,7 @@
 import Foundation
 import SSFModels
 
-protocol WalletRemoteHistoryItemProtocol {
+public protocol WalletRemoteHistoryItemProtocol {
     var identifier: String { get }
     var itemBlockNumber: UInt64 { get }
     var itemExtrinsicIndex: UInt16 { get }

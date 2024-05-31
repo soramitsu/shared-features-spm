@@ -1,5 +1,6 @@
 import Foundation
 import SSFModels
+import SSFIndexers
 
 struct SubsquidHistoryResponse: Decodable {
     let historyElements: [SubsquidHistoryElement]

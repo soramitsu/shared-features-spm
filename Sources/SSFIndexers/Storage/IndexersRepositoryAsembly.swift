@@ -1,17 +1,19 @@
 import Foundation
 import RobinHood
 
-typealias IndexersRepository = AsyncCoreDataRepositoryDefault<
+public typealias IndexersRepository = AsyncCoreDataRepositoryDefault<
     TransactionHistoryItem,
     CDTransactionHistoryItem
 >
 
-protocol IndexersRepositoryAssembly {
+public protocol IndexersRepositoryAssembly {
     func createRepository() throws -> IndexersRepository
 }
 
-final class IndexersRepositoryAssemblyDefault: IndexersRepositoryAssembly {
-    func createRepository() throws -> IndexersRepository {
+public final class IndexersRepositoryAssemblyDefault: IndexersRepositoryAssembly {
+    public init() {}
+    
+    public func createRepository() throws -> IndexersRepository {
         try IndexersStorageFacade().createRepository()
     }
 }

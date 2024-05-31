@@ -1,6 +1,6 @@
 import Foundation
 
-protocol RewardOrSlash {
+public protocol RewardOrSlash {
     var amount: String { get }
     var isReward: Bool { get }
     var era: Int? { get }

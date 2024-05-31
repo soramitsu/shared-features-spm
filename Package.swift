@@ -37,7 +37,15 @@ let package = Package(
         .library(name: "SSFPolkaswap", targets: ["SSFPolkaswap"]),
         .library(name: "SSFPools", targets: ["SSFPools"]),
         .library(name: "SSFPoolsStorage", targets: ["SSFPoolsStorage"]),
-        .library(name: "SSFIndexers", targets: ["SSFIndexers"])
+        .library(name: "SSFIndexers", targets: ["SSFIndexers"]),
+        .library(name: "SSFEtherscanIndexer", targets: ["SSFEtherscanIndexer"]),
+        .library(name: "SSFGiantsquidIndexer", targets: ["SSFGiantsquidIndexer"]),
+        .library(name: "SSFOklinkIndexer", targets: ["SSFOklinkIndexer"]),
+        .library(name: "SSFReefIndexer", targets: ["SSFReefIndexer"]),
+        .library(name: "SSFSoraSubsquidIndexer", targets: ["SSFSoraSubsquidIndexer"]),
+        .library(name: "SSFSubqueryIndexer", targets: ["SSFSubqueryIndexer"]),
+        .library(name: "SSFSubsquidIndexer", targets: ["SSFSubsquidIndexer"]),
+        .library(name: "SSFZetaIndexer", targets: ["SSFZetaIndexer"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
@@ -428,7 +436,8 @@ let package = Package(
         .target(name: "SSFReefIndexer", dependencies: ["SSFIndexers"]),
         .target(name: "SSFSoraSubsquidIndexer", dependencies: ["SSFIndexers"]),
         .target(name: "SSFSubqueryIndexer", dependencies: ["SSFIndexers"]),
-        .target(name: "SSFSubsquidIndexer", dependencies: ["SSFIndexers"]) 
+        .target(name: "SSFSubsquidIndexer", dependencies: ["SSFIndexers"]),
+        .target(name: "SSFZetaIndexer", dependencies: ["SSFIndexers"])
     ],
     cLanguageStandard: .gnu11,
     cxxLanguageStandard: .gnucxx14

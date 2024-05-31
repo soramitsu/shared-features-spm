@@ -1,4 +1,5 @@
 import Foundation
+import SSFIndexers
 
 struct SubsquidHistoryServiceFilters {
     static func query(

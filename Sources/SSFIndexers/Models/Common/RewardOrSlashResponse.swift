@@ -1,5 +1,5 @@
 import Foundation
 
-protocol RewardOrSlashResponse {
+public protocol RewardOrSlashResponse {
     var data: [RewardOrSlashData] { get }
 }

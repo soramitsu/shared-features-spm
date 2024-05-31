@@ -1,6 +1,7 @@
 import Foundation
 import SSFNetwork
 import SSFModels
+import SSFIndexers
 
 final class ZetaHistoryRequest: RequestConfig {
     init(

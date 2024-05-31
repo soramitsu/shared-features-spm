@@ -2,8 +2,9 @@ import MocksBasket
 import SSFModels
 import SSFNetwork
 import XCTest
+import SSFIndexers
 
-@testable import SSFIndexers
+@testable import SSFZetaIndexer
 
 final class ZetaHistoryServiceTests: BaseHistoryServiceTestCase {
     private var expectedResponse: ZetaHistoryResponse {

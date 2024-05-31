@@ -2,8 +2,9 @@ import MocksBasket
 import SSFModels
 import SSFNetwork
 import XCTest
+import SSFIndexers
 
-@testable import SSFIndexers
+@testable import SSFOklinkIndexer
 
 final class OklinkHistoryServiceTests: BaseHistoryServiceTestCase {
     private var expectedResponse: OklinkHistoryResponse {

@@ -1,6 +1,6 @@
 import Foundation
 
-protocol RewardOrSlashData {
+public protocol RewardOrSlashData {
     var identifier: String { get }
     var timestamp: String { get }
     var address: String { get }

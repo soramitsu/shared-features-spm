@@ -3,6 +3,7 @@ import RobinHood
 import SSFUtils
 import SSFModels
 import SSFNetwork
+import SSFIndexers
 
 final actor SubsquidHistoryService: HistoryService {
     private let txStorage: AsyncAnyRepository<TransactionHistoryItem>

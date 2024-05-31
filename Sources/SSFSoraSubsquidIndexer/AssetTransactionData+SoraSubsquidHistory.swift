@@ -1,6 +1,7 @@
 import Foundation
 import SSFModels
 import BigInt
+import SSFIndexers
 
 extension AssetTransactionData {
     static func createTransaction(

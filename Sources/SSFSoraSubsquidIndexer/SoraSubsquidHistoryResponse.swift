@@ -1,6 +1,7 @@
 import Foundation
 import SSFModels
 import SSFUtils
+import SSFIndexers
 
 struct SoraSubsquidPageInfo: Decodable {
     let endCursor: String?
