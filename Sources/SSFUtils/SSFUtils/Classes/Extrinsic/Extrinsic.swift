@@ -29,16 +29,16 @@ public struct ExtrinsicSignedExtra: Codable {
 
 public struct Extrinsic: Codable {
     enum CodingKeys: String, CodingKey {
-        case signature
         case call
+        case signature
     }
 
-    public let signature: ExtrinsicSignature?
     public let call: JSON
+    public let signature: ExtrinsicSignature?
 
-    public init(signature: ExtrinsicSignature?, call: JSON) {
-        self.signature = signature
+    public init(call: JSON, signature: ExtrinsicSignature?) {
         self.call = call
+        self.signature = signature
     }
 }
 
