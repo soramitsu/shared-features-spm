@@ -135,9 +135,18 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                     throw XcmError.missingCurrencyId
                 }
                 return try await estimateBridgeProxyBurn(
-                    fromChainModel: fromChainModel,
                     currencyId: currencyId,
                     destChainModel: destChainModel,
+                    accountId: destAccountId,
+                    amount: amount,
+                    path: callPath
+                )
+            case .soraBridgeAppBurn:
+                let currencyId = fromChainModel.assets
+                    .first(where: { $0.symbol.lowercased() == assetSymbol.lowercased() })?
+                    .currencyId
+                return try await estimateSoraAppBridgeProxyBurn(
+                    currencyId: currencyId,
                     accountId: destAccountId,
                     amount: amount,
                     path: callPath
@@ -229,7 +238,6 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                     throw XcmError.missingCurrencyId
                 }
                 return try await submitBridgeProxyBurn(
-                    fromChainModel: fromChainModel,
                     currencyId: currencyId,
                     destChainModel: destChainModel,
                     accountId: destAccountId,
@@ -338,17 +346,29 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
     }
 
     private func makeBridgeProxyBurnExtrinsic(
-        fromChainModel: ChainModel,
         currencyId: String,
         destChainModel: ChainModel,
-        accountId: AccountId?,
+        accountId: AccountId,
         amount: BigUInt,
         path: XcmCallPath
-    ) throws -> ExtrinsicBuilderClosure {
-        try extrinsicBuilder.buildBridgeProxyBurn(
-            fromChainModel: fromChainModel,
+    ) -> ExtrinsicBuilderClosure {
+        extrinsicBuilder.buildBridgeProxyBurn(
             currencyId: currencyId,
             destChainModel: destChainModel,
+            accountId: accountId,
+            amount: amount,
+            path: path
+        )
+    }
+    
+    private func makeSoraBridgeAddBurnExtrinsic(
+        currencyId: String?,
+        accountId: AccountId,
+        amount: BigUInt,
+        path: XcmCallPath
+    ) -> ExtrinsicBuilderClosure {
+        extrinsicBuilder.buildSoraBridgeAddBurn(
+            currencyId: currencyId,
             accountId: accountId,
             amount: amount,
             path: path
@@ -483,36 +503,6 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
         }
     }
 
-    private func submitBridgeProxyBurn(
-        fromChainModel: ChainModel,
-        currencyId: String,
-        destChainModel: ChainModel,
-        accountId: AccountId?,
-        amount: BigUInt,
-        path: XcmCallPath
-    ) async throws -> SubmitExtrinsicResult {
-        let extrinsicCall = try makeBridgeProxyBurnExtrinsic(
-            fromChainModel: fromChainModel,
-            currencyId: currencyId,
-            destChainModel: destChainModel,
-            accountId: accountId,
-            amount: amount,
-            path: path
-        )
-
-        let extrinsicService = try await depsContainer.prepareDeps().extrinsicService
-
-        return await withCheckedContinuation { continuation in
-            extrinsicService.submit(
-                extrinsicCall,
-                signer: signingWrapper,
-                runningIn: .main
-            ) { result in
-                continuation.resume(returning: result)
-            }
-        }
-    }
-
     // MARK: - Fees
 
     private func estimateNativeTokenTransferFee(
@@ -628,15 +618,13 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
     // MARK: - Sora Mainnet
 
     private func estimateBridgeProxyBurn(
-        fromChainModel: ChainModel,
         currencyId: String,
         destChainModel: ChainModel,
-        accountId: AccountId?,
+        accountId: AccountId,
         amount: BigUInt,
         path: XcmCallPath
     ) async throws -> FeeExtrinsicResult {
-        let extrinsicCall = try makeBridgeProxyBurnExtrinsic(
-            fromChainModel: fromChainModel,
+        let extrinsicCall = makeBridgeProxyBurnExtrinsic(
             currencyId: currencyId,
             destChainModel: destChainModel,
             accountId: accountId,
@@ -652,6 +640,59 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             }
         }
     }
+    
+    private func submitBridgeProxyBurn(
+        currencyId: String,
+        destChainModel: ChainModel,
+        accountId: AccountId,
+        amount: BigUInt,
+        path: XcmCallPath
+    ) async throws -> SubmitExtrinsicResult {
+        let extrinsicCall = makeBridgeProxyBurnExtrinsic(
+            currencyId: currencyId,
+            destChainModel: destChainModel,
+            accountId: accountId,
+            amount: amount,
+            path: path
+        )
+
+        let extrinsicService = try await depsContainer.prepareDeps().extrinsicService
+
+        return await withCheckedContinuation { continuation in
+            extrinsicService.submit(
+                extrinsicCall,
+                signer: signingWrapper,
+                runningIn: .main
+            ) { result in
+                continuation.resume(returning: result)
+            }
+        }
+    }
+    
+    // MARK: - Liberland Mainnet
+    
+    private func estimateSoraAppBridgeProxyBurn(
+        currencyId: String?,
+        accountId: AccountId,
+        amount: BigUInt,
+        path: XcmCallPath
+    ) async throws -> FeeExtrinsicResult {
+        let extrinsicCall = makeSoraBridgeAddBurnExtrinsic(
+            currencyId: currencyId,
+            accountId: accountId,
+            amount: amount,
+            path: path
+        )
+
+        let extrinsicService = try await depsContainer.prepareDeps().extrinsicService
+
+        return await withCheckedContinuation { continuation in
+            extrinsicService.estimateFee(extrinsicCall, runningIn: .global()) { result in
+                continuation.resume(returning: result)
+            }
+        }
+    }
+    
 }
 
 private extension String {

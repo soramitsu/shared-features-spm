@@ -50,13 +50,19 @@ protocol XcmCallFactoryProtocol {
     ) async throws -> RuntimeCall<ReserveTransferAssetsCall>
 
     func bridgeProxyBurn(
-        fromChainModel: ChainModel,
         currencyId: String,
         destChainModel: ChainModel,
-        accountId: AccountId?,
+        accountId: AccountId,
         amount: BigUInt,
         path: XcmCallPath
     ) -> RuntimeCall<BridgeProxyBurnCall>
+    
+    func soraBridgeAppBurn(
+        currencyId: String?,
+        accountId: AccountId,
+        amount: BigUInt,
+        path: XcmCallPath
+    ) -> RuntimeCall<LiberlandBridgeProxyBurnCall>
 }
 
 final class XcmCallFactory: XcmCallFactoryProtocol {
@@ -285,26 +291,31 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
     }
 
     func bridgeProxyBurn(
-        fromChainModel _: ChainModel,
         currencyId: String,
         destChainModel: ChainModel,
-        accountId: AccountId?,
+        accountId: AccountId,
         amount: BigUInt,
         path: XcmCallPath
     ) -> RuntimeCall<BridgeProxyBurnCall> {
         let networkId = BridgeTypesGenericNetworkId(from: destChainModel)
         let assetId = SoraAssetId(wrappedValue: currencyId)
 
-        let destParachainId = UInt32(destChainModel.paraId ?? "")
-        let destParents: UInt8 = destChainModel.isRelaychain ? 1 : 0
-        let destination = createVersionedMultiLocation(
-            version: .V3,
-            chainModel: destChainModel,
-            parachainId: destParachainId,
-            accountId: accountId,
-            parents: destParents
-        )
-        let recipient = BridgeTypesGenericAccount.parachain(destination)
+        let recipient: BridgeTypesGenericAccount
+        switch destChainModel.knownChainEquivalent {
+        case .liberland:
+            recipient = .liberland(accountId)
+        default:
+            let destParachainId = UInt32(destChainModel.paraId ?? "")
+            let destParents: UInt8 = destChainModel.isRelaychain ? 1 : 0
+            let destination = createVersionedMultiLocation(
+                version: .V3,
+                chainModel: destChainModel,
+                parachainId: destParachainId,
+                accountId: accountId,
+                parents: destParents
+            )
+            recipient = .parachain(destination)
+        }
 
         let args = BridgeProxyBurnCall(
             networkId: networkId,
@@ -313,6 +324,26 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             amount: amount
         )
 
+        return RuntimeCall(
+            moduleName: path.moduleName,
+            callName: path.itemName,
+            args: args
+        )
+    }
+    
+    func soraBridgeAppBurn(
+        currencyId: String?,
+        accountId: AccountId,
+        amount: BigUInt,
+        path: XcmCallPath
+    ) -> RuntimeCall<LiberlandBridgeProxyBurnCall> {
+        let args = LiberlandBridgeProxyBurnCall(
+            networkId: .mainnet,
+            assetId: .init(currencyId: currencyId),
+            recipient: .sora(accountId),
+            amount: amount
+        )
+        
         return RuntimeCall(
             moduleName: path.moduleName,
             callName: path.itemName,

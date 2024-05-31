@@ -54,6 +54,10 @@ final class CallPathDeterminerImpl: CallPathDeterminer {
             return .bridgeProxyBurn
         case (.relaychain, .soraMainnet): // considers this case as to Sora mainnet bridge
             return .xcmPalletLimitedReserveTransferAssets
+        case (.liberland, .soraMainnet):
+            return .soraBridgeAppBurn
+        case (.soraMainnet, .liberland):
+            return .bridgeProxyBurn
         default:
             throw XcmError.directionNotSupported
         }

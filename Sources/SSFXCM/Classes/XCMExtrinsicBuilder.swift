@@ -49,13 +49,19 @@ protocol XcmExtrinsicBuilderProtocol {
     ) async throws -> ExtrinsicBuilderClosure
 
     func buildBridgeProxyBurn(
-        fromChainModel: ChainModel,
         currencyId: String,
         destChainModel: ChainModel,
-        accountId: AccountId?,
+        accountId: AccountId,
         amount: BigUInt,
         path: XcmCallPath
-    ) throws -> ExtrinsicBuilderClosure
+    ) -> ExtrinsicBuilderClosure
+    
+    func buildSoraBridgeAddBurn(
+        currencyId: String?,
+        accountId: AccountId,
+        amount: BigUInt,
+        path: XcmCallPath
+    ) -> ExtrinsicBuilderClosure
 }
 
 final class XcmExtrinsicBuilder: XcmExtrinsicBuilderProtocol {
@@ -170,17 +176,33 @@ final class XcmExtrinsicBuilder: XcmExtrinsicBuilderProtocol {
     }
 
     func buildBridgeProxyBurn(
-        fromChainModel: ChainModel,
         currencyId: String,
         destChainModel: ChainModel,
-        accountId: AccountId?,
+        accountId: AccountId,
         amount: BigUInt,
         path: XcmCallPath
-    ) throws -> ExtrinsicBuilderClosure {
+    ) -> ExtrinsicBuilderClosure {
         let call = callFactory.bridgeProxyBurn(
-            fromChainModel: fromChainModel,
             currencyId: currencyId,
             destChainModel: destChainModel,
+            accountId: accountId,
+            amount: amount,
+            path: path
+        )
+
+        return { builder in
+            try builder.adding(call: call)
+        }
+    }
+    
+    func buildSoraBridgeAddBurn(
+        currencyId: String?,
+        accountId: AccountId,
+        amount: BigUInt,
+        path: XcmCallPath
+    ) -> ExtrinsicBuilderClosure {
+        let call = callFactory.soraBridgeAppBurn(
+            currencyId: currencyId,
             accountId: accountId,
             amount: amount,
             path: path

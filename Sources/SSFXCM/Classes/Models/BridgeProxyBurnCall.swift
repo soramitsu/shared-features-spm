@@ -57,6 +57,7 @@ enum BridgeTypesSubNetworkId: Codable {
     case kusama
     case polkadot
     case rococo
+    case liberland
     case custom(UInt32)
 
     init(from chain: ChainModel) {
@@ -69,6 +70,8 @@ enum BridgeTypesSubNetworkId: Codable {
             self = .polkadot
         case .rococo:
             self = .rococo
+        case .liberland:
+            self = .liberland
         default:
             self = .custom(0)
         }
@@ -92,6 +95,9 @@ enum BridgeTypesSubNetworkId: Codable {
             try container.encodeNil()
         case let .custom(value):
             try container.encode(value)
+        case .liberland:
+            try container.encode("Liberland")
+            try container.encodeNil()
         }
     }
 }
@@ -115,6 +121,7 @@ extension BridgeTypesSubNetworkId: Equatable {
 enum BridgeTypesGenericAccount: Codable {
     case evm(AccountId)
     case sora(AccountId)
+    case liberland(AccountId)
     case parachain(XcmVersionedMultiLocation)
     case unknown
     case root
@@ -138,6 +145,9 @@ enum BridgeTypesGenericAccount: Codable {
         case .root:
             try container.encode("Root")
             try container.encodeNil()
+        case let .liberland(accountId):
+            try container.encode("Liberland")
+            try container.encode(accountId)
         }
     }
 }
@@ -153,6 +163,8 @@ extension BridgeTypesGenericAccount: Equatable {
         case let (.sora(lhsValue), .sora(rhsValue)):
             return lhsValue == rhsValue
         case let (.parachain(lhsValue), .parachain(rhsValue)):
+            return lhsValue == rhsValue
+        case let (.liberland(lhsValue), .liberland(rhsValue)):
             return lhsValue == rhsValue
         default:
             return false
