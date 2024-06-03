@@ -8,6 +8,15 @@ configurations:
         ../Sources/MocksBasket/SSFAssetManagmentTests
       args:
         autoMockableTestableImports: ["SSFAssetManagment", "SSFModels"]
+# SSFAssetManagmentStorage
+    - sources:
+      - ../Sources/SSFAssetManagmentStorage
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Sources/MocksBasket/SSFAssetManagmentStorage
+      args:
+        autoMockableTestableImports: ["SSFAssetManagmentStorage", "SSFModels"]
 # SSFAccountManagment
     - sources:
       - ../Sources/SSFAccountManagment
@@ -62,6 +71,7 @@ configurations:
         ../Sources/MocksBasket/SSFUtils
       args:
         autoMockableTestableImports: ["SSFUtils", "BigInt"]
+# SSFNetwork
     - sources:
       - ../Sources/SSFNetwork
       templates:
@@ -70,6 +80,7 @@ configurations:
         ../Sources/MocksBasket/SSFNetwork
       args:
         autoMockableTestableImports: ["SSFNetwork", "RobinHood"]
+# SSFXCM
     - sources:
       - ../Sources/SSFXCM
       templates:
@@ -78,6 +89,7 @@ configurations:
         ../Sources/MocksBasket/SSFXCM
       args:
         autoMockableTestableImports: ["SSFXCM", "SSFUtils", "SSFNetwork", "SSFModels", "RobinHood", "BigInt", "SSFExtrinsicKit", "SSFChainRegistry", "SSFRuntimeCodingService", "SSFSigner", "SSFChainConnection", "SSFStorageQueryKit"]
+# SSFExtrinsicKit
     - sources:
       - ../Sources/SSFExtrinsicKit
       templates:
@@ -86,6 +98,7 @@ configurations:
         ../Sources/MocksBasket/SSFExtrinsicKit
       args:
         autoMockableTestableImports: ["SSFUtils", "SSFCrypto", "SSFModels", "RobinHood", "SSFExtrinsicKit", "IrohaCrypto", "SSFRuntimeCodingService", "SSFSigner"]
+# SSFTransferService
     - sources:
       - ../Sources/SSFTransferService
       templates:
@@ -94,3 +107,12 @@ configurations:
         ../Sources/MocksBasket/SSFTransferService
       args:
         autoMockableTestableImports: ["SSFTransferService", "SSFModels", "Web3", "Web3ContractABI"]
+# SSFChainRegistry
+    - sources:
+      - ../Sources/SSFChainRegistry
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Sources/MocksBasket/SSFChainRegistry
+      args:
+        autoMockableTestableImports: ["SSFChainRegistry","Web3", "SSFUtils", "RobinHood", "SSFModels", "SSFRuntimeCodingService", "SSFChainConnection", "SSFNetwork", "SSFLogger"]

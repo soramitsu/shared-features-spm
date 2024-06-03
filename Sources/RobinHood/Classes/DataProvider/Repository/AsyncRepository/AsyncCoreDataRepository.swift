@@ -21,7 +21,7 @@ public protocol AsyncCoreDataRepository {
     func save(
         models: [Model],
         deleteIds: [String]
-    ) async throws
+    ) async
 }
 
 public extension AsyncCoreDataRepository {
@@ -106,7 +106,7 @@ public final class AsyncCoreDataRepositoryDefault<
     public func save(
         models: [Model],
         deleteIds: [String]
-    ) async throws {
+    ) async {
         let operation = coreDataRepository.saveOperation(
             { models },
             { deleteIds }

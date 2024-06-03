@@ -1,6 +1,7 @@
 import Foundation
 import SSFUtils
 
+// sourcery: AutoMockable
 public protocol RuntimeCoderFactoryProtocol {
     var specVersion: UInt32 { get }
     var txVersion: UInt32 { get }
