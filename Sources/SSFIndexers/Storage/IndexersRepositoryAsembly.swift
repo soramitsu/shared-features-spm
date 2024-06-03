@@ -12,7 +12,7 @@ public protocol IndexersRepositoryAssembly {
 
 public final class IndexersRepositoryAssemblyDefault: IndexersRepositoryAssembly {
     public init() {}
-    
+
     public func createRepository() throws -> IndexersRepository {
         try IndexersStorageFacade().createRepository()
     }

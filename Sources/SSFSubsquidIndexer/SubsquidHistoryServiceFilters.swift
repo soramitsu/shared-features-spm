@@ -1,7 +1,7 @@
 import Foundation
 import SSFIndexers
 
-struct SubsquidHistoryServiceFilters {
+enum SubsquidHistoryServiceFilters {
     static func query(
         for address: String,
         count: Int,
@@ -12,7 +12,9 @@ struct SubsquidHistoryServiceFilters {
         let offset: Int = cursor.map { Int($0) ?? 0 } ?? 0
         return """
         query MyQuery {
-          historyElements(where: {address_eq: "\(address)", \(filterString)}, orderBy: timestamp_DESC, limit: \(count), offset: \(offset)) {
+          historyElements(where: {address_eq: "\(address)", \(
+              filterString
+          )}, orderBy: timestamp_DESC, limit: \(count), offset: \(offset)) {
             timestamp
             id
             extrinsicIdx
@@ -46,7 +48,7 @@ struct SubsquidHistoryServiceFilters {
         }
         """
     }
-    
+
     static func prepareFilter(
         filters: [WalletTransactionHistoryFilter]
     ) -> String {

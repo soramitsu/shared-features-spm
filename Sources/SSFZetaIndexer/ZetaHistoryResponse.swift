@@ -1,6 +1,6 @@
+import BigInt
 import Foundation
 import SSFUtils
-import BigInt
 
 struct ZetaHistoryResponse: Codable {
     let items: [ZetaItem]

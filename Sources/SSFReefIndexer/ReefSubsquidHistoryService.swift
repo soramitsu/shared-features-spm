@@ -1,9 +1,9 @@
 import Foundation
 import RobinHood
-import SSFUtils
+import SSFIndexers
 import SSFModels
 import SSFNetwork
-import SSFIndexers
+import SSFUtils
 
 actor ReefSubsquidHistoryService: HistoryService {
     private let txStorage: AsyncAnyRepository<TransactionHistoryItem>
@@ -16,9 +16,9 @@ actor ReefSubsquidHistoryService: HistoryService {
         self.txStorage = txStorage
         self.networkWorker = networkWorker
     }
-    
+
     // MARK: - HistoryService
-    
+
     func fetchTransactionHistory(
         chainAsset: ChainAsset,
         address: String,
@@ -30,14 +30,13 @@ actor ReefSubsquidHistoryService: HistoryService {
             defaultRow: pagination.count
         ).byApplying(filters: filters)
 
-        guard
-            !historyContext.isComplete,
-            chainAsset.isUtility,
-            let baseUrl = chainAsset.chain.externalApi?.history?.url
-        else {
+        guard !historyContext.isComplete,
+              chainAsset.isUtility,
+              let baseUrl = chainAsset.chain.externalApi?.history?.url else
+        {
             return nil
         }
-        
+
         async let subqueryHistory = try await fetchHistory(
             address: address,
             url: baseUrl,
@@ -47,14 +46,15 @@ actor ReefSubsquidHistoryService: HistoryService {
             stakingsCursor: pagination.context?["stakingsCursor"]
         )
 
-        let subqueryTransactions: [AssetTransactionData] = try await subqueryHistory.history.sorted(by: { item1, item2 in
-            item1.itemTimestamp > item2.itemTimestamp
-        }).map { item in
-            item.createTransactionForAddress(
-                address,
-                chainAsset: chainAsset
-            )
-        }
+        let subqueryTransactions: [AssetTransactionData] = try await subqueryHistory.history
+            .sorted(by: { item1, item2 in
+                item1.itemTimestamp > item2.itemTimestamp
+            }).map { item in
+                item.createTransactionForAddress(
+                    address,
+                    chainAsset: chainAsset
+                )
+            }
 
         let map = try await createHistoryMap(
             subqueryItems: subqueryTransactions,
@@ -62,7 +62,7 @@ actor ReefSubsquidHistoryService: HistoryService {
         )
         return map
     }
-    
+
     // MARK: - Private methods
 
     private func fetchHistory(
@@ -85,8 +85,9 @@ actor ReefSubsquidHistoryService: HistoryService {
             url: url,
             query: queryString
         )
-        
-        let response: GraphQLResponse<ReefResponseData> = try await networkWorker.performRequest(with: request)
+
+        let response: GraphQLResponse<ReefResponseData> = try await networkWorker
+            .performRequest(with: request)
         return try response.result()
     }
 
@@ -148,19 +149,19 @@ actor ReefSubsquidHistoryService: HistoryService {
         let isTransfersHasNextPage = (reefData.transfersConnection?.pageInfo?.hasNextPage).or(false)
         let isStakingHasNextPage = (reefData.stakingsConnection?.pageInfo?.hasNextPage).or(false)
         let hasNextPage = isTransfersHasNextPage || isStakingHasNextPage
-        
+
         guard hasNextPage else {
             return AssetTransactionPageData(
                 transactions: subqueryItems,
                 context: nil
             )
         }
-        
+
         var context: [String: String] = [:]
         if let transfersCursor = reefData.transfersConnection?.pageInfo?.endCursor {
             context["transfersCursor"] = transfersCursor
         }
-        
+
         if let stakingsCursor = reefData.stakingsConnection?.pageInfo?.endCursor {
             context["stakingsCursor"] = stakingsCursor
         }

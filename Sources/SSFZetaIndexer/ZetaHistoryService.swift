@@ -1,32 +1,31 @@
+import BigInt
 import Foundation
 import RobinHood
-import SSFUtils
-import SSFModels
-import BigInt
-import SSFNetwork
 import SSFIndexers
+import SSFModels
+import SSFNetwork
+import SSFUtils
 
 final actor ZetaHistoryService: HistoryService {
-    
     private let networkWorker: NetworkWorker
-    
+
     init(networkWorker: NetworkWorker) {
         self.networkWorker = networkWorker
     }
-    
+
     // MARK: - HistoryService
-    
+
     func fetchTransactionHistory(
         chainAsset: ChainAsset,
         address: String,
-        filters: [WalletTransactionHistoryFilter],
-        pagination: Pagination
+        filters _: [WalletTransactionHistoryFilter],
+        pagination _: Pagination
     ) async throws -> AssetTransactionPageData? {
         let remote = try await fetchHistory(
             address: address,
             chainAsset: chainAsset
         )
-        
+
         let map = createMap(
             remote: remote,
             address: address,
@@ -34,9 +33,9 @@ final actor ZetaHistoryService: HistoryService {
         )
         return map
     }
-    
+
     // MARK: - Private methods
-    
+
     private func fetchHistory(
         address: String,
         chainAsset: ChainAsset
@@ -44,7 +43,7 @@ final actor ZetaHistoryService: HistoryService {
         guard let historyUrl = chainAsset.chain.externalApi?.history?.url else {
             throw HistoryError.urlMissing
         }
-        
+
         let request = try ZetaHistoryRequest(
             historyUrl: historyUrl,
             chainAsset: chainAsset,
@@ -70,7 +69,7 @@ final actor ZetaHistoryService: HistoryService {
             }
             .filter { ($0.amount?.decimalValue ?? 0) > 0 }
             .sorted(by: { $0.timestamp ?? 0 > $1.timestamp ?? 0 })
-        
+
         return AssetTransactionPageData(transactions: transactions)
     }
 }

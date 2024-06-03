@@ -1,8 +1,8 @@
-import Foundation
 import BigInt
+import Foundation
 import SSFCrypto
-import SSFModels
 import SSFIndexers
+import SSFModels
 
 extension AssetTransactionData {
     static func createTransaction(
@@ -19,9 +19,12 @@ extension AssetTransactionData {
         let type: TransactionType = transfer.from?.id == address ? .outgoing : .incoming
 
         var fees: [AssetTransactionFee] = []
-        if
-            let feeAmountString = transfer.feeAmount,
-            let amount = SubstrateAmountDecimal(string: feeAmountString, precision: asset.precision) {
+        if let feeAmountString = transfer.feeAmount,
+           let amount = SubstrateAmountDecimal(
+               string: feeAmountString,
+               precision: asset.precision
+           )
+        {
             let fee = AssetTransactionFee(
                 identifier: asset.id,
                 assetId: asset.id,
@@ -31,11 +34,11 @@ extension AssetTransactionData {
             fees.append(fee)
         }
 
-        if
-            let signedData = transfer.signedData,
-            let fee = signedData.fee,
-            let partialFee = fee.partialFee,
-            let amount = SubstrateAmountDecimal(big: partialFee, precision: asset.precision) {
+        if let signedData = transfer.signedData,
+           let fee = signedData.fee,
+           let partialFee = fee.partialFee,
+           let amount = SubstrateAmountDecimal(big: partialFee, precision: asset.precision)
+        {
             let fee = AssetTransactionFee(
                 identifier: asset.id,
                 assetId: asset.id,
@@ -164,7 +167,7 @@ extension AssetTransactionData {
             context: nil
         )
     }
-    
+
     static func convertGiantsquid(timestamp: String) -> Int64? {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"

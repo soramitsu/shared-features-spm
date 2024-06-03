@@ -1,9 +1,9 @@
 import MocksBasket
 import RobinHood
+import SSFIndexers
 import SSFModels
 import SSFNetwork
 import XCTest
-import SSFIndexers
 
 @testable import SSFSubsquidIndexer
 

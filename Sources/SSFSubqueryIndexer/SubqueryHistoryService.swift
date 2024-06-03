@@ -1,11 +1,11 @@
 import Foundation
 import RobinHood
-import SSFUtils
-import SSFModels
 import SSFChainRegistry
-import SSFRuntimeCodingService
-import SSFNetwork
 import SSFIndexers
+import SSFModels
+import SSFNetwork
+import SSFRuntimeCodingService
+import SSFUtils
 
 actor SubqueryHistoryService: HistoryService {
     private let txStorage: AsyncAnyRepository<TransactionHistoryItem>
@@ -21,9 +21,9 @@ actor SubqueryHistoryService: HistoryService {
         self.chainRegistry = chainRegistry
         self.networkWorker = networkWorker
     }
-    
+
     // MARK: - HistoryService
-    
+
     func fetchTransactionHistory(
         chainAsset: ChainAsset,
         address: String,
@@ -35,10 +35,9 @@ actor SubqueryHistoryService: HistoryService {
             defaultRow: pagination.count
         ).byApplying(filters: filters)
 
-        guard
-            !historyContext.isComplete,
-            let baseUrl = chainAsset.chain.externalApi?.history?.url
-        else {
+        guard !historyContext.isComplete,
+              let baseUrl = chainAsset.chain.externalApi?.history?.url else
+        {
             return nil
         }
 
@@ -49,7 +48,7 @@ actor SubqueryHistoryService: HistoryService {
             url: baseUrl,
             filters: filters
         )
-        
+
         let filteredTransactions = try await filter(
             remoteTransactions: remoteHistory.historyElements.nodes,
             chainAsset: chainAsset
@@ -60,15 +59,14 @@ actor SubqueryHistoryService: HistoryService {
                 chainAsset: chainAsset
             )
         }
-        
-        let result = await AssetTransactionPageData(
+
+        let result = try await AssetTransactionPageData(
             transactions: transactions,
-            context: try remoteHistory.historyElements.pageInfo.toContext()
+            context: remoteHistory.historyElements.pageInfo.toContext()
         )
         return result
     }
-    
-    
+
     // MARK: - Privamte methods
 
     private func fetchSubqueryHistoryData(
@@ -84,13 +82,14 @@ actor SubqueryHistoryService: HistoryService {
             cursor: cursor,
             filters: filters
         )
-        
+
         let request = try HistoryRequest(
             url: url,
             query: queryString
         )
-        
-        let response: GraphQLResponse<SubqueryHistoryData> = try await networkWorker.performRequest(with: request)
+
+        let response: GraphQLResponse<SubqueryHistoryData> = try await networkWorker
+            .performRequest(with: request)
         return try response.result()
     }
 
@@ -151,7 +150,7 @@ actor SubqueryHistoryService: HistoryService {
         }
         """
     }
-    
+
     private func filter(
         remoteTransactions: [SubqueryHistoryElement],
         chainAsset: ChainAsset
@@ -162,7 +161,7 @@ actor SubqueryHistoryService: HistoryService {
 
         let filteredTransactions = try remoteTransactions.filter { transaction in
             var assetId: String?
-            
+
             switch transaction.type {
             case let .transfer(transfer):
                 assetId = transfer.assetId
@@ -173,46 +172,46 @@ actor SubqueryHistoryService: HistoryService {
             case .none:
                 assetId = nil
             }
-            
+
             if chainAsset.chainAssetType != .normal, assetId == nil {
                 return false
             }
-            
+
             if chainAsset.chainAssetType == .normal, assetId != nil {
                 return false
             }
-            
+
             if chainAsset.chainAssetType == .normal, assetId == nil {
                 return true
             }
-            
+
             guard let assetId = assetId else {
                 return false
             }
-            
+
             let assetIdBytes = try Data(hexStringSSF: assetId)
             let encoder = coderFactory.createEncoder()
             guard let currencyId = chainAsset.currencyId else {
                 return false
             }
-            
+
             guard let type = coderFactory.metadata.schema?.types
                 .first(where: { $0.type.path.contains("CurrencyId") })?
                 .type
                 .path
-                .joined(separator: "::")
-            else {
+                .joined(separator: "::") else
+            {
                 return false
             }
             try encoder.append(currencyId, ofType: type)
             let currencyIdBytes = try encoder.encode()
-            
+
             return currencyIdBytes == assetIdBytes
         }
-        
+
         return filteredTransactions
     }
-    
+
     private func fetchCoderFactory(
         chainId: ChainModel.Id
     ) async throws -> RuntimeCoderFactoryProtocol {

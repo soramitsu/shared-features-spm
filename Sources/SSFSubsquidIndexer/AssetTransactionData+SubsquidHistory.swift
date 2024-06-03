@@ -1,14 +1,14 @@
-import Foundation
 import BigInt
+import Foundation
 import SSFCrypto
-import SSFModels
 import SSFIndexers
+import SSFModels
 
 extension AssetTransactionData {
     enum AssetTransactionDataType: String {
         case unknown = "UNKNOWN"
     }
-    
+
     static func createTransaction(
         from item: SubsquidHistoryElement,
         address: String,

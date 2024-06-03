@@ -1,8 +1,8 @@
-import Foundation
 import BigInt
+import Foundation
+import SSFIndexers
 import SSFModels
 import SSFUtils
-import SSFIndexers
 
 struct GiantsquidDestination: Decodable {
     let id: String

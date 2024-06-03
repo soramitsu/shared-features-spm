@@ -1,6 +1,6 @@
 import Foundation
-import SSFModels
 import SSFIndexers
+import SSFModels
 
 struct SubqueryHistoryElement: Decodable, RewardOrSlashData {
     enum CodingKeys: String, CodingKey {
@@ -11,7 +11,7 @@ struct SubqueryHistoryElement: Decodable, RewardOrSlashData {
         case extrinsic
         case transfer
     }
-    
+
     enum SubqueryHistoryElementType {
         case reward(SubqueryRewardOrSlash)
         case extrinsic(SubqueryExtrinsic)
@@ -24,7 +24,7 @@ struct SubqueryHistoryElement: Decodable, RewardOrSlashData {
     let reward: SubqueryRewardOrSlash?
     let extrinsic: SubqueryExtrinsic?
     let transfer: SubqueryTransfer?
-    
+
     var type: SubqueryHistoryElementType? {
         if let reward {
             return .reward(reward)

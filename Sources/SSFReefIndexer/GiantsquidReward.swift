@@ -1,7 +1,7 @@
-import Foundation
 import BigInt
-import SSFModels
+import Foundation
 import SSFIndexers
+import SSFModels
 
 struct GiantsquidReward: Decodable {
     enum CodingKeys: String, CodingKey {

@@ -1,9 +1,9 @@
 import Foundation
 import RobinHood
-import SSFUtils
+import SSFIndexers
 import SSFModels
 import SSFNetwork
-import SSFIndexers
+import SSFUtils
 
 final actor SubsquidHistoryService: HistoryService {
     private let txStorage: AsyncAnyRepository<TransactionHistoryItem>
@@ -16,9 +16,9 @@ final actor SubsquidHistoryService: HistoryService {
         self.txStorage = txStorage
         self.networkWorker = networkWorker
     }
-    
+
     // MARK: - HistoryService
-    
+
     func fetchTransactionHistory(
         chainAsset: ChainAsset,
         address: String,
@@ -29,14 +29,13 @@ final actor SubsquidHistoryService: HistoryService {
             context: pagination.context ?? [:],
             defaultRow: pagination.count
         ).byApplying(filters: filters)
-        
-        guard
-            !historyContext.isComplete,
-            let baseUrl = chainAsset.chain.externalApi?.history?.url
-        else {
+
+        guard !historyContext.isComplete,
+              let baseUrl = chainAsset.chain.externalApi?.history?.url else
+        {
             return nil
         }
-        
+
         async let remoteHistory = fetchHistory(
             address: address,
             count: pagination.count,
@@ -44,25 +43,26 @@ final actor SubsquidHistoryService: HistoryService {
             url: baseUrl,
             filters: filters
         )
-        
-        let filteredTransactions = try await remoteHistory.historyElements.sorted { element1, element2 in
-            element2.timestampInSeconds < element1.timestampInSeconds
-        }
-        
+
+        let filteredTransactions = try await remoteHistory.historyElements
+            .sorted { element1, element2 in
+                element2.timestampInSeconds < element1.timestampInSeconds
+            }
+
         let transactions: [AssetTransactionData] = filteredTransactions.map { item in
             item.createTransactionForAddress(
                 address,
                 chainAsset: chainAsset
             )
         }
-        
+
         let map = createSubqueryHistoryMap(
             transactions: transactions,
             pagination: pagination
         )
         return map
     }
-    
+
     // MARK: - Private methods
 
     private func fetchHistory(
@@ -83,8 +83,9 @@ final actor SubsquidHistoryService: HistoryService {
             url: url,
             query: queryString
         )
-        
-        let response: GraphQLResponse<SubsquidHistoryResponse> = try await networkWorker.performRequest(with: request)
+
+        let response: GraphQLResponse<SubsquidHistoryResponse> = try await networkWorker
+            .performRequest(with: request)
         return try response.result()
     }
 
@@ -93,7 +94,8 @@ final actor SubsquidHistoryService: HistoryService {
         pagination: Pagination
     ) -> AssetTransactionPageData? {
         let context = pagination.context
-        let endCursor = context.map { (Int($0["endCursor"] ?? "0") ?? 0) + pagination.count } ?? pagination.count
+        let endCursor = context
+            .map { (Int($0["endCursor"] ?? "0") ?? 0) + pagination.count } ?? pagination.count
         return AssetTransactionPageData(
             transactions: transactions,
             context: ["endCursor": "\(endCursor)"]

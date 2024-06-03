@@ -1,6 +1,6 @@
+import BigInt
 import Foundation
 import SSFIndexers
-import BigInt
 import SSFModels
 
 struct ReefResponseData: Decodable {

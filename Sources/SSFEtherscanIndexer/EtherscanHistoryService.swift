@@ -1,29 +1,28 @@
 import Foundation
 import RobinHood
-import SSFUtils
+import SSFIndexers
 import SSFModels
 import SSFNetwork
-import SSFIndexers
+import SSFUtils
 
 enum EtherscanHistoryServiceError: Error {
     case remoteResultNotFetched
 }
 
 final actor EtherscanHistoryService: HistoryService {
-    
     private let networkWorker: NetworkWorker
-    
+
     init(networkWorker: NetworkWorker) {
         self.networkWorker = networkWorker
     }
-    
+
     // MARK: - HistoryService
-    
+
     func fetchTransactionHistory(
         chainAsset: ChainAsset,
         address: String,
-        filters: [WalletTransactionHistoryFilter],
-        pagination: Pagination
+        filters _: [WalletTransactionHistoryFilter],
+        pagination _: Pagination
     ) async throws -> AssetTransactionPageData? {
         let remote = try await fetchHistory(
             address: address,
@@ -36,7 +35,7 @@ final actor EtherscanHistoryService: HistoryService {
         )
         return map
     }
-    
+
     // MARK: - Private methods
 
     private func fetchHistory(
@@ -46,14 +45,15 @@ final actor EtherscanHistoryService: HistoryService {
         guard let baseURL = chainAsset.chain.externalApi?.history?.url else {
             throw HistoryError.urlMissing
         }
-        
+
         let request = EtherscanHistoryRequest(
             baseURL: baseURL,
             chainAsset: chainAsset,
             address: address
         )
-        
-        let response: EtherscanHistoryResponse = try await networkWorker.performRequest(with: request)
+
+        let response: EtherscanHistoryResponse = try await networkWorker
+            .performRequest(with: request)
         return response
     }
 
@@ -82,7 +82,7 @@ final actor EtherscanHistoryService: HistoryService {
                 )
             }
             .filter { ($0.amount?.decimalValue ?? 0) > 0 }
-        
+
         return AssetTransactionPageData(transactions: transactions)
     }
 }

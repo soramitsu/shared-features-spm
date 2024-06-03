@@ -1,8 +1,8 @@
 import MocksBasket
+import SSFIndexers
 import SSFModels
 import SSFNetwork
 import XCTest
-import SSFIndexers
 
 @testable import SSFOklinkIndexer
 

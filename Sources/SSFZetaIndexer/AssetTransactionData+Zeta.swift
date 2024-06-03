@@ -1,6 +1,6 @@
 import Foundation
-import SSFModels
 import SSFIndexers
+import SSFModels
 
 extension AssetTransactionData {
     static func createTransaction(
@@ -45,7 +45,7 @@ extension AssetTransactionData {
             context: nil
         )
     }
-    
+
     static func convertZeta(timestamp: String) -> Int64? {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"

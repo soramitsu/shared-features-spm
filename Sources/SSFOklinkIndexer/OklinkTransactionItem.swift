@@ -10,7 +10,8 @@ struct OklinkTransactionItem: Codable {
     enum CodingKeys: String, CodingKey {
         case txID = "txId"
         case methodID = "methodId"
-        case blockHash, height, transactionTime, from, to, isFromContract, isToContract, amount, transactionSymbol, txFee, state
+        case blockHash, height, transactionTime, from, to, isFromContract, isToContract, amount,
+             transactionSymbol, txFee, state
         case tokenID = "tokenId"
         case tokenContractAddress, challengeStatus, l1OriginHash
     }

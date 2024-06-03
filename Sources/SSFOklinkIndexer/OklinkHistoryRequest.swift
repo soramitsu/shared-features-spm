@@ -1,9 +1,8 @@
 import Foundation
-import SSFNetwork
 import SSFModels
+import SSFNetwork
 
 final class OklinkHistoryRequest: RequestConfig {
-    
     init(
         baseUrl: URL,
         chainAsset: ChainAsset,
@@ -11,14 +10,14 @@ final class OklinkHistoryRequest: RequestConfig {
     ) {
         let queryItems = [
             URLQueryItem(name: "address", value: address),
-            URLQueryItem(name: "symbol", value: chainAsset.asset.symbol.lowercased())
+            URLQueryItem(name: "symbol", value: chainAsset.asset.symbol.lowercased()),
         ]
 
         var headers: [HTTPHeader]?
         if let apiKey = chainAsset.chain.externalApi?.history?.apiKey {
             headers?.append(HTTPHeader(field: "Ok-Access-Key", value: apiKey))
         }
-        
+
         super.init(
             baseURL: baseUrl,
             method: .get,

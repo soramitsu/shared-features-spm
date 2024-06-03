@@ -1,8 +1,8 @@
-import Foundation
 import BigInt
+import Foundation
 import SSFCrypto
-import SSFModels
 import SSFIndexers
+import SSFModels
 
 extension AssetTransactionData {
     enum AssetTransactionDataType: String {
@@ -150,7 +150,7 @@ extension AssetTransactionData {
             precision: asset.precision
         )
         let status: AssetTransactionStatus = extrinsic.success ? .commited : .rejected
-        
+
         return AssetTransactionData(
             transactionId: item.identifier,
             status: status,

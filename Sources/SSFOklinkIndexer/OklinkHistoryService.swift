@@ -1,9 +1,9 @@
 import Foundation
 import RobinHood
-import SSFUtils
+import SSFIndexers
 import SSFModels
 import SSFNetwork
-import SSFIndexers
+import SSFUtils
 
 enum OklinkHistoryServiceError: Error {
     case remoteResultNotFetched
@@ -11,24 +11,24 @@ enum OklinkHistoryServiceError: Error {
 
 final actor OklinkHistoryService: HistoryService {
     private let networkWorker: NetworkWorker
-    
+
     init(networkWorker: NetworkWorker) {
         self.networkWorker = networkWorker
     }
-    
+
     // MARK: - HistoryService
-    
+
     func fetchTransactionHistory(
         chainAsset: SSFModels.ChainAsset,
         address: String,
-        filters: [WalletTransactionHistoryFilter],
-        pagination: Pagination
+        filters _: [WalletTransactionHistoryFilter],
+        pagination _: Pagination
     ) async throws -> AssetTransactionPageData? {
         let remote = try await fetchHistory(
             address: address,
             chainAsset: chainAsset
         )
-        
+
         let map = try createMap(
             remote: remote,
             address: address,
@@ -36,9 +36,9 @@ final actor OklinkHistoryService: HistoryService {
         )
         return map
     }
-    
+
     // MARK: - Private methods
-    
+
     private func fetchHistory(
         address: String,
         chainAsset: ChainAsset
@@ -46,17 +46,17 @@ final actor OklinkHistoryService: HistoryService {
         guard let historyUrl = chainAsset.chain.externalApi?.history?.url else {
             throw HistoryError.urlMissing
         }
-        
+
         let request = OklinkHistoryRequest(
             baseUrl: historyUrl,
             chainAsset: chainAsset,
             address: address
         )
-        
+
         let response: OklinkHistoryResponse = try await networkWorker.performRequest(with: request)
         return response
     }
-    
+
     private func createMap(
         remote: OklinkHistoryResponse,
         address: String,
@@ -67,7 +67,7 @@ final actor OklinkHistoryService: HistoryService {
         }
         let asset = chainAsset.asset
         let isNormalAsset = asset.ethereumType == .normal
-        
+
         let transactions = remoteTransactions
             .filter {
                 if isNormalAsset {
@@ -85,8 +85,7 @@ final actor OklinkHistoryService: HistoryService {
                 )
             }
             .filter { ($0.amount?.decimalValue ?? 0) > 0 }
-        
+
         return AssetTransactionPageData(transactions: transactions)
     }
 }
-    

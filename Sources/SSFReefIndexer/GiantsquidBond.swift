@@ -1,6 +1,6 @@
 import Foundation
-import SSFModels
 import SSFIndexers
+import SSFModels
 
 struct GiantsquidBond: Decodable {
     let id: String

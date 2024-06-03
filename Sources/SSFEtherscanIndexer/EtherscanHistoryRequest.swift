@@ -1,9 +1,8 @@
 import Foundation
-import SSFNetwork
 import SSFModels
+import SSFNetwork
 
 final class EtherscanHistoryRequest: RequestConfig {
-    
     init(
         baseURL: URL,
         chainAsset: ChainAsset,
