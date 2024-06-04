@@ -88,14 +88,10 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                 .xcmPalletLimitedReserveTransferAssets,
                 .polkadotXcmLimitedTeleportAssets:
                 if destChainType == .soraMainnet {
-                    guard let bridgeParachainId = fromChainModel.xcm?.availableDestinations
-                        .first(where: { $0.chainId == destChainId })?.bridgeParachainId else
-                    {
-                        throw XcmError.convenience(error: "missing bridgeParachainId")
-                    }
-                    let soraParachainModel = try await chainRegistry
-                        .getChain(for: bridgeParachainId)
-                    destChainModel = soraParachainModel
+                    destChainModel = try await getSoraParachainModel(
+                        fromChainModel: fromChainModel,
+                        destChainId: destChainId
+                    )
                 }
                 return try await estimateNativeTokenTransferFee(
                     with: callPath,
@@ -106,6 +102,12 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                     weightLimit: xcmWeight
                 )
             case .xTokensTransferMultiasset:
+                if destChainType == .soraMainnet {
+                    destChainModel = try await getSoraParachainModel(
+                        fromChainModel: fromChainModel,
+                        destChainId: destChainId
+                    )
+                }
                 return try await estimateXTokensTransferMultiassetFee(
                     fromChainModel: fromChainModel,
                     assetSymbol: assetSymbol.dropXcPrefix(chain: fromChainModel),
@@ -191,14 +193,10 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                 .xcmPalletLimitedReserveTransferAssets,
                 .polkadotXcmLimitedTeleportAssets:
                 if destChainType == .soraMainnet {
-                    guard let bridgeParachainId = fromChainModel.xcm?.availableDestinations
-                        .first(where: { $0.chainId == destChainId })?.bridgeParachainId else
-                    {
-                        throw XcmError.convenience(error: "missing bridgeParachainId")
-                    }
-                    let soraParachainModel = try await chainRegistry
-                        .getChain(for: bridgeParachainId)
-                    destChainModel = soraParachainModel
+                    destChainModel = try await getSoraParachainModel(
+                        fromChainModel: fromChainModel,
+                        destChainId: destChainId
+                    )
                 }
                 return try await submitNativeTokenTransfer(
                     with: callPath,
@@ -209,6 +207,12 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                     weightLimit: xcmWeight
                 )
             case .xTokensTransferMultiasset:
+                if destChainType == .soraMainnet {
+                    destChainModel = try await getSoraParachainModel(
+                        fromChainModel: fromChainModel,
+                        destChainId: destChainId
+                    )
+                }
                 return try await submitXTokensTransferMultiasset(
                     fromChainModel: fromChainModel,
                     assetSymbol: assetSymbol.dropXcPrefix(chain: fromChainModel),
@@ -240,6 +244,16 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                 return try await submitBridgeProxyBurn(
                     currencyId: currencyId,
                     destChainModel: destChainModel,
+                    accountId: destAccountId,
+                    amount: amount,
+                    path: callPath
+                )
+            case .soraBridgeAppBurn:
+                let currencyId = fromChainModel.assets
+                    .first(where: { $0.symbol.lowercased() == assetSymbol.lowercased() })?
+                    .currencyId
+                return try await submitSoraAppBridgeProxyBurn(
+                    currencyId: currencyId,
                     accountId: destAccountId,
                     amount: amount,
                     path: callPath
@@ -669,6 +683,19 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
         }
     }
     
+    private func getSoraParachainModel(
+        fromChainModel: ChainModel,
+        destChainId: String
+    ) async throws -> ChainModel {
+        guard let bridgeParachainId = fromChainModel.xcm?.availableDestinations
+            .first(where: { $0.chainId == destChainId })?.bridgeParachainId else
+        {
+            throw XcmError.convenience(error: "missing bridgeParachainId")
+        }
+        let soraParachainModel = try await chainRegistry.getChain(for: bridgeParachainId)
+        return soraParachainModel
+    }
+    
     // MARK: - Liberland Mainnet
     
     private func estimateSoraAppBridgeProxyBurn(
@@ -688,6 +715,32 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
 
         return await withCheckedContinuation { continuation in
             extrinsicService.estimateFee(extrinsicCall, runningIn: .global()) { result in
+                continuation.resume(returning: result)
+            }
+        }
+    }
+    
+    private func submitSoraAppBridgeProxyBurn(
+        currencyId: String?,
+        accountId: AccountId,
+        amount: BigUInt,
+        path: XcmCallPath
+    ) async throws -> SubmitExtrinsicResult {
+        let extrinsicCall = makeSoraBridgeAddBurnExtrinsic(
+            currencyId: currencyId,
+            accountId: accountId,
+            amount: amount,
+            path: path
+        )
+
+        let extrinsicService = try await depsContainer.prepareDeps().extrinsicService
+
+        return await withCheckedContinuation { continuation in
+            extrinsicService.submit(
+                extrinsicCall,
+                signer: signingWrapper,
+                runningIn: .main
+            ) { result in
                 continuation.resume(returning: result)
             }
         }

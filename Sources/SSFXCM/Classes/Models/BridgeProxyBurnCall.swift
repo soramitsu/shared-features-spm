@@ -66,7 +66,7 @@ enum BridgeTypesSubNetworkId: Codable {
             self = .mainnet
         case .kusama:
             self = .kusama
-        case .polkadot:
+        case .polkadot, .acala:
             self = .polkadot
         case .rococo:
             self = .rococo
