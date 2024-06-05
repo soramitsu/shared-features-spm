@@ -228,15 +228,18 @@ FORCE_INLINE void _sse2neon_smp_mb(void)
 #if !defined(__ARM_NEON) || !defined(__ARM_NEON__)
 #error "You must enable NEON instructions (e.g. -mfpu=neon) to use SSE2NEON."
 #endif
+
 #if !defined(__clang__)
 #pragma GCC push_options
 #pragma GCC target("fpu=neon")
 #endif
+
 #elif defined(__aarch64__) || defined(_M_ARM64)
 #if !defined(__clang__) && !defined(_MSC_VER)
 #pragma GCC push_options
 #pragma GCC target("+simd")
 #endif
+
 #elif __ARM_ARCH == 8
 #if !defined(__ARM_NEON) || !defined(__ARM_NEON__)
 #error \

@@ -31,7 +31,12 @@
 
 #include <stdint.h>
 #include <unistd.h>
-//#include <arm_neon.h>
+
+#if defined(__GNUC__)
+#if defined(__arm__) && __ARM_ARCH == 7
+#include <arm_neon.h>
+#endif
+#endif
 
 /**
  * crypto_scrypt(passwd, passwdlen, salt, saltlen, N, r, p, buf, buflen):
