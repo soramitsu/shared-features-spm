@@ -304,6 +304,16 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         switch destChainModel.knownChainEquivalent {
         case .liberland:
             recipient = .liberland(accountId)
+        case .acala:
+            let destParachainId = UInt32(destChainModel.paraId ?? "")
+            let destination = createVersionedMultiLocation(
+                version: .V3,
+                chainModel: destChainModel,
+                parachainId: destParachainId,
+                accountId: accountId,
+                parents: 1
+            )
+            recipient = .parachain(destination)
         default:
             let destParachainId = UInt32(destChainModel.paraId ?? "")
             let destParents: UInt8 = destChainModel.isRelaychain ? 1 : 0
