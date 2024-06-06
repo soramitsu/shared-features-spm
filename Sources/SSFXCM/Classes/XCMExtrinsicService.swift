@@ -35,6 +35,7 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
     private let depsContainer: XcmDependencyContainerProtocol
     private let callPathDeterminer: CallPathDeterminer
     private let xcmFeeFetcher: XcmDestinationFeeFetching
+    private let minAmountInspector: XcmMinAmountInspector
 
     init(
         signingWrapper: TransactionSignerProtocol,
@@ -43,7 +44,8 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
         chainRegistry: ChainRegistryProtocol,
         depsContainer: XcmDependencyContainerProtocol,
         callPathDeterminer: CallPathDeterminer,
-        xcmFeeFetcher: XcmDestinationFeeFetching
+        xcmFeeFetcher: XcmDestinationFeeFetching,
+        minAmountInspector: XcmMinAmountInspector
     ) {
         self.signingWrapper = signingWrapper
         self.extrinsicBuilder = extrinsicBuilder
@@ -52,6 +54,7 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
         self.depsContainer = depsContainer
         self.callPathDeterminer = callPathDeterminer
         self.xcmFeeFetcher = xcmFeeFetcher
+        self.minAmountInspector = minAmountInspector
     }
 
     // MARK: - Public methods
@@ -171,6 +174,14 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
         do {
             let fromChainModel = try await chainRegistry.getChain(for: fromChainId)
             var destChainModel = try await chainRegistry.getChain(for: destChainId)
+            
+            try minAmountInspector.inspectMin(
+                amount: amount,
+                fromChainModel: fromChainModel,
+                destChainModel: destChainModel,
+                assetSymbol: assetSymbol
+            )
+            
             let fromChainType = try XcmChainType.determineChainType(for: fromChainModel)
             let destChainType = try XcmChainType.determineChainType(for: destChainModel)
             let callPath = try await callPathDeterminer.determineCallPath(

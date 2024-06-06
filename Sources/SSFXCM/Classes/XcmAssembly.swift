@@ -58,7 +58,8 @@ public enum XcmAssembly {
             chainRegistry: chainRegistry,
             depsContainer: depsContainer,
             callPathDeterminer: callPathDeterminer,
-            xcmFeeFetcher: destinationFeeFetcher
+            xcmFeeFetcher: destinationFeeFetcher, 
+            minAmountInspector: XcmMinAmountInspectorImpl()
         )
 
         return XcmExtrinsicServices(

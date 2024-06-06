@@ -19,4 +19,5 @@ public enum XcmError: Error {
     case noWeight(chainId: String)
     case noAvailableXcmAsset(symbol: String)
     case convenience(error: String)
+    case minAmountError(minAmount: String)
 }

@@ -45,9 +45,11 @@ public struct XcmAvailableDestination: Codable, Hashable {
 public struct XcmAvailableAsset: Codable, Hashable {
     public let id: String
     public let symbol: String
+    public let minAmount: String?
 
-    public init(id: String, symbol: String) {
+    public init(id: String, symbol: String, minAmount: String?) {
         self.id = id
         self.symbol = symbol
+        self.minAmount = minAmount
     }
 }
