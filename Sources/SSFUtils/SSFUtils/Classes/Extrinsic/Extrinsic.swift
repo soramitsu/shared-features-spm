@@ -17,7 +17,7 @@ public struct ExtrinsicSignedExtra: Codable {
     public var era: Era?
     @OptionStringCodable public var nonce: UInt32?
     @OptionStringCodable public var tip: BigUInt?
-    @OptionStringCodable public  var appId: BigUInt?
+    @OptionStringCodable public var appId: BigUInt?
 
     public init(era: Era?, nonce: UInt32?, tip: BigUInt?, appId: BigUInt?) {
         self.era = era

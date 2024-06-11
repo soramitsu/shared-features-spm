@@ -120,6 +120,9 @@ public final class ExtrinsicBuilder {
                 try encoder.append(encodable: specVersion)
             case .txVersion:
                 try encoder.append(encodable: transactionVersion)
+            case .checkMetadataHash:
+                // https://soramitsu.atlassian.net/browse/FLW-4679
+                try encoder.appendU8(json: JSON.stringValue("0"))
             default:
                 continue
             }
