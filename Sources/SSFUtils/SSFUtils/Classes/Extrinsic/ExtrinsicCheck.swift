@@ -12,6 +12,7 @@ enum ExtrinsicCheck: String, CaseIterable {
     case assetTxPayment =
         "pallet_asset_tx_payment::ChargeAssetTxPayment" // Statemine/Statemint case
     case appCheck = "da_control::extensions::check_app_id::CheckAppId"
+    case checkMetadataHash = "frame_metadata_hash_extension::CheckMetadataHash"
 
     /// Overiden types explain which network has what full names
     /// Key UInt32 - is metadata reserver number to identify network
