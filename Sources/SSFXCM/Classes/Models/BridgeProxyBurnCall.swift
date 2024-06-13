@@ -14,10 +14,10 @@ enum BridgeTypesGenericNetworkId: Codable {
     case evm(BigUInt)
     case sub(BridgeTypesSubNetworkId)
 
-    init(from chain: ChainModel) {
+    init(from chain: ChainModel) throws {
         switch chain.chainBaseType {
         case .substrate:
-            let networkId = BridgeTypesSubNetworkId(from: chain)
+            let networkId = try BridgeTypesSubNetworkId(from: chain)
             self = .sub(networkId)
         case .ethereum:
             let evmChainId = BigUInt(stringLiteral: chain.chainId)
@@ -58,22 +58,25 @@ enum BridgeTypesSubNetworkId: Codable {
     case polkadot
     case rococo
     case liberland
-    case custom(UInt32)
 
-    init(from chain: ChainModel) {
+    init(from chain: ChainModel) throws {
         switch chain.knownChainEquivalent {
         case .soraMain:
             self = .mainnet
-        case .kusama:
-            self = .kusama
-        case .polkadot, .acala:
-            self = .polkadot
         case .rococo:
             self = .rococo
         case .liberland:
             self = .liberland
         default:
-            self = .custom(0)
+            let ecosystem = ChainEcosystem.defineEcosystem(chain: chain)
+            switch ecosystem {
+            case .kusama:
+                self = .kusama
+            case .polkadot:
+                self = .polkadot
+            default:
+                throw XcmError.ecosystemNotSupported
+            }
         }
     }
 
@@ -93,8 +96,6 @@ enum BridgeTypesSubNetworkId: Codable {
         case .rococo:
             try container.encode("Rococo")
             try container.encodeNil()
-        case let .custom(value):
-            try container.encode(value)
         case .liberland:
             try container.encode("Liberland")
             try container.encodeNil()
@@ -110,8 +111,6 @@ extension BridgeTypesSubNetworkId: Equatable {
              (.polkadot, .polkadot),
              (.rococo, .rococo):
             return true
-        case let (.custom(lhsValue), .custom(rhsValue)):
-            return lhsValue == rhsValue
         default:
             return false
         }

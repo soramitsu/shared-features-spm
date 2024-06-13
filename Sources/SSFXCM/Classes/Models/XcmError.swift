@@ -20,4 +20,5 @@ public enum XcmError: Error {
     case noAvailableXcmAsset(symbol: String)
     case convenience(error: String)
     case minAmountError(minAmount: String)
+    case ecosystemNotSupported
 }

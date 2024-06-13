@@ -55,7 +55,7 @@ protocol XcmCallFactoryProtocol {
         accountId: AccountId,
         amount: BigUInt,
         path: XcmCallPath
-    ) -> RuntimeCall<BridgeProxyBurnCall>
+    ) throws -> RuntimeCall<BridgeProxyBurnCall>
     
     func soraBridgeAppBurn(
         currencyId: String?,
@@ -296,8 +296,8 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         accountId: AccountId,
         amount: BigUInt,
         path: XcmCallPath
-    ) -> RuntimeCall<BridgeProxyBurnCall> {
-        let networkId = BridgeTypesGenericNetworkId(from: destChainModel)
+    ) throws -> RuntimeCall<BridgeProxyBurnCall> {
+        let networkId = try BridgeTypesGenericNetworkId(from: destChainModel)
         let assetId = SoraAssetId(wrappedValue: currencyId)
 
         let recipient: BridgeTypesGenericAccount

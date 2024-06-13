@@ -376,8 +376,8 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
         accountId: AccountId,
         amount: BigUInt,
         path: XcmCallPath
-    ) -> ExtrinsicBuilderClosure {
-        extrinsicBuilder.buildBridgeProxyBurn(
+    ) throws -> ExtrinsicBuilderClosure {
+        try extrinsicBuilder.buildBridgeProxyBurn(
             currencyId: currencyId,
             destChainModel: destChainModel,
             accountId: accountId,
@@ -649,7 +649,7 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
         amount: BigUInt,
         path: XcmCallPath
     ) async throws -> FeeExtrinsicResult {
-        let extrinsicCall = makeBridgeProxyBurnExtrinsic(
+        let extrinsicCall = try makeBridgeProxyBurnExtrinsic(
             currencyId: currencyId,
             destChainModel: destChainModel,
             accountId: accountId,
@@ -673,7 +673,7 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
         amount: BigUInt,
         path: XcmCallPath
     ) async throws -> SubmitExtrinsicResult {
-        let extrinsicCall = makeBridgeProxyBurnExtrinsic(
+        let extrinsicCall = try makeBridgeProxyBurnExtrinsic(
             currencyId: currencyId,
             destChainModel: destChainModel,
             accountId: accountId,
