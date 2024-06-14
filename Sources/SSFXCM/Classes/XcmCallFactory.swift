@@ -598,7 +598,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         ) ? 1 : 0
 
         let multilocation = XcmV1MultiLocation(
-            parents: parents,
+            parents: remote.parents ?? parents,
             interior: interior
         )
 
