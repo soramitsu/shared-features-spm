@@ -13,6 +13,7 @@ public enum PolkaswapLiquidityPoolServiceError: Swift.Error {
     case missingReservesAccountId
     case userPoolNotFound(poolId: String)
     case dexIdNotFound(baseAssetId: String)
+    case totalIssuanceNotFound(reservesId: AccountId)
 }
 
 public protocol PolkaswapLiquidityPoolService {
@@ -29,7 +30,9 @@ public protocol PolkaswapLiquidityPoolService {
     func fetchPoolsAPY() async throws -> [PoolApyInfo]
     func fetchReserves(pools: [LiquidityPair]) async throws -> [PolkaswapPoolReservesInfo]
     func fetchDexId(baseAssetId: String) async throws -> String
+    func fetchTotalIssuance(reservesId: AccountId) async throws -> BigUInt
 }
+
 
 public final class PolkaswapLiquidityPoolServiceDefault {
     private let dexManagerStorage: DexManagerStorage
@@ -184,6 +187,16 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
     
     public func fetchReserves(pools: [LiquidityPair]) async throws -> [PolkaswapPoolReservesInfo] {
         return try await poolXykStorage.reserves(pairs: pools.compactMap { AssetIdPair(baseAssetIdCode: $0.baseAssetId, targetAssetIdCode: $0.targetAssetId) }, chain: chain)
+    }
+    
+    public func fetchTotalIssuance(reservesId: AccountId) async throws -> BigUInt {
+        let totalIssuanceByReservesId = try await poolXykStorage.totalIssuance(chain: chain)
+        
+        guard let totalIssuance = totalIssuanceByReservesId[reservesId] else {
+            throw PolkaswapLiquidityPoolServiceError.totalIssuanceNotFound(reservesId: reservesId)
+        }
+        
+        return totalIssuance
     }
     
     public func subscribeUserPools(accountId: AccountId) async throws -> AsyncThrowingStream<CachedStorageResponse<[LiquidityPair]>, Swift.Error> {
