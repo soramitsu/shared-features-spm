@@ -39,6 +39,7 @@ public final class ChainModel: Codable, Identifiable {
     public var selectedNode: ChainNodeModel?
     public let customNodes: Set<ChainNodeModel>?
     public let iosMinAppVersion: String?
+    public let identityChain: String?
 
     public init(
         rank: UInt16?,
@@ -57,7 +58,8 @@ public final class ChainModel: Codable, Identifiable {
         externalApi: ExternalApiSet? = nil,
         selectedNode: ChainNodeModel? = nil,
         customNodes: Set<ChainNodeModel>? = nil,
-        iosMinAppVersion: String?
+        iosMinAppVersion: String?,
+        identityChain: String?
     ) {
         self.rank = rank
         self.disabled = disabled
@@ -76,6 +78,7 @@ public final class ChainModel: Codable, Identifiable {
         self.selectedNode = selectedNode
         self.customNodes = customNodes
         self.iosMinAppVersion = iosMinAppVersion
+        self.identityChain = identityChain
     }
 
     public var isRelaychain: Bool {
@@ -253,7 +256,8 @@ public final class ChainModel: Codable, Identifiable {
             externalApi: externalApi,
             selectedNode: node,
             customNodes: customNodes,
-            iosMinAppVersion: iosMinAppVersion
+            iosMinAppVersion: iosMinAppVersion,
+            identityChain: identityChain
         )
     }
 
@@ -275,7 +279,8 @@ public final class ChainModel: Codable, Identifiable {
             externalApi: externalApi,
             selectedNode: selectedNode,
             customNodes: Set(newCustomNodes),
-            iosMinAppVersion: iosMinAppVersion
+            iosMinAppVersion: iosMinAppVersion,
+            identityChain: identityChain
         )
     }
 }
@@ -307,6 +312,7 @@ extension ChainModel: Hashable {
             && lhs.selectedNode == rhs.selectedNode
             && lhs.xcm == rhs.xcm
             && lhs.disabled == rhs.disabled
+            && lhs.identityChain == rhs.identityChain
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -326,6 +332,7 @@ public enum ChainOptions: String, Codable {
     case nft
     case utilityFeePayment
     case chainlinkProvider
+    case checkAppId
 
     case unsupported
 
@@ -396,6 +403,7 @@ public extension ChainModel {
         case polkascan
         case etherscan
         case reef
+        case oklink
         case unknown
 
         public init(from decoder: Decoder) throws {
@@ -517,7 +525,7 @@ public extension ChainModel.ExternalApiExplorer {
 
     var transactionType: ChainModel.SubscanType {
         switch type {
-        case .etherscan:
+        case .etherscan, .oklink:
             return .tx
         default:
             return .extrinsic

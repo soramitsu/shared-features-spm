@@ -71,7 +71,8 @@ public enum ChainModelGenerator {
                 options: options.isEmpty ? nil : options,
                 externalApi: externalApi,
                 customNodes: nil,
-                iosMinAppVersion: nil
+                iosMinAppVersion: nil,
+                identityChain: nil
             )
 
             let asset = generateAssetWithId("", symbol: "", assetPresicion: 12, chainId: chainId)
@@ -107,7 +108,8 @@ public enum ChainModelGenerator {
             externalApi: chain.externalApi,
             selectedNode: chain.selectedNode,
             customNodes: chain.customNodes,
-            iosMinAppVersion: chain.iosMinAppVersion
+            iosMinAppVersion: chain.iosMinAppVersion,
+            identityChain: nil
         )
     }
 
@@ -169,7 +171,8 @@ public enum ChainModelGenerator {
             options: options.isEmpty ? nil : options,
             externalApi: externalApi,
             customNodes: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            identityChain: nil
         )
         let chainAssetsArray: [AssetModel] = (0 ..< count).map { index in
             generateAssetWithId(

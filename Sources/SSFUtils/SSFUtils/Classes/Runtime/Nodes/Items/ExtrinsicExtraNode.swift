@@ -54,6 +54,18 @@ public class ExtrinsicExtraNode: Node {
 
                 try encoder.appendCompact(json: tip, type: KnownType.balance.name)
                 try encoder.appendOption(json: .null, type: PrimitiveType.u32.name)
+                
+            case .appCheck:
+                guard let checkAppId = params[ExtrinsicSignedExtra.CodingKeys.appId.rawValue] else {
+                    continue
+                }
+                
+                try encoder.appendCompact(json: checkAppId, type: KnownType.balance.name)
+                
+            case .checkMetadataHash:
+                // https://soramitsu.atlassian.net/browse/FLW-4679
+                try encoder.appendU8(json: JSON.stringValue("0"))
+
             default:
                 continue
             }

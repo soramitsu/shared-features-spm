@@ -20,7 +20,8 @@ public struct XcmExtrinsicServices {
 public enum XcmAssembly {
     public static func createExtrincisServices(
         fromChainData: FromChainData,
-        sourceConfig: XcmConfigProtocol?
+        sourceConfig: XcmConfigProtocol?,
+        chainRegistry: ChainRegistryProtocol?
     ) -> XcmExtrinsicServices {
         let signingWrapper = TransactionSignerAssembly.signer(
             for: fromChainData.chainType,
@@ -30,28 +31,7 @@ public enum XcmAssembly {
         )
 
         let extrinsicBuilder = XcmExtrinsicBuilder()
-
-        let chainSyncService = ChainSyncService(
-            chainsUrl: sourceConfig?.chainsSourceUrl ?? XcmConfig.shared.chainsSourceUrl,
-            operationQueue: OperationQueue(),
-            dataFetchFactory: NetworkOperationFactory()
-        )
-
-        let chainsTypesSyncService = ChainsTypesSyncService(
-            url: sourceConfig?.chainTypesSourceUrl ?? XcmConfig.shared.chainTypesSourceUrl,
-            dataOperationFactory: NetworkOperationFactory(),
-            operationQueue: OperationQueue()
-        )
-
-        let runtimeSyncService = RuntimeSyncService(dataOperationFactory: NetworkOperationFactory())
-
-        let chainRegistry = ChainRegistry(
-            runtimeProviderPool: RuntimeProviderPool(),
-            connectionPool: ConnectionPool(),
-            chainSyncService: chainSyncService,
-            chainsTypesSyncService: chainsTypesSyncService,
-            runtimeSyncService: runtimeSyncService
-        )
+        let chainRegistry = chainRegistry ?? Self.createInternalChainRegistry(sourceConfig: sourceConfig)
 
         let xcmChainsConfigFetcher = XcmChainsConfigFetcher(chainRegistry: chainRegistry)
         let depsContainer = XcmDependencyContainer(
@@ -78,7 +58,8 @@ public enum XcmAssembly {
             chainRegistry: chainRegistry,
             depsContainer: depsContainer,
             callPathDeterminer: callPathDeterminer,
-            xcmFeeFetcher: destinationFeeFetcher
+            xcmFeeFetcher: destinationFeeFetcher, 
+            minAmountInspector: XcmMinAmountInspectorImpl()
         )
 
         return XcmExtrinsicServices(
@@ -86,6 +67,33 @@ public enum XcmAssembly {
             destinationFeeFetcher: destinationFeeFetcher,
             availableDestionationFetching: xcmChainsConfigFetcher
         )
+    }
+    
+    private static func createInternalChainRegistry(
+        sourceConfig: XcmConfigProtocol?
+    ) -> ChainRegistryProtocol {
+        let chainSyncService = ChainSyncService(
+            chainsUrl: sourceConfig?.chainsSourceUrl ?? XcmConfig.shared.chainsSourceUrl,
+            operationQueue: OperationQueue(),
+            dataFetchFactory: NetworkOperationFactory()
+        )
+
+        let chainsTypesSyncService = ChainsTypesSyncService(
+            url: sourceConfig?.chainTypesSourceUrl ?? XcmConfig.shared.chainTypesSourceUrl,
+            dataOperationFactory: NetworkOperationFactory(),
+            operationQueue: OperationQueue()
+        )
+
+        let runtimeSyncService = RuntimeSyncService(dataOperationFactory: NetworkOperationFactory())
+
+        let chainRegistry = ChainRegistry(
+            runtimeProviderPool: RuntimeProviderPool(),
+            connectionPool: ConnectionPool(),
+            chainSyncService: chainSyncService,
+            chainsTypesSyncService: chainsTypesSyncService,
+            runtimeSyncService: runtimeSyncService
+        )
+        return chainRegistry
     }
 }
 

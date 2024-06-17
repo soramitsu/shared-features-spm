@@ -35,6 +35,7 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
     private let depsContainer: XcmDependencyContainerProtocol
     private let callPathDeterminer: CallPathDeterminer
     private let xcmFeeFetcher: XcmDestinationFeeFetching
+    private let minAmountInspector: XcmMinAmountInspector
 
     init(
         signingWrapper: TransactionSignerProtocol,
@@ -43,7 +44,8 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
         chainRegistry: ChainRegistryProtocol,
         depsContainer: XcmDependencyContainerProtocol,
         callPathDeterminer: CallPathDeterminer,
-        xcmFeeFetcher: XcmDestinationFeeFetching
+        xcmFeeFetcher: XcmDestinationFeeFetching,
+        minAmountInspector: XcmMinAmountInspector
     ) {
         self.signingWrapper = signingWrapper
         self.extrinsicBuilder = extrinsicBuilder
@@ -52,6 +54,7 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
         self.depsContainer = depsContainer
         self.callPathDeterminer = callPathDeterminer
         self.xcmFeeFetcher = xcmFeeFetcher
+        self.minAmountInspector = minAmountInspector
     }
 
     // MARK: - Public methods
@@ -88,14 +91,10 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                 .xcmPalletLimitedReserveTransferAssets,
                 .polkadotXcmLimitedTeleportAssets:
                 if destChainType == .soraMainnet {
-                    guard let bridgeParachainId = fromChainModel.xcm?.availableDestinations
-                        .first(where: { $0.chainId == destChainId })?.bridgeParachainId else
-                    {
-                        throw XcmError.convenience(error: "missing bridgeParachainId")
-                    }
-                    let soraParachainModel = try await chainRegistry
-                        .getChain(for: bridgeParachainId)
-                    destChainModel = soraParachainModel
+                    destChainModel = try await getSoraParachainModel(
+                        fromChainModel: fromChainModel,
+                        destChainId: destChainId
+                    )
                 }
                 return try await estimateNativeTokenTransferFee(
                     with: callPath,
@@ -106,6 +105,12 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                     weightLimit: xcmWeight
                 )
             case .xTokensTransferMultiasset:
+                if destChainType == .soraMainnet {
+                    destChainModel = try await getSoraParachainModel(
+                        fromChainModel: fromChainModel,
+                        destChainId: destChainId
+                    )
+                }
                 return try await estimateXTokensTransferMultiassetFee(
                     fromChainModel: fromChainModel,
                     assetSymbol: assetSymbol.dropXcPrefix(chain: fromChainModel),
@@ -135,9 +140,18 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                     throw XcmError.missingCurrencyId
                 }
                 return try await estimateBridgeProxyBurn(
-                    fromChainModel: fromChainModel,
                     currencyId: currencyId,
                     destChainModel: destChainModel,
+                    accountId: destAccountId,
+                    amount: amount,
+                    path: callPath
+                )
+            case .soraBridgeAppBurn:
+                let currencyId = fromChainModel.assets
+                    .first(where: { $0.symbol.lowercased() == assetSymbol.lowercased() })?
+                    .currencyId
+                return try await estimateSoraAppBridgeProxyBurn(
+                    currencyId: currencyId,
                     accountId: destAccountId,
                     amount: amount,
                     path: callPath
@@ -160,6 +174,14 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
         do {
             let fromChainModel = try await chainRegistry.getChain(for: fromChainId)
             var destChainModel = try await chainRegistry.getChain(for: destChainId)
+            
+            try minAmountInspector.inspectMin(
+                amount: amount,
+                fromChainModel: fromChainModel,
+                destChainModel: destChainModel,
+                assetSymbol: assetSymbol
+            )
+            
             let fromChainType = try XcmChainType.determineChainType(for: fromChainModel)
             let destChainType = try XcmChainType.determineChainType(for: destChainModel)
             let callPath = try await callPathDeterminer.determineCallPath(
@@ -182,14 +204,10 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                 .xcmPalletLimitedReserveTransferAssets,
                 .polkadotXcmLimitedTeleportAssets:
                 if destChainType == .soraMainnet {
-                    guard let bridgeParachainId = fromChainModel.xcm?.availableDestinations
-                        .first(where: { $0.chainId == destChainId })?.bridgeParachainId else
-                    {
-                        throw XcmError.convenience(error: "missing bridgeParachainId")
-                    }
-                    let soraParachainModel = try await chainRegistry
-                        .getChain(for: bridgeParachainId)
-                    destChainModel = soraParachainModel
+                    destChainModel = try await getSoraParachainModel(
+                        fromChainModel: fromChainModel,
+                        destChainId: destChainId
+                    )
                 }
                 return try await submitNativeTokenTransfer(
                     with: callPath,
@@ -200,6 +218,12 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                     weightLimit: xcmWeight
                 )
             case .xTokensTransferMultiasset:
+                if destChainType == .soraMainnet {
+                    destChainModel = try await getSoraParachainModel(
+                        fromChainModel: fromChainModel,
+                        destChainId: destChainId
+                    )
+                }
                 return try await submitXTokensTransferMultiasset(
                     fromChainModel: fromChainModel,
                     assetSymbol: assetSymbol.dropXcPrefix(chain: fromChainModel),
@@ -229,9 +253,18 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                     throw XcmError.missingCurrencyId
                 }
                 return try await submitBridgeProxyBurn(
-                    fromChainModel: fromChainModel,
                     currencyId: currencyId,
                     destChainModel: destChainModel,
+                    accountId: destAccountId,
+                    amount: amount,
+                    path: callPath
+                )
+            case .soraBridgeAppBurn:
+                let currencyId = fromChainModel.assets
+                    .first(where: { $0.symbol.lowercased() == assetSymbol.lowercased() })?
+                    .currencyId
+                return try await submitSoraAppBridgeProxyBurn(
+                    currencyId: currencyId,
                     accountId: destAccountId,
                     amount: amount,
                     path: callPath
@@ -338,17 +371,29 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
     }
 
     private func makeBridgeProxyBurnExtrinsic(
-        fromChainModel: ChainModel,
         currencyId: String,
         destChainModel: ChainModel,
-        accountId: AccountId?,
+        accountId: AccountId,
         amount: BigUInt,
         path: XcmCallPath
     ) throws -> ExtrinsicBuilderClosure {
         try extrinsicBuilder.buildBridgeProxyBurn(
-            fromChainModel: fromChainModel,
             currencyId: currencyId,
             destChainModel: destChainModel,
+            accountId: accountId,
+            amount: amount,
+            path: path
+        )
+    }
+    
+    private func makeSoraBridgeAddBurnExtrinsic(
+        currencyId: String?,
+        accountId: AccountId,
+        amount: BigUInt,
+        path: XcmCallPath
+    ) -> ExtrinsicBuilderClosure {
+        extrinsicBuilder.buildSoraBridgeAddBurn(
+            currencyId: currencyId,
             accountId: accountId,
             amount: amount,
             path: path
@@ -483,36 +528,6 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
         }
     }
 
-    private func submitBridgeProxyBurn(
-        fromChainModel: ChainModel,
-        currencyId: String,
-        destChainModel: ChainModel,
-        accountId: AccountId?,
-        amount: BigUInt,
-        path: XcmCallPath
-    ) async throws -> SubmitExtrinsicResult {
-        let extrinsicCall = try makeBridgeProxyBurnExtrinsic(
-            fromChainModel: fromChainModel,
-            currencyId: currencyId,
-            destChainModel: destChainModel,
-            accountId: accountId,
-            amount: amount,
-            path: path
-        )
-
-        let extrinsicService = try await depsContainer.prepareDeps().extrinsicService
-
-        return await withCheckedContinuation { continuation in
-            extrinsicService.submit(
-                extrinsicCall,
-                signer: signingWrapper,
-                runningIn: .main
-            ) { result in
-                continuation.resume(returning: result)
-            }
-        }
-    }
-
     // MARK: - Fees
 
     private func estimateNativeTokenTransferFee(
@@ -628,15 +643,13 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
     // MARK: - Sora Mainnet
 
     private func estimateBridgeProxyBurn(
-        fromChainModel: ChainModel,
         currencyId: String,
         destChainModel: ChainModel,
-        accountId: AccountId?,
+        accountId: AccountId,
         amount: BigUInt,
         path: XcmCallPath
     ) async throws -> FeeExtrinsicResult {
         let extrinsicCall = try makeBridgeProxyBurnExtrinsic(
-            fromChainModel: fromChainModel,
             currencyId: currencyId,
             destChainModel: destChainModel,
             accountId: accountId,
@@ -652,6 +665,98 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             }
         }
     }
+    
+    private func submitBridgeProxyBurn(
+        currencyId: String,
+        destChainModel: ChainModel,
+        accountId: AccountId,
+        amount: BigUInt,
+        path: XcmCallPath
+    ) async throws -> SubmitExtrinsicResult {
+        let extrinsicCall = try makeBridgeProxyBurnExtrinsic(
+            currencyId: currencyId,
+            destChainModel: destChainModel,
+            accountId: accountId,
+            amount: amount,
+            path: path
+        )
+
+        let extrinsicService = try await depsContainer.prepareDeps().extrinsicService
+
+        return await withCheckedContinuation { continuation in
+            extrinsicService.submit(
+                extrinsicCall,
+                signer: signingWrapper,
+                runningIn: .main
+            ) { result in
+                continuation.resume(returning: result)
+            }
+        }
+    }
+    
+    private func getSoraParachainModel(
+        fromChainModel: ChainModel,
+        destChainId: String
+    ) async throws -> ChainModel {
+        guard let bridgeParachainId = fromChainModel.xcm?.availableDestinations
+            .first(where: { $0.chainId == destChainId })?.bridgeParachainId else
+        {
+            throw XcmError.convenience(error: "missing bridgeParachainId")
+        }
+        let soraParachainModel = try await chainRegistry.getChain(for: bridgeParachainId)
+        return soraParachainModel
+    }
+    
+    // MARK: - Liberland Mainnet
+    
+    private func estimateSoraAppBridgeProxyBurn(
+        currencyId: String?,
+        accountId: AccountId,
+        amount: BigUInt,
+        path: XcmCallPath
+    ) async throws -> FeeExtrinsicResult {
+        let extrinsicCall = makeSoraBridgeAddBurnExtrinsic(
+            currencyId: currencyId,
+            accountId: accountId,
+            amount: amount,
+            path: path
+        )
+
+        let extrinsicService = try await depsContainer.prepareDeps().extrinsicService
+
+        return await withCheckedContinuation { continuation in
+            extrinsicService.estimateFee(extrinsicCall, runningIn: .global()) { result in
+                continuation.resume(returning: result)
+            }
+        }
+    }
+    
+    private func submitSoraAppBridgeProxyBurn(
+        currencyId: String?,
+        accountId: AccountId,
+        amount: BigUInt,
+        path: XcmCallPath
+    ) async throws -> SubmitExtrinsicResult {
+        let extrinsicCall = makeSoraBridgeAddBurnExtrinsic(
+            currencyId: currencyId,
+            accountId: accountId,
+            amount: amount,
+            path: path
+        )
+
+        let extrinsicService = try await depsContainer.prepareDeps().extrinsicService
+
+        return await withCheckedContinuation { continuation in
+            extrinsicService.submit(
+                extrinsicCall,
+                signer: signingWrapper,
+                runningIn: .main
+            ) { result in
+                continuation.resume(returning: result)
+            }
+        }
+    }
+    
 }
 
 private extension String {

@@ -36,11 +36,11 @@ let package = Package(
         .library(name: "SSFSingleValueCache", targets: ["SSFSingleValueCache"]),
         .library(name: "SSFPolkaswap", targets: ["SSFPolkaswap"]),
         .library(name: "SSFPools", targets: ["SSFPools"]),
-        .library(name: "SSFPoolsStorage", targets: ["SSFPoolsStorage"])
+        .library(name: "SSFPoolsStorage", targets: ["SSFPoolsStorage"]),
+        .library(name: "MPQRCoreSDK", targets: ["MPQRCoreSDK"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
-        .package(url: "https://github.com/v57/scrypt.c.git", from: "0.1.0"),
         .package(url: "https://github.com/bitmark-inc/tweetnacl-swiftwrap", from: "1.1.0"),
         .package(url: "https://github.com/ashleymills/Reachability.swift", from: "5.0.0"),
         .package(url: "https://github.com/soramitsu/fearless-starscream", from: "4.0.12"),
@@ -58,6 +58,15 @@ let package = Package(
         .binaryTarget(name: "sr25519lib", path: "Binaries/sr25519lib.xcframework"),
         .binaryTarget(name: "sorawallet", path: "Binaries/sorawallet.xcframework"),
         .binaryTarget(name: "MPQRCoreSDK", path: "Binaries/MPQRCoreSDK.xcframework"),
+        .target(
+            name: "scrypt",
+            sources: [
+                "."
+            ],
+            cSettings: [
+                .headerSearchPath("./include"),
+            ]
+        ),
         .target(name: "RobinHood"),
         .target(name: "keccak"),
         .target(name: "SoraKeystore"),
@@ -130,7 +139,7 @@ let package = Package(
                 .byName(name: "sr25519lib"),
                 .byName(name: "blake2lib"),
                 .product(name: "secp256k1", package: "secp256k1.swift"),
-                .product(name: "scrypt", package: "scrypt.c")
+                "scrypt"
             ],
             publicHeadersPath: "include",
             cSettings: [ .headerSearchPath(".") ]
@@ -392,7 +401,9 @@ let package = Package(
             ]
         ),
         
-    ]
+    ],
+    cLanguageStandard: .gnu11,
+    cxxLanguageStandard: .gnucxx14
 )
 
 func mockDeps() -> [Target.Dependency] {

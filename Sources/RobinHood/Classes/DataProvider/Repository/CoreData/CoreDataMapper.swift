@@ -102,6 +102,10 @@ public final class AnyCoreDataMapper<T: Identifiable, U: NSManagedObject>: CoreD
     public var entityIdentifierFieldName: String {
         _entityIdentifierFieldName
     }
+    
+    public func dict(for model: DataProviderModel) throws -> [String: Any] {
+        try _dict(model)
+    }
 }
 
 /**
@@ -173,5 +177,14 @@ public final class CodableCoreDataMapper<
             from: data
         )
         try container.populate(entity: entity, using: context)
+    }
+
+    public func dict(for model: T) throws -> [String : Any] {
+        let data = try JSONEncoder().encode(model)
+        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        guard let json = json else {
+            throw CoreDataRepositoryError.creationFailed
+        }
+        return json
     }
 }

@@ -14,5 +14,6 @@ struct RemoteAssetMultilocation: Codable, Equatable {
 struct AssetMultilocation: Codable, Equatable {
     let id: String
     let symbol: String
+    let parents: UInt8?
     let interiors: [XcmJunction]
 }

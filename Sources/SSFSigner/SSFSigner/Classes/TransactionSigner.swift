@@ -46,7 +46,7 @@ public extension TransactionSignerProtocol {
 
         let signer = SECSigner(privateKey: privateKey)
 
-        let hashedData = try originalData.blake2b32()
+        let hashedData = try originalData.keccak256()
         return try signer.sign(hashedData)
     }
 

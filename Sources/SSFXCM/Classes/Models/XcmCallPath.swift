@@ -38,6 +38,8 @@ enum XcmCallPath: StorageCodingPathProtocol {
             return (moduleName: "bridgeProxy", itemName: "burn")
         case .bridgeProxyTransactions:
             return (moduleName: "BridgeProxy", itemName: "Transactions")
+        case .soraBridgeAppBurn:
+            return (moduleName: "soraBridgeApp", itemName: "burn")
         }
     }
 
@@ -56,6 +58,7 @@ enum XcmCallPath: StorageCodingPathProtocol {
 
     case bridgeProxyBurn
     case bridgeProxyTransactions
+    case soraBridgeAppBurn
 }
 
 extension XcmCallPath {

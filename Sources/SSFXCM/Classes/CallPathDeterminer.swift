@@ -50,10 +50,18 @@ final class CallPathDeterminerImpl: CallPathDeterminer {
             return try await determineForParachain(dest: dest)
         case (.parachain, .parachain):
             return try await determineForParachain(dest: dest)
+        case (.parachain, .soraMainnet):
+            return try await determineForParachain(dest: dest)
         case (.soraMainnet, .relaychain): // considers this case as Sora mainnet bridge
             return .bridgeProxyBurn
         case (.relaychain, .soraMainnet): // considers this case as to Sora mainnet bridge
             return .xcmPalletLimitedReserveTransferAssets
+        case (.liberland, .soraMainnet):
+            return .soraBridgeAppBurn
+        case (.soraMainnet, .liberland):
+            return .bridgeProxyBurn
+        case (.soraMainnet, .parachain):
+            return .bridgeProxyBurn
         default:
             throw XcmError.directionNotSupported
         }
@@ -71,6 +79,8 @@ final class CallPathDeterminerImpl: CallPathDeterminer {
         case (.xTokens, .nativeParachain):
             return .xTokensTransferMultiasset
         case (.xTokens, .parachain):
+            return .xTokensTransferMultiasset
+        case (.xTokens, .soraMainnet):
             return .xTokensTransferMultiasset
 
         case (.polkadotXcm, .relaychain):

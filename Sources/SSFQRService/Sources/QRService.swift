@@ -3,6 +3,7 @@ import UIKit
 
 // sourcery: AutoMockable
 public protocol QRService: AnyObject {
+    func lookingMatcher(for code: String) throws -> QRMatcherType
     func extractQrCode(from image: UIImage) throws -> QRMatcherType
     func generate(with qrType: QRType, qrSize: CGSize) async throws -> UIImage
 }
@@ -26,21 +27,20 @@ public final class QRServiceDefault: QRService {
         self.matchers = matchers ?? [
             QRInfoMatcher(decoder: self.decoder),
             QRUriMatcherImpl(scheme: "ws"),
+            QRPreinstalledWalletMatcher()
         ]
     }
 
     // MARK: - QRService
+    
+    public func lookingMatcher(for code: String) throws -> QRMatcherType {
+        try searchMatcher(for: code)
+    }
 
     public func extractQrCode(from image: UIImage) throws -> QRMatcherType {
         let code = try proccess(image: image)
-        let qrMatcherTypes = matchers.map { $0.match(code: code) }.compactMap { $0 }
-        if qrMatcherTypes.isEmpty {
-            throw QRExtractionError.invalidImage
-        }
-        guard qrMatcherTypes.count == 1, let qrType = qrMatcherTypes.first else {
-            throw QRExtractionError.severalCoincidences
-        }
-        return qrType
+        let matcher = try searchMatcher(for: code)
+        return matcher
     }
 
     public func generate(with qrType: QRType, qrSize: CGSize) async throws -> UIImage {
@@ -49,6 +49,19 @@ public final class QRServiceDefault: QRService {
     }
 
     // MARK: - Private methods
+    
+    private func searchMatcher(for code: String) throws -> QRMatcherType {
+        let qrMatcherTypes = matchers
+            .map { $0.match(code: code) }
+            .compactMap { $0 }
+        if qrMatcherTypes.isEmpty {
+            throw QRExtractionError.invalidImage
+        }
+        guard qrMatcherTypes.count == 1, let qrType = qrMatcherTypes.first else {
+            throw QRExtractionError.severalCoincidences
+        }
+        return qrType
+    }
 
     private func createQR(for payload: Data, qrSize: CGSize) throws -> UIImage {
         guard let filter = CIFilter(name: "CIQRCodeGenerator") else {
