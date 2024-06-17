@@ -5,20 +5,21 @@ public protocol QRDecoder {
     func decode(data: Data) throws -> QRInfoType
 }
 
-final class QRDecoderDefault: QRDecoder {
-    static let defaultDecoders: [QRDecoder] = [
+public final class QRDecoderDefault: QRDecoder {
+    public static let defaultDecoders: [QRDecoder] = [
         BokoloCashDecoder(),
         SoraQRDecoder(),
         CexQRDecoder(),
+        DesiredCryptocurrencyDecoder()
     ]
 
     private let qrDecoders: [QRDecoder]
 
-    init(qrDecoders: [QRDecoder] = QRDecoderDefault.defaultDecoders) {
+    public init(qrDecoders: [QRDecoder] = QRDecoderDefault.defaultDecoders) {
         self.qrDecoders = qrDecoders
     }
 
-    func decode(data: Data) throws -> QRInfoType {
+    public func decode(data: Data) throws -> QRInfoType {
         let types = qrDecoders.compactMap {
             try? $0.decode(data: data)
         }
