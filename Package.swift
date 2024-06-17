@@ -323,7 +323,8 @@ let package = Package(
                 "SSFStorageQueryKit",
                 "SSFPools",
                 "sorawallet",
-                "SSFPoolsStorage"
+                "SSFPoolsStorage",
+                "SSFAccountManagment"
             ]
         ),
         .target(
