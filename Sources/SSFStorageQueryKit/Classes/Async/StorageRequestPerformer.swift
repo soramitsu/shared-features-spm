@@ -66,9 +66,11 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         _ request: StorageRequest,
         chain: ChainModel
     ) async throws -> T? {
-        guard let runtimeService = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
-            throw RuntimeProviderError.providerUnavailable
-        }
+        let runtimeService = try await chainRegistry.getRuntimeProvider(
+            chainId: chain.chainId,
+            usedRuntimePaths: [:],
+            runtimeItem: nil
+        )
         
         let connection = try chainRegistry.getSubstrateConnection(for: chain)
         
@@ -128,9 +130,11 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         _ request: MultipleRequest,
         chain: ChainModel
     ) async throws -> [K:T]? {
-        guard let runtimeService = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
-            throw RuntimeProviderError.providerUnavailable
-        }
+        let runtimeService = try await chainRegistry.getRuntimeProvider(
+            chainId: chain.chainId,
+            usedRuntimePaths: [:],
+            runtimeItem: nil
+        )
         
         let connection = try chainRegistry.getSubstrateConnection(for: chain)
         
@@ -192,9 +196,11 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         _ request: PrefixRequest,
         chain: ChainModel
     ) async throws -> [K: T]? {
-        guard let runtimeService = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
-            throw RuntimeProviderError.providerUnavailable
-        }
+        let runtimeService = try await chainRegistry.getRuntimeProvider(
+            chainId: chain.chainId,
+            usedRuntimePaths: [:],
+            runtimeItem: nil
+        )
         
         let connection = try chainRegistry.getSubstrateConnection(for: chain)
         
@@ -255,9 +261,11 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         _ requests: [any MixStorageRequest],
         chain: ChainModel
     ) async throws -> [MixStorageResponse] {
-        guard let runtimeService = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
-            throw RuntimeProviderError.providerUnavailable
-        }
+        let runtimeService = try await chainRegistry.getRuntimeProvider(
+            chainId: chain.chainId,
+            usedRuntimePaths: [:],
+            runtimeItem: nil
+        )
         
         let connection = try chainRegistry.getSubstrateConnection(for: chain)
         let codingFactory = try await runtimeService.fetchCoderFactory()
@@ -305,9 +313,11 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         with continuation: AsyncThrowingStream<CachedStorageResponse<[K:T]>, Error>.Continuation,
         chain: ChainModel
     ) async throws where T: Decodable, K: Decodable & ScaleCodable, K: Hashable {
-        guard let runtimeService = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
-            throw RuntimeProviderError.providerUnavailable
-        }
+        let runtimeService = try await chainRegistry.getRuntimeProvider(
+            chainId: chain.chainId,
+            usedRuntimePaths: [:],
+            runtimeItem: nil
+        )
         let keyExtractor = StorageKeyDataExtractor(runtimeService: runtimeService)
 
         let cache: [Data:T]? = try await getCache(
@@ -371,9 +381,11 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         storagePath: any StorageCodingPathProtocol,
         chain: ChainModel
     ) async throws -> [Data:T]? {
-        guard let runtimeService = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
-            throw RuntimeProviderError.providerUnavailable
-        }
+        let runtimeService = try await chainRegistry.getRuntimeProvider(
+            chainId: chain.chainId,
+            usedRuntimePaths: [:],
+            runtimeItem: nil
+        )
         let codingFactory = try await runtimeService.fetchCoderFactory()
         let keysEncoder = StorageRequestKeyEncodingWorkerFactoryDefault().buildFactory(
             storageCodingPath: storagePath,
