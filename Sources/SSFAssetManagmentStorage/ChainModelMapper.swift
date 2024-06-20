@@ -260,12 +260,14 @@ public final class ChainModelMapper {
     private func createExternalApi(from entity: CDChain) -> ChainModel.ExternalApiSet? {
         var staking: ChainModel.BlockExplorer?
         if let type = entity.stakingApiType, let url = entity.stakingApiUrl {
-            staking = ChainModel.BlockExplorer(type: type, url: url)
+            let apiKey = getBlockExplorerApiKey(for: type, chainId: entity.chainId)
+            staking = ChainModel.BlockExplorer(type: type, url: url, apiKey: apiKey)
         }
 
         var history: ChainModel.BlockExplorer?
         if let type = entity.historyApiType, let url = entity.historyApiUrl {
-            history = ChainModel.BlockExplorer(type: type, url: url)
+            let apiKey = getBlockExplorerApiKey(for: type, chainId: entity.chainId)
+            history = ChainModel.BlockExplorer(type: type, url: url, apiKey: apiKey)
         }
 
         var crowdloans: ChainModel.ExternalResource?
@@ -439,6 +441,15 @@ public final class ChainModelMapper {
         configEntity.availableDestinations = Set(destinationEntities) as NSSet
 
         entity.xcmConfig = configEntity
+    }
+
+    private func getBlockExplorerApiKey(for type: String, chainId: ChainModel.Id?) -> String? {
+        guard let blockExplorerType = BlockExplorerType(rawValue: type),
+              let chainId else
+        {
+            return nil
+        }
+        return apiKeyInjector.getBlockExplorerKey(for: blockExplorerType, chainId: chainId)
     }
 }
 
