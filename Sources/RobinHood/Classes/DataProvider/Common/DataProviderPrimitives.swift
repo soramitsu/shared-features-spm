@@ -116,6 +116,10 @@ public struct StreamableProviderObserverOptions {
     /// Refreshes list using data source when one from repository is empty.
     /// By default ```true```.
     public var refreshWhenEmpty: Bool
+    
+    /// Will notify just when local repository was updated.
+    /// By default ```false```.
+    public var notifyJustWhenUpdated: Bool
 
     /// - parameters:
     ///    - alwaysNotifyOnRefresh: Asks data provider to notify observer in any case
@@ -143,12 +147,14 @@ public struct StreamableProviderObserverOptions {
         alwaysNotifyOnRefresh: Bool = false,
         waitsInProgressSyncOnAdd: Bool = true,
         initialSize: Int = 0,
-        refreshWhenEmpty: Bool = true
+        refreshWhenEmpty: Bool = true,
+        notifyJustWhenUpdated: Bool = false
     ) {
         self.alwaysNotifyOnRefresh = alwaysNotifyOnRefresh
         self.waitsInProgressSyncOnAdd = waitsInProgressSyncOnAdd
         self.initialSize = initialSize
         self.refreshWhenEmpty = refreshWhenEmpty
+        self.notifyJustWhenUpdated = notifyJustWhenUpdated
     }
 }
 

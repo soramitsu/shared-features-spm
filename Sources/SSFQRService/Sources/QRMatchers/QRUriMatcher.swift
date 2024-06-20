@@ -1,13 +1,13 @@
 import Foundation
 
-final class QRUriMatcherImpl: QRMatcher {
+public final class QRUriMatcherImpl: QRMatcher {
     private let scheme: String
 
-    init(scheme: String) {
+    public init(scheme: String) {
         self.scheme = scheme
     }
 
-    func match(code: String) -> QRMatcherType? {
+    public func match(code: String) -> QRMatcherType? {
         guard let url = URL(string: code), url.scheme == scheme else {
             return nil
         }

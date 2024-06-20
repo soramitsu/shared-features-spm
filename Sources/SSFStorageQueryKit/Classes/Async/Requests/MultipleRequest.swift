@@ -4,10 +4,11 @@ import SSFModels
 public protocol MultipleRequest {
     var parametersType: MultipleStorageRequestParametersType { get }
     var storagePath: any StorageCodingPathProtocol { get }
+    var keyType: MapKeyType { get }
 }
 
 public enum MultipleStorageRequestParametersType {
-    case multipleNMap(params: [[any NMapKeyParamProtocol]])
+    case multipleNMap(params: [[[any NMapKeyParamProtocol]]])
     case multipleEncodable(params: [any Encodable])
 
     var workerType: StorageRequestWorkerType {

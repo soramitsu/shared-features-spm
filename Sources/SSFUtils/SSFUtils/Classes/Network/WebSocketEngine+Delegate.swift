@@ -18,11 +18,26 @@ extension WebSocketEngine: WebSocketDelegate {
             handleErrorEvent(error)
         case .cancelled:
             handleCancelled()
+        case .timeout:
+            handleTimeout()
+        case let .waiting(error):
+            handleDisconnectedEvent(reason: error.localizedDescription, code: 0)
         default:
             logger?.warning("Unhandled event \(event)")
         }
 
         mutex.unlock()
+    }
+    
+    private func handleTimeout() {
+        notify(
+            requests: pendingRequests,
+            error: JSONRPCEngineError.timeout
+        )
+        resetPendings()
+        if case .connecting = state {
+            handleDisconnectedEvent(reason: "timeout", code: 0)
+        }
     }
 
     private func handleCancelled() {

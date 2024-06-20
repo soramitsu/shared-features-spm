@@ -23,12 +23,17 @@ class JSONRPCWorker<P: Codable, T: Decodable> {
     }
 
     func performCall() async throws -> T {
-        try await withCheckedThrowingContinuation { continuation in
+        return try await withCheckedThrowingContinuation { continuation in
             currentTask = Task {
                 let timeoutTask = Task {
                     let duration = UInt64(timeout * 1_000_000_000)
                     try await Task.sleep(nanoseconds: duration)
-                    continuation.resume(throwing: JSONRPCWorkerContinuationError())
+
+                    if let requestId = requestId {
+                        engine.cancelForIdentifier(requestId)
+                    } else {
+                        continuation.resume(throwing: JSONRPCWorkerContinuationError())
+                    }
                 }
 
                 do {
@@ -40,6 +45,7 @@ class JSONRPCWorker<P: Codable, T: Decodable> {
                         continuation.resume(with: result)
                     }
                 } catch {
+                    timeoutTask.cancel()
                     continuation.resume(throwing: error)
                 }
             }

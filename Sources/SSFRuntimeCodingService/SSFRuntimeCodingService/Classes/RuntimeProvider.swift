@@ -43,6 +43,7 @@ public protocol RuntimeProviderProtocol: AnyObject, RuntimeCodingServiceProtocol
     func setup()
     func readySnapshot() async throws -> RuntimeSnapshot
     func cleanup()
+    func setupHot()
 }
 
 public enum RuntimeProviderError: Error {
@@ -280,4 +281,6 @@ extension RuntimeProvider: RuntimeProviderProtocol {
             }
         }
     }
+    
+    public func setupHot() {}
 }

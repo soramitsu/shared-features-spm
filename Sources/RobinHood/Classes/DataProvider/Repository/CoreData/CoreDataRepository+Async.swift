@@ -23,17 +23,20 @@ extension CoreDataRepository {
                     let entityName = String(describing: U.self)
                     let fetchRequest = NSFetchRequest<U>(entityName: entityName)
                     let modelIds = try modelIdsClosure()
-                    var predicate = NSPredicate(
-                        format: "%K in %@",
-                        strongSelf.dataMapper.entityIdentifierFieldName,
-                        modelIds
-                    )
+                    let predicates = modelIds.compactMap {
+                        NSPredicate(
+                            format: "%K BEGINSWITH[cd] %@",
+                            strongSelf.dataMapper.entityIdentifierFieldName,
+                            $0
+                        )
+                    }
+                    
+                    var predicate: NSPredicate? = NSCompoundPredicate(orPredicateWithSubpredicates: predicates)
 
                     if let filter = strongSelf.filter {
                         predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
-                            filter,
-                            predicate,
-                        ])
+                            filter
+                        ] + predicates)
                     }
 
                     fetchRequest.predicate = predicate

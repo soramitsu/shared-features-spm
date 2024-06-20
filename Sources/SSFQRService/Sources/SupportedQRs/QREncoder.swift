@@ -5,8 +5,8 @@ public protocol QREncoder {
     func encode(with type: QRType) throws -> Data
 }
 
-final class QREncoderDefault: QREncoder {
-    func encode(with type: QRType) throws -> Data {
+public final class QREncoderDefault: QREncoder {
+    public func encode(with type: QRType) throws -> Data {
         switch type {
         case let .address(address):
             return try CexQREncoder().encode(address: address)

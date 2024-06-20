@@ -8,6 +8,7 @@ public protocol ExtrinsicBuilderProtocol: AnyObject {
     func with(nonce: UInt32) -> Self
     func with(era: Era, blockHash: String) -> Self
     func with(tip: BigUInt) -> Self
+    func with(appId: BigUInt) -> Self
     func with(shouldUseAtomicBatch: Bool) -> Self
     func adding<T: RuntimeCallable>(call: T) throws -> Self
     func adding(rawCall: Data) throws -> Self
@@ -53,6 +54,7 @@ public final class ExtrinsicBuilder {
     private var nonce: UInt32?
     private var era: Era
     private var tip: BigUInt
+    private var appId: BigUInt?
     private var signature: ExtrinsicSignature?
     private var shouldUseAtomicBatch: Bool = true
 
@@ -96,7 +98,7 @@ public final class ExtrinsicBuilder {
     }
 
     private func appendExtraToPayload(encodingBy encoder: DynamicScaleEncoding) throws {
-        let extra = ExtrinsicSignedExtra(era: era, nonce: nonce ?? 0, tip: tip)
+        let extra = ExtrinsicSignedExtra(era: era, nonce: nonce ?? 0, tip: tip, appId: appId)
         try encoder.append(extra, ofType: GenericType.extrinsicExtra.name)
     }
 
@@ -105,7 +107,7 @@ public final class ExtrinsicBuilder {
         metadata: RuntimeMetadata
     ) throws {
         for checkString in try metadata.extrinsic.signedExtensions(using: metadata.schemaResolver) {
-            guard let check = ExtrinsicCheck(rawValue: checkString) else {
+            guard let check = ExtrinsicCheck.from(string: checkString, runtimeMetadata: metadata) else {
                 continue
             }
 
@@ -118,6 +120,9 @@ public final class ExtrinsicBuilder {
                 try encoder.append(encodable: specVersion)
             case .txVersion:
                 try encoder.append(encodable: transactionVersion)
+            case .checkMetadataHash:
+                // https://soramitsu.atlassian.net/browse/FLW-4679
+                try encoder.appendU8(json: JSON.stringValue("0"))
             default:
                 continue
             }
@@ -169,6 +174,15 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
 
         return self
     }
+    
+    
+    public func with(appId: BigUInt) -> Self {
+        self.appId = appId
+        self.signature = nil
+
+        return self
+    }
+
 
     public func with(shouldUseAtomicBatch: Bool) -> Self {
         self.shouldUseAtomicBatch = shouldUseAtomicBatch
@@ -204,7 +218,7 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
         let rawSignature = try signer(data)
 
         var signatureJson = JSON.null
-        var signatureTypeString = KnownType.signature.rawValue
+        var signatureTypeString = metadata.signatureType
 
         // Some networks like Moonbeam/Moonriver have signature as direct byte-array rather than
         // MultiSignature enum
@@ -242,7 +256,7 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
             signatureJson = try signature.toScaleCompatibleJSON()
         }
 
-        let extra = ExtrinsicSignedExtra(era: era, nonce: nonce ?? 0, tip: tip)
+        let extra = ExtrinsicSignedExtra(era: era, nonce: nonce ?? 0, tip: tip, appId: appId)
         signature = ExtrinsicSignature(
             address: address,
             signature: signatureJson,
@@ -260,7 +274,7 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
         let call = try prepareExtrinsicCall(for: metadata)
 
         Log.enable(kind: "DynamicScale")
-        let extrinsic = Extrinsic(signature: signature, call: call)
+        let extrinsic = Extrinsic(call: call, signature: signature)
 
         try encoder.append(extrinsic, ofType: GenericType.extrinsic.name)
 

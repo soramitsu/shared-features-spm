@@ -4,7 +4,9 @@ import SSFRuntimeCodingService
 import SSFUtils
 
 final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
-    private lazy var storageKeyFactory: StorageKeyFactoryProtocol = StorageKeyFactory()
+    private lazy var storageKeyFactory: StorageKeyFactoryProtocol = {
+        StorageKeyFactory()
+    }()
 
     // MARK: - AsyncStorageRequestFactory
 
@@ -92,7 +94,7 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
 
     func queryItems<T>(
         engine: JSONRPCEngine,
-        keyParams: [[any NMapKeyParamProtocol]],
+        keyParams: [[[any NMapKeyParamProtocol]]],
         factory: RuntimeCoderFactoryProtocol,
         storagePath: any StorageCodingPathProtocol,
         at blockHash: Data?
@@ -122,7 +124,7 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
         storagePath: any StorageCodingPathProtocol,
         at blockHash: Data?
     ) async throws -> [StorageResponse<T>] where T: Decodable {
-        let queryKeys = try await createQueryByPrefixOperation(for: keys, engine: engine)
+        let queryKeys = try await queryKeysByPrefix(for: keys, engine: engine)
         let fetchedKeys = try queryKeys
             .compactMap { $0 }.reduce([], +)
             .compactMap { try Data(hexStringSSF: $0) }
@@ -151,10 +153,32 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
         )
         return mergeResult
     }
-
-    // MARK: - Private methods
-
-    private func queryWorkersResult(
+    
+    func queryItemsByPrefix<T>(
+        engine: JSONRPCEngine,
+        keyParams: [any Encodable],
+        factory: RuntimeCoderFactoryProtocol,
+        storagePath: any StorageCodingPathProtocol,
+        at blockHash: Data?
+    ) async throws -> [StorageResponse<T>] where T: Decodable {
+        let keysWorker = MapKeyEncodingWorker(
+            codingFactory: factory,
+            path: storagePath,
+            storageKeyFactory: storageKeyFactory,
+            keyParams: keyParams
+        )
+        let keys = try keysWorker.performEncoding()
+        
+        return try await queryItemsByPrefix(
+            engine: engine,
+            keys: keys,
+            factory: factory,
+            storagePath: storagePath,
+            at: nil
+        )
+    }
+    
+    func queryWorkersResult(
         for keys: [Data],
         at blockHash: Data?,
         engine: JSONRPCEngine
@@ -184,6 +208,8 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
         let updates = try await runRPCWorkers(workers)
         return updates
     }
+
+    // MARK: - Private methods
 
     private func mergeResult<T>(
         updates: [[StorageUpdate]],
@@ -222,38 +248,45 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
             return index1 < index2
         }
     }
-
-    private func createQueryByPrefixOperation(
-        for keys: [Data],
+    
+    private func queryKeysByPrefix(
+        for key: Data,
         engine: JSONRPCEngine
-    ) async throws -> [[String]] {
+    ) async throws -> [String] {
         let itemsPerPage = 1000
-        let pageCount = (keys.count % itemsPerPage == 0)
-            ? keys.count / itemsPerPage
-            : (keys.count / itemsPerPage + 1)
 
-        let workers = try (0 ..< pageCount).map { pageIndex in
-            let pageStart = pageIndex * itemsPerPage
-            let pageEnd = pageStart + itemsPerPage
-            let subkeys = (pageEnd < keys.count)
-                ? Array(keys[pageStart ..< pageEnd])
-                : Array(keys.suffix(from: pageStart))
+        var result: [String] = []
+        var full = false
+        var offset: String?
 
-            guard let key = subkeys.first?.toHex(includePrefix: true) else {
-                throw AsyncStorageRequestError.unexpectedDependentResult
-            }
-
-            let request = PagedKeysRequest(key: key)
-            let workers = JSONRPCWorker<PagedKeysRequest, [String]>(
+        while !full {
+            let request = PagedKeysRequest(
+                key: key.toHex(includePrefix: true),
+                count: UInt32(itemsPerPage),
+                offset: offset
+            )
+            let worker = JSONRPCWorker<PagedKeysRequest, [String]>(
                 engine: engine,
                 method: RPCMethod.getStorageKeysPaged,
                 parameters: request
             )
 
-            return workers
+            let page = try await worker.performCall()
+            result += page
+            offset = page.last
+            full = page.count < itemsPerPage
         }
-        let updates = try await runRPCWorkers(workers)
-        return updates
+
+        return result
+    }
+
+    private func queryKeysByPrefix(
+        for keys: [Data],
+        engine: JSONRPCEngine
+    ) async throws -> [[String]] {
+        return try await keys.asyncCompactMap {
+            return try await queryKeysByPrefix(for: $0, engine: engine)
+        }
     }
 
     private func runRPCWorkers<P: Encodable, T: Decodable>(
@@ -263,7 +296,7 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
             of: T.self,
             returning: [T].self,
             body: { group in
-                for worker in workers {
+                workers.forEach { worker in
                     group.addTask {
                         try await worker.performCall()
                     }

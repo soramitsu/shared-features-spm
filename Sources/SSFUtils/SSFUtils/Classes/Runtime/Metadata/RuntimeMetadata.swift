@@ -99,7 +99,7 @@ public final class RuntimeMetadata {
             if version == 13 {
                 return .indexedString(accountId)
             } else {
-                return MultiAddress.address32(accountId)
+                return MultiAddress.accoundId(accountId)
             }
         }
     }

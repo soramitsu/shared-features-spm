@@ -3,6 +3,7 @@ import Foundation
 public enum QRMatcherType {
     case qrInfo(QRInfoType)
     case walletConnect(String)
+    case preinstalledWallet(String)
 
     public var address: String? {
         switch self {
@@ -14,8 +15,10 @@ public enum QRMatcherType {
                 return cexQRInfo.address
             case let .bokoloCash(qrInfo):
                 return qrInfo.address
+            case let .desiredCryptocurrency(qrInfo):
+                return qrInfo.address
             }
-        case .walletConnect:
+        case .walletConnect, .preinstalledWallet:
             return nil
         }
     }
@@ -24,17 +27,26 @@ public enum QRMatcherType {
         switch self {
         case let .qrInfo(qRInfoType):
             return qRInfoType
-        case .walletConnect:
+        case .walletConnect, .preinstalledWallet:
             return nil
         }
     }
 
     public var uri: String? {
         switch self {
-        case .qrInfo:
+        case .qrInfo, .preinstalledWallet:
             return nil
         case let .walletConnect(uri):
             return uri
+        }
+    }
+    
+    public var preinstalledWallet: String? {
+        switch self {
+        case .qrInfo, .walletConnect:
+            return nil
+        case let .preinstalledWallet(preinstalledWallet):
+            return preinstalledWallet
         }
     }
 }

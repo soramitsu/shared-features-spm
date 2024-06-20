@@ -36,20 +36,21 @@ let package = Package(
         .library(name: "SSFSingleValueCache", targets: ["SSFSingleValueCache"]),
         .library(name: "SSFPolkaswap", targets: ["SSFPolkaswap"]),
         .library(name: "SSFPools", targets: ["SSFPools"]),
-        .library(name: "SSFPoolsStorage", targets: ["SSFPoolsStorage"])
+        .library(name: "SSFPoolsStorage", targets: ["SSFPoolsStorage"]),
+        .library(name: "MPQRCoreSDK", targets: ["MPQRCoreSDK"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
         .package(url: "https://github.com/bitmark-inc/tweetnacl-swiftwrap", from: "1.1.0"),
         .package(url: "https://github.com/ashleymills/Reachability.swift", from: "5.0.0"),
-        .package(url: "https://github.com/soramitsu/fearless-starscream", from: "4.0.8"),
+        .package(url: "https://github.com/soramitsu/fearless-starscream", from: "4.0.12"),
         .package(url: "https://github.com/google/GoogleSignIn-iOS", from: "7.0.0"),
         .package(url: "https://github.com/google/google-api-objectivec-client-for-rest.git", from: "3.3.0"),
         .package(url: "https://github.com/attaswift/BigInt.git", from: "5.3.0"),
         .package(url: "https://github.com/daisuke-t-jp/xxHash-Swift", from: "1.1.1"),
         .package(url: "https://github.com/SwiftyBeaver/SwiftyBeaver.git", .upToNextMajor(from: "2.0.0")),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.50.4"),
-        .package(url: "https://github.com/bnsports/Web3.swift.git", branch: "master")
+        .package(url: "https://github.com/bnsports/Web3.swift.git", from: "7.7.7")
     ],
     targets: [
         .binaryTarget(name: "blake2lib", path: "Binaries/blake2lib.xcframework"),
@@ -240,7 +241,8 @@ let package = Package(
                 "SSFCrypto",
                 "SSFChainConnection",
                 "SSFUtils",
-                "SSFSingleValueCache"
+                "SSFSingleValueCache",
+                "SSFChainRegistry"
             ]
         ),
         .testTarget(

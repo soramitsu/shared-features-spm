@@ -5,6 +5,7 @@ public enum JSONRPCEngineError: Error {
     case remoteCancelled
     case clientCancelled
     case unknownError
+    case timeout
 }
 
 public protocol JSONRPCResponseHandling {
@@ -95,6 +96,7 @@ public final class JSONRPCSubscription<T: Decodable>: JSONRPCSubscribing {
 }
 
 public protocol JSONRPCEngine: AnyObject {
+    var connectionName: String? { get set }
     var url: URL? { get set }
     var pendingEngineRequests: [JSONRPCRequest] { get }
 

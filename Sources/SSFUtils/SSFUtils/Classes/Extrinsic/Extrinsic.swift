@@ -11,31 +11,34 @@ public struct ExtrinsicSignedExtra: Codable {
         case era
         case nonce
         case tip
+        case appId = "app_id"
     }
 
     public var era: Era?
     @OptionStringCodable public var nonce: UInt32?
     @OptionStringCodable public var tip: BigUInt?
+    @OptionStringCodable public var appId: BigUInt?
 
-    public init(era: Era?, nonce: UInt32?, tip: BigUInt?) {
+    public init(era: Era?, nonce: UInt32?, tip: BigUInt?, appId: BigUInt?) {
         self.era = era
         self.nonce = nonce
         self.tip = tip
+        self.appId = appId
     }
 }
 
 public struct Extrinsic: Codable {
     enum CodingKeys: String, CodingKey {
-        case signature
         case call
+        case signature
     }
 
-    public let signature: ExtrinsicSignature?
     public let call: JSON
+    public let signature: ExtrinsicSignature?
 
-    public init(signature: ExtrinsicSignature?, call: JSON) {
-        self.signature = signature
+    public init(call: JSON, signature: ExtrinsicSignature?) {
         self.call = call
+        self.signature = signature
     }
 }
 
