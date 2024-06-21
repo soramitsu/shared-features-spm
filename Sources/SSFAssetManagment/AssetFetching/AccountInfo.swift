@@ -10,20 +10,20 @@ struct AccountInfoStorageWrapper: StorageWrapper {
     let data: Data
 }
 
-struct AccountInfo: Codable, Equatable {
+public struct AccountInfo: Codable, Equatable {
     @StringCodable var nonce: UInt32
     @StringCodable var consumers: UInt32
     @StringCodable var providers: UInt32
     let data: AccountData
 
-    init(ethBalance: BigUInt) {
+    public init(ethBalance: BigUInt) {
         nonce = 0
         consumers = 0
         providers = 0
         data = AccountData(ethBalance: ethBalance)
     }
 
-    init(nonce: UInt32, consumers: UInt32, providers: UInt32, data: AccountData) {
+    public init(nonce: UInt32, consumers: UInt32, providers: UInt32, data: AccountData) {
         self.nonce = nonce
         self.consumers = consumers
         self.providers = providers
@@ -46,7 +46,7 @@ struct AccountInfo: Codable, Equatable {
         )
     }
 
-    init?(equilibriumFree: BigUInt?) {
+    public init?(equilibriumFree: BigUInt?) {
         guard let equilibriumFree = equilibriumFree else {
             return nil
         }
@@ -86,7 +86,7 @@ struct AccountInfo: Codable, Equatable {
     }
 }
 
-struct AccountData: Codable, Equatable {
+public struct AccountData: Codable, Equatable {
     enum CodingKeys: String, CodingKey {
         case free
         case reserved
@@ -101,21 +101,21 @@ struct AccountData: Codable, Equatable {
     @StringCodable var frozen: BigUInt
     @StringCodable var flags: BigUInt
 
-    init(ethBalance: BigUInt) {
+    public init(ethBalance: BigUInt) {
         free = ethBalance
         reserved = 0
         frozen = 0
         flags = 0
     }
 
-    init(free: BigUInt, reserved: BigUInt, frozen: BigUInt, flags: BigUInt? = .zero) {
+    public init(free: BigUInt, reserved: BigUInt, frozen: BigUInt, flags: BigUInt? = .zero) {
         self.free = free
         self.reserved = reserved
         self.frozen = frozen
         self.flags = flags ?? .zero
     }
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(free, forKey: .free)
         try container.encode(reserved, forKey: .reserved)
@@ -123,7 +123,7 @@ struct AccountData: Codable, Equatable {
         try container.encode(flags, forKey: .flags)
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         do {
