@@ -25,10 +25,10 @@ public enum SubstrateStorageParams {
     }
 }
 
-class SubstrateDataStorageFacade: StorageFacadeProtocol {
-    static let shared = SubstrateDataStorageFacade()
+public class SubstrateDataStorageFacade: StorageFacadeProtocol {
+    public static let shared = SubstrateDataStorageFacade()
 
-    let databaseService: CoreDataServiceProtocol
+    public let databaseService: CoreDataServiceProtocol
 
     private init() {
         let modelName = "SubstrateDataModel"
@@ -60,7 +60,7 @@ class SubstrateDataStorageFacade: StorageFacadeProtocol {
         databaseService = CoreDataService(configuration: configuration)
     }
 
-    func createRepository<T, U>(
+    public func createRepository<T, U>(
         filter: NSPredicate?,
         sortDescriptors: [NSSortDescriptor],
         mapper: AnyCoreDataMapper<T, U>
