@@ -66,7 +66,7 @@ extension AccountImportService: AccountImportable {
                 cryptoType: request.cryptoType,
                 defaultChainId: request.defaultChainId
             )
-            
+
             operation = accountOperationFactory.newMetaAccountOperation(
                 mnemonicRequest: request,
                 isBackuped: true
