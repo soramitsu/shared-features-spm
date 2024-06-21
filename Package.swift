@@ -228,7 +228,8 @@ let package = Package(
                 "RobinHood",
                 "IrohaCrypto",
                 "SoraKeystore",
-                "SSFUtils"
+                "SSFUtils",
+                "SSFModels"
             ]
         ),
         .testTarget(
