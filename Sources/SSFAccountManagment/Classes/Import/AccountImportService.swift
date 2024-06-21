@@ -40,7 +40,6 @@ public final class AccountImportService {
                 for: nil,
                 sortDescriptors: []
             )
-
         self.accountOperationFactory = accountOperationFactory
         self.operationManager = operationManager
         self.mnemonicCreator = mnemonicCreator
