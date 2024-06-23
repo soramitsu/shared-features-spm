@@ -14,7 +14,7 @@ public struct AccountInfo: Codable, Equatable {
     @StringCodable var nonce: UInt32
     @StringCodable var consumers: UInt32
     @StringCodable var providers: UInt32
-    let data: AccountData
+    public let data: AccountData
 
     public init(ethBalance: BigUInt) {
         nonce = 0
