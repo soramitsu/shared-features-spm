@@ -166,7 +166,7 @@ public struct AccountData: Codable, Equatable {
     }
 }
 
-extension AccountData {
+public extension AccountData {
     var total: BigUInt { free + reserved }
     var locked: BigUInt { frozen }
     var stakingAvailable: BigUInt {
