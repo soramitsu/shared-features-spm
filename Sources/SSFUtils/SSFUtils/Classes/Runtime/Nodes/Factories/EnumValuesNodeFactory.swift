@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 class EnumValuesNodeFactory: TypeNodeFactoryProtocol {
     let parser: TypeParser

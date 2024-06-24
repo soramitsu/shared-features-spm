@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 enum TypeNodeFactoryError: Error {
     case unexpectedParsingResult(typeName: String)

@@ -304,7 +304,12 @@ let package = Package(
                 "SSFLogger"
             ]
         ),
-        .target(name: "SSFNetwork", dependencies: [ "RobinHood" ]),
+        .target(name: "SSFNetwork", dependencies: [
+            "RobinHood",
+            "IrohaCrypto",
+            "SSFSingleValueCache",
+            "SSFUtils"
+        ]),
         .target(name: "SSFLogger", dependencies: [ "SwiftyBeaver" ]),
         .target(
             name: "SSFXCM",

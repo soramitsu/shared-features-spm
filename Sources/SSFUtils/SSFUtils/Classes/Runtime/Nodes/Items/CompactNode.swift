@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class CompactNode: Node {
     public let typeName: String

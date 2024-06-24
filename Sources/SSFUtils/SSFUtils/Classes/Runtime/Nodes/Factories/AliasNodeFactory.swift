@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 class AliasNodeFactory: TypeNodeFactoryProtocol {
     let parser: TypeParser

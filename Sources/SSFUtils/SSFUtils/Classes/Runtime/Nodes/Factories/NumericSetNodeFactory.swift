@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 class NumericSetNodeFactory: TypeNodeFactoryProtocol {
     let parser: TypeParser

@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class TupleNode: Node {
     public let typeName: String

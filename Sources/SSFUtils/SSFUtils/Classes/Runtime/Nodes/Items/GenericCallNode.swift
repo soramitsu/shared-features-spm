@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public enum GenericCallNodeError: Error {
     case unexpectedParams

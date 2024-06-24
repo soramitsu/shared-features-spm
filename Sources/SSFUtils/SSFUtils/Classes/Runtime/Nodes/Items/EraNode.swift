@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class EraNode: Node {
     public var typeName: String { GenericType.era.name }

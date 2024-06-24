@@ -1,6 +1,6 @@
 import BigInt
 import Foundation
-
+import SSFModels
 public class DynamicScaleDecoder {
     private var decoder: ScaleDecoder
     public let registry: TypeRegistryCatalogProtocol

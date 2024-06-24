@@ -1,5 +1,6 @@
 import BigInt
 import Foundation
+import SSFModels
 
 public enum ExtrinsicConstants {
     static let version: UInt8 = 4

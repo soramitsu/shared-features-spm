@@ -1,5 +1,6 @@
 import BigInt
 import Foundation
+import SSFModels
 
 public enum ExtrinsicNodeError: Error {
     case invalidParams

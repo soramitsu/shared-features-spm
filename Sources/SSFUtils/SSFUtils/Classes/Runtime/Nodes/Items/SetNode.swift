@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class SetNode: Node {
     public struct Item: Hashable, Equatable {

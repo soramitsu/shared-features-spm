@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class ExtrinsicsDecoderNode: Node {
     public var typeName: String { GenericType.extrinsicDecoder.name }

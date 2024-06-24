@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class H512Node: Node {
     public var typeName: String { GenericType.h512.name }

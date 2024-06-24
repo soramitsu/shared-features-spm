@@ -6,6 +6,7 @@ import SSFStorageQueryKit
 import SSFUtils
 import BigInt
 import SSFModels
+import SSFNetwork
 
 typealias BaseAssetId = String
 
@@ -23,11 +24,12 @@ public protocol PolkaswapLiquidityPoolService {
     
     func subscribeLiquidityPool(assetIdPair: AssetIdPair) async throws -> AsyncThrowingStream<CachedStorageResponse<LiquidityPair>, Swift.Error>
     func subscribePoolReserves(assetIdPair: AssetIdPair) async throws -> AsyncThrowingStream<CachedStorageResponse<PolkaswapPoolReservesInfo>, Swift.Error>
+    func subscribePoolsAPY(poolIds: [String]) async throws -> AsyncThrowingStream<[CachedNetworkResponse<PoolApyInfo>], Swift.Error>
 
     func fetchAvailablePools() async throws -> [LiquidityPair]
     func fetchUserPools(accountId: AccountId) async throws -> [AccountPool]
     func fetchUserPool(assetIdPair: AssetIdPair, accountId: AccountId) async throws -> AccountPool
-    func fetchPoolsAPY() async throws -> [PoolApyInfo]
+    func fetchPoolsAPY(poolIds: [String]) async throws -> [PoolApyInfo]
     func fetchReserves(pools: [LiquidityPair]) async throws -> [PolkaswapPoolReservesInfo]
     func fetchDexId(baseAssetId: String) async throws -> String
     func fetchTotalIssuance(reservesId: AccountId) async throws -> BigUInt
@@ -38,18 +40,18 @@ public final class PolkaswapLiquidityPoolServiceDefault {
     private let dexManagerStorage: DexManagerStorage
     private let poolXykStorage: PoolXykStorage
     private let chain: ChainModel
-    private let apyWorker: PolkaswapAPYWorker
+    private let apyFetcher: PoolsApyFetcher
     
     public init(
         dexManagerStorage: DexManagerStorage,
         poolXykStorage: PoolXykStorage,
         chain: ChainModel,
-        apyWorker: PolkaswapAPYWorkerDefault
+        apyFetcher: PoolsApyFetcher
     ) {
         self.dexManagerStorage = dexManagerStorage
         self.poolXykStorage = poolXykStorage
         self.chain = chain
-        self.apyWorker = apyWorker
+        self.apyFetcher = apyFetcher
     }
 }
 
@@ -178,11 +180,8 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
         }
     }
 
-    public func fetchPoolsAPY() async throws -> [PoolApyInfo] {
-        let apyInfo = try await apyWorker.getAPYInfo()
-        return apyInfo.compactMap {
-            PoolApyInfo(poolId: $0.id, apy: $0.sbApy?.decimalValue)
-        }
+    public func fetchPoolsAPY(poolIds: [String]) async throws -> [PoolApyInfo] {
+        return try await apyFetcher.fetch(poolIds: poolIds)
     }
     
     public func fetchReserves(pools: [LiquidityPair]) async throws -> [PolkaswapPoolReservesInfo] {
@@ -197,6 +196,10 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
         }
         
         return totalIssuance
+    }
+    
+    public func subscribePoolsAPY(poolIds: [String]) async throws -> AsyncThrowingStream<[CachedNetworkResponse<PoolApyInfo>], Swift.Error> {
+        return try await apyFetcher.subscribe(poolIds: poolIds)
     }
     
     public func subscribeUserPools(accountId: AccountId) async throws -> AsyncThrowingStream<CachedStorageResponse<[LiquidityPair]>, Swift.Error> {

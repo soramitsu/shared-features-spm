@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class OneOfParser: TypeParser {
     public let children: [TypeParser]

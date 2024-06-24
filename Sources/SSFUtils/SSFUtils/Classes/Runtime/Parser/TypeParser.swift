@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public protocol TypeParser {
     func parse(json: JSON) -> [JSON]?

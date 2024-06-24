@@ -1,5 +1,6 @@
 import Foundation
 import SSFUtils
+import SSFModels
 
 struct XcmV1MultilocationJunctions: Codable {
     let items: [XcmJunction]

@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class AccountIdAddressNode: Node {
     public var typeName: String { "AccountIdAddress" }

@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class GenericBlockNode: Node {
     public var typeName: String { GenericType.block.name }

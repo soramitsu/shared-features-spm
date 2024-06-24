@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class DataNode: Node {
     public var typeName: String { GenericType.data.name }

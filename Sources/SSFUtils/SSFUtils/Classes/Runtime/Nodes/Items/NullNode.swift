@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class NullNode: Node {
     public var typeName: String { GenericType.null.name }

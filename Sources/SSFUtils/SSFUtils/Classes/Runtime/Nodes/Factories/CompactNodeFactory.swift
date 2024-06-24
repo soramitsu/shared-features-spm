@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 final class CompactNodeFactory: TypeNodeFactoryProtocol {
     let parser: TypeParser

@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 class TupleNodeFactory: TypeNodeFactoryProtocol {
     let parser: TypeParser
