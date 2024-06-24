@@ -23,6 +23,11 @@ public protocol StorageRequestPerformer {
         _ request: MultipleRequest,
         withCacheOptions: CachedStorageRequestTrigger
     ) async -> AsyncThrowingStream<[T?], Error>
+
+    func perform(
+        _ requests: [any MixStorageRequest],
+        chain: ChainModel
+    ) async throws -> [MixStorageResponse]
 }
 
 public final class StorageRequestPerformerDefault: StorageRequestPerformer {
@@ -151,6 +156,36 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
                 }
             }
         }
+    }
+
+    public func perform(
+        _ requests: [any MixStorageRequest],
+        chain: ChainModel
+    ) async throws -> [MixStorageResponse] {
+//        guard let runtimeService = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
+//            throw RuntimeProviderError.providerUnavailable
+//        }
+
+//        let connection = try chainRegistry.getSubstrateConnection(for: chain)
+        let codingFactory = try await runtimeService.fetchCoderFactory()
+        let keysBuilder = MixStorageRequestsKeysBuilder(codingFactory: codingFactory)
+        let requesrWorker = MixStorageRequestsWorkerDefault(
+            runtimeService: runtimeService,
+            connection: connection,
+            storageRequestFactory: storageRequestFactory
+        )
+
+        let keys = try keysBuilder.buildKeys(for: requests)
+        let updates = try await requesrWorker.perform(keys: keys)
+
+        let decodingWorker = MixStorageDecodingListWorker(
+            requests: requests,
+            updates: updates,
+            codingFactory: codingFactory
+        )
+        let responses = try decodingWorker.performDecoding()
+
+        return responses
     }
 
     // MARK: - Private methods
