@@ -36,10 +36,14 @@ public final class ConnectionPool: ConnectionPoolProtocol {
 
         clearUnusedConnections()
 
-        let nodes = chain.nodes.map { $0.url }
+        let nodes: [ChainNodeModel]
+        if let selectedNode = chain.selectedNode {
+            nodes = [selectedNode]
+        } else {
+            nodes = Array(chain.nodes)
+        }
         let autoBalance = SubstrateConnectionAutoBalance(
-            urls: nodes,
-            selectedUrl: chain.selectedNode?.url,
+            urls: nodes.map { $0.url },
             chainId: chain.chainId
         )
 

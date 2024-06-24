@@ -89,9 +89,9 @@ public final class JSONRPCListOperation<T: Decodable>: JSONRPCOperation<[String]
 
 public extension JSONRPCOperation {
     static func failureOperation(_ error: Error) -> JSONRPCOperation<P, T> {
-        let mockEngine = WebSocketEngine(
+        let mockEngine = try! WebSocketEngine(
             connectionName: nil,
-            url: URL(string: "https://wiki.fearlesswallet.io")!,
+            urls: [URL(string: "https://wiki.fearlesswallet.io")!],
             autoconnect: false
         )
         let operation = JSONRPCOperation<P, T>(engine: mockEngine, method: "")

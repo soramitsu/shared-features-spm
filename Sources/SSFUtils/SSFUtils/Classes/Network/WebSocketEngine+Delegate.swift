@@ -22,8 +22,14 @@ extension WebSocketEngine: WebSocketDelegate {
             handleTimeout()
         case let .waiting(error):
             handleDisconnectedEvent(reason: error.localizedDescription, code: 0)
-        default:
+        case .pong, .ping, .viabilityChanged:
             logger?.warning("Unhandled event \(event)")
+        case let .reconnectSuggested(reconnectSuggested):
+            logger?.warning("reconnectSuggested \(reconnectSuggested)")
+            guard reconnectSuggested else {
+                return
+            }
+            handleDisconnectedEvent(reason: "reconnect suggested", code: 0)
         }
 
         mutex.unlock()
@@ -44,16 +50,16 @@ extension WebSocketEngine: WebSocketDelegate {
         logger?.warning("Remote cancelled")
 
         switch state {
-        case let .connecting(attempt):
-            connection.disconnect()
-            scheduleReconnectionOrDisconnect(attempt + 1)
+        case .connecting:
+            disconnect()
+            scheduleReconnectionOrDisconnect()
         case .connected:
             let cancelledRequests = resetInProgress()
 
             pingScheduler.cancel()
 
-            connection.disconnect()
-            scheduleReconnectionOrDisconnect(1)
+            disconnect()
+            scheduleReconnectionOrDisconnect()
 
             notify(
                 requests: cancelledRequests,
@@ -77,17 +83,17 @@ extension WebSocketEngine: WebSocketDelegate {
 
             pingScheduler.cancel()
 
-            connection.disconnect()
-            startConnecting(0)
+            disconnect()
+            startConnecting()
 
             notify(
                 requests: cancelledRequests,
                 error: JSONRPCEngineError.clientCancelled
             )
-        case let .connecting(attempt):
-            connection.disconnect()
+        case .connecting:
+            disconnect()
 
-            scheduleReconnectionOrDisconnect(attempt + 1)
+            scheduleReconnectionOrDisconnect(after: error)
         default:
             break
         }
@@ -123,14 +129,14 @@ extension WebSocketEngine: WebSocketDelegate {
         logger?.warning("Disconnected with code \(code): \(reason)")
 
         switch state {
-        case let .connecting(attempt):
-            scheduleReconnectionOrDisconnect(attempt + 1)
+        case .connecting:
+            scheduleReconnectionOrDisconnect()
         case .connected:
             let cancelledRequests = resetInProgress()
 
             pingScheduler.cancel()
 
-            scheduleReconnectionOrDisconnect(1)
+            scheduleReconnectionOrDisconnect()
 
             notify(
                 requests: cancelledRequests,
@@ -149,8 +155,8 @@ extension WebSocketEngine: ReachabilityListenerDelegate {
         if manager.isReachable, case .notReachable = state {
             logger?.debug("Network became reachable, retrying connection")
 
-            reconnectionScheduler.cancel()
-            startConnecting(0)
+            cancelReconectionShedule()
+            startConnecting()
         }
 
         mutex.unlock()
@@ -163,25 +169,15 @@ extension WebSocketEngine: SchedulerDelegate {
 
         if scheduler === pingScheduler {
             handlePing(scheduler: scheduler)
-        } else {
-            handleReconnection(scheduler: scheduler)
         }
 
         mutex.unlock()
     }
 
-    private func handleReconnection(scheduler _: SchedulerProtocol) {
-        logger?.debug("Did trigger reconnection scheduler")
-
-        if case let .waitingReconnection(attempt) = state {
-            startConnecting(attempt)
-        }
-    }
-
     private func handlePing(scheduler _: SchedulerProtocol) {
         schedulePingIfNeeded()
 
-        connection.callbackQueue.async {
+        completionQueue.async {
             self.sendPing()
         }
     }
