@@ -35,7 +35,7 @@ public struct AccountInfo: Codable, Equatable {
         self.data = data
     }
 
-    init?(ormlAccountInfo: OrmlAccountInfo?) {
+    public init?(ormlAccountInfo: OrmlAccountInfo?) {
         guard let ormlAccountInfo = ormlAccountInfo else {
             return nil
         }
@@ -187,7 +187,7 @@ public extension AccountData {
 
 // MARK: - Orml
 
-struct OrmlAccountInfo: Codable, Equatable {
+public struct OrmlAccountInfo: Codable, Equatable {
     @StringCodable var free: BigUInt
     @StringCodable var reserved: BigUInt
     @StringCodable var frozen: BigUInt
