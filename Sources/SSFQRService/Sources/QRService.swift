@@ -26,8 +26,7 @@ public final class QRServiceDefault: QRService {
         self.decoder = decoder ?? QRDecoderDefault()
         self.matchers = matchers ?? [
             QRInfoMatcher(decoder: self.decoder),
-            QRUriMatcherImpl(scheme: "ws"),
-            QRPreinstalledWalletMatcher()
+            QRUriMatcherImpl(scheme: "ws")
         ]
     }
 

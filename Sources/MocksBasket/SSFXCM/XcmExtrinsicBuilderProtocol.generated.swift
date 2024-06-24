@@ -101,24 +101,42 @@ public init() {}
 
     //MARK: - buildBridgeProxyBurn
 
-    public var buildBridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathThrowableError: Error?
-    public var buildBridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathCallsCount = 0
-    public var buildBridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathCalled: Bool {
-        return buildBridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathCallsCount > 0
+    public var buildBridgeProxyBurnCurrencyIdDestChainModelAccountIdAmountPathThrowableError: Error?
+    public var buildBridgeProxyBurnCurrencyIdDestChainModelAccountIdAmountPathCallsCount = 0
+    public var buildBridgeProxyBurnCurrencyIdDestChainModelAccountIdAmountPathCalled: Bool {
+        return buildBridgeProxyBurnCurrencyIdDestChainModelAccountIdAmountPathCallsCount > 0
     }
-    public var buildBridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathReceivedArguments: (fromChainModel: ChainModel, currencyId: String, destChainModel: ChainModel, accountId: AccountId?, amount: BigUInt, path: XcmCallPath)?
-    public var buildBridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathReceivedInvocations: [(fromChainModel: ChainModel, currencyId: String, destChainModel: ChainModel, accountId: AccountId?, amount: BigUInt, path: XcmCallPath)] = []
-    public var buildBridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathReturnValue: ExtrinsicBuilderClosure!
-    public var buildBridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathClosure: ((ChainModel, String, ChainModel, AccountId?, BigUInt, XcmCallPath) throws -> ExtrinsicBuilderClosure)?
+    public var buildBridgeProxyBurnCurrencyIdDestChainModelAccountIdAmountPathReceivedArguments: (currencyId: String, destChainModel: ChainModel, accountId: AccountId, amount: BigUInt, path: XcmCallPath)?
+    public var buildBridgeProxyBurnCurrencyIdDestChainModelAccountIdAmountPathReceivedInvocations: [(currencyId: String, destChainModel: ChainModel, accountId: AccountId, amount: BigUInt, path: XcmCallPath)] = []
+    public var buildBridgeProxyBurnCurrencyIdDestChainModelAccountIdAmountPathReturnValue: ExtrinsicBuilderClosure!
+    public var buildBridgeProxyBurnCurrencyIdDestChainModelAccountIdAmountPathClosure: ((String, ChainModel, AccountId, BigUInt, XcmCallPath) throws -> ExtrinsicBuilderClosure)?
 
-    public func buildBridgeProxyBurn(fromChainModel: ChainModel, currencyId: String, destChainModel: ChainModel, accountId: AccountId?, amount: BigUInt, path: XcmCallPath) throws -> ExtrinsicBuilderClosure {
-        if let error = buildBridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathThrowableError {
+    public func buildBridgeProxyBurn(currencyId: String, destChainModel: ChainModel, accountId: AccountId, amount: BigUInt, path: XcmCallPath) throws -> ExtrinsicBuilderClosure {
+        if let error = buildBridgeProxyBurnCurrencyIdDestChainModelAccountIdAmountPathThrowableError {
             throw error
         }
-        buildBridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathCallsCount += 1
-        buildBridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathReceivedArguments = (fromChainModel: fromChainModel, currencyId: currencyId, destChainModel: destChainModel, accountId: accountId, amount: amount, path: path)
-        buildBridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathReceivedInvocations.append((fromChainModel: fromChainModel, currencyId: currencyId, destChainModel: destChainModel, accountId: accountId, amount: amount, path: path))
-        return try buildBridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathClosure.map({ try $0(fromChainModel, currencyId, destChainModel, accountId, amount, path) }) ?? buildBridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathReturnValue
+        buildBridgeProxyBurnCurrencyIdDestChainModelAccountIdAmountPathCallsCount += 1
+        buildBridgeProxyBurnCurrencyIdDestChainModelAccountIdAmountPathReceivedArguments = (currencyId: currencyId, destChainModel: destChainModel, accountId: accountId, amount: amount, path: path)
+        buildBridgeProxyBurnCurrencyIdDestChainModelAccountIdAmountPathReceivedInvocations.append((currencyId: currencyId, destChainModel: destChainModel, accountId: accountId, amount: amount, path: path))
+        return try buildBridgeProxyBurnCurrencyIdDestChainModelAccountIdAmountPathClosure.map({ try $0(currencyId, destChainModel, accountId, amount, path) }) ?? buildBridgeProxyBurnCurrencyIdDestChainModelAccountIdAmountPathReturnValue
+    }
+
+    //MARK: - buildSoraBridgeAddBurn
+
+    public var buildSoraBridgeAddBurnCurrencyIdAccountIdAmountPathCallsCount = 0
+    public var buildSoraBridgeAddBurnCurrencyIdAccountIdAmountPathCalled: Bool {
+        return buildSoraBridgeAddBurnCurrencyIdAccountIdAmountPathCallsCount > 0
+    }
+    public var buildSoraBridgeAddBurnCurrencyIdAccountIdAmountPathReceivedArguments: (currencyId: String?, accountId: AccountId, amount: BigUInt, path: XcmCallPath)?
+    public var buildSoraBridgeAddBurnCurrencyIdAccountIdAmountPathReceivedInvocations: [(currencyId: String?, accountId: AccountId, amount: BigUInt, path: XcmCallPath)] = []
+    public var buildSoraBridgeAddBurnCurrencyIdAccountIdAmountPathReturnValue: ExtrinsicBuilderClosure!
+    public var buildSoraBridgeAddBurnCurrencyIdAccountIdAmountPathClosure: ((String?, AccountId, BigUInt, XcmCallPath) -> ExtrinsicBuilderClosure)?
+
+    public func buildSoraBridgeAddBurn(currencyId: String?, accountId: AccountId, amount: BigUInt, path: XcmCallPath) -> ExtrinsicBuilderClosure {
+        buildSoraBridgeAddBurnCurrencyIdAccountIdAmountPathCallsCount += 1
+        buildSoraBridgeAddBurnCurrencyIdAccountIdAmountPathReceivedArguments = (currencyId: currencyId, accountId: accountId, amount: amount, path: path)
+        buildSoraBridgeAddBurnCurrencyIdAccountIdAmountPathReceivedInvocations.append((currencyId: currencyId, accountId: accountId, amount: amount, path: path))
+        return buildSoraBridgeAddBurnCurrencyIdAccountIdAmountPathClosure.map({ $0(currencyId, accountId, amount, path) }) ?? buildSoraBridgeAddBurnCurrencyIdAccountIdAmountPathReturnValue
     }
 
 }

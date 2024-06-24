@@ -23,10 +23,10 @@ final class NMapKeyEncodingWorkerTests: XCTestCase {
             codingFactory: codingFactory,
             path: StoragePathMock.custom(moduleName: "Staking", itemName: "ErasValidatorPrefs"),
             storageKeyFactory: StorageKeyFactory(),
-            keyParams: [
+            keyParams: [[
                 [NMapKeyParam(value: "1353")],
                 [NMapKeyParam(value: account)],
-            ]
+            ]]
         )
 
         let keys = try worker.performEncoding()
@@ -64,10 +64,10 @@ final class NMapKeyEncodingWorkerTests: XCTestCase {
             codingFactory: codingFactory,
             path: StoragePathMock.custom(moduleName: "Staking", itemName: "currentPlannedSession"),
             storageKeyFactory: StorageKeyFactory(),
-            keyParams: [
+            keyParams: [[
                 [NMapKeyParam(value: account)],
                 [NMapKeyParam(value: "1353")],
-            ]
+            ]]
         )
 
         do {
@@ -93,9 +93,9 @@ final class NMapKeyEncodingWorkerTests: XCTestCase {
             codingFactory: codingFactory,
             path: StoragePathMock.custom(moduleName: "Staking", itemName: "ErasValidatorPrefs"),
             storageKeyFactory: StorageKeyFactory(),
-            keyParams: [
+            keyParams: [[
                 [NMapKeyParam(value: account)],
-            ]
+            ]]
         )
 
         do {
@@ -117,9 +117,9 @@ final class NMapKeyEncodingWorkerTests: XCTestCase {
             codingFactory: codingFactory,
             path: StoragePathMock.custom(moduleName: "Staking", itemName: "ErasValidatorPrefs"),
             storageKeyFactory: StorageKeyFactory(),
-            keyParams: [
+            keyParams: [[
                 [NMapKeyParam(value: 123)],
-            ]
+            ]]
         )
 
         do {

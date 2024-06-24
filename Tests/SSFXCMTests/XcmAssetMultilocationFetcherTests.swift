@@ -103,7 +103,7 @@ final class XcmAssetMultilocationFetcherTests: XCTestCase {
 
         // act
         do {
-            let assetMultiplication = try await fetcher?.versionedMultilocation(
+            let _ = try await fetcher?.versionedMultilocation(
                 originAssetId: "1",
                 destChainId: "2"
             )
@@ -123,7 +123,8 @@ extension XcmAssetMultilocationFetcherTests {
     enum TestData {
         static let multilocation = AssetMultilocation(
             id: "0",
-            symbol: "1",
+            symbol: "1", 
+            parents: nil,
             interiors: [.onlyChild]
         )
     }
@@ -132,6 +133,7 @@ extension XcmAssetMultilocationFetcherTests {
         let asset = AssetMultilocation(
             id: "1",
             symbol: "2",
+            parents: nil,
             interiors: [.onlyChild]
         )
 

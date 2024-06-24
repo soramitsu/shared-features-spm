@@ -94,3 +94,12 @@ configurations:
         ../Sources/MocksBasket/SSFTransferService
       args:
         autoMockableTestableImports: ["SSFTransferService", "SSFModels", "Web3", "Web3ContractABI"]
+# ChainRegistry
+    - sources:
+      - ../Sources/SSFChainRegistry
+      templates:
+        - ./Templates/AutoMockable.stencil
+      output:
+        ../Sources/MocksBasket/SSFChainRegistry
+      args:
+        autoMockableTestableImports: ["Web3", "SSFUtils", "RobinHood", "SSFModels", "SSFRuntimeCodingService", "SSFChainConnection", "SSFNetwork", "SSFLogger", "SSFChainRegistry"]

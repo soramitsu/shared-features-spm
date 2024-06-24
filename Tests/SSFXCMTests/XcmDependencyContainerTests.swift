@@ -72,14 +72,16 @@ extension XcmDependencyContainerTests {
                 destWeightIsPrimitive: true,
                 availableAssets: [.init(
                     id: "0",
-                    symbol: "0"
+                    symbol: "0",
+                    minAmount: nil
                 )],
                 availableDestinations: [.init(
                     chainId: "0",
                     bridgeParachainId: "2",
                     assets: [.init(
                         id: "1",
-                        symbol: "1"
+                        symbol: "1",
+                        minAmount: nil
                     )]
                 )]
             ),
@@ -90,7 +92,8 @@ extension XcmDependencyContainerTests {
             )]),
             addressPrefix: 0,
             icon: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil, 
+            identityChain: nil
         )
 
         static let runtimeProvider = RuntimeProvider(
@@ -105,9 +108,9 @@ extension XcmDependencyContainerTests {
             chainTypes: Data()
         )
 
-        static let connectionChain = WebSocketEngine(
+        static let connectionChain = try! WebSocketEngine(
             connectionName: "test",
-            url: XcmConfig.shared.chainsSourceUrl
+            urls: [XcmConfig.shared.chainsSourceUrl]
         )
     }
 }

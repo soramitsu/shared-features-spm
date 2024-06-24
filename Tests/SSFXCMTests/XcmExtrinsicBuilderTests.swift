@@ -25,7 +25,7 @@ final class XcmExtrinsicBuilderTests: XCTestCase {
             .polkadotXcmLimitedReserveTransferAssetsFromChainModelVersionAssetSymbolAccountIdDestChainModelAmountWeightLimitPathReturnValue =
             createRuntimeCall(TestData.reserveTransferCall)
         callFactory
-            .bridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathReturnValue =
+            .bridgeProxyBurnCurrencyIdDestChainModelAccountIdAmountPathReturnValue =
             createRuntimeCall(TestData.bridgeProxyCall)
 
         self.callFactory = callFactory
@@ -176,7 +176,6 @@ final class XcmExtrinsicBuilderTests: XCTestCase {
 
         // act
         let closure = try builder?.buildBridgeProxyBurn(
-            fromChainModel: fromChainModel,
             currencyId: currencyId,
             destChainModel: destChainModel,
             accountId: accountId,
@@ -187,8 +186,7 @@ final class XcmExtrinsicBuilderTests: XCTestCase {
         // assert
         XCTAssertNotNil(closure)
         XCTAssertEqual(
-            callFactory?
-                .bridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathCallsCount,
+            callFactory?.bridgeProxyBurnCurrencyIdDestChainModelAccountIdAmountPathCallsCount,
             1
         )
     }
@@ -207,14 +205,16 @@ private extension XcmExtrinsicBuilderTests {
                 destWeightIsPrimitive: true,
                 availableAssets: [.init(
                     id: "0",
-                    symbol: "0"
+                    symbol: "0",
+                    minAmount: nil
                 )],
                 availableDestinations: [.init(
                     chainId: "1",
                     bridgeParachainId: "2",
                     assets: [.init(
                         id: "0",
-                        symbol: "0"
+                        symbol: "0",
+                        minAmount: nil
                     )]
                 )]
             ),
@@ -225,7 +225,8 @@ private extension XcmExtrinsicBuilderTests {
             )]),
             addressPrefix: 0,
             icon: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            identityChain: nil
         )
 
         static let reserveTransferCall = ReserveTransferAssetsCall(

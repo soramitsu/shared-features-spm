@@ -8,6 +8,7 @@ struct StorageRequestMock: StorageRequest {
 }
 
 struct MultipleStorageRequstMock: MultipleRequest {
+    var keyType: SSFStorageQueryKit.MapKeyType
     let parametersType: MultipleStorageRequestParametersType
     let storagePath: any StorageCodingPathProtocol
 }

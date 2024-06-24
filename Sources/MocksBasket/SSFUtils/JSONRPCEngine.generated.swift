@@ -6,7 +6,7 @@ public enum JSONRPCEngineMockError: Error {
 }
 
 public class JSONRPCEngineMock: JSONRPCEngine {
-    public var url: URL?
+    public var connectionName: String? = "Mock"
 
     public var pendingEngineRequests: [SSFUtils.JSONRPCRequest] = []
 
