@@ -5,9 +5,14 @@ import SSFUtils
 
 // MARK: - Normal
 
-struct AccountInfoStorageWrapper: StorageWrapper {
-    let identifier: String
-    let data: Data
+public struct AccountInfoStorageWrapper: StorageWrapper {
+    public let identifier: String
+    public let data: Data
+
+    public init(identifier: String, data: Data) {
+        self.identifier = identifier
+        self.data = data
+    }
 }
 
 public struct AccountInfo: Codable, Equatable {
