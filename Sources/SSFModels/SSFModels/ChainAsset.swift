@@ -153,4 +153,35 @@ public extension ChainAsset {
         let model: AssetModel? = chain.assets.first { $0.id == asset.id }
         return model?.staking != nil
     }
+
+    var storagePath: StorageCodingPath {
+        var storagePath: StorageCodingPath
+        switch chainAssetType {
+        case .normal, .equilibrium, .none:
+            storagePath = StorageCodingPath.account
+        case
+            .ormlChain,
+            .ormlAsset,
+            .foreignAsset,
+            .stableAssetPoolToken,
+            .liquidCrowdloan,
+            .vToken,
+            .vsToken,
+            .stable,
+            .assetId,
+            .token2,
+            .xcm:
+            storagePath = StorageCodingPath.tokens
+        case .assets:
+            storagePath = StorageCodingPath.assetsAccount
+        case .soraAsset:
+            if isUtility {
+                storagePath = StorageCodingPath.account
+            } else {
+                storagePath = StorageCodingPath.tokens
+            }
+        }
+
+        return storagePath
+    }
 }
