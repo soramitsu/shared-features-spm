@@ -206,15 +206,15 @@ public struct EquilibriumAccountInfo: Decodable {
     @StringCodable var consumers: BigUInt
     @StringCodable var providers: BigUInt
     @StringCodable var sufficients: BigUInt
-    var data: EquilibriumAccountData
+    public var data: EquilibriumAccountData
 }
 
-enum EquilibriumAccountData: Decodable {
+public enum EquilibriumAccountData: Decodable {
     static let v0Field = "V0"
 
     case v0data(info: EquilibriumV0AccountData)
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
         let rawValue = try container.decode(String.self)
 
@@ -232,10 +232,10 @@ enum EquilibriumAccountData: Decodable {
     }
 }
 
-struct EquilibriumV0AccountData: Decodable {
+public struct EquilibriumV0AccountData: Decodable {
     let balance: [EqulibriumBalanceData]
 
-    func mapBalances() -> [String: BigUInt] {
+    public func mapBalances() -> [String: BigUInt] {
         var map = [String: BigUInt]()
         for balanceData in balance {
             switch balanceData.positive {
