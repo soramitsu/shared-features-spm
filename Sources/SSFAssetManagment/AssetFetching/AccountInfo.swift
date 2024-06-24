@@ -195,7 +195,7 @@ public struct OrmlAccountInfo: Codable, Equatable {
 
 // MARK: - Assets Account
 
-struct AssetAccount: Codable {
+public struct AssetAccount: Codable {
     @StringCodable var balance: BigUInt
 }
 
