@@ -67,7 +67,7 @@ public struct AccountInfo: Codable, Equatable {
         )
     }
 
-    init?(assetAccount: AssetAccount?) {
+    public init?(assetAccount: AssetAccount?) {
         guard let assetAccount = assetAccount else {
             return nil
         }
@@ -82,11 +82,11 @@ public struct AccountInfo: Codable, Equatable {
         )
     }
 
-    func nonZero() -> Bool {
+    public func nonZero() -> Bool {
         data.total > 0
     }
 
-    func zero() -> Bool {
+    public func zero() -> Bool {
         data.total == BigUInt.zero
     }
 }
