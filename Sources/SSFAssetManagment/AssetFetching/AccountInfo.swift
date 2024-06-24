@@ -201,7 +201,7 @@ struct AssetAccount: Codable {
 
 // MARK: - Equilibrium
 
-struct EquilibriumAccountInfo: Decodable {
+public struct EquilibriumAccountInfo: Decodable {
     @StringCodable var nonce: BigUInt
     @StringCodable var consumers: BigUInt
     @StringCodable var providers: BigUInt
