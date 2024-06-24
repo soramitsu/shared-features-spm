@@ -12,7 +12,7 @@ enum ChainAccountFetchingError: Error {
     case accountNotExists
 }
 
-extension ChainAccountResponse {
+public extension ChainAccountResponse {
     func toAddress() -> AccountAddress? {
         let chainFormat: SFChainFormat = isEthereumBased ? .sfEthereum : .sfSubstrate(addressPrefix)
         return try? accountId.toAddress(using: chainFormat)
