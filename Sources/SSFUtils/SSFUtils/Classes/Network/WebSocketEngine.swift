@@ -83,13 +83,11 @@ public final class WebSocketEngine {
         self.pingInterval = pingInterval
         self.connectionStrategy = connectionStrategy
         completionQueue = processingQueue ?? Self.sharedProcessingQueue
+        state = .notConnected
         
         if autoconnect {
-            state = .connecting
-        } else {
-            state = .notConnected
+            changeState(.connecting)
         }
-
         connectionStrategy.currentConnection.delegate = self
         subscribeToReachabilityStatus()
     }
