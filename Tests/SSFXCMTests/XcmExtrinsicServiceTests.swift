@@ -223,9 +223,12 @@ private extension XcmExtrinsicServiceTests {
             chainTypes: Data()
         )
 
-        static let connectionChain = try! WebSocketEngine(
+        static let connectionChain = WebSocketEngine(
             connectionName: "test",
-            urls: [XcmConfig.shared.chainsSourceUrl]
+            connectionStrategy: ConnectionStrategyImpl(
+                urls: [XcmConfig.shared.chainsSourceUrl],
+                callbackQueue: .global()
+            )!
         )
     }
 

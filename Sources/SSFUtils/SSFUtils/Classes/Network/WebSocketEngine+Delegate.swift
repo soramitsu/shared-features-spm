@@ -4,6 +4,10 @@ import Starscream
 extension WebSocketEngine: WebSocketDelegate {
     public func didReceive(event: WebSocketEvent, client _: WebSocketClient) {
         mutex.lock()
+        
+        defer {
+            mutex.unlock()
+        }
 
         switch event {
         case let .binary(data):
@@ -31,22 +35,13 @@ extension WebSocketEngine: WebSocketDelegate {
             }
             handleDisconnectedEvent(reason: "reconnect suggested", code: 0)
         }
-
-        mutex.unlock()
     }
     
     private func handleTimeout() {
-        notify(
-            requests: pendingRequests,
-            error: JSONRPCEngineError.timeout
-        )
-        resetPendings()
-        if case .connecting = state {
-            handleDisconnectedEvent(reason: "timeout", code: 0)
-        }
+        handleCancelled(error: JSONRPCEngineError.timeout)
     }
 
-    private func handleCancelled() {
+    private func handleCancelled(error: Error? = nil) {
         logger?.warning("Remote cancelled")
 
         switch state {
@@ -63,7 +58,7 @@ extension WebSocketEngine: WebSocketDelegate {
 
             notify(
                 requests: cancelledRequests,
-                error: JSONRPCEngineError.clientCancelled
+                error: error ?? JSONRPCEngineError.clientCancelled
             )
         default:
             break

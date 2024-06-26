@@ -37,7 +37,7 @@ public final class WebSocketEngine {
     public let completionQueue: DispatchQueue
     public let pingInterval: TimeInterval
 
-    public private(set) var state: State = .connecting {
+    public private(set) var state: State {
         didSet {
             if let delegate = delegate {
                 let oldState = oldValue
@@ -52,7 +52,6 @@ public final class WebSocketEngine {
 
     private let jsonEncoder = JSONEncoder()
     private let jsonDecoder = JSONDecoder()
-    private let reconnectionStrategy: ReconnectionStrategyProtocol?
     private let connectionStrategy: ConnectionStrategy
 
     private(set) lazy var pingScheduler: SchedulerProtocol = {
@@ -69,38 +68,30 @@ public final class WebSocketEngine {
 
     public init(
         connectionName: String?,
-        urls: [URL],
         reachabilityManager: ReachabilityManagerProtocol? = ReachabilityManager.shared,
-        reconnectionStrategy: ReconnectionStrategyProtocol? = ExponentialReconnection(),
+        connectionStrategy: ConnectionStrategy,
         version: String = "2.0",
         processingQueue: DispatchQueue? = nil,
         autoconnect: Bool = true,
-        connectionTimeout: TimeInterval = 10.0,
         pingInterval: TimeInterval = 30,
         logger: SDKLoggerProtocol? = nil
-    ) throws {
+    ) {
         self.connectionName = connectionName
         self.version = version
         self.logger = logger
-        self.reconnectionStrategy = reconnectionStrategy
         self.reachabilityManager = reachabilityManager
         self.pingInterval = pingInterval
-
+        self.connectionStrategy = connectionStrategy
         completionQueue = processingQueue ?? Self.sharedProcessingQueue
-        connectionStrategy = try ConnectionStrategyImpl(
-            urls: urls,
-            callbackQueue: completionQueue,
-            timeout: connectionTimeout,
-            reconnectionStrategy: reconnectionStrategy,
-            logger: logger
-        )
-        connectionStrategy.currentConnection.delegate = self
-
-        subscribeToReachabilityStatus()
-
+        
         if autoconnect {
-            connectionStrategy.currentConnection.connect()
+            state = .connecting
+        } else {
+            state = .notConnected
         }
+
+        connectionStrategy.currentConnection.delegate = self
+        subscribeToReachabilityStatus()
     }
 
     deinit {
@@ -565,6 +556,7 @@ extension WebSocketEngine {
                 state = .connecting
             } else {
                 state = .notReachable
+                return
             }
         }
 

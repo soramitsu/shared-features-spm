@@ -4,6 +4,8 @@ import Starscream
 public protocol ConnectionStrategy {
     var currentConnection: WebSocketConnectionProtocol { get }
     var callbackQueue: DispatchQueue { get }
+    var currentUrl: URL { get }
+    var currentLoop: Int { get }
     
     func updateConnection(
         for state: WebSocketEngine.State,
@@ -21,8 +23,10 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
     
     // MARK: - Public properties
     
-    private(set) public var currentConnection: WebSocketConnectionProtocol
-    private(set) public var callbackQueue: DispatchQueue
+    public private(set) var currentConnection: WebSocketConnectionProtocol
+    public private(set) var callbackQueue: DispatchQueue
+    public private(set) var currentUrl: URL
+    public private(set) var currentLoop: Int = 0
     
     // MARK: - Private properties
     
@@ -34,31 +38,26 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
         Scheduler(with: self, callbackQueue: callbackQueue)
     }()
     
-    // MARK: - State
-    
-    private var currentUrl: URL
-    private var currentLoop: Int = 0
-    
     // MARK: - Constuctor
     
-    public init(
+    public init?(
         urls: [URL],
         callbackQueue: DispatchQueue,
         timeout: TimeInterval = 10.0,
         reconnectionStrategy: ReconnectionStrategyProtocol? = ExponentialReconnection(),
-        logger: SDKLoggerProtocol?
-    ) throws {
+        logger: SDKLoggerProtocol? = nil
+    ) {
         self.urls = urls
         self.callbackQueue = callbackQueue
         self.timeout = timeout
         self.reconnectionStrategy = reconnectionStrategy
         self.logger = logger
         
-        guard let firstUrl = urls.first else {
-            throw WebSocketEngineError.emptyUrls
+        guard let url = urls.first else {
+            return nil
         }
-        self.currentUrl = firstUrl
-        let request = URLRequest(url: firstUrl, timeoutInterval: timeout)
+        self.currentUrl = url
+        let request = URLRequest(url: url, timeoutInterval: timeout)
         let engine = WSEngine(transport: TCPTransport(), certPinner: FoundationSecurity())
         let connection = WebSocket(request: request, engine: engine)
         currentConnection = connection
@@ -101,7 +100,7 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
     public func shouldRunInNextLoop() -> Bool {
         let currentUrlIndex = urls.firstIndex(of: currentUrl) ?? 0
         let nextIndex = currentUrlIndex + 1
-        return nextIndex > urls.count
+        return !urls.indices.contains(nextIndex)
     }
     
     // MARK: - Private methods
@@ -110,7 +109,9 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
         let currentUrlIndex = urls.firstIndex(of: currentUrl) ?? 0
         let nextIndex = currentUrlIndex + 1
         let nextUrl = urls.indices.contains(nextIndex) ? urls[nextIndex] : nil
-        guard let nextUrl else { return }
+        guard let nextUrl else {
+            return
+        }
         updateConnection(with: nextUrl)
         currentConnection.connect()
     }
@@ -118,6 +119,14 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
     private func handleWaitingNewLoopState() {
         currentLoop += 1
         sheduleReconnection()
+        
+        guard let firstUrl = urls.first else {
+            return
+        }
+        updateConnection(with: firstUrl)
+        if currentLoop > 4 {
+            currentLoop = 0
+        }
     }
     
     private func sheduleReconnection() {
@@ -146,9 +155,6 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
 
 extension ConnectionStrategyImpl: SchedulerDelegate {
     public func didTrigger(scheduler: any SchedulerProtocol) {
-        guard let firstUrl = urls.first else {
-            return
-        }
-        updateConnection(with: firstUrl)
+        currentConnection.connect()
     }
 }

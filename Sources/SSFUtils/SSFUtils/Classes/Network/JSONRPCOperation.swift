@@ -3,16 +3,17 @@ import RobinHood
 
 enum JSONRPCOperationError: Error {
     case timeout
+    case noConnection
 }
 
 public class JSONRPCOperation<P: Codable, T: Decodable>: BaseOperation<T> {
-    public let engine: JSONRPCEngine
+    public let engine: JSONRPCEngine?
     private(set) var requestId: UInt16?
     public let method: String
     public var parameters: P?
     public let timeout: Int
 
-    public init(engine: JSONRPCEngine, method: String, parameters: P? = nil, timeout: Int = 10) {
+    public init(engine: JSONRPCEngine?, method: String, parameters: P? = nil, timeout: Int = 10) {
         self.engine = engine
         self.method = method
         self.parameters = parameters
@@ -36,6 +37,10 @@ public class JSONRPCOperation<P: Codable, T: Decodable>: BaseOperation<T> {
             let semaphore = DispatchSemaphore(value: 0)
 
             var optionalCallResult: Result<T, Error>?
+            
+            guard let engine else {
+                throw JSONRPCOperationError.noConnection
+            }
 
             requestId = try engine.callMethod(method, params: parameters) { (result: Result<
                 T,
@@ -77,7 +82,7 @@ public class JSONRPCOperation<P: Codable, T: Decodable>: BaseOperation<T> {
     }
 
     override public func cancel() {
-        if let requestId = requestId {
+        if let requestId = requestId, let engine {
             engine.cancelForIdentifier(requestId)
         }
 
@@ -89,12 +94,7 @@ public final class JSONRPCListOperation<T: Decodable>: JSONRPCOperation<[String]
 
 public extension JSONRPCOperation {
     static func failureOperation(_ error: Error) -> JSONRPCOperation<P, T> {
-        let mockEngine = try! WebSocketEngine(
-            connectionName: nil,
-            urls: [URL(string: "https://wiki.fearlesswallet.io")!],
-            autoconnect: false
-        )
-        let operation = JSONRPCOperation<P, T>(engine: mockEngine, method: "")
+        let operation = JSONRPCOperation<P, T>(engine: nil, method: "")
         operation.result = .failure(error)
         return operation
     }

@@ -20,11 +20,16 @@ final class ConnectionFactory: ConnectionFactoryProtocol {
         for urls: [URL],
         delegate: WebSocketEngineDelegate
     ) throws -> SubstrateConnection {
-        let engine = try WebSocketEngine(
-            connectionName: connectionName,
+        guard let connectionStrategy = ConnectionStrategyImpl(
             urls: urls,
-            processingQueue: processingQueue,
-            logger: nil
+            callbackQueue: processingQueue
+        ) else {
+            throw ConnectionPoolError.connectionFetchingError
+        }
+        let engine = WebSocketEngine(
+            connectionName: connectionName,
+            connectionStrategy: connectionStrategy,
+            processingQueue: processingQueue
         )
         engine.delegate = delegate
         return engine

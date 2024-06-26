@@ -291,6 +291,13 @@ let package = Package(
                 "BigInt"
             ]
         ),
+        .testTarget(
+            name: "WebSocketEngineTests",
+            dependencies: [
+                "SSFUtils",
+                .product(name: "Starscream", package: "fearless-starscream")
+            ]
+        ),
         .target(
             name: "SSFChainRegistry",
             dependencies: [
