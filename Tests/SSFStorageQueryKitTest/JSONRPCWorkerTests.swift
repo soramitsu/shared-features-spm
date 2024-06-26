@@ -17,7 +17,7 @@ final class JSONRPCWorkerTests: XCTestCase {
             let _: String = try await worker.performCall()
             XCTFail("method should to throw timeout error")
         } catch {
-            XCTAssertTrue(error is JSONRPCWorkerContinuationError)
+            XCTAssertTrue(error is JSONRPCEngineMockTimeout)
         }
     }
 
