@@ -280,3 +280,21 @@ enum EquilibruimPositive: Decodable {
         }
     }
 }
+
+extension AccountInfo: ScaleDecodable {
+    public init(scaleDecoder: ScaleDecoding) throws {
+        nonce = try UInt32(scaleDecoder: scaleDecoder)
+        consumers = try UInt32(scaleDecoder: scaleDecoder)
+        providers = try UInt32(scaleDecoder: scaleDecoder)
+        data = try AccountData(scaleDecoder: scaleDecoder)
+    }
+}
+
+extension AccountData: ScaleDecodable {
+    public init(scaleDecoder: ScaleDecoding) throws {
+        free = try BigUInt(scaleDecoder: scaleDecoder)
+        reserved = try BigUInt(scaleDecoder: scaleDecoder)
+        frozen = .zero
+        flags = .zero
+    }
+}
