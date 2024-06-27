@@ -129,7 +129,7 @@ final class PoolsApyFetcherDefault: PoolsApyFetcher {
                                      entities: poolXYKs(
                                        first: 100
                                        after: "\(cursor)" ,
-                                       filter: {id: {in: \(poolIds) }}) {
+                                       filter: {id: {in: \(poolIds.sorted()) }}) {
                                            nodes {
                                              id strategicBonusApy
                                            }

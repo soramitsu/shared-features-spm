@@ -10,7 +10,7 @@ public typealias DexInfoByDexId = [String: DexInfos]
 
 public protocol DexManagerStorage {
     func dexInfos(chain: ChainModel) async throws -> DexInfoByDexId
-    func subscribeDexInfos(chain: ChainModel) async throws -> AsyncThrowingStream<CachedStorageResponse<DexInfoByDexId>, Error>
+    func subscribeDexInfos(chain: ChainModel) async -> AsyncThrowingStream<CachedStorageResponse<DexInfoByDexId>, Error>
 }
 
 public final class DexManagerStorageDefault: DexManagerStorage {
@@ -31,7 +31,7 @@ public final class DexManagerStorageDefault: DexManagerStorage {
         return dexInfos
     }
 
-    public func subscribeDexInfos(chain: ChainModel) async throws -> AsyncThrowingStream<CachedStorageResponse<DexInfoByDexId>, Error> {
+    public func subscribeDexInfos(chain: ChainModel) async -> AsyncThrowingStream<CachedStorageResponse<DexInfoByDexId>, Error> {
         let baseAssetIdsRequest = DexManagerDexInfosStorageRequest()
         let dexInfos: AsyncThrowingStream<CachedStorageResponse<DexInfoByDexId>, Error> = await storageRequestPerformer.performPrefix(baseAssetIdsRequest, withCacheOptions: .onAll, chain: chain)
         return dexInfos

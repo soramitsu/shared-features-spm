@@ -19,7 +19,6 @@ public final class NetworkWorker {
         var request = try requestConfigurator.buildRequest(with: config)
         try requestSigner?.sign(request: &request, config: config)
         let response = await networkClient.perform(request: request)
-        print("send remote request")
 
         switch response {
         case let .success(response):

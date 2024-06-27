@@ -2,7 +2,7 @@ import BigInt
 import Foundation
 import SSFUtils
 
-public struct PolkaswapPoolReserves: Codable {
+public struct PolkaswapPoolReserves: Codable, Equatable {
     @StringCodable public var reserves: BigUInt
     @StringCodable public var fee: BigUInt
     

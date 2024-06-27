@@ -45,8 +45,14 @@ extension PolkaswapLiquidityPoolOperationService: PoolsOperationService {
     }
 
     func submitSupplyLiquidity(model: SupplyLiquidityInfo) async throws -> String {
-        let pairs = try await poolService.fetchAvailablePools()
-
+        var pairs: [LiquidityPair]
+        
+        if let availablePairs = model.availablePairs {
+            pairs = availablePairs
+        } else {
+            pairs = try await poolService.fetchAvailablePools()
+        }
+        
         let closure = try extrinsicBuilder.depositLiqudityExtrinsic(
             pairs: pairs,
             model: model
@@ -100,7 +106,13 @@ extension PolkaswapLiquidityPoolOperationService: PoolsOperationService {
     }
 
     func estimateFeeSupplyLiquidity(model: SupplyLiquidityInfo) async throws -> BigUInt {
-        let pairs = try await poolService.fetchAvailablePools()
+        var pairs: [LiquidityPair]
+        
+        if let availablePairs = model.availablePairs {
+            pairs = availablePairs
+        } else {
+            pairs = try await poolService.fetchAvailablePools()
+        }
 
         let closure = try extrinsicBuilder.depositLiqudityExtrinsic(
             pairs: pairs,

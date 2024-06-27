@@ -19,7 +19,7 @@ public enum PolkaswapLiquidityPoolServiceError: Swift.Error {
 
 public protocol PolkaswapLiquidityPoolService {
     func subscribeAvailablePools() async throws -> AsyncThrowingStream<CachedStorageResponse<[LiquidityPair]>, Swift.Error>
-    func subscribeUserPools(accountId: AccountId) async throws -> AsyncThrowingStream<CachedStorageResponse<[LiquidityPair]>, Swift.Error>
+    func subscribeUserPools(accountId: AccountId) async throws -> AsyncThrowingStream<CachedStorageResponse<[AccountPool]>, Swift.Error>
     func subscribePoolsReserves(pools: [LiquidityPair]) async throws -> AsyncThrowingStream<CachedStorageResponse<[PolkaswapPoolReservesInfo]>, Swift.Error>
     
     func subscribeLiquidityPool(assetIdPair: AssetIdPair) async throws -> AsyncThrowingStream<CachedStorageResponse<LiquidityPair>, Swift.Error>
@@ -161,6 +161,10 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
         let dexInfos = try await dexManagerStorage.dexInfos(chain: chain)
         let pairs = try await poolXykStorage.properties(baseAssetIds: dexInfos.compactMap { $0.value.baseAssetId }, chain: chain)
 
+        let dexIdByBaseAssetIdArray = dexInfos.compactMap { [$0.value.baseAssetId.code: $0.key] }
+        let tupleArray: [(String, String)] = dexIdByBaseAssetIdArray.flatMap { $0 }
+        let dexIdByBaseAssetId = Dictionary(tupleArray, uniquingKeysWith: { (first, last) in last })
+        
         return try pairs.compactMap {
             let reservesAccountId = $0.value.reservesId
             let baseAssetId = $0.key.baseAssetId.code
@@ -170,7 +174,12 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
                 chainFormat: self.chain.chainFormat
             )
             
+            guard let dexId = dexIdByBaseAssetId[baseAssetId] else {
+                return nil
+            }
+            
             return LiquidityPair(
+                dexId: dexId,
                 pairId: "\(baseAssetId)-\(targetAssetId)",
                 chainId: nil,
                 baseAssetId: baseAssetId,
@@ -202,50 +211,212 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
         return try await apyFetcher.subscribe(poolIds: poolIds)
     }
     
-    public func subscribeUserPools(accountId: AccountId) async throws -> AsyncThrowingStream<CachedStorageResponse<[LiquidityPair]>, Swift.Error> {
-        AsyncThrowingStream<CachedStorageResponse<[LiquidityPair]>, Swift.Error> { continuation in
+    private func deriveUserPools(
+        continuation: AsyncThrowingStream<CachedStorageResponse<[AccountPool]>, Swift.Error>.Continuation,
+        totalIssuance: [Data: StringScaleMapper<BigUInt>]?,
+        reserves: [AssetIdPair: PolkaswapPoolReserves]?,
+        properties: [AssetIdPair: LiquidityPoolProperties]?,
+        providers: [PoolProvidersStorageKey: StringScaleMapper<BigUInt>]?,
+        accountId: AccountId
+    ) async {
+        guard let totalIssuance, let reserves, let properties, let providers else {
+            return
+        }
+        let pairs: [AssetIdPair] = properties.compactMap { $0.key }
+        let accountPools: [AccountPool] = await pairs.asyncCompactMap { assetPair in
+            let baseAssetId = assetPair.baseAssetId.code
+            let targetAssetId = assetPair.targetAssetId.code
+            let id = "\(baseAssetId)-\(targetAssetId)"
+            let reservesIdKey = AssetIdPair(baseAssetIdCode: baseAssetId, targetAssetIdCode: targetAssetId)
+            let poolProperties = properties[reservesIdKey]
+            
+            guard
+                let baseAsset = chain.assets.first(where: { $0.currencyId == baseAssetId }),
+                let targetAsset = chain.assets.first(where: { $0.currencyId == targetAssetId }),
+                let reservesId = poolProperties?.reservesId
+            else {
+                return nil
+            }
+            let totalIssuance = totalIssuance[reservesId]?.value
+            let reserves = reserves[reservesIdKey]
+        
+            let poolProviderKey = PoolProvidersStorageKey(reservesId: reservesId, accountId: accountId)
+            let accountPoolBalance = providers[poolProviderKey]?.value
+            let totalIssuancesDecimal = Decimal.fromSubstrateAmount(
+                totalIssuance.or(.zero),
+                precision: Int16(baseAsset.precision)
+            ) ?? Decimal(0)
+
+            let reservesDecimal = Decimal.fromSubstrateAmount(
+                reserves?.reserves ?? BigUInt.zero,
+                precision: Int16(baseAsset.precision)
+            ) ?? Decimal(0)
+
+            let accountPoolBalanceDecimal = Decimal.fromSubstrateAmount(
+                accountPoolBalance.or(.zero),
+                precision: Int16(baseAsset.precision)
+            ) ?? Decimal(0)
+
+            let targetAssetPooledTotal = Decimal.fromSubstrateAmount(
+                reserves?.fee ?? BigUInt.zero,
+                precision: Int16(targetAsset.precision)
+            ) ?? Decimal(0)
+
+            let areThereIssuances = totalIssuancesDecimal > 0
+
+            let accountPoolShare = areThereIssuances ? accountPoolBalanceDecimal /
+                totalIssuancesDecimal * 100 : .zero
+            let baseAssetPooled = areThereIssuances ? reservesDecimal * accountPoolBalanceDecimal /
+                totalIssuancesDecimal : .zero
+            let targetAssetPooled = areThereIssuances ? targetAssetPooledTotal *
+                accountPoolBalanceDecimal / totalIssuancesDecimal : .zero
+            let reservationIdString = reservesId.toHex()
+
+            return AccountPool(
+                poolId: id,
+                accountId: accountId.toHex(),
+                chainId: chain.chainId,
+                baseAssetId: baseAssetId,
+                targetAssetId: targetAssetId,
+                baseAssetPooled: baseAssetPooled,
+                targetAssetPooled: targetAssetPooled,
+                accountPoolShare: accountPoolShare,
+                reservesId: reservationIdString
+            )
+        }
+        
+        let response = CachedStorageResponse(value: accountPools, type: .cache)
+        continuation.yield(response)
+    }
+    
+    public func subscribeUserPools(accountId: AccountId) async throws -> AsyncThrowingStream<CachedStorageResponse<[AccountPool]>, Swift.Error> {
+        return AsyncThrowingStream<CachedStorageResponse<[AccountPool]>, Swift.Error> { continuation in
             Task {
+                let dexInfosStream = await self.dexManagerStorage.subscribeDexInfos(chain: self.chain)
+                let totalIssuanceStream = await self.poolXykStorage.subscribeTotalIssuance(chain: self.chain)
                 let userPoolsStream = await self.poolXykStorage.subscribeAccountPools(accountId: accountId, chain: self.chain)
-                for try await userPool in userPoolsStream {
-                    guard let userPool = userPool.value else {
-                        continuation.finish(throwing: PoolXykStorageError.accountPoolsNotFound(accountId: accountId))
+                
+                var fetchedDexInfos : DexInfoByDexId?
+                var fetchedTotalIssuance: [Data: StringScaleMapper<BigUInt>]?
+                var fetchedReserves: [AssetIdPair: PolkaswapPoolReserves]?
+                var fetchedUserPools: [ScaleTuple<Data,SoraAssetId>: [SoraAssetId]]?
+                var fetchedProperties: [AssetIdPair: LiquidityPoolProperties]?
+                var fetchedProviders: [PoolProvidersStorageKey: StringScaleMapper<BigUInt>]?
+                
+                for try await (dexInfos) in (dexInfosStream) {
+                    guard fetchedDexInfos != dexInfos.value else {
                         return
                     }
                     
-                    let pools: [UserPool] = userPool.compactMap { userPool in
-                        return userPool.value.compactMap {
-                            let assetIdPair = AssetIdPair(baseAssetIdCode: userPool.key.second.value, targetAssetIdCode: $0.value)
-                            
-                            return UserPool(
-                                accountId: accountId,
-                                assetPair: assetIdPair
-                            )
-                        }
-                    }.reduce([UserPool](), +)
+                    fetchedDexInfos = dexInfos.value
+                    await self.deriveUserPools(
+                        continuation: continuation,
+                        totalIssuance: fetchedTotalIssuance,
+                        reserves: fetchedReserves,
+                        properties: fetchedProperties,
+                        providers: fetchedProviders,
+                        accountId: accountId
+                    )
                     
-                    let propertiesStream = try await poolXykStorage.subscribeProperties(pairs: pools.compactMap { $0.assetPair }, chain: chain)
-                    
-                    for try await properties in propertiesStream {
-                        let pairs = properties.value?.compactMap {
-                            let reservesAccountId = $0.value.reservesId
-                            let baseAssetId = $0.key.baseAssetId.code
-                            let targetAssetId = $0.key.targetAssetId.code
-                            let reservesId = reservesAccountId.toHex()
-                            
-                            return LiquidityPair(
-                                pairId: "\(baseAssetId)-\(targetAssetId)",
-                                chainId: nil,
-                                baseAssetId: baseAssetId,
-                                targetAssetId: targetAssetId,
-                                reservesId: reservesId
-                            )
+                    for try await totalIssuance in totalIssuanceStream {
+                        guard fetchedTotalIssuance != totalIssuance.value else {
+                            return
                         }
-                                   
-                        let response = CachedStorageResponse(value: pairs, type: properties.type)
-                        continuation.yield(response)
+                        
+                        fetchedTotalIssuance = totalIssuance.value
+                        await self.deriveUserPools(
+                            continuation: continuation,
+                            totalIssuance: fetchedTotalIssuance,
+                            reserves: fetchedReserves,
+                            properties: fetchedProperties,
+                            providers: fetchedProviders,
+                            accountId: accountId
+                        )
+                        
+                        for try await userPool in userPoolsStream {
+                            guard fetchedUserPools != userPool.value else {
+                                return
+                            }
+                            
+                            fetchedUserPools = userPool.value
+                            await self.deriveUserPools(
+                                continuation: continuation,
+                                totalIssuance: fetchedTotalIssuance,
+                                reserves: fetchedReserves,
+                                properties: fetchedProperties,
+                                providers: fetchedProviders,
+                                accountId: accountId
+                            )
+                            
+                            guard let fetchedUserPools else {
+                                return
+                            }
+                            
+                            
+                            let assetIdPairs = fetchedUserPools.compactMap { userPool in
+                                return userPool.value.compactMap {
+                                    return AssetIdPair(baseAssetIdCode: userPool.key.second.value, targetAssetIdCode: $0.value)
+                                }
+                            }.reduce([], +)
+                            
+                            let propertiesStream = try await self.poolXykStorage.subscribeProperties(pairs: assetIdPairs, chain: self.chain)
+                            let reservesStream = try await self.poolXykStorage.subscribePoolsReserves(pairs: assetIdPairs, chain: self.chain)
+                            
+                            for try await reserves in reservesStream {
+                                guard fetchedReserves != reserves.value else {
+                                    return
+                                }
+                                
+                                fetchedReserves = reserves.value
+                                await self.deriveUserPools(
+                                    continuation: continuation,
+                                    totalIssuance: fetchedTotalIssuance,
+                                    reserves: fetchedReserves,
+                                    properties: fetchedProperties,
+                                    providers: fetchedProviders,
+                                    accountId: accountId
+                                )
+                                for try await properties in propertiesStream {
+                                    guard fetchedProperties != properties.value else {
+                                        return
+                                    }
+                                    
+                                    fetchedProperties = properties.value
+                                    await self.deriveUserPools(
+                                        continuation: continuation,
+                                        totalIssuance: fetchedTotalIssuance,
+                                        reserves: fetchedReserves,
+                                        properties: fetchedProperties,
+                                        providers: fetchedProviders,
+                                        accountId: accountId
+                                    )
+                                    
+                                    guard let fetchedProperties else {
+                                        return
+                                    }
+                                    
+                                    let providersStream = try await self.poolXykStorage.subscribePoolProviders(properties: fetchedProperties.compactMap { $0.value }, accountId: accountId, chain: self.chain)
+                                    
+                                    for try await providers in providersStream {
+                                        guard fetchedProviders != providers.value else {
+                                            return
+                                        }
+                                        
+                                        fetchedProviders = providers.value
+                                        await self.deriveUserPools(
+                                            continuation: continuation,
+                                            totalIssuance: fetchedTotalIssuance,
+                                            reserves: fetchedReserves,
+                                            properties: fetchedProperties,
+                                            providers: fetchedProviders,
+                                            accountId: accountId
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-                
             }
         }
     }
@@ -262,14 +433,24 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
                         return
                     }
                     
+                    let dexIdByBaseAssetIdArray = dexInfo.compactMap { [$0.value.baseAssetId.code: $0.key] }
+                    let tupleArray: [(String, String)] = dexIdByBaseAssetIdArray.flatMap { $0 }
+                    let dexIdByBaseAssetId = Dictionary(tupleArray, uniquingKeysWith: { (first, last) in last })
+                    
                     let poolPropertiesStream = await poolXykStorage.subscribeProperties(baseAssetIds: dexInfo.compactMap { $0.value.baseAssetId }, chain: chain)
                     for try await properties in poolPropertiesStream {
-                        let pairs = properties.value?.compactMap {
+                        let pairs: [LiquidityPair]? = properties.value?.compactMap {
                             let reservesAccountId = $0.value.reservesId
                             let baseAssetId = $0.key.baseAssetId.code
                             let targetAssetId = $0.key.targetAssetId.code
                             let reservesId = reservesAccountId.toHex()
+                            
+                            guard let dexId = dexIdByBaseAssetId[baseAssetId] else {
+                                return nil
+                            }
+                            
                             return LiquidityPair(
+                                dexId: dexId,
                                 pairId: "\(baseAssetId)-\(targetAssetId)",
                                 chainId: nil,
                                 baseAssetId: baseAssetId,
@@ -308,11 +489,22 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
     public func subscribeLiquidityPool(assetIdPair: AssetIdPair) async throws -> AsyncThrowingStream<CachedStorageResponse<LiquidityPair>, Swift.Error> {
         AsyncThrowingStream<CachedStorageResponse<LiquidityPair>, Swift.Error> { continuation in
             Task {
+                let dexInfos = try await dexManagerStorage.dexInfos(chain: chain)
                 let poolPropertiesStream = try await poolXykStorage.subscribePoolProperties(pair: assetIdPair, chain: chain)
+                let dexIdByBaseAssetIdArray = dexInfos.compactMap { [$0.value.baseAssetId.code: $0.key] }
+                let tupleArray: [(String, String)] = dexIdByBaseAssetIdArray.flatMap { $0 }
+                let dexIdByBaseAssetId = Dictionary(tupleArray, uniquingKeysWith: { (first, last) in last })
+                
                 for try await properties in poolPropertiesStream {
                     let reservesAccountId = properties.value?.reservesId
                     let reservesId = reservesAccountId?.toHex()
+                    
+                    guard let dexId = dexIdByBaseAssetId[assetIdPair.baseAssetId.code] else {
+                        return
+                    }
+                    
                     let liquidityPair = LiquidityPair(
+                        dexId: dexId,
                         pairId: "\(assetIdPair.baseAssetId.code)-\(assetIdPair.targetAssetId.code)",
                         chainId: nil,
                         baseAssetId: assetIdPair.baseAssetId.code,

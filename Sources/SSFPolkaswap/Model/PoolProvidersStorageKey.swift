@@ -15,8 +15,6 @@ public struct PoolProvidersStorageKey: Codable, Hashable {
         var container = try decoder.unkeyedContainer()
         self.reservesId = try container.decode(AccountId.self)
         self.accountId = try container.decode(AccountId.self)
-        
-        print("PoolProvidersStorageKey reservesId: ", reservesId.toHex())
     }
     
     public func encode(to encoder: Encoder) throws {
