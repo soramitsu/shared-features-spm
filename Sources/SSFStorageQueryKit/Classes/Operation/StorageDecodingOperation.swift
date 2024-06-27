@@ -68,7 +68,7 @@ extension StorageModifierHandling {
 
 public final class StorageDecodingOperation<T: Decodable>: BaseOperation<T>, StorageDecodable {
     var data: Data?
-    var codingFactory: RuntimeCoderFactoryProtocol?
+    public var codingFactory: RuntimeCoderFactoryProtocol?
 
     public let path: any StorageCodingPathProtocol
 
