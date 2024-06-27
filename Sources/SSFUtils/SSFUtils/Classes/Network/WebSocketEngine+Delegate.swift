@@ -44,7 +44,7 @@ extension WebSocketEngine: WebSocketDelegate {
     private func handleCancelled(error: Error? = nil) {
         logger?.warning("Remote cancelled")
 
-        switch state {
+        switch connectionStrategy.state {
         case .connecting:
             disconnect()
             scheduleReconnectionOrDisconnect()
@@ -72,7 +72,7 @@ extension WebSocketEngine: WebSocketDelegate {
             logger?.error("Did receive unknown error")
         }
 
-        switch state {
+        switch connectionStrategy.state {
         case .connected:
             let cancelledRequests = resetInProgress()
 
@@ -123,7 +123,7 @@ extension WebSocketEngine: WebSocketDelegate {
     private func handleDisconnectedEvent(reason: String, code: UInt16) {
         logger?.warning("Disconnected with code \(code): \(reason)")
 
-        switch state {
+        switch connectionStrategy.state {
         case .connecting:
             scheduleReconnectionOrDisconnect()
         case .connected:
@@ -147,7 +147,7 @@ extension WebSocketEngine: ReachabilityListenerDelegate {
     public func didChangeReachability(by manager: ReachabilityManagerProtocol) {
         mutex.lock()
 
-        if manager.isReachable, case .notReachable = state {
+        if manager.isReachable, case .notReachable = connectionStrategy.state {
             logger?.debug("Network became reachable, retrying connection")
 
             cancelReconectionShedule()

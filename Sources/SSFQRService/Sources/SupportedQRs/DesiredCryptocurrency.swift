@@ -20,6 +20,12 @@ final class DesiredCryptocurrencyDecoder: QRDecoder {
         let address = components[1]
         var amount: String?
         
+        guard let data = address.data(using: .utf8) else {
+            throw QRDecoderError.brokenFormat
+        }
+        let cexDecoder = CexQRDecoder()
+        let _ = try cexDecoder.decode(data: data)
+        
         let amountString = components.indices.contains(2) ? components[2] : nil
         let amountComponents = amountString?.components(separatedBy: "=")
         if let amountComponents,

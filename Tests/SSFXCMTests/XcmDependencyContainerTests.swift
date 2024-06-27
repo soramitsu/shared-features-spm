@@ -112,7 +112,8 @@ extension XcmDependencyContainerTests {
             connectionName: "test",
             connectionStrategy: ConnectionStrategyImpl(
                 urls: [XcmConfig.shared.chainsSourceUrl],
-                callbackQueue: .global()
+                callbackQueue: .global(),
+                autoconnect: false
             )!
         )
     }

@@ -14,7 +14,6 @@ extension WebSocket: WebSocketConnectionProtocol {}
 public protocol WebSocketEngineDelegate: AnyObject {
     func webSocketDidChangeState(
         engine: WebSocketEngine,
-        from oldState: WebSocketEngine.State,
         to newState: WebSocketEngine.State
     )
 }
@@ -36,23 +35,12 @@ public final class WebSocketEngine {
     public let reachabilityManager: ReachabilityManagerProtocol?
     public let completionQueue: DispatchQueue
     public let pingInterval: TimeInterval
-
-    public private(set) var state: State {
-        didSet {
-            if let delegate = delegate {
-                let oldState = oldValue
-                let newState = state
-                delegate.webSocketDidChangeState(engine: self, from: oldState, to: newState)
-            }
-            connectionStrategy.updateConnection(for: state, delegate: self)
-        }
-    }
+    public let connectionStrategy: ConnectionStrategy
 
     let mutex = NSLock()
 
     private let jsonEncoder = JSONEncoder()
     private let jsonDecoder = JSONDecoder()
-    private let connectionStrategy: ConnectionStrategy
 
     private(set) lazy var pingScheduler: SchedulerProtocol = {
         Scheduler(with: self, callbackQueue: connectionStrategy.callbackQueue)
@@ -72,7 +60,6 @@ public final class WebSocketEngine {
         connectionStrategy: ConnectionStrategy,
         version: String = "2.0",
         processingQueue: DispatchQueue? = nil,
-        autoconnect: Bool = true,
         pingInterval: TimeInterval = 30,
         logger: SDKLoggerProtocol? = nil
     ) {
@@ -84,12 +71,7 @@ public final class WebSocketEngine {
         self.connectionStrategy = connectionStrategy
         completionQueue = processingQueue ?? Self.sharedProcessingQueue
         
-        if autoconnect {
-            state = .connecting
-            connectionStrategy.currentConnection.connect()
-        } else {
-            state = .notConnected
-        }
+        connectionStrategy.set(webSocketEngine: self)
         connectionStrategy.currentConnection.delegate = self
         subscribeToReachabilityStatus()
     }
@@ -103,7 +85,7 @@ public final class WebSocketEngine {
     public func connectIfNeeded() {
         mutex.lock()
 
-        switch state {
+        switch connectionStrategy.state {
         case .notConnected:
             startConnecting()
         case .waitingNewLoop:
@@ -122,9 +104,9 @@ public final class WebSocketEngine {
     public func disconnectIfNeeded() {
         mutex.lock()
 
-        switch state {
+        switch connectionStrategy.state {
         case .connected:
-            state = .notConnected
+            connectionStrategy.changeState(.notConnected)
 
             let cancelledRequests = resetInProgress()
 
@@ -141,7 +123,7 @@ public final class WebSocketEngine {
 
             logger?.debug("Did start disconnect from socket")
         case .connecting:
-            state = .notConnected
+            connectionStrategy.changeState(.notConnected)
 
             connectionStrategy.currentConnection.disconnect()
 
@@ -170,7 +152,10 @@ public final class WebSocketEngine {
 
 extension WebSocketEngine {
     func changeState(_ newState: State) {
-        state = newState
+        if let delegate = delegate {
+            delegate.webSocketDidChangeState(engine: self, to: newState)
+        }
+        connectionStrategy.changeState(newState)
     }
 
     func subscribeToReachabilityStatus() {
@@ -186,7 +171,7 @@ extension WebSocketEngine {
     }
 
     func updateConnectionForRequest(_ request: JSONRPCRequest) {
-        switch state {
+        switch connectionStrategy.state {
         case .connected:
             send(request: request)
         case .connecting:
@@ -480,7 +465,7 @@ extension WebSocketEngine {
 
     func scheduleReconnectionOrDisconnect(after error: Error? = nil) {
         if !connectionStrategy.canReconnect() {
-            state = .notConnected
+            connectionStrategy.changeState(.notConnected)
 
             // notify pendings about error because there is no chance to reconnect
 
@@ -493,19 +478,19 @@ extension WebSocketEngine {
         }
         
         if reachabilityManager?.isReachable == false {
-            state = .notReachable
+            connectionStrategy.changeState(.notReachable)
             return
         }
         
         if connectionStrategy.shouldRunInNextLoop() {
-            state = .waitingNewLoop
+            connectionStrategy.changeState(.waitingNewLoop)
         } else {
-            state = .connecting
+            connectionStrategy.changeState(.connecting)
         }
     }
 
     func schedulePingIfNeeded() {
-        guard pingInterval > 0.0, case .connected = state else {
+        guard pingInterval > 0.0, case .connected = connectionStrategy.state else {
             return
         }
 
@@ -515,7 +500,7 @@ extension WebSocketEngine {
     }
 
     func sendPing() {
-        guard case .connected = state else {
+        guard case .connected = connectionStrategy.state else {
             logger?.warning("Tried to send ping but not connected")
             return
         }
@@ -548,14 +533,14 @@ extension WebSocketEngine {
     }
 
     func startConnecting() {
-        switch state {
+        switch connectionStrategy.state {
         case .connecting:
             return
         default:
             if reachabilityManager?.isReachable == true {
-                state = .connecting
+                connectionStrategy.changeState(.connecting)
             } else {
-                state = .notReachable
+                connectionStrategy.changeState(.notReachable)
                 return
             }
         }
