@@ -66,20 +66,20 @@ extension StorageModifierHandling {
     }
 }
 
-final class StorageDecodingOperation<T: Decodable>: BaseOperation<T>, StorageDecodable {
+public final class StorageDecodingOperation<T: Decodable>: BaseOperation<T>, StorageDecodable {
     var data: Data?
     var codingFactory: RuntimeCoderFactoryProtocol?
 
-    let path: any StorageCodingPathProtocol
+    public let path: any StorageCodingPathProtocol
 
-    init(path: any StorageCodingPathProtocol, data: Data? = nil) {
+    public init(path: any StorageCodingPathProtocol, data: Data? = nil) {
         self.path = path
         self.data = data
 
         super.init()
     }
 
-    override func main() {
+    public override func main() {
         super.main()
 
         if isCancelled {
