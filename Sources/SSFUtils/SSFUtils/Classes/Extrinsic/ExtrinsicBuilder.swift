@@ -10,6 +10,7 @@ public protocol ExtrinsicBuilderProtocol: AnyObject {
     func with(tip: BigUInt) -> Self
     func with(appId: BigUInt) -> Self
     func with(shouldUseAtomicBatch: Bool) -> Self
+    func with(payloadType: ExtrinsicBuilder.PayloadType) -> Self
     func adding<T: RuntimeCallable>(call: T) throws -> Self
     func adding(rawCall: Data) throws -> Self
 
@@ -21,7 +22,7 @@ public protocol ExtrinsicBuilderProtocol: AnyObject {
     ) throws -> Self
 
     func build(encodingBy encoder: DynamicScaleEncoding, metadata: RuntimeMetadata) throws -> Data
-    func buildSignature(
+    func buildSignaturePayload(
         encodingBy encoder: DynamicScaleEncoding,
         metadata: RuntimeMetadata
     ) throws -> Data
@@ -37,6 +38,11 @@ public enum ExtrinsicBuilderError: Error {
 
 public final class ExtrinsicBuilder {
     static let payloadHashingTreshold = 256
+    
+    public enum PayloadType {
+        case regular
+        case rawData
+    }
 
     struct InternalCall: Codable {
         let moduleName: String
@@ -57,6 +63,7 @@ public final class ExtrinsicBuilder {
     private var appId: BigUInt?
     private var signature: ExtrinsicSignature?
     private var shouldUseAtomicBatch: Bool = true
+    private var payloadType: PayloadType = .regular
 
     public init(
         specVersion: UInt32,
@@ -134,7 +141,13 @@ public final class ExtrinsicBuilder {
         using metadata: RuntimeMetadata
     ) throws -> Data {
         let call = try prepareExtrinsicCall(for: metadata)
-        try encoder.append(json: call, type: GenericType.call.name)
+        
+        switch payloadType {
+        case .regular:
+            try encoder.append(json: call, type: GenericType.call.name)
+        case .rawData:
+            try encoder.appendBytes(json: call)
+        }
 
         try appendExtraToPayload(encodingBy: encoder)
         try appendAdditionalSigned(encodingBy: encoder, metadata: metadata)
@@ -186,6 +199,12 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
 
     public func with(shouldUseAtomicBatch: Bool) -> Self {
         self.shouldUseAtomicBatch = shouldUseAtomicBatch
+        return self
+    }
+    
+    public func with(payloadType: PayloadType) -> Self {
+        self.payloadType = payloadType
+        self.signature = nil
         return self
     }
 
@@ -288,7 +307,7 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
         return encoded
     }
 
-    public func buildSignature(
+    public func buildSignaturePayload(
         encodingBy encoder: DynamicScaleEncoding,
         metadata: RuntimeMetadata
     ) throws -> Data {
