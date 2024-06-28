@@ -211,7 +211,7 @@ final class XcmCallFactoryTests: XCTestCase {
         }
     }
 
-    func testBridgeProxyBurn() {
+    func testBridgeProxyBurn() throws {
         // arrange
         let fromChainModel: ChainModel = TestData.model
         let currencyId = "0"
@@ -223,8 +223,7 @@ final class XcmCallFactoryTests: XCTestCase {
         let itemName = "parachainId"
 
         // act
-        let runtimeCall = factory?.bridgeProxyBurn(
-            fromChainModel: fromChainModel,
+        let runtimeCall = try factory?.bridgeProxyBurn(
             currencyId: currencyId,
             destChainModel: destChainModel,
             accountId: accountId,
@@ -244,19 +243,21 @@ extension XcmCallFactoryTests {
         static let multilocation = AssetMultilocation(
             id: "0",
             symbol: "0",
+            parents: nil,
             interiors: [.onlyChild]
         )
 
         static let chain = XcmChain(
             xcmVersion: .V1,
             destWeightIsPrimitive: true,
-            availableAssets: [.init(id: "0", symbol: "0")],
+            availableAssets: [.init(id: "0", symbol: "0", minAmount: nil)],
             availableDestinations: [.init(
                 chainId: "1",
                 bridgeParachainId: "2",
                 assets: [.init(
                     id: "0",
-                    symbol: "0"
+                    symbol: "0", 
+                    minAmount: nil
                 )]
             )]
         )
@@ -271,13 +272,15 @@ extension XcmCallFactoryTests {
             rank: 0,
             disabled: false,
             chainId: "0",
+            parentId: "91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3",
             paraId: "0",
             name: "model",
             xcm: chain,
             nodes: Set([node]),
             addressPrefix: 0,
             icon: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil, 
+            identityChain: nil
         )
     }
 }

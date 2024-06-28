@@ -113,7 +113,8 @@ extension MnemonicExportServiceTests {
             externalApi: nil,
             selectedNode: nil,
             customNodes: [],
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            identityChain: nil
         )
 
         static let response = ChainAccountResponse(

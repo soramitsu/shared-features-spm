@@ -4,9 +4,9 @@ import SSFUtils
 protocol ConnectionFactoryProtocol {
     func createConnection(
         connectionName: String?,
-        for url: URL,
+        for urls: [URL],
         delegate: WebSocketEngineDelegate
-    ) -> SubstrateConnection
+    ) throws -> SubstrateConnection
 }
 
 final class ConnectionFactory: ConnectionFactoryProtocol {
@@ -17,14 +17,19 @@ final class ConnectionFactory: ConnectionFactoryProtocol {
 
     func createConnection(
         connectionName: String?,
-        for url: URL,
+        for urls: [URL],
         delegate: WebSocketEngineDelegate
-    ) -> SubstrateConnection {
+    ) throws -> SubstrateConnection {
+        guard let connectionStrategy = ConnectionStrategyImpl(
+            urls: urls,
+            callbackQueue: processingQueue
+        ) else {
+            throw ConnectionPoolError.connectionFetchingError
+        }
         let engine = WebSocketEngine(
             connectionName: connectionName,
-            url: url,
-            processingQueue: processingQueue,
-            logger: nil
+            connectionStrategy: connectionStrategy,
+            processingQueue: processingQueue
         )
         engine.delegate = delegate
         return engine

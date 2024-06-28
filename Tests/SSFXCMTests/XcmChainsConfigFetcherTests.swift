@@ -183,14 +183,16 @@ extension XcmChainsConfigFetcherTests {
                 destWeightIsPrimitive: true,
                 availableAssets: [.init(
                     id: "0",
-                    symbol: "0"
+                    symbol: "0",
+                    minAmount: nil
                 )],
                 availableDestinations: [.init(
                     chainId: "0",
                     bridgeParachainId: "2",
                     assets: [.init(
                         id: "1",
-                        symbol: "1"
+                        symbol: "1",
+                        minAmount: nil
                     )]
                 )]
             ),
@@ -201,7 +203,8 @@ extension XcmChainsConfigFetcherTests {
             )]),
             addressPrefix: 0,
             icon: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil, 
+            identityChain: nil
         )
 
         static let secondChain = ChainModel(
@@ -215,12 +218,13 @@ extension XcmChainsConfigFetcherTests {
                 destWeightIsPrimitive: true,
                 availableAssets: [.init(
                     id: "1",
-                    symbol: "1"
+                    symbol: "1",
+                    minAmount: nil
                 )],
                 availableDestinations: [.init(
                     chainId: "1",
                     bridgeParachainId: "2",
-                    assets: [.init(id: "0", symbol: "0")]
+                    assets: [.init(id: "0", symbol: "0", minAmount: nil)]
                 )]
             ),
             nodes: Set([ChainNodeModel(
@@ -230,7 +234,8 @@ extension XcmChainsConfigFetcherTests {
             )]),
             addressPrefix: 1,
             icon: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil, 
+            identityChain: nil
         )
 
         static let errorChain = ChainModel(
@@ -247,7 +252,8 @@ extension XcmChainsConfigFetcherTests {
             )]),
             addressPrefix: 2,
             icon: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil, 
+            identityChain: nil
         )
     }
 }

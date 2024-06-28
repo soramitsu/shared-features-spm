@@ -28,9 +28,9 @@ final class BridgeProxyBurnCallTests: XCTestCase {
         XCTAssertEqual(call.recipient, recipient)
     }
 
-    func testBridgeTypesGenericNetworkIdInit() {
+    func testBridgeTypesGenericNetworkIdInit() throws {
         // act
-        let networkId = BridgeTypesGenericNetworkId(from: TestData.chain)
+        let networkId = try BridgeTypesGenericNetworkId(from: TestData.chain)
 
         // assert
         XCTAssertNotNil(networkId)
@@ -39,7 +39,7 @@ final class BridgeProxyBurnCallTests: XCTestCase {
 
     func testBridgeTypesGenericNetworkIdEncode() throws {
         // arrange
-        let networkId = BridgeTypesGenericNetworkId(from: TestData.chain)
+        let networkId = try BridgeTypesGenericNetworkId(from: TestData.chain)
 
         // act
         let encodedData = try JSONEncoder().encode(networkId)
@@ -48,9 +48,9 @@ final class BridgeProxyBurnCallTests: XCTestCase {
         XCTAssertEqual(encodedData, TestData.genericNetworkIdData)
     }
 
-    func testBridgeTypesSubNetworkIdInit() {
+    func testBridgeTypesSubNetworkIdInit() throws {
         // act
-        let subNetworkId = BridgeTypesSubNetworkId(from: TestData.chain)
+        let subNetworkId = try BridgeTypesSubNetworkId(from: TestData.chain)
 
         // assert
         XCTAssertNotNil(subNetworkId)
@@ -59,7 +59,7 @@ final class BridgeProxyBurnCallTests: XCTestCase {
 
     func testBridgeTypesSubNetworkIdEncode() throws {
         // arrange
-        let subNetworkId = BridgeTypesSubNetworkId(from: TestData.chain)
+        let subNetworkId = try BridgeTypesSubNetworkId(from: TestData.chain)
 
         // act
         let encodedData = try JSONEncoder().encode(subNetworkId)
@@ -167,10 +167,11 @@ extension BridgeProxyBurnCallTests {
             nodes: Set([ChainNodeModel(url: TestData.url, name: "test", apikey: nil)]),
             addressPrefix: 1,
             icon: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil, 
+            identityChain: nil
         )
 
-        static let subNetworkId = BridgeTypesSubNetworkId(from: chain)
+        static let subNetworkId = try! BridgeTypesSubNetworkId(from: chain)
 
         static let hexString = "0xbf57a61b1d24b6cde5a12f6779e9d13f7c59db72fc2a63bd382a6c91e7e41f61"
 

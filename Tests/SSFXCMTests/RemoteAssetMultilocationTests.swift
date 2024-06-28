@@ -10,6 +10,7 @@ final class RemoteAssetMultilocationTests: XCTestCase {
         let assets: [AssetMultilocation] = [AssetMultilocation(
             id: "assetId",
             symbol: "assetSymbol",
+            parents: nil,
             interiors: [.onlyChild]
         )]
 
@@ -35,6 +36,7 @@ final class RemoteAssetMultilocationTests: XCTestCase {
         let multiplication = AssetMultilocation(
             id: id,
             symbol: symbol,
+            parents: nil,
             interiors: interiors
         )
         // assert

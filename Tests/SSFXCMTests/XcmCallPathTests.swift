@@ -25,6 +25,6 @@ final class XcmCallPathTests: XCTestCase {
         let usedRuntimePaths = XcmCallPath.usedRuntimePaths
 
         // assert
-        XCTAssertEqual(usedRuntimePaths.count, 6)
+        XCTAssertEqual(usedRuntimePaths.count, 7)
     }
 }

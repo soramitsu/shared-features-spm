@@ -115,7 +115,8 @@ private extension AccountManagementServiceTests {
             externalApi: nil,
             selectedNode: nil,
             customNodes: [],
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            identityChain: nil
         )
 
         static let asset = AssetModel(

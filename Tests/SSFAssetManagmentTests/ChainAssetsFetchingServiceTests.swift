@@ -436,7 +436,8 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
             externalApi: nil,
             selectedNode: nil,
             customNodes: [],
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            identityChain: nil
         )
 
         let extectedAssetArray = chain.assets.map { ChainAsset(chain: chain, asset: $0) }
@@ -604,7 +605,8 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
             externalApi: nil,
             selectedNode: nil,
             customNodes: [],
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            identityChain: nil
         )
 
         let extectedAssetArray = chain.assets.map { ChainAsset(chain: chain, asset: $0) }
@@ -648,7 +650,8 @@ private extension ChainAssetsFetchingServiceTests {
             externalApi: nil,
             selectedNode: nil,
             customNodes: [],
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            identityChain: nil
         )
 
         static let asset = AssetModel(
@@ -689,7 +692,8 @@ private extension ChainAssetsFetchingServiceTests {
             externalApi: nil,
             selectedNode: nil,
             customNodes: [],
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            identityChain: nil
         )
 
         static let assetWithStacking = AssetModel(

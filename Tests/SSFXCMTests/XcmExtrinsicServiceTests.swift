@@ -50,7 +50,8 @@ final class XcmExtrinsicServiceTests: XCTestCase {
             chainRegistry: chainRegistry,
             depsContainer: depsContainer,
             callPathDeterminer: determiner,
-            xcmFeeFetcher: feeFetcher
+            xcmFeeFetcher: feeFetcher, 
+            minAmountInspector: XcmMinAmountInspectorImpl()
         )
     }
 
@@ -175,14 +176,16 @@ private extension XcmExtrinsicServiceTests {
                 destWeightIsPrimitive: true,
                 availableAssets: [.init(
                     id: "0",
-                    symbol: "0"
+                    symbol: "0",
+                    minAmount: nil
                 )],
                 availableDestinations: [.init(
                     chainId: "0",
                     bridgeParachainId: "2",
                     assets: [.init(
                         id: "1",
-                        symbol: "1"
+                        symbol: "1",
+                        minAmount: nil
                     )]
                 )]
             ),
@@ -193,7 +196,8 @@ private extension XcmExtrinsicServiceTests {
             )]),
             addressPrefix: 0,
             icon: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            identityChain: nil
         )
 
         static let paths: [XcmCallPath] = [
@@ -221,7 +225,10 @@ private extension XcmExtrinsicServiceTests {
 
         static let connectionChain = WebSocketEngine(
             connectionName: "test",
-            url: XcmConfig.shared.chainsSourceUrl
+            connectionStrategy: ConnectionStrategyImpl(
+                urls: [XcmConfig.shared.chainsSourceUrl],
+                callbackQueue: .global()
+            )!
         )
     }
 
@@ -244,8 +251,7 @@ private extension XcmExtrinsicServiceTests {
             .buildPolkadotXcmLimitedReserveTransferAssetsExtrinsicBuilderClosureFromChainModelVersionAssetSymbolAccountIdDestChainModelAmountWeightLimitPathReturnValue =
             closure
         extrinsicBuilder?
-            .buildBridgeProxyBurnFromChainModelCurrencyIdDestChainModelAccountIdAmountPathReturnValue =
-            closure
+            .buildBridgeProxyBurnCurrencyIdDestChainModelAccountIdAmountPathReturnValue = closure
         depsContainer?.prepareDepsReturnValue = XcmDeps(extrinsicService: extrinsicService())
     }
 
