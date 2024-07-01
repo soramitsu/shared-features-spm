@@ -11,7 +11,7 @@ public final class ApplicationSourcesImpl: ApplicationSources {
 
     public var chainsSourceUrl: URL {
         #if DEBUG
-            GitHubUrl.url(suffix: "chains/v6/chains_dev.json", branch: .developFree)
+            GitHubUrl.url(suffix: "chains/v9/chains.json", branch: .mwr819)
         #else
             GitHubUrl.url(suffix: "chains/v6/chains.json")
         #endif
@@ -31,6 +31,7 @@ private enum GitHubUrl {
         case master
         case develop
         case developFree = "develop-free"
+        case mwr819 = "MWR-819"
     }
 
     static func url(suffix: String, branch: DefaultBranch = .master) -> URL {

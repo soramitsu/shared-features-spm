@@ -2,7 +2,12 @@ import CoreData
 import RobinHood
 import SSFUtils
 
+enum SubstrateDataStorageFacadeError: Error {
+    case unexpectedError
+}
+
 public enum SubstrateStorageParams {
+    static let modelName = "SubstrateDataModel"
     static let modelVersion: SubstrateStorageVersion = .version5
     static let modelDirectory: String = "SubstrateDataModel.momd"
     static let databaseName = "SubstrateDataModel.sqlite"
@@ -26,19 +31,15 @@ public enum SubstrateStorageParams {
 }
 
 public class SubstrateDataStorageFacade: StorageFacadeProtocol {
-    public static let shared = SubstrateDataStorageFacade()
-
     public let databaseService: CoreDataServiceProtocol
 
-    private init() {
-        let modelName = "SubstrateDataModel"
-        let modelURL = Bundle.main.url(forResource: modelName, withExtension: "momd")
-        let databaseName = "\(modelName).sqlite"
-
-        let baseURL = FileManager.default.urls(
-            for: .documentDirectory,
-            in: .userDomainMask
-        ).first?.appendingPathComponent("CoreData")
+    public init() throws {
+        guard let modelURL = Bundle.module.url(
+            forResource: "SubstrateDataModel",
+            withExtension: "momd"
+        ) else {
+            throw SubstrateDataStorageFacadeError.unexpectedError
+        }
 
         let options = [
             NSMigratePersistentStoresAutomaticallyOption: true,
@@ -46,14 +47,14 @@ public class SubstrateDataStorageFacade: StorageFacadeProtocol {
         ]
 
         let persistentSettings = CoreDataPersistentSettings(
-            databaseDirectory: baseURL!,
-            databaseName: databaseName,
+            databaseDirectory: SubstrateStorageParams.storageDirectoryURL,
+            databaseName: SubstrateStorageParams.databaseName,
             incompatibleModelStrategy: .ignore,
             options: options
         )
 
         let configuration = CoreDataServiceConfiguration(
-            modelURL: modelURL!,
+            modelURL: modelURL,
             storageType: .persistent(settings: persistentSettings)
         )
 

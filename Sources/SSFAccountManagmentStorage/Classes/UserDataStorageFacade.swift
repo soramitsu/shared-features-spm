@@ -3,6 +3,10 @@ import Foundation
 import RobinHood
 import SSFUtils
 
+enum UserDataStorageFacadeError: Error {
+    case unexpectedError
+}
+
 public enum UserStorageParams {
     static let modelVersion: UserStorageVersion = .version11
     static let modelDirectory: String = "UserDataModel.momd"
@@ -27,27 +31,16 @@ public enum UserStorageParams {
 }
 
 public class UserDataStorageFacade: StorageFacadeProtocol {
-    public static let shared = UserDataStorageFacade()
 
     public let databaseService: CoreDataServiceProtocol
 
-    private init() {
-        let modelName = UserStorageParams.modelVersion.rawValue
-        let bundle = Bundle(for: UserDataStorageFacade.self)
-
-        let omoURL = bundle.url(
-            forResource: modelName,
-            withExtension: "omo",
-            subdirectory: UserStorageParams.modelDirectory
-        )
-
-        let momURL = bundle.url(
-            forResource: modelName,
-            withExtension: "mom",
-            subdirectory: UserStorageParams.modelDirectory
-        )
-
-        let modelURL = omoURL ?? momURL
+    public init() throws {
+        guard let modelURL = Bundle.module.url(
+            forResource: "UserDataModel",
+            withExtension: "momd"
+        ) else {
+            throw UserDataStorageFacadeError.unexpectedError
+        }
 
         let persistentSettings = CoreDataPersistentSettings(
             databaseDirectory: UserStorageParams.storageDirectoryURL,
@@ -56,7 +49,7 @@ public class UserDataStorageFacade: StorageFacadeProtocol {
         )
 
         let configuration = CoreDataServiceConfiguration(
-            modelURL: modelURL!,
+            modelURL: modelURL,
             storageType: .persistent(settings: persistentSettings)
         )
 
