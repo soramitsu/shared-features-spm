@@ -72,7 +72,6 @@ public final class WebSocketEngine {
         completionQueue = processingQueue ?? Self.sharedProcessingQueue
         
         connectionStrategy.set(webSocketEngine: self)
-        connectionStrategy.currentConnection.delegate = self
         subscribeToReachabilityStatus()
     }
 

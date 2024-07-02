@@ -63,6 +63,7 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
         let request = URLRequest(url: url, timeoutInterval: timeout)
         let engine = WSEngine(transport: TCPTransport(), certPinner: FoundationSecurity())
         let connection = WebSocket(request: request, engine: engine)
+        connection.callbackQueue = callbackQueue
         currentConnection = connection
         
         if autoconnect {
@@ -77,6 +78,7 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
     
     public func set(webSocketEngine: WebSocketEngine) {
         self.webSocketEngine = webSocketEngine
+        currentConnection.delegate = webSocketEngine
     }
     
     public func changeState(_ newState: WebSocketEngine.State) {
