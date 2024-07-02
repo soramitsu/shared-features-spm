@@ -11,7 +11,7 @@ public final class ApplicationSourcesImpl: ApplicationSources {
 
     public var chainsSourceUrl: URL {
         #if DEBUG
-            GitHubUrl.url(suffix: "chains/v9/chains.json", branch: .mwr819)
+            GitHubUrl.url(suffix: "chains/chains.json", branch: .mwr819)
         #else
             GitHubUrl.url(suffix: "chains/v6/chains.json")
         #endif
