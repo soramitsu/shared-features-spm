@@ -6,12 +6,12 @@ public enum CachedNetworkResponseType {
 }
 
 public struct CachedNetworkResponse<T> {
-    public var value: T?
-    public var type: CachedNetworkResponseType
-    
     public static var empty: CachedNetworkResponse<T> {
         return CachedNetworkResponse(value: nil, type: .cache)
     }
+    
+    public var value: T?
+    public var type: CachedNetworkResponseType
     
     public init(value: T?, type: CachedNetworkResponseType) {
         self.value = value
