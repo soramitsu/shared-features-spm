@@ -14,11 +14,7 @@ public protocol NetworkWorker {
 }
 
 public final class NetworkWorkerImpl {
-    private let logger: LoggerProtocol
-    
-    public init(logger: LoggerProtocol) {
-        self.logger = logger
-    }
+    public init() {}
     
     private lazy var cacheStorage: AsyncSingleValueRepository = {
         SingleValueCacheRepositoryFactoryDefault().createAsyncSingleValueCacheRepository()
