@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class BoxProposalNode: Node {
     public var typeName: String { GenericType.boxProposal.name }

@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class EcdsaNode: Node {
     public var typeName: String { GenericType.ecdsa.name }

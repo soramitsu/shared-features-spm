@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class BytesNode: Node {
     public var typeName: String { GenericType.bytes.name }

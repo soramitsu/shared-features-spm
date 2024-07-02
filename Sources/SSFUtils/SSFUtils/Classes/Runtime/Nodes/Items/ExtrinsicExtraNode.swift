@@ -1,5 +1,5 @@
 import Foundation
-
+import SSFModels
 public enum ExtrinsicExtraNodeError: Error {
     case invalidParams
 }

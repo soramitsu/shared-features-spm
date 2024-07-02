@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class TrimProcessor: ParserPreproccessing, ParserPostprocessing {
     public let charset: CharacterSet

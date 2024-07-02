@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 class OptionNodeFactory: TypeNodeFactoryProtocol {
     let parser: TypeParser

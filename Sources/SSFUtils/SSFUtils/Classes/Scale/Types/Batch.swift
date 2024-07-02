@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public struct BatchArgs: Codable {
     public let calls: [JSON]

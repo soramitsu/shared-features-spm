@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class GenericConsensusEngineIdNode: Node {
     public var typeName: String { GenericType.consensusEngineId.name }

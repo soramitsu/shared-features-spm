@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class H160Node: Node {
     public var typeName: String { GenericType.h160.name }

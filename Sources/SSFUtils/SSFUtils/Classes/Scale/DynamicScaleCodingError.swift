@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public enum DynamicScaleCoderError: Error {
     case unresolvedType(name: String)

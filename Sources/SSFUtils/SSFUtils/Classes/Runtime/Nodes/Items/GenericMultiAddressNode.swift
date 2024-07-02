@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class GenericMultiAddressNode: Node {
     public static let typeMapping = [

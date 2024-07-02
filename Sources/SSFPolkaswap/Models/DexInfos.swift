@@ -1,13 +1,13 @@
 import Foundation
 import SSFUtils
 
-public struct DexInfos: Decodable {
+public struct DexInfos: Decodable, Equatable {
     var baseAssetId: PolkaswapDexInfoAssetId
     var syntheticBaseAssetId: PolkaswapDexInfoAssetId
     var isPublic: Bool
 }
 
-public struct PolkaswapDexInfoAssetId: Codable, Hashable {
+public struct PolkaswapDexInfoAssetId: Codable, Hashable, Equatable {
     @ArrayCodable public var code: String
     
     public func hash(into hasher: inout Hasher) {

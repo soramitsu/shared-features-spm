@@ -8,6 +8,7 @@ public struct LiquidityPair: Codable, Comparable {
     }
     
     public enum CodingKeys: String, CodingKey {
+        case dexId
         case pairId
         case chainId
         case baseAssetId
@@ -16,6 +17,7 @@ public struct LiquidityPair: Codable, Comparable {
         case reserves
     }
 
+    public let dexId: String
     public let pairId: String
     public let chainId: String?
     public let baseAssetId: String
@@ -26,6 +28,7 @@ public struct LiquidityPair: Codable, Comparable {
     public var reservesId: String?
 
     public init(
+        dexId: String,
         pairId: String,
         chainId: String?,
         baseAssetId: String,
@@ -34,6 +37,7 @@ public struct LiquidityPair: Codable, Comparable {
         apy: Decimal? = nil,
         reservesId: String? = nil
     ) {
+        self.dexId = dexId
         self.pairId = pairId
         self.chainId = chainId
         self.baseAssetId = baseAssetId
@@ -45,6 +49,7 @@ public struct LiquidityPair: Codable, Comparable {
 
     init(pair: LiquidityPair) {
         self.init(
+            dexId: pair.dexId,
             pairId: pair.pairId,
             chainId: pair.chainId,
             baseAssetId: pair.baseAssetId,

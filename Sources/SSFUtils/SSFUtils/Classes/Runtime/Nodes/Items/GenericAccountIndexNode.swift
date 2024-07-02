@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class GenericAccountIndexNode: Node {
     public var typeName: String { GenericType.accountIndex.name }

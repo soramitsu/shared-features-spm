@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class EventRecordNode: Node {
     public var typeName: String { GenericType.eventRecord.name }

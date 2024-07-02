@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class CallBytesNode: Node {
     public var typeName: String { GenericType.callBytes.name }

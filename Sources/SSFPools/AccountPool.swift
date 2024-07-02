@@ -7,6 +7,7 @@ enum WalletAssetId: String {
 
 public struct AccountPool: Codable {
     public enum CodingKeys: String, CodingKey {
+        case dexId
         case poolId
         case accountId
         case chainId
@@ -19,6 +20,7 @@ public struct AccountPool: Codable {
         case accountPoolShare
     }
 
+    public let dexId: String
     public let poolId: String
     public let accountId: String
     public let chainId: String
@@ -32,6 +34,7 @@ public struct AccountPool: Codable {
     public var reservesId: String?
 
     public init(
+        dexId: String,
         poolId: String,
         accountId: String,
         chainId: String,
@@ -43,6 +46,7 @@ public struct AccountPool: Codable {
         accountPoolShare: Decimal? = nil,
         reservesId: String? = nil
     ) {
+        self.dexId = dexId
         self.poolId = poolId
         self.accountId = accountId
         self.chainId = chainId
@@ -54,9 +58,11 @@ public struct AccountPool: Codable {
         self.accountPoolShare = accountPoolShare
         self.reservesId = reservesId
     }
+    
 
     init(accountPool: AccountPool) {
         self.init(
+            dexId: accountPool.dexId,
             poolId: accountPool.poolId,
             accountId: accountPool.accountId,
             chainId: accountPool.chainId,
@@ -80,6 +86,17 @@ public struct AccountPool: Codable {
         var copy = AccountPool(accountPool: self)
         copy.apy = apy
         return copy
+    }
+    
+    public var liquidityPair: LiquidityPair {
+        LiquidityPair(
+            dexId: dexId,
+            pairId: poolId,
+            chainId: chainId,
+            baseAssetId: baseAssetId,
+            targetAssetId: targetAssetId,
+            reservesId: reservesId
+        )
     }
 }
 

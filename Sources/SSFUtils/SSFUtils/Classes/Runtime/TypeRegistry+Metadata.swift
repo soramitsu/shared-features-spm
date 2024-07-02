@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public extension TypeRegistry {
     static func createFromRuntimeMetadata(

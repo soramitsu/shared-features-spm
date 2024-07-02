@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public struct Bracket: Hashable {
     public let left: Character

@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public struct NamedType {
     public let name: String

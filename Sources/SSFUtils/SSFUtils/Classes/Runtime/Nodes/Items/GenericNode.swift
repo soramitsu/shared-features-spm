@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class GenericNode: Node {
     public let typeName: String

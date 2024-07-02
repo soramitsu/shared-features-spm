@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class SessionKeysSubstrateNode: Node {
     static let fieldNames: [String] = ["grandpa", "babe", "im_online"]

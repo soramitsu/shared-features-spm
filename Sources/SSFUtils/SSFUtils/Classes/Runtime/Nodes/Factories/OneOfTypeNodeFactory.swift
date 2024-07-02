@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 class OneOfTypeNodeFactory: TypeNodeFactoryProtocol {
     let children: [TypeNodeFactoryProtocol]

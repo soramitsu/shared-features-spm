@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class TermParser: TypeParser {
     public let preprocessor: ParserPreproccessing?

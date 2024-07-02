@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class TypeValuesParser: TypeParser {
     public let type: String

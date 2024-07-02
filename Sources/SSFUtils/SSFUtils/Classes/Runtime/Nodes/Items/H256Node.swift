@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class H256Node: Node {
     public var typeName: String { GenericType.h256.name }

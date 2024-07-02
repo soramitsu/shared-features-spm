@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 // MARK: - U8Node
 

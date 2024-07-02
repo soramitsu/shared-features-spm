@@ -1,5 +1,6 @@
 import BigInt
 import Foundation
+import SSFModels
 
 public enum BitVecNodeError: Error {
     case expectedArrayOfBools(json: JSON)

@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class KeyValueNode: Node {
     public let typeName: String

@@ -1,6 +1,7 @@
 import BigInt
 import Foundation
 import SSFUtils
+import SSFModels
 
 public struct XorlessTransfer: Codable {
     public let dexId: String

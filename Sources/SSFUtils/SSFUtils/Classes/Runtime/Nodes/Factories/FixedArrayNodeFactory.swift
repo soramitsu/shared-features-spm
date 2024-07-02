@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 class FixedArrayNodeFactory: TypeNodeFactoryProtocol {
     let parser: TypeParser

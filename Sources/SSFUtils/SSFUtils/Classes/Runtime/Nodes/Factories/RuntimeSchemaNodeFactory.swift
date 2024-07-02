@@ -1,5 +1,6 @@
 import BigInt
 import Foundation
+import SSFModels
 
 private extension JSON {
     static func typeId(_ id: BigUInt) -> JSON {

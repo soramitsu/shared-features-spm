@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public protocol NodeResolver: AnyObject {
     func resolve(for key: String) -> Node?

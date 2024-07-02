@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class OpaqueCallNode: Node {
     public var typeName: String { GenericType.opaqueCall.name }

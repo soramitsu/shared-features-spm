@@ -1,5 +1,6 @@
 import BigInt
 import Foundation
+import SSFModels
 
 public enum TypeRegistryError: Error {
     case unexpectedJson

@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class GenericVoteNode: Node {
     public var typeName: String { GenericType.vote.name }

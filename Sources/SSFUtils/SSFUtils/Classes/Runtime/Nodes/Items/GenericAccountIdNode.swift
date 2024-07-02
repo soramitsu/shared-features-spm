@@ -1,4 +1,5 @@
 import Foundation
+import SSFModels
 
 public class GenericAccountIdNode: Node {
     public var typeName: String { GenericType.accountId.name }
