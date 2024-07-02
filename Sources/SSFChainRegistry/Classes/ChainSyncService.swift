@@ -77,6 +77,7 @@ public final class ChainSyncService {
                     let map = strongSelf.syncChanges(remoteChains: chains)
                     return continuation.resume(returning: map)
                 case let .failure(error):
+                    print("OLOLO error \(error)")
                     self?.complete(result: .failure(error))
                     return continuation.resume(throwing: error)
                 }

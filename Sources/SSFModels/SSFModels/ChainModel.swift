@@ -22,7 +22,7 @@ public final class ChainModel: Codable, Identifiable {
 
     public var identifier: String { chainId }
     public let rank: UInt16?
-    public let disabled: Bool
+//    public let disabled: Bool
     public let chainId: Id
     public let parentId: Id?
     public let paraId: String?
@@ -41,7 +41,7 @@ public final class ChainModel: Codable, Identifiable {
 
     public init(
         rank: UInt16?,
-        disabled: Bool,
+//        disabled: Bool,
         chainId: Id,
         parentId: Id? = nil,
         paraId: String?,
@@ -59,7 +59,7 @@ public final class ChainModel: Codable, Identifiable {
         iosMinAppVersion: String?
     ) {
         self.rank = rank
-        self.disabled = disabled
+//        self.disabled = disabled
         self.chainId = chainId
         self.parentId = parentId
         self.paraId = paraId
