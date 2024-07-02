@@ -1,4 +1,5 @@
 import Foundation
+import SSFLogger
 import RobinHood
 import SSFSingleValueCache
 import SSFUtils
@@ -13,7 +14,11 @@ public protocol NetworkWorker {
 }
 
 public final class NetworkWorkerImpl {
-    public init() {}
+    private let logger: LoggerProtocol
+    
+    public init(logger: LoggerProtocol) {
+        self.logger = logger
+    }
     
     private lazy var cacheStorage: AsyncSingleValueRepository = {
         SingleValueCacheRepositoryFactoryDefault().createAsyncSingleValueCacheRepository()
@@ -29,7 +34,7 @@ public final class NetworkWorkerImpl {
         try requestSigner?.sign(request: &request, config: config)
         let response = try await networkClient.perform(request: request)
 
-        try save(
+        save(
             response: response,
             config: config
         )
@@ -79,11 +84,11 @@ public final class NetworkWorkerImpl {
     private func getCache<T: Decodable>(
         config: RequestConfig
     ) async throws -> T? {
-        guard let key = config.cacheKey, let dictKey = key.data(using: .utf8) else {
+        guard let dictKey = config.cacheKey.data(using: .utf8) else {
             throw NetworkingError.unableToParseResponse
         }
         
-        let cache = try await cacheStorage.fetch(by: [key], options: RepositoryFetchOptions())
+        let cache = try await cacheStorage.fetch(by: [config.cacheKey], options: RepositoryFetchOptions())
 
          let caches = cache.compactMap {
             let item: [Data:T]? = try? decode(
@@ -111,13 +116,9 @@ public final class NetworkWorkerImpl {
     private func save(
         response: Data,
         config: RequestConfig
-    ) throws {
-        guard let key = config.cacheKey else {
-            throw NetworkingError.unknownError
-        }
-        
+    ) {
         Task {
-            let object = SingleValueProviderObject(identifier: key, payload: response)
+            let object = SingleValueProviderObject(identifier: config.cacheKey, payload: response)
             await cacheStorage.save(models: [object])
         }
     }

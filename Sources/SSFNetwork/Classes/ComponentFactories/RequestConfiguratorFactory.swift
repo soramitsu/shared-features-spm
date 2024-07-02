@@ -12,7 +12,7 @@ final class BaseRequestConfiguratorFactory: RequestConfiguratorFactory {
     func buildRequestConfigurator(with type: NetworkRequestType, baseURL: URL) throws -> RequestConfigurator {
         switch type {
         case .plain:
-            return RESTRequestConfigurator(baseURL: baseURL)
+            return RESTRequestConfigurator()
         case .multipart:
             throw RequestConfiguratorFactoryError.requestTypeNotSupported
         case let .custom(configurator):

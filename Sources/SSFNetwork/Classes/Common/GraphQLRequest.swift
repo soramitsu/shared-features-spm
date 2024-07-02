@@ -26,14 +26,15 @@ public class GraphQLRequest: RequestConfig {
         )
     }
     
-    override var cacheKey: String? {
+    override var cacheKey: String {
         guard
             let body,
-                let json = try? JSONDecoder().decode(JSON.self, from: body)
+            let json = try? JSONDecoder().decode(JSON.self, from: body),
+            let key = json.dictValue?["query"]?.stringValue
         else {
-            return nil
+            return super.cacheKey
         }
         
-        return json.dictValue?["query"]?.stringValue
+        return key
     }
 }

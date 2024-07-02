@@ -29,7 +29,7 @@ public class RequestConfig {
         self.body = body
     }
     
-    var cacheKey: String? {
+    var cacheKey: String {
         var cacheKey = baseURL.absoluteString
         
         if let endpoint = endpoint {
