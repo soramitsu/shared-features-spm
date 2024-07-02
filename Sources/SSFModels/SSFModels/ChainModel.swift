@@ -237,7 +237,7 @@ public final class ChainModel: Codable, Identifiable {
     public func replacingSelectedNode(_ node: ChainNodeModel?) -> ChainModel {
         ChainModel(
             rank: rank,
-            disabled: disabled,
+//            disabled: disabled,
             chainId: chainId,
             parentId: parentId,
             paraId: paraId,
@@ -259,7 +259,7 @@ public final class ChainModel: Codable, Identifiable {
     public func replacingCustomNodes(_ newCustomNodes: [ChainNodeModel]) -> ChainModel {
         ChainModel(
             rank: rank,
-            disabled: disabled,
+//            disabled: disabled,
             chainId: chainId,
             parentId: parentId,
             paraId: paraId,
@@ -305,7 +305,7 @@ extension ChainModel: Hashable {
             && lhs.iosMinAppVersion == rhs.iosMinAppVersion
             && lhs.selectedNode == rhs.selectedNode
             && lhs.xcm == rhs.xcm
-            && lhs.disabled == rhs.disabled
+//            && lhs.disabled == rhs.disabled
     }
 
     public func hash(into hasher: inout Hasher) {
