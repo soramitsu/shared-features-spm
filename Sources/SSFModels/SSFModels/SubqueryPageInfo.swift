@@ -1,11 +1,11 @@
 import Foundation
 
-struct SubqueryPageInfo: Decodable {
-    let startCursor: String?
-    let endCursor: String?
-    let hasNextPage: Bool?
+public struct SubqueryPageInfo: Decodable {
+    public let startCursor: String?
+    public let endCursor: String?
+    public let hasNextPage: Bool?
 
-    func toContext() -> [String: String]? {
+    public func toContext() -> [String: String]? {
         if startCursor == nil, endCursor == nil {
             return nil
         }
