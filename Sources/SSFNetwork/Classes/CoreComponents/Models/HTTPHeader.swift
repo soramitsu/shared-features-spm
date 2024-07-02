@@ -1,6 +1,6 @@
 import Foundation
 
 public struct HTTPHeader: Codable {
-    let field: String
-    let value: String
+    public let field: String
+    public let value: String
 }

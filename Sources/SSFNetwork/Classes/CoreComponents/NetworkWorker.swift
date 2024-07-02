@@ -3,7 +3,16 @@ import RobinHood
 import SSFSingleValueCache
 import SSFUtils
 
-public final class NetworkWorker {
+public protocol NetworkWorker {
+    func performRequest<T>(with config: RequestConfig) async throws -> T
+    
+    func performRequest<T: Decodable>(
+        with config: RequestConfig,
+        withCacheOptions: CachedNetworkRequestTrigger
+    ) async -> AsyncThrowingStream<CachedNetworkResponse<T>, Error>
+}
+
+public final class NetworkWorkerImpl {
     public init() {}
     
     private lazy var cacheStorage: AsyncSingleValueRepository = {
@@ -18,20 +27,15 @@ public final class NetworkWorker {
 
         var request = try requestConfigurator.buildRequest(with: config)
         try requestSigner?.sign(request: &request, config: config)
-        let response = await networkClient.perform(request: request)
+        let response = try await networkClient.perform(request: request)
 
-        switch response {
-        case let .success(response):
-            try save(
-                response: response,
-                config: config
-            )
-            
-            let decoded: T = try responseDecoder.decode(data: response)
-            return decoded
-        case let .failure(error):
-            throw error
-        }
+        try save(
+            response: response,
+            config: config
+        )
+        
+        let decoded: T = try responseDecoder.decode(data: response)
+        return decoded
     }
     
     public func performRequest<T: Decodable>(

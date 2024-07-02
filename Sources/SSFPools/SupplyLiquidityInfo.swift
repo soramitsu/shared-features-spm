@@ -17,7 +17,15 @@ public struct SupplyLiquidityInfo {
         targetAssetAmount * (Decimal(1) - slippage / 100)
     }
     
-    public init(dexId: String, baseAsset: PooledAssetInfo, targetAsset: PooledAssetInfo, baseAssetAmount: Decimal, targetAssetAmount: Decimal, slippage: Decimal, availablePairs: [LiquidityPair]?) {
+    public init(
+        dexId: String,
+        baseAsset: PooledAssetInfo,
+        targetAsset: PooledAssetInfo,
+        baseAssetAmount: Decimal,
+        targetAssetAmount: Decimal,
+        slippage: Decimal,
+        availablePairs: [LiquidityPair]?
+    ) {
         self.dexId = dexId
         self.baseAsset = baseAsset
         self.targetAsset = targetAsset

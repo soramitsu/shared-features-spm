@@ -1,27 +1,5 @@
 import Foundation
-
-//TODO: move to ssfmodels
-struct SubqueryPageInfo: Decodable {
-    let startCursor: String?
-    let endCursor: String?
-    let hasNextPage: Bool?
-
-    func toContext() -> [String: String]? {
-        if startCursor == nil, endCursor == nil {
-            return nil
-        }
-        var context: [String: String] = [:]
-        if let startCursor = startCursor {
-            context["startCursor"] = startCursor
-        }
-
-        if let endCursor = endCursor {
-            context["endCursor"] = endCursor
-        }
-
-        return context
-    }
-}
+import SSFModels
 
 struct SoraSubqueryApyInfoResponse: Decodable {
     let entities: SoraSubqueryApyInfoPage

@@ -4,15 +4,7 @@ enum RESTRequestConfiguratorError: Error {
     case badURL
 }
 
-final class RESTRequestConfigurator {
-    private let baseURL: URL
-
-    init(baseURL: URL) {
-        self.baseURL = baseURL
-    }
-}
-
-extension RESTRequestConfigurator: RequestConfigurator {
+final class RESTRequestConfigurator: RequestConfigurator {
     func buildRequest(with config: RequestConfig) throws -> URLRequest {
         var urlComponents = URLComponents()
         urlComponents.scheme = config.baseURL.scheme

@@ -81,6 +81,7 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
     public func fetchUserPools(accountId: AccountId) async throws -> [AccountPool] {
         async let totalIssuanceByReservesIdPromise = try await poolXykStorage.totalIssuance(chain: chain)
         
+        let dexInfos = try await dexManagerStorage.dexInfos(chain: chain)
         let userPools = try await poolXykStorage.accountPools(accountId: accountId, chain: chain)
         let pairs: [AssetIdPair] = userPools.compactMap { $0.assetPair }
         
@@ -103,7 +104,8 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
             guard
                 let baseAsset = chain.assets.first(where: { $0.currencyId == baseAssetId }),
                 let targetAsset = chain.assets.first(where: { $0.currencyId == targetAssetId }),
-                let reservesId = poolProperties?.reservesId
+                let reservesId = poolProperties?.reservesId,
+                let dexId = dexInfos.first(where: { $0.value.baseAssetId.code == assetPair.baseAssetId.code })?.key
             else {
                 return nil
             }
@@ -142,6 +144,7 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
             let reservationIdString = reservesId.toHex()
 
             return AccountPool(
+                dexId: "",
                 poolId: id,
                 accountId: accountId.toHex(),
                 chainId: chain.chainId,
@@ -194,7 +197,8 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
     }
     
     public func fetchReserves(pools: [LiquidityPair]) async throws -> [PolkaswapPoolReservesInfo] {
-        return try await poolXykStorage.reserves(pairs: pools.compactMap { AssetIdPair(baseAssetIdCode: $0.baseAssetId, targetAssetIdCode: $0.targetAssetId) }, chain: chain)
+        let pairs = pools.compactMap { AssetIdPair(baseAssetIdCode: $0.baseAssetId, targetAssetIdCode: $0.targetAssetId) }
+        return try await poolXykStorage.reserves(pairs: pairs, chain: chain)
     }
     
     public func fetchTotalIssuance(reservesId: AccountId) async throws -> BigUInt {
@@ -209,84 +213,6 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
     
     public func subscribePoolsAPY(poolIds: [String]) async throws -> AsyncThrowingStream<[CachedNetworkResponse<PoolApyInfo>], Swift.Error> {
         return try await apyFetcher.subscribe(poolIds: poolIds)
-    }
-    
-    private func deriveUserPools(
-        continuation: AsyncThrowingStream<CachedStorageResponse<[AccountPool]>, Swift.Error>.Continuation,
-        totalIssuance: [Data: StringScaleMapper<BigUInt>]?,
-        reserves: [AssetIdPair: PolkaswapPoolReserves]?,
-        properties: [AssetIdPair: LiquidityPoolProperties]?,
-        providers: [PoolProvidersStorageKey: StringScaleMapper<BigUInt>]?,
-        accountId: AccountId
-    ) async {
-        guard let totalIssuance, let reserves, let properties, let providers else {
-            return
-        }
-        let pairs: [AssetIdPair] = properties.compactMap { $0.key }
-        let accountPools: [AccountPool] = await pairs.asyncCompactMap { assetPair in
-            let baseAssetId = assetPair.baseAssetId.code
-            let targetAssetId = assetPair.targetAssetId.code
-            let id = "\(baseAssetId)-\(targetAssetId)"
-            let reservesIdKey = AssetIdPair(baseAssetIdCode: baseAssetId, targetAssetIdCode: targetAssetId)
-            let poolProperties = properties[reservesIdKey]
-            
-            guard
-                let baseAsset = chain.assets.first(where: { $0.currencyId == baseAssetId }),
-                let targetAsset = chain.assets.first(where: { $0.currencyId == targetAssetId }),
-                let reservesId = poolProperties?.reservesId
-            else {
-                return nil
-            }
-            let totalIssuance = totalIssuance[reservesId]?.value
-            let reserves = reserves[reservesIdKey]
-        
-            let poolProviderKey = PoolProvidersStorageKey(reservesId: reservesId, accountId: accountId)
-            let accountPoolBalance = providers[poolProviderKey]?.value
-            let totalIssuancesDecimal = Decimal.fromSubstrateAmount(
-                totalIssuance.or(.zero),
-                precision: Int16(baseAsset.precision)
-            ) ?? Decimal(0)
-
-            let reservesDecimal = Decimal.fromSubstrateAmount(
-                reserves?.reserves ?? BigUInt.zero,
-                precision: Int16(baseAsset.precision)
-            ) ?? Decimal(0)
-
-            let accountPoolBalanceDecimal = Decimal.fromSubstrateAmount(
-                accountPoolBalance.or(.zero),
-                precision: Int16(baseAsset.precision)
-            ) ?? Decimal(0)
-
-            let targetAssetPooledTotal = Decimal.fromSubstrateAmount(
-                reserves?.fee ?? BigUInt.zero,
-                precision: Int16(targetAsset.precision)
-            ) ?? Decimal(0)
-
-            let areThereIssuances = totalIssuancesDecimal > 0
-
-            let accountPoolShare = areThereIssuances ? accountPoolBalanceDecimal /
-                totalIssuancesDecimal * 100 : .zero
-            let baseAssetPooled = areThereIssuances ? reservesDecimal * accountPoolBalanceDecimal /
-                totalIssuancesDecimal : .zero
-            let targetAssetPooled = areThereIssuances ? targetAssetPooledTotal *
-                accountPoolBalanceDecimal / totalIssuancesDecimal : .zero
-            let reservationIdString = reservesId.toHex()
-
-            return AccountPool(
-                poolId: id,
-                accountId: accountId.toHex(),
-                chainId: chain.chainId,
-                baseAssetId: baseAssetId,
-                targetAssetId: targetAssetId,
-                baseAssetPooled: baseAssetPooled,
-                targetAssetPooled: targetAssetPooled,
-                accountPoolShare: accountPoolShare,
-                reservesId: reservationIdString
-            )
-        }
-        
-        let response = CachedStorageResponse(value: accountPools, type: .cache)
-        continuation.yield(response)
     }
     
     public func subscribeUserPools(accountId: AccountId) async throws -> AsyncThrowingStream<CachedStorageResponse<[AccountPool]>, Swift.Error> {
@@ -311,6 +237,7 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
                     fetchedDexInfos = dexInfos.value
                     await self.deriveUserPools(
                         continuation: continuation,
+                        dexInfos: fetchedDexInfos,
                         totalIssuance: fetchedTotalIssuance,
                         reserves: fetchedReserves,
                         properties: fetchedProperties,
@@ -326,6 +253,7 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
                         fetchedTotalIssuance = totalIssuance.value
                         await self.deriveUserPools(
                             continuation: continuation,
+                            dexInfos: fetchedDexInfos,
                             totalIssuance: fetchedTotalIssuance,
                             reserves: fetchedReserves,
                             properties: fetchedProperties,
@@ -341,6 +269,7 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
                             fetchedUserPools = userPool.value
                             await self.deriveUserPools(
                                 continuation: continuation,
+                                dexInfos: fetchedDexInfos,
                                 totalIssuance: fetchedTotalIssuance,
                                 reserves: fetchedReserves,
                                 properties: fetchedProperties,
@@ -370,6 +299,7 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
                                 fetchedReserves = reserves.value
                                 await self.deriveUserPools(
                                     continuation: continuation,
+                                    dexInfos: fetchedDexInfos,
                                     totalIssuance: fetchedTotalIssuance,
                                     reserves: fetchedReserves,
                                     properties: fetchedProperties,
@@ -384,6 +314,7 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
                                     fetchedProperties = properties.value
                                     await self.deriveUserPools(
                                         continuation: continuation,
+                                        dexInfos: fetchedDexInfos,
                                         totalIssuance: fetchedTotalIssuance,
                                         reserves: fetchedReserves,
                                         properties: fetchedProperties,
@@ -405,6 +336,7 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
                                         fetchedProviders = providers.value
                                         await self.deriveUserPools(
                                             continuation: continuation,
+                                            dexInfos: fetchedDexInfos,
                                             totalIssuance: fetchedTotalIssuance,
                                             reserves: fetchedReserves,
                                             properties: fetchedProperties,
@@ -537,5 +469,89 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
                 }
             }
         }
+    }
+    
+    // MARK: Private
+    
+    private func deriveUserPools(
+        continuation: AsyncThrowingStream<CachedStorageResponse<[AccountPool]>, Swift.Error>.Continuation,
+        dexInfos : DexInfoByDexId?,
+        totalIssuance: [Data: StringScaleMapper<BigUInt>]?,
+        reserves: [AssetIdPair: PolkaswapPoolReserves]?,
+        properties: [AssetIdPair: LiquidityPoolProperties]?,
+        providers: [PoolProvidersStorageKey: StringScaleMapper<BigUInt>]?,
+        accountId: AccountId
+    ) async {
+        guard let totalIssuance, let reserves, let properties, let providers, let dexInfos else {
+            return
+        }
+        let pairs: [AssetIdPair] = properties.compactMap { $0.key }
+        let accountPools: [AccountPool] = await pairs.asyncCompactMap { assetPair in
+            let baseAssetId = assetPair.baseAssetId.code
+            let targetAssetId = assetPair.targetAssetId.code
+            let id = "\(baseAssetId)-\(targetAssetId)"
+            let reservesIdKey = AssetIdPair(baseAssetIdCode: baseAssetId, targetAssetIdCode: targetAssetId)
+            let poolProperties = properties[reservesIdKey]
+            
+            guard
+                let baseAsset = chain.assets.first(where: { $0.currencyId == baseAssetId }),
+                let targetAsset = chain.assets.first(where: { $0.currencyId == targetAssetId }),
+                let reservesId = poolProperties?.reservesId,
+                let dexId = dexInfos.first(where: { $0.value.baseAssetId.code == assetPair.baseAssetId.code })?.key
+            else {
+                return nil
+            }
+            
+            let totalIssuance = totalIssuance[reservesId]?.value
+            let reserves = reserves[reservesIdKey]
+        
+            let poolProviderKey = PoolProvidersStorageKey(reservesId: reservesId, accountId: accountId)
+            let accountPoolBalance = providers[poolProviderKey]?.value
+            let totalIssuancesDecimal = Decimal.fromSubstrateAmount(
+                totalIssuance.or(.zero),
+                precision: Int16(baseAsset.precision)
+            ) ?? Decimal(0)
+
+            let reservesDecimal = Decimal.fromSubstrateAmount(
+                reserves?.reserves ?? BigUInt.zero,
+                precision: Int16(baseAsset.precision)
+            ) ?? Decimal(0)
+
+            let accountPoolBalanceDecimal = Decimal.fromSubstrateAmount(
+                accountPoolBalance.or(.zero),
+                precision: Int16(baseAsset.precision)
+            ) ?? Decimal(0)
+
+            let targetAssetPooledTotal = Decimal.fromSubstrateAmount(
+                reserves?.fee ?? BigUInt.zero,
+                precision: Int16(targetAsset.precision)
+            ) ?? Decimal(0)
+
+            let areThereIssuances = totalIssuancesDecimal > 0
+
+            let accountPoolShare = areThereIssuances ? accountPoolBalanceDecimal /
+                totalIssuancesDecimal * 100 : .zero
+            let baseAssetPooled = areThereIssuances ? reservesDecimal * accountPoolBalanceDecimal /
+                totalIssuancesDecimal : .zero
+            let targetAssetPooled = areThereIssuances ? targetAssetPooledTotal *
+                accountPoolBalanceDecimal / totalIssuancesDecimal : .zero
+            let reservationIdString = reservesId.toHex()
+
+            return AccountPool(
+                dexId: dexId,
+                poolId: id,
+                accountId: accountId.toHex(),
+                chainId: chain.chainId,
+                baseAssetId: baseAssetId,
+                targetAssetId: targetAssetId,
+                baseAssetPooled: baseAssetPooled,
+                targetAssetPooled: targetAssetPooled,
+                accountPoolShare: accountPoolShare,
+                reservesId: reservationIdString
+            )
+        }
+        
+        let response = CachedStorageResponse(value: accountPools, type: .cache)
+        continuation.yield(response)
     }
 }

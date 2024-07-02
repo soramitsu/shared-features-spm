@@ -30,6 +30,21 @@ public class RequestConfig {
     }
     
     var cacheKey: String? {
-        baseURL.absoluteString
+        var cacheKey = baseURL.absoluteString
+        
+        if let endpoint = endpoint {
+            cacheKey = cacheKey.appending(endpoint)
+        }
+        
+        if let queryItems = queryItems {
+            let queryItemsString = queryItems.compactMap { "\($0.name)-\($0.value.or(""))"}.joined(separator: "-")
+            cacheKey = cacheKey.appending(queryItemsString )
+        }
+        
+        if let body = body, let json = try? JSONDecoder().decode(String.self, from: body) {
+            cacheKey = cacheKey.appending(json)
+        }
+                
+        return cacheKey
     }
 }

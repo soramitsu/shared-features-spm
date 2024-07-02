@@ -1,7 +1,16 @@
 import Foundation
 
 public struct RemoveLiquidityInfo {
-    public init(dexId: String, baseAsset: PooledAssetInfo, targetAsset: PooledAssetInfo, baseAssetAmount: Decimal, targetAssetAmount: Decimal, baseAssetReserves: Decimal, totalIssuances: Decimal, slippage: Decimal) {
+    public init(
+        dexId: String,
+        baseAsset: PooledAssetInfo,
+        targetAsset: PooledAssetInfo,
+        baseAssetAmount: Decimal,
+        targetAssetAmount: Decimal,
+        baseAssetReserves: Decimal,
+        totalIssuances: Decimal,
+        slippage: Decimal
+    ) {
         self.dexId = dexId
         self.baseAsset = baseAsset
         self.targetAsset = targetAsset

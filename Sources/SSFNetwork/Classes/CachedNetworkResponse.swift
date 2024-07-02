@@ -9,13 +9,13 @@ public struct CachedNetworkResponse<T> {
     public var value: T?
     public var type: CachedNetworkResponseType
     
+    public static var empty: CachedNetworkResponse<T> {
+        return CachedNetworkResponse(value: nil, type: .cache)
+    }
+    
     public init(value: T?, type: CachedNetworkResponseType) {
         self.value = value
         self.type = type
-    }
-    
-    public static var empty: CachedNetworkResponse<T> {
-        return CachedNetworkResponse(value: nil, type: .cache)
     }
     
     public func merge(with previous: CachedNetworkResponse<T>?, priorityType: CachedNetworkResponseType) -> CachedNetworkResponse<T> {

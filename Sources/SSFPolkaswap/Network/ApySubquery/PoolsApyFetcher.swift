@@ -24,7 +24,7 @@ final class PoolsApyFetcherDefault: PoolsApyFetcher {
         var allApyInfosFetched: Bool = false
 
         while !allApyInfosFetched {
-            let response = try await loadNewApyInfos(apyInfos: apyInfos, poolIds: poolIds, cursor: cursor)
+            let response = try await loadNewApyInfos(poolIds: poolIds, cursor: cursor)
             apyInfos = apyInfos + response.nodes
             allApyInfosFetched = response.pageInfo.hasNextPage.or(false) == false
             cursor = response.pageInfo.endCursor.or("")
@@ -36,17 +36,15 @@ final class PoolsApyFetcherDefault: PoolsApyFetcher {
     func subscribe(poolIds: [String]) async throws -> AsyncThrowingStream<[CachedNetworkResponse<PoolApyInfo>], Error> {
         AsyncThrowingStream<[CachedNetworkResponse<PoolApyInfo>], Error> { continuation in
             Task {
-                
                 var apyInfos: [CachedNetworkResponse<PoolApyInfo>] = []
                 var cursor: String = ""
                 var allApyInfosFetched: Bool = false
                 
-                let stream = try await subscribeNewApyInfos(apyInfos: apyInfos.compactMap { $0.value }, poolIds: poolIds, cursor: cursor)
+                let stream = try await subscribeNewApyInfos(poolIds: poolIds, cursor: cursor)
                 
                 for try await newApyInfosPage in stream {
                     let newApyInfos = newApyInfosPage.value?.nodes.compactMap { CachedNetworkResponse(value: $0, type: newApyInfosPage.type) }
                     apyInfos = apyInfos + newApyInfos.or([])
-                    
                     allApyInfosFetched = (newApyInfosPage.value?.pageInfo.hasNextPage).or(false) == false
                     cursor = (newApyInfosPage.value?.pageInfo.endCursor).or("")
                     
@@ -55,15 +53,12 @@ final class PoolsApyFetcherDefault: PoolsApyFetcher {
                     }
                 }
                 
-                
-                
                 continuation.yield(apyInfos)
             }
         }
     }
     
     private func subscribeNewApyInfos(
-        apyInfos _: [PoolApyInfo],
         poolIds: [String],
         cursor: String
     ) async throws -> AsyncThrowingStream<CachedNetworkResponse<SoraSubqueryApyInfoPage>, Error> {
@@ -77,7 +72,7 @@ final class PoolsApyFetcherDefault: PoolsApyFetcher {
                     baseURL: url,
                     query: queryString(poolIds: poolIds, cursor: cursor)
                 )
-                let worker = NetworkWorker()
+                let worker = NetworkWorkerImpl()
                 let stream: AsyncThrowingStream<CachedNetworkResponse<GraphQLResponse<SoraSubqueryApyInfoResponse>>, Error> = await worker.performRequest(with: request, withCacheOptions: .onAll)
                 
                 
@@ -99,7 +94,6 @@ final class PoolsApyFetcherDefault: PoolsApyFetcher {
     }
 
     private func loadNewApyInfos(
-        apyInfos _: [PoolApyInfo],
         poolIds: [String],
         cursor: String
     ) async throws -> SoraSubqueryApyInfoPage {
@@ -111,7 +105,7 @@ final class PoolsApyFetcherDefault: PoolsApyFetcher {
             baseURL: url,
             query: queryString(poolIds: poolIds, cursor: cursor)
         )
-        let worker = NetworkWorker()
+        let worker = NetworkWorkerImpl()
         let response: GraphQLResponse<SoraSubqueryApyInfoResponse> = try await worker.performRequest(with: request)
 
         switch response {
