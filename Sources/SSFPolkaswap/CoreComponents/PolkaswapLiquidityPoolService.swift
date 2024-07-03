@@ -230,10 +230,15 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
                 var fetchedProviders: [PoolProvidersStorageKey: StringScaleMapper<BigUInt>]?
                 
                 for try await (dexInfos) in (dexInfosStream) {
-                    guard fetchedDexInfos != dexInfos.value else {
-                        return
+                    if
+                        dexInfos.value != nil && fetchedDexInfos != nil,
+                            dexInfos.value?.isEmpty == false,
+                            fetchedDexInfos?.isEmpty == false,
+                            fetchedDexInfos == dexInfos.value
+                    {
+                        continue
                     }
-                    
+                   
                     fetchedDexInfos = dexInfos.value
                     await self.deriveUserPools(
                         continuation: continuation,
@@ -246,8 +251,13 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
                     )
                     
                     for try await totalIssuance in totalIssuanceStream {
-                        guard fetchedTotalIssuance != totalIssuance.value else {
-                            return
+                        if
+                            totalIssuance.value != nil && fetchedTotalIssuance != nil,
+                                totalIssuance.value?.isEmpty == false,
+                                fetchedTotalIssuance?.isEmpty == false,
+                                fetchedTotalIssuance == totalIssuance.value
+                        {
+                            continue
                         }
                         
                         fetchedTotalIssuance = totalIssuance.value
@@ -262,8 +272,13 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
                         )
                         
                         for try await userPool in userPoolsStream {
-                            guard fetchedUserPools != userPool.value else {
-                                return
+                            print("Received user pools: ", userPool.value)
+                            if
+                                userPool.value != nil && fetchedUserPools != nil,
+                                userPool.value?.isEmpty == false,
+                                fetchedUserPools?.isEmpty == false,
+                                fetchedUserPools == userPool.value {
+                                continue
                             }
                             
                             fetchedUserPools = userPool.value
@@ -278,7 +293,7 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
                             )
                             
                             guard let fetchedUserPools else {
-                                return
+                                continue
                             }
                             
                             
@@ -288,12 +303,20 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
                                 }
                             }.reduce([], +)
                             
+                            guard !assetIdPairs.isEmpty else {
+                                continue
+                            }
+                            
                             let propertiesStream = try await self.poolXykStorage.subscribeProperties(pairs: assetIdPairs, chain: self.chain)
                             let reservesStream = try await self.poolXykStorage.subscribePoolsReserves(pairs: assetIdPairs, chain: self.chain)
                             
                             for try await reserves in reservesStream {
-                                guard fetchedReserves != reserves.value else {
-                                    return
+                                if
+                                    reserves.value != nil && fetchedReserves != nil,
+                                    reserves.value?.isEmpty == false,
+                                    fetchedReserves?.isEmpty == false,
+                                        fetchedReserves == reserves.value {
+                                    continue
                                 }
                                 
                                 fetchedReserves = reserves.value
@@ -307,8 +330,13 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
                                     accountId: accountId
                                 )
                                 for try await properties in propertiesStream {
-                                    guard fetchedProperties != properties.value else {
-                                        return
+                                    if
+                                        properties.value != nil && fetchedProperties != nil,
+                                        properties.value?.isEmpty == false,
+                                        fetchedProperties?.isEmpty == false,
+                                            fetchedProperties == properties.value
+                                    {
+                                        continue
                                     }
                                     
                                     fetchedProperties = properties.value
@@ -323,14 +351,23 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
                                     )
                                     
                                     guard let fetchedProperties else {
-                                        return
+                                        continue
                                     }
                                     
-                                    let providersStream = try await self.poolXykStorage.subscribePoolProviders(properties: fetchedProperties.compactMap { $0.value }, accountId: accountId, chain: self.chain)
+                                    let propertiesParameters = fetchedProperties.compactMap { $0.value }
+                                    guard !propertiesParameters.isEmpty else {
+                                        continue
+                                    }
+                                    
+                                    let providersStream = try await self.poolXykStorage.subscribePoolProviders(properties: propertiesParameters, accountId: accountId, chain: self.chain)
                                     
                                     for try await providers in providersStream {
-                                        guard fetchedProviders != providers.value else {
-                                            return
+                                        if
+                                            providers.value != nil && fetchedProviders != nil,
+                                            providers.value?.isEmpty == false,
+                                            fetchedProviders?.isEmpty == false,
+                                                fetchedProviders == providers.value {
+                                            continue
                                         }
                                         
                                         fetchedProviders = providers.value
@@ -357,7 +394,7 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
     public func subscribeAvailablePools() async throws -> AsyncThrowingStream<CachedStorageResponse<[LiquidityPair]>, Swift.Error> {
         AsyncThrowingStream<CachedStorageResponse<[LiquidityPair]>, Swift.Error> { continuation in
             Task {
-                let dexInfosStream = try await dexManagerStorage.subscribeDexInfos(chain: chain)
+                let dexInfosStream = await dexManagerStorage.subscribeDexInfos(chain: chain)
                 
                 for try await dexInfo in dexInfosStream {
                     guard let dexInfo = dexInfo.value else {

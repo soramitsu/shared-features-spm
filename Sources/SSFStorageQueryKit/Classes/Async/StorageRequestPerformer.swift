@@ -103,7 +103,7 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         AsyncThrowingStream<CachedStorageResponse<T>, Error> { continuation in
             Task {
                 if withCacheOptions == .onAll || withCacheOptions.isEmpty {
-                    try await getCacheSingleValue(for: request, with: continuation, chain: chain)
+                    try? await getCacheSingleValue(for: request, with: continuation, chain: chain)
                     let value: T? = try await performSingle(request, chain: chain)
                     let response = CachedStorageResponse(value: value, type: .remote)
                     continuation.yield(response)
@@ -168,7 +168,7 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         AsyncThrowingStream<CachedStorageResponse<[K:T]>, Error> { continuation in
             Task {
                 if withCacheOptions == .onAll || withCacheOptions.isEmpty {
-                    try await getCacheMultipleValue(for: request, with: continuation, chain: chain)
+                    try? await getCacheMultipleValue(for: request, with: continuation, chain: chain)
                     let value: [K:T]? = try await performMultiple(request, chain: chain)
                     let response = CachedStorageResponse(value: value, type: .remote)
                     continuation.yield(response)
@@ -234,7 +234,7 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         return AsyncThrowingStream<CachedStorageResponse<[K:T]>, Error> { continuation in
             Task {
                 if withCacheOptions == .onAll || withCacheOptions.isEmpty {
-                    try await getCachePagedValue(for: request, with: continuation, chain: chain)
+                    try? await getCachePagedValue(for: request, with: continuation, chain: chain)
                     let value: [K:T]? = try await performPrefix(request, chain: chain)
                     let response = CachedStorageResponse(value: value, type: .remote)
                     continuation.yield(response)
@@ -296,7 +296,7 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         with continuation: AsyncThrowingStream<CachedStorageResponse<T>, Error>.Continuation,
         chain: ChainModel
     ) async throws {
-        let cache: [Data:T]? = try await getCache(
+        let cache: [Data:T]? = try? await getCache(
             params: request.parametersType.workerType,
             storagePath: request.storagePath,
             chain: chain
@@ -320,7 +320,7 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         )
         let keyExtractor = StorageKeyDataExtractor(runtimeService: runtimeService)
 
-        let cache: [Data:T]? = try await getCache(
+        let cache: [Data:T]? = try? await getCache(
             params: request.parametersType.workerType,
             storagePath: request.storagePath,
             chain: chain
@@ -354,7 +354,7 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         )
         let keyExtractor = StorageKeyDataExtractor(runtimeService: runtimeService)
         
-        let cache: [Data:T]? = try await getCache(
+        let cache: [Data:T]? = try? await getCache(
             params: request.parametersType.workerType,
             storagePath: request.storagePath,
             chain: chain
