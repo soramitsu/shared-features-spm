@@ -46,6 +46,41 @@ public enum DataProviderChange<T> {
     }
 }
 
+enum DataProviderDiff<T> {
+    /// New items has been added.
+    /// Item is passed as associated value.
+    case insert(newItem: T)
+
+    /// Existing item has been updated
+    /// Item is passed as associated value.
+    case update(newItem: T)
+
+    /// New remote items.
+    case remote(newItem: T)
+
+    /// Existing local item
+    case local(newItem: T)
+    
+    /// Existing item has been removed.
+    /// Identifier of the item is passed as associated value.
+    case delete(deletedIdentifier: String)
+
+    var item: T? {
+        switch self {
+        case let .remote(newItem):
+            return newItem
+        case let .local(newItem):
+            return nil
+        case .delete:
+            return nil
+        case let .insert(newItem):
+            return newItem
+        case let .update(newItem):
+            return newItem
+        }
+    }
+}
+
 /**
  *  Struct designed to store options needed to describe how an observer should be handled by data provider.
  */
@@ -64,6 +99,12 @@ public struct DataProviderObserverOptions {
     /// observer's local data and persistent data if a repository doesn't have any synchronization
     /// mechanism.
     public var waitsInProgressSyncOnAdd: Bool
+    
+    /// Asks data provider to notify observer if no difference from remote.
+    /// If this value is `false` (default value) then observer is only notified when
+    /// there are difference from remote source.
+    /// if this value is `true` and no diff observer will notify with local source values
+    public var notifyIfNoDiff: Bool
 
     /// - parameters:
     ///    - alwaysNotifyOnRefresh: Asks data provider to notify observer in any case after
@@ -80,10 +121,12 @@ public struct DataProviderObserverOptions {
 
     public init(
         alwaysNotifyOnRefresh: Bool = false,
-        waitsInProgressSyncOnAdd: Bool = true
+        waitsInProgressSyncOnAdd: Bool = true,
+        notifyIfNoDiff: Bool = false
     ) {
         self.alwaysNotifyOnRefresh = alwaysNotifyOnRefresh
         self.waitsInProgressSyncOnAdd = waitsInProgressSyncOnAdd
+        self.notifyIfNoDiff = notifyIfNoDiff
     }
 }
 

@@ -193,9 +193,9 @@ extension SingleValueProvider {
         dependingOn sourceOperation: BaseOperation<T?>,
         repositoryOperation: BaseOperation<SingleValueProviderObject?>
     )
-        -> BaseOperation<DataProviderChange<T>?>
+        -> BaseOperation<DataProviderDiff<T>?>
     {
-        let operation = ClosureOperation<DataProviderChange<T>?> {
+        let operation = ClosureOperation<DataProviderDiff<T>?> {
             guard let sourceResult = sourceOperation.result else {
                 throw DataProviderError.unexpectedSourceResult
             }
@@ -231,7 +231,7 @@ extension SingleValueProvider {
     }
 
     private func createSaveRepositoryOperation(
-        dependingOn differenceOperation: BaseOperation<DataProviderChange<T>?>
+        dependingOn differenceOperation: BaseOperation<DataProviderDiff<T>?>
     )
         -> BaseOperation<Void>
     {
@@ -283,14 +283,34 @@ extension SingleValueProvider {
         return operation
     }
 
-    private func notifyObservers(with update: DataProviderChange<T>?) {
+    private func notifyObservers(with update: DataProviderDiff<T>?) {
         for repositoryObserver in observers {
             if repositoryObserver.observer != nil,
                update != nil || repositoryObserver.options.alwaysNotifyOnRefresh
             {
                 dispatchInQueueWhenPossible(repositoryObserver.queue) {
                     if let update = update {
-                        repositoryObserver.updateBlock([update])
+                        switch update {
+                        case .insert(newItem: let newItem):
+                            let change: DataProviderChange<T> = .insert(newItem: newItem)
+                            repositoryObserver.updateBlock([change])
+                        case .update(newItem: let newItem):
+                            let change: DataProviderChange<T> = .update(newItem: newItem)
+                            repositoryObserver.updateBlock([change])
+                        case .remote(newItem: let newItem):
+                            let change: DataProviderChange<T> = .update(newItem: newItem)
+                            repositoryObserver.updateBlock([change])
+                        case .local(newItem: let newItem):
+                            if repositoryObserver.options.notifyIfNoDiff {
+                                let change: DataProviderChange<T> = .update(newItem: newItem)
+                                repositoryObserver.updateBlock([change])
+                            } else {
+                                repositoryObserver.updateBlock([])
+                            }
+                        case .delete(deletedIdentifier: let deletedIdentifier):
+                            let change: DataProviderChange<T> = .delete(deletedIdentifier: deletedIdentifier)
+                            repositoryObserver.updateBlock([change])
+                        }
                     } else {
                         repositoryObserver.updateBlock([])
                     }
@@ -312,12 +332,12 @@ extension SingleValueProvider {
     }
 
     private func findChanges(sourceResult: T?, repositoryResult: SingleValueProviderObject?) throws
-        -> DataProviderChange<T>?
+        -> DataProviderDiff<T>?
     {
         guard let existingSourceResult = sourceResult else {
             if repositoryResult != nil {
                 // no source data or broken, just remove inconsistent local data
-                return DataProviderChange.delete(deletedIdentifier: targetIdentifier)
+                return DataProviderDiff.delete(deletedIdentifier: targetIdentifier)
             } else {
                 return nil
             }
@@ -325,7 +345,7 @@ extension SingleValueProvider {
 
         guard let existingRepositoryResult = repositoryResult else {
             // new data received and no local data, so insert new one
-            return DataProviderChange.insert(newItem: existingSourceResult)
+            return DataProviderDiff.insert(newItem: existingSourceResult)
         }
 
         guard let existingLocalValue = try? decoder.decode(
@@ -333,14 +353,14 @@ extension SingleValueProvider {
             from: existingRepositoryResult.payload
         ) else {
             // local data is broken but remote one is ok, so just update local one
-            return DataProviderChange.update(newItem: existingSourceResult)
+            return DataProviderDiff.update(newItem: existingSourceResult)
         }
 
         if existingSourceResult != existingLocalValue {
             // remote data change so update local one
-            return DataProviderChange.update(newItem: existingSourceResult)
+            return DataProviderDiff.remote(newItem: existingSourceResult)
         } else {
-            return nil
+            return DataProviderDiff.local(newItem: existingLocalValue)
         }
     }
 }
