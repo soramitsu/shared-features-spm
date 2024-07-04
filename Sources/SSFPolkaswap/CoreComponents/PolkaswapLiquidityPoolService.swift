@@ -272,7 +272,6 @@ extension PolkaswapLiquidityPoolServiceDefault: PolkaswapLiquidityPoolService {
                         )
                         
                         for try await userPool in userPoolsStream {
-                            print("Received user pools: ", userPool.value)
                             if
                                 userPool.value != nil && fetchedUserPools != nil,
                                 userPool.value?.isEmpty == false,
