@@ -157,15 +157,12 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
     private func updateConnection(
         with url: URL
     ) {
-        guard currentUrl != url else {
+        guard currentUrl != url, let currentWebScoketConnection = self.currentConnection as? WebSocket else {
             return
         }
         let request = URLRequest(url: url, timeoutInterval: timeout)
-        let engine = WSEngine(transport: TCPTransport(), certPinner: FoundationSecurity())
-        let connection = WebSocket(request: request, engine: engine)
-        connection.callbackQueue = callbackQueue
-        connection.delegate = webSocketEngine
-        currentConnection = connection
+        currentWebScoketConnection.request = request
+        currentConnection = currentWebScoketConnection
         currentUrl = url
     }
 }
