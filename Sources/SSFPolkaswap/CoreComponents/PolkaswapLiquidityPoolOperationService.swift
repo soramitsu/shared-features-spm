@@ -64,11 +64,11 @@ extension PolkaswapLiquidityPoolOperationService: PoolsOperationService {
                 return
             }
 
-            self.extrisicService.submit(
+            self.extrisicService.submitAndWatch(
                 closure,
                 signer: self.signingWrapper,
                 runningIn: .global(),
-                completion: { result in
+                completion: { result, hash in
                     switch result {
                     case let .success(hash):
                         continuation.resume(returning: hash)
@@ -89,11 +89,11 @@ extension PolkaswapLiquidityPoolOperationService: PoolsOperationService {
                 return
             }
 
-            self.extrisicService.submit(
+            self.extrisicService.submitAndWatch(
                 closure,
                 signer: self.signingWrapper,
                 runningIn: .global(),
-                completion: { result in
+                completion: { result, hash in
                     switch result {
                     case let .success(hash):
                         continuation.resume(returning: hash)
