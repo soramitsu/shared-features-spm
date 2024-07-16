@@ -56,7 +56,7 @@ public final class AccountRepositoryFactory: AccountRepositoryFactoryProtocol {
 
 extension AccountRepositoryFactory {
     static func createRepository(
-        for storageFacade: StorageFacadeProtocol = UserDataStorageFacade.shared
+        for storageFacade: StorageFacadeProtocol
     ) -> AnyDataProviderRepository<MetaAccountModel> {
         let mapper = MetaAccountMapper()
         let repository = storageFacade.createRepository(mapper: AnyCoreDataMapper(mapper))
