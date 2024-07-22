@@ -10,6 +10,22 @@ public struct MetaAccountImportMnemonicRequest {
     let ethereumDerivationPath: String
     let cryptoType: CryptoType
     let defaultChainId: ChainModel.Id?
+
+    public init(
+        mnemonic: IRMnemonicProtocol,
+        username: String,
+        substrateDerivationPath: String,
+        ethereumDerivationPath: String,
+        cryptoType: CryptoType,
+        defaultChainId: ChainModel.Id?
+    ) {
+        self.mnemonic = mnemonic
+        self.username = username
+        self.substrateDerivationPath = substrateDerivationPath
+        self.ethereumDerivationPath = ethereumDerivationPath
+        self.cryptoType = cryptoType
+        self.defaultChainId = defaultChainId
+    }
 }
 
 public struct MetaAccountImportSeedRequest {
@@ -19,6 +35,22 @@ public struct MetaAccountImportSeedRequest {
     let substrateDerivationPath: String
     let ethereumDerivationPath: String?
     let cryptoType: CryptoType
+
+    public init(
+        substrateSeed: String,
+        ethereumSeed: String?,
+        username: String,
+        substrateDerivationPath: String,
+        ethereumDerivationPath: String?,
+        cryptoType: CryptoType
+    ) {
+        self.substrateSeed = substrateSeed
+        self.ethereumSeed = ethereumSeed
+        self.username = username
+        self.substrateDerivationPath = substrateDerivationPath
+        self.ethereumDerivationPath = ethereumDerivationPath
+        self.cryptoType = cryptoType
+    }
 }
 
 public struct MetaAccountImportKeystoreRequest {
@@ -28,6 +60,22 @@ public struct MetaAccountImportKeystoreRequest {
     let ethereumPassword: String?
     let username: String
     let cryptoType: CryptoType
+
+    public init(
+        substrateKeystore: String,
+        ethereumKeystore: String?,
+        substratePassword: String,
+        ethereumPassword: String?,
+        username: String,
+        cryptoType: CryptoType
+    ) {
+        self.substrateKeystore = substrateKeystore
+        self.ethereumKeystore = ethereumKeystore
+        self.substratePassword = substratePassword
+        self.ethereumPassword = ethereumPassword
+        self.username = username
+        self.cryptoType = cryptoType
+    }
 }
 
 public enum MetaAccountImportRequestSource {
@@ -52,6 +100,18 @@ public enum MetaAccountImportRequestSource {
         let ethereumSeed: String?
         let substrateDerivationPath: String
         let ethereumDerivationPath: String?
+
+        public init(
+            substrateSeed: String,
+            ethereumSeed: String?,
+            substrateDerivationPath: String,
+            ethereumDerivationPath: String?
+        ) {
+            self.substrateSeed = substrateSeed
+            self.ethereumSeed = ethereumSeed
+            self.substrateDerivationPath = substrateDerivationPath
+            self.ethereumDerivationPath = ethereumDerivationPath
+        }
     }
 
     public struct KeystoreImportRequestData {
@@ -59,6 +119,18 @@ public enum MetaAccountImportRequestSource {
         let ethereumKeystore: String?
         let substratePassword: String
         let ethereumPassword: String?
+
+        public init(
+            substrateKeystore: String,
+            ethereumKeystore: String?,
+            substratePassword: String,
+            ethereumPassword: String?
+        ) {
+            self.substrateKeystore = substrateKeystore
+            self.ethereumKeystore = ethereumKeystore
+            self.substratePassword = substratePassword
+            self.ethereumPassword = ethereumPassword
+        }
     }
 
     case mnemonic(data: MnemonicImportRequestData)
