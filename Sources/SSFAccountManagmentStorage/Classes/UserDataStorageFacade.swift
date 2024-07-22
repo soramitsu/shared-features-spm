@@ -4,7 +4,7 @@ import RobinHood
 import SSFUtils
 
 public enum UserStorageParams {
-    static let modelVersion: UserStorageVersion = .version11
+    static let modelVersion: UserStorageVersion = .version12
     static let modelDirectory: String = "UserDataModel.momd"
     static let databaseName = "UserDataModel.sqlite"
     public static let momURL = Bundle.module.url(
@@ -33,7 +33,7 @@ public class UserDataStorageFacade: StorageFacadeProtocol {
 
     private init() {
         let modelName = UserStorageParams.modelVersion.rawValue
-        let bundle = Bundle(for: UserDataStorageFacade.self)
+        let bundle = Bundle.module
 
         let omoURL = bundle.url(
             forResource: modelName,

@@ -20,6 +20,10 @@ public protocol AccountImportable {
     func importMetaAccount(request: MetaAccountImportRequest) async throws -> MetaAccountModel
 }
 
+public protocol AccountCreatable {
+    func createNewMetaAccount() async throws -> MetaAccountModel
+}
+
 public final class AccountImportService {
     private let accountRepository: AnyDataProviderRepository<MetaAccountModel>
     private let accountOperationFactory: MetaAccountOperationFactoryProtocol
@@ -45,6 +49,83 @@ public final class AccountImportService {
         self.operationManager = operationManager
         self.mnemonicCreator = mnemonicCreator
         self.selectedWallet = selectedWallet
+    }
+
+    private func saveOperation(
+        with item: MetaAccountModel,
+        continuation: UnsafeContinuation<MetaAccountModel, Error>
+    ) {
+        let checkOperation = accountRepository.fetchOperation(
+            by: item.identifier,
+            options: RepositoryFetchOptions()
+        )
+
+        let saveOperation: ClosureOperation<MetaAccountModel> = ClosureOperation { [weak self] in
+            if try checkOperation
+                .extractResultData(throwing: BaseOperationError.parentOperationCancelled) != nil
+            {
+                throw CreateAccountError.duplicated
+            }
+
+            self?.selectedWallet.save(value: item)
+            return item
+        }
+
+        saveOperation.addDependency(checkOperation)
+        operationManager.enqueue(operations: [checkOperation, saveOperation], in: .transient)
+
+        saveOperation.completionBlock = { [weak self] in
+            DispatchQueue.main.async {
+                switch saveOperation.result {
+                case .success:
+                    self?.selectedWallet.setup()
+                    continuation.resume(returning: item)
+
+                case let .failure(error):
+                    continuation.resume(throwing: error)
+                case .none:
+                    let error = BaseOperationError.parentOperationCancelled
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+}
+
+extension AccountImportService: AccountCreatable {
+    public func createNewMetaAccount() async throws -> MetaAccountModel {
+        guard let mnemonic = try? mnemonicCreator.randomMnemonic(strength: .entropy128) else {
+            throw CreateAccountError.invalidMnemonicFormat
+        }
+
+        let request = MetaAccountImportMnemonicRequest(
+            mnemonic: mnemonic,
+            username: "New wallet",
+            substrateDerivationPath: "",
+            ethereumDerivationPath: "",
+            cryptoType: .sr25519,
+            defaultChainId: nil
+        )
+        let operation = accountOperationFactory.newMetaAccountOperation(
+            mnemonicRequest: request,
+            isBackuped: true
+        )
+        operationManager.enqueue(operations: [operation], in: .transient)
+
+        return try await withUnsafeThrowingContinuation { continuation in
+            operation.completionBlock = { [weak self] in
+                switch operation.result {
+                case let .success(accountItem):
+                    self?.saveOperation(with: accountItem, continuation: continuation)
+
+                case let .failure(error):
+                    continuation.resume(throwing: error)
+                case .none:
+                    let error = BaseOperationError.parentOperationCancelled
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
     }
 }
 
@@ -105,46 +186,6 @@ extension AccountImportService: AccountImportable {
                 switch operation.result {
                 case let .success(accountItem):
                     self?.saveOperation(with: accountItem, continuation: continuation)
-
-                case let .failure(error):
-                    continuation.resume(throwing: error)
-                case .none:
-                    let error = BaseOperationError.parentOperationCancelled
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
-    }
-
-    func saveOperation(
-        with item: MetaAccountModel,
-        continuation: UnsafeContinuation<MetaAccountModel, Error>
-    ) {
-        let checkOperation = accountRepository.fetchOperation(
-            by: item.identifier,
-            options: RepositoryFetchOptions()
-        )
-
-        let saveOperation: ClosureOperation<MetaAccountModel> = ClosureOperation { [weak self] in
-            if try checkOperation
-                .extractResultData(throwing: BaseOperationError.parentOperationCancelled) != nil
-            {
-                throw CreateAccountError.duplicated
-            }
-
-            self?.selectedWallet.save(value: item)
-            return item
-        }
-
-        saveOperation.addDependency(checkOperation)
-        operationManager.enqueue(operations: [checkOperation, saveOperation], in: .transient)
-
-        saveOperation.completionBlock = { [weak self] in
-            DispatchQueue.main.async {
-                switch saveOperation.result {
-                case .success:
-                    self?.selectedWallet.setup()
-                    continuation.resume(returning: item)
 
                 case let .failure(error):
                     continuation.resume(throwing: error)
