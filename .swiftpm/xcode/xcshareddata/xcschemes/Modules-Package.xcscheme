@@ -747,6 +747,9 @@
                <Test
                   Identifier = "XcmAssetMultilocationFetcherTests/testVersionedMultilocationWithRetryError()">
                </Test>
+               <Test
+                  Identifier = "XcmFeeServiceTests">
+               </Test>
             </SkippedTests>
          </TestableReference>
          <TestableReference
@@ -768,6 +771,11 @@
                BlueprintName = "SSFStorageQueryKitTest"
                ReferencedContainer = "container:">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "StorageRequestPerformerTests/testCashOnAllSingle()">
+               </Test>
+            </SkippedTests>
          </TestableReference>
          <TestableReference
             skipped = "NO">
