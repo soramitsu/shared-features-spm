@@ -1,12 +1,13 @@
 import Foundation
 
-public class RequestConfig {
-    public let baseURL: URL
-    public let method: HTTPMethod
-    public let endpoint: String?
+open class RequestConfig {
+    public var baseURL: URL
+    public var method: HTTPMethod
+    public var endpoint: String?
     public var queryItems: [URLQueryItem]?
     public var headers: [HTTPHeader]?
     public var body: Data?
+    public var timeout: TimeInterval?
 
     public var requestType: NetworkRequestType = .plain
     public var signingType: RequestSigningType = .none
@@ -19,7 +20,8 @@ public class RequestConfig {
         endpoint: String?,
         queryItems: [URLQueryItem]? = nil,
         headers: [HTTPHeader]?,
-        body: Data?
+        body: Data?,
+        timeout: TimeInterval? = nil
     ) {
         self.baseURL = baseURL
         self.method = method
@@ -27,9 +29,10 @@ public class RequestConfig {
         self.queryItems = queryItems
         self.headers = headers
         self.body = body
+        self.timeout = timeout
     }
     
-    var cacheKey: String {
+    open var cacheKey: String {
         var cacheKey = baseURL.absoluteString
         
         if let endpoint = endpoint {
