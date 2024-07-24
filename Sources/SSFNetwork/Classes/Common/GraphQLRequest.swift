@@ -26,7 +26,7 @@ public class GraphQLRequest: RequestConfig {
         )
     }
     
-    override var cacheKey: String {
+    public override var cacheKey: String {
         guard
             let body,
             let json = try? JSONDecoder().decode(JSON.self, from: body),

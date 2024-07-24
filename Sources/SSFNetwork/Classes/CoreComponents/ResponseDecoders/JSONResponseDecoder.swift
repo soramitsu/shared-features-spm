@@ -1,17 +1,17 @@
 import Foundation
 
-enum JSONResponseDecoderError: Error {
+public enum JSONResponseDecoderError: Error {
     case typeNotDecodable
 }
 
-final class JSONResponseDecoder: ResponseDecoder {
-    private let jsonDecoder: JSONDecoder
+open class JSONResponseDecoder: ResponseDecoder {
+    let jsonDecoder: JSONDecoder
 
     init(jsonDecoder: JSONDecoder = JSONDecoder()) {
         self.jsonDecoder = jsonDecoder
     }
 
-    func decode<T>(data: Data) throws -> T {
+    open func decode<T>(data: Data) throws -> T {
         guard let type = T.self as? Decodable.Type else {
             throw JSONResponseDecoderError.typeNotDecodable
         }

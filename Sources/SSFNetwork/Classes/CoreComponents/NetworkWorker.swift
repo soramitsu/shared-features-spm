@@ -5,6 +5,7 @@ import SSFSingleValueCache
 import SSFUtils
 
 public protocol NetworkWorker {
+    func fetchCached<T: Decodable>(with config: RequestConfig) async throws -> T?
     func performRequest<T>(with config: RequestConfig) async throws -> T
     
     func performRequest<T: Decodable>(
@@ -13,12 +14,17 @@ public protocol NetworkWorker {
     ) async -> AsyncThrowingStream<CachedNetworkResponse<T>, Error>
 }
 
-public final class NetworkWorkerImpl {
+public final class NetworkWorkerImpl: NetworkWorker {
     public init() {}
     
     private lazy var cacheStorage: AsyncSingleValueRepository = {
         SingleValueCacheRepositoryFactoryDefault().createAsyncSingleValueCacheRepository()
     }()
+    
+    public func fetchCached<T: Decodable>(with config: RequestConfig) async throws -> T? {
+        let cached: T? = try await getCache(config: config)
+        return cached
+    }
     
     public func performRequest<T>(with config: RequestConfig) async throws -> T {
         let requestConfigurator = try BaseRequestConfiguratorFactory().buildRequestConfigurator(with: config.requestType, baseURL: config.baseURL)
@@ -52,10 +58,14 @@ public final class NetworkWorkerImpl {
                         continuation.yield(response)
                     }
                     
-                    let value: T? = try await performRequest(with: config)
-                    let response = CachedNetworkResponse(value: value, type: .remote)
-                    continuation.yield(response)
-                    continuation.finish()
+                    do {
+                        let value: T? = try await performRequest(with: config)
+                        let response = CachedNetworkResponse(value: value, type: .remote)
+                        continuation.yield(response)
+                        continuation.finish()
+                    } catch {
+                        continuation.yield(with: .failure(error))
+                    }
                     return
                 }
                 if withCacheOptions.contains(.onCache) {
@@ -88,7 +98,8 @@ public final class NetworkWorkerImpl {
 
          let caches = cache.compactMap {
             let item: [Data:T]? = try? decode(
-                object: $0
+                object: $0,
+                request: config
             )
             return item
         }
@@ -98,14 +109,22 @@ public final class NetworkWorkerImpl {
     }
 
     private func decode<T: Decodable>(
-        object: SingleValueProviderObject
+        object: SingleValueProviderObject,
+        request: RequestConfig
     ) throws -> [Data:T]? {
         guard let key = object.identifier.data(using: .utf8) else {
             throw NetworkingError.unableToParseResponse
         }
 
-       
-        let value = try JSONDecoder().decode(T.self, from: object.payload)
+        var decoder: JSONDecoder
+        switch request.decoderType {
+        case let .codable(jsonDecoder):
+            decoder = jsonDecoder
+        default:
+            decoder = JSONDecoder()
+        }
+        
+        let value = try decoder.decode(T.self, from: object.payload)
         return [key: value]
     }
 

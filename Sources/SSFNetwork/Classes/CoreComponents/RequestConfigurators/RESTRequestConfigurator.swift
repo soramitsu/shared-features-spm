@@ -24,6 +24,10 @@ final class RESTRequestConfigurator: RequestConfigurator {
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = config.method.rawValue
         urlRequest.httpBody = config.body
+        
+        if let timeout = config.timeout {
+            urlRequest.timeoutInterval = timeout
+        }
 
         config.headers?.forEach {
             urlRequest.addValue($0.value, forHTTPHeaderField: $0.field)
