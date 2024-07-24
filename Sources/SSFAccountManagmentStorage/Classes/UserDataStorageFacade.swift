@@ -3,6 +3,10 @@ import Foundation
 import RobinHood
 import SSFUtils
 
+enum UserDataStorageFacadeError: Error {
+    case unexpectedError
+}
+
 public enum UserStorageParams {
     static let modelVersion: UserStorageVersion = .version12
     static let modelDirectory: String = "UserDataModel.momd"
@@ -28,26 +32,15 @@ public enum UserStorageParams {
 
 public class UserDataStorageFacade: StorageFacadeProtocol {
     public static let shared = UserDataStorageFacade()
-
     public let databaseService: CoreDataServiceProtocol
 
-    private init() {
-        let modelName = UserStorageParams.modelVersion.rawValue
-        let bundle = Bundle.module
-
-        let omoURL = bundle.url(
-            forResource: modelName,
-            withExtension: "omo",
-            subdirectory: UserStorageParams.modelDirectory
-        )
-
-        let momURL = bundle.url(
-            forResource: modelName,
-            withExtension: "mom",
-            subdirectory: UserStorageParams.modelDirectory
-        )
-
-        let modelURL = omoURL ?? momURL
+    public init?() {
+        guard let modelURL = Bundle.module.url(
+            forResource: "UserDataModel",
+            withExtension: "momd"
+        ) else {
+            return nil
+        }
 
         let persistentSettings = CoreDataPersistentSettings(
             databaseDirectory: UserStorageParams.storageDirectoryURL,
@@ -56,7 +49,7 @@ public class UserDataStorageFacade: StorageFacadeProtocol {
         )
 
         let configuration = CoreDataServiceConfiguration(
-            modelURL: modelURL!,
+            modelURL: modelURL,
             storageType: .persistent(settings: persistentSettings)
         )
 
@@ -69,6 +62,19 @@ public class UserDataStorageFacade: StorageFacadeProtocol {
         mapper: AnyCoreDataMapper<T, U>
     ) -> CoreDataRepository<T, U> where T: Identifiable, U: NSManagedObject {
         CoreDataRepository(
+            databaseService: databaseService,
+            mapper: mapper,
+            filter: filter,
+            sortDescriptors: sortDescriptors
+        )
+    }
+
+    public func createAsyncRepository<T, U>(
+        filter: NSPredicate?,
+        sortDescriptors: [NSSortDescriptor],
+        mapper: AnyCoreDataMapper<T, U>
+    ) -> AsyncCoreDataRepositoryDefault<T, U> where T: Identifiable, U: NSManagedObject {
+        AsyncCoreDataRepositoryDefault(
             databaseService: databaseService,
             mapper: mapper,
             filter: filter,

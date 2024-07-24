@@ -10,7 +10,7 @@ public final class SelectedWalletSettings: PersistentValueSettings<MetaAccountMo
     private let managedAccountMapper: AnyCoreDataMapper<ManagedMetaAccountModel, CDMetaAccount>
 
     public init(
-        storageFacade: StorageFacadeProtocol = UserDataStorageFacade.shared,
+        storageFacade: StorageFacadeProtocol,
         operationQueue: OperationQueue = OperationManagerFacade.sharedDefaultQueue,
         metaAccountMapper _: any CoreDataMapperProtocol = MetaAccountMapper(),
         managedAccountMapper _: any CoreDataMapperProtocol = ManagedMetaAccountMapper()
