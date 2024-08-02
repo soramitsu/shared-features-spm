@@ -4,18 +4,18 @@ import SSFModels
 import SSFNetwork
 import SSFUtils
 
-public enum ChainsTypesSyncError: Error {
+public enum ChainTypesRemoteDataFercherError: Error {
     case missingChainId
     case missingData
     case incorrectUrl
 }
 
-public protocol ChainsTypesSyncServiceProtocol {
+public protocol ChainTypesRemoteDataFercherProtocol {
     func syncUp()
     func getTypes(for chainId: ChainModel.Id) async throws -> Data
 }
 
-public final class ChainsTypesSyncService {
+public final class ChainTypesRemoteDataFercher {
     private let url: URL?
     private let dataOperationFactory: NetworkOperationFactoryProtocol
     private let retryStrategy: ReconnectionStrategyProtocol
@@ -55,7 +55,7 @@ public final class ChainsTypesSyncService {
 
     private func fetchRemoteData() async throws -> [String: Data] {
         guard let url = url else {
-            throw ChainsTypesSyncError.incorrectUrl
+            throw ChainTypesRemoteDataFercherError.incorrectUrl
         }
 
         let fetchOperation: BaseOperation<JSON> = dataOperationFactory.fetchData(from: url)
@@ -66,7 +66,7 @@ public final class ChainsTypesSyncService {
                 guard let result = fetchOperation.result,
                       let strongSelf = self else
                 {
-                    self?.handleFailure(with: ChainsTypesSyncError.missingData)
+                    self?.handleFailure(with: ChainTypesRemoteDataFercherError.missingData)
                     return
                 }
 
@@ -94,14 +94,14 @@ public final class ChainsTypesSyncService {
 
     private func prepareVersionedJsons(from json: JSON) throws -> [String: Data] {
         guard let versionedDefinitionJsons = json.arrayValue else {
-            throw ChainsTypesSyncError.missingData
+            throw ChainTypesRemoteDataFercherError.missingData
         }
 
         return try versionedDefinitionJsons.reduce([String: Data]()) { partialResult, json in
             var partialResult = partialResult
 
             guard let chainId = json.chainId?.stringValue else {
-                throw ChainsTypesSyncError.missingChainId
+                throw ChainTypesRemoteDataFercherError.missingChainId
             }
 
             let data = try JSONEncoder().encode(json)
@@ -142,7 +142,7 @@ public final class ChainsTypesSyncService {
 
 // MARK: - SchedulerDelegate
 
-extension ChainsTypesSyncService: SchedulerDelegate {
+extension ChainTypesRemoteDataFercher: SchedulerDelegate {
     public func didTrigger(scheduler _: SchedulerProtocol) {
         mutex.lock()
 
@@ -154,9 +154,9 @@ extension ChainsTypesSyncService: SchedulerDelegate {
     }
 }
 
-// MARK: - ChainsTypesSyncServiceProtocol
+// MARK: - ChainTypesRemoteDataFercherProtocol
 
-extension ChainsTypesSyncService: ChainsTypesSyncServiceProtocol {
+extension ChainTypesRemoteDataFercher: ChainTypesRemoteDataFercherProtocol {
     public func syncUp() {
         mutex.lock()
 
@@ -178,7 +178,7 @@ extension ChainsTypesSyncService: ChainsTypesSyncServiceProtocol {
 
         let remoteVersioningMap = try await fetchRemoteData()
         guard let types = remoteVersioningMap[chainId] else {
-            throw ChainsTypesSyncError.missingData
+            throw ChainTypesRemoteDataFercherError.missingData
         }
         return types
     }

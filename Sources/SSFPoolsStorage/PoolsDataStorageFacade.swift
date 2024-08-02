@@ -66,6 +66,19 @@ public final class PoolsDataStorageFacade: StorageFacadeProtocol {
         )
     }
 
+    public func createAsyncRepository<T, U>(
+        filter: NSPredicate?,
+        sortDescriptors: [NSSortDescriptor],
+        mapper: AnyCoreDataMapper<T, U>
+    ) -> AsyncCoreDataRepositoryDefault<T, U> where T: Identifiable, U: NSManagedObject {
+        AsyncCoreDataRepositoryDefault(
+            databaseService: databaseService,
+            mapper: mapper,
+            filter: filter,
+            sortDescriptors: sortDescriptors
+        )
+    }
+
     private static func createModelURL() -> URL? {
         let bundle = Bundle(for: PoolsDataStorageFacade.self)
 

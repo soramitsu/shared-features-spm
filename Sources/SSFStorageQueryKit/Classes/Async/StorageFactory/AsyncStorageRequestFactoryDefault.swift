@@ -154,7 +154,7 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
 
     // MARK: - Private methods
 
-    private func queryWorkersResult(
+    func queryWorkersResult(
         for keys: [Data],
         at blockHash: Data?,
         engine: JSONRPCEngine

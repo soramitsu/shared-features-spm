@@ -5,20 +5,20 @@ import SSFModels
 import SSFNetwork
 import SSFUtils
 
-public protocol ChainSyncServiceProtocol {
+public protocol ChainsDataFetcherProtocol {
     func getChainModel(for chainId: ChainModel.Id) async throws -> ChainModel
     func getChainModels() async throws -> [ChainModel]
     func syncUp()
 }
 
-public enum ChainSyncServiceError: Error {
+public enum ChainsDataFetcherError: Error {
     case chainsNotLoaded
     case missingChainModel
     case invalidUrl
     case mappingError
 }
 
-public final class ChainSyncService {
+public final class ChainsDataFetcher {
     private let chainsUrl: URL
     private let dataFetchFactory: NetworkOperationFactoryProtocol
     private let retryStrategy: ReconnectionStrategyProtocol
@@ -109,9 +109,9 @@ public final class ChainSyncService {
     }
 }
 
-// MARK: - ChainSyncServiceProtocol
+// MARK: - ChainsDataFetcherProtocol
 
-extension ChainSyncService: ChainSyncServiceProtocol {
+extension ChainsDataFetcher: ChainsDataFetcherProtocol {
     public func getChainModel(for chainId: ChainModel.Id) async throws -> ChainModel {
         if let chainModel = remoteMapping[chainId] {
             return chainModel
@@ -119,7 +119,7 @@ extension ChainSyncService: ChainSyncServiceProtocol {
 
         let remoteMap = try await executeSync()
         guard let remoteChainModel = remoteMap[chainId] else {
-            throw ChainSyncServiceError.missingChainModel
+            throw ChainsDataFetcherError.missingChainModel
         }
         return remoteChainModel
     }
@@ -140,7 +140,7 @@ extension ChainSyncService: ChainSyncServiceProtocol {
 
 // MARK: - SchedulerDelegate
 
-extension ChainSyncService: SchedulerDelegate {
+extension ChainsDataFetcher: SchedulerDelegate {
     public func didTrigger(scheduler _: SchedulerProtocol) {
         mutex.lock()
 

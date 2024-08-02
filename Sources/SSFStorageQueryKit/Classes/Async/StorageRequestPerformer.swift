@@ -1,5 +1,6 @@
 import Foundation
 import RobinHood
+import SSFChainRegistry
 import SSFModels
 import SSFRuntimeCodingService
 import SSFSingleValueCache
@@ -23,11 +24,16 @@ public protocol StorageRequestPerformer {
         _ request: MultipleRequest,
         withCacheOptions: CachedStorageRequestTrigger
     ) async -> AsyncThrowingStream<[T?], Error>
+
+    func perform(
+        _ requests: [any MixStorageRequest]
+    ) async throws -> [MixStorageResponse]
 }
 
 public final class StorageRequestPerformerDefault: StorageRequestPerformer {
     private let runtimeService: RuntimeCodingServiceProtocol
     private let connection: JSONRPCEngine
+
     private lazy var storageRequestFactory: AsyncStorageRequestFactory =
         AsyncStorageRequestDefault()
 
@@ -50,7 +56,9 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
 
     // MARK: - StorageRequestPerformer
 
-    public func performSingle<T: Decodable>(_ request: StorageRequest) async throws -> T? {
+    public func performSingle<T: Decodable>(
+        _ request: StorageRequest
+    ) async throws -> T? {
         let worker = StorageRequestWorkerBuilderDefault<T>().buildWorker(
             runtimeService: runtimeService,
             connection: connection,
@@ -151,6 +159,30 @@ public final class StorageRequestPerformerDefault: StorageRequestPerformer {
                 }
             }
         }
+    }
+
+    public func perform(
+        _ requests: [any MixStorageRequest]
+    ) async throws -> [MixStorageResponse] {
+        let codingFactory = try await runtimeService.fetchCoderFactory()
+        let keysBuilder = MixStorageRequestsKeysBuilder(codingFactory: codingFactory)
+        let requesrWorker = MixStorageRequestsWorkerDefault(
+            runtimeService: runtimeService,
+            connection: connection,
+            storageRequestFactory: storageRequestFactory
+        )
+
+        let keys = try keysBuilder.buildKeys(for: requests)
+        let updates = try await requesrWorker.perform(keys: keys)
+
+        let decodingWorker = MixStorageDecodingListWorker(
+            requests: requests,
+            updates: updates,
+            codingFactory: codingFactory
+        )
+        let responses = try decodingWorker.performDecoding()
+
+        return responses
     }
 
     // MARK: - Private methods

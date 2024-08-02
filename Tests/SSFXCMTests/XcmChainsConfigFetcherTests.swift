@@ -178,6 +178,12 @@ extension XcmChainsConfigFetcherTests {
             chainId: "0",
             paraId: "1001",
             name: "test1",
+            tokens: ChainRemoteTokens(
+                type: .config,
+                whitelist: nil,
+                utilityId: nil,
+                tokens: []
+            ),
             xcm: XcmChain(
                 xcmVersion: .V3,
                 destWeightIsPrimitive: true,
@@ -199,9 +205,9 @@ extension XcmChainsConfigFetcherTests {
                 name: "test1",
                 apikey: nil
             )]),
-            addressPrefix: 0,
             icon: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            properties: ChainProperties(addressPrefix: "0")
         )
 
         static let secondChain = ChainModel(
@@ -210,6 +216,12 @@ extension XcmChainsConfigFetcherTests {
             chainId: "1",
             paraId: "1002",
             name: "test2",
+            tokens: ChainRemoteTokens(
+                type: .config,
+                whitelist: nil,
+                utilityId: nil,
+                tokens: []
+            ),
             xcm: XcmChain(
                 xcmVersion: .V1,
                 destWeightIsPrimitive: true,
@@ -228,9 +240,9 @@ extension XcmChainsConfigFetcherTests {
                 name: "test2",
                 apikey: nil
             )]),
-            addressPrefix: 1,
             icon: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            properties: ChainProperties(addressPrefix: "1")
         )
 
         static let errorChain = ChainModel(
@@ -239,15 +251,21 @@ extension XcmChainsConfigFetcherTests {
             chainId: "2",
             paraId: "1",
             name: "test3",
+            tokens: ChainRemoteTokens(
+                type: .config,
+                whitelist: nil,
+                utilityId: nil,
+                tokens: []
+            ),
             xcm: nil,
             nodes: Set([ChainNodeModel(
                 url: XcmConfig.shared.tokenLocationsSourceUrl,
                 name: "test3",
                 apikey: nil
             )]),
-            addressPrefix: 2,
             icon: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            properties: ChainProperties(addressPrefix: "2")
         )
     }
 }

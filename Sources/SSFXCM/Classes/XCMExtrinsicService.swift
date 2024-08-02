@@ -128,15 +128,9 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                     path: callPath
                 )
             case .bridgeProxyBurn:
-                guard let currencyId = fromChainModel.assets
-                    .first(where: { $0.symbol.lowercased() == assetSymbol.lowercased() })?
-                    .currencyId else
-                {
-                    throw XcmError.missingCurrencyId
-                }
                 return try await estimateBridgeProxyBurn(
                     fromChainModel: fromChainModel,
-                    currencyId: currencyId,
+                    currencyId: "",
                     destChainModel: destChainModel,
                     accountId: destAccountId,
                     amount: amount,
@@ -222,15 +216,9 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
                     path: callPath
                 )
             case .bridgeProxyBurn:
-                guard let currencyId = fromChainModel.assets
-                    .first(where: { $0.symbol.lowercased() == assetSymbol.lowercased() })?
-                    .currencyId else
-                {
-                    throw XcmError.missingCurrencyId
-                }
                 return try await submitBridgeProxyBurn(
                     fromChainModel: fromChainModel,
-                    currencyId: currencyId,
+                    currencyId: "",
                     destChainModel: destChainModel,
                     accountId: destAccountId,
                     amount: amount,

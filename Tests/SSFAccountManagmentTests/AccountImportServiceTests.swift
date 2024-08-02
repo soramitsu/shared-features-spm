@@ -51,7 +51,7 @@ final class AccountImportServiceTests: XCTestCase {
             source: source,
             username: TestData.accountName,
             cryptoType: .sr25519,
-            defaultChainId: "5d3c298622d5634ed019bf61ea4b71655030015bde9beb0d6a24743714462c86"
+            defaultChainId: "3266816be9fa51b32cfea58d3e33ca77246bc9618595a4300e44c8856a8d8a17"
         )
 
         // act
@@ -76,7 +76,7 @@ final class AccountImportServiceTests: XCTestCase {
             source: source,
             username: TestData.accountName,
             cryptoType: .sr25519,
-            defaultChainId: "5d3c298622d5634ed019bf61ea4b71655030015bde9beb0d6a24743714462c86"
+            defaultChainId: "3266816be9fa51b32cfea58d3e33ca77246bc9618595a4300e44c8856a8d8a17"
         )
 
         // act
@@ -100,7 +100,7 @@ final class AccountImportServiceTests: XCTestCase {
             source: source,
             username: TestData.accountName,
             cryptoType: .sr25519,
-            defaultChainId: "5d3c298622d5634ed019bf61ea4b71655030015bde9beb0d6a24743714462c86"
+            defaultChainId: "3266816be9fa51b32cfea58d3e33ca77246bc9618595a4300e44c8856a8d8a17"
         )
 
         // act

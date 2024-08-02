@@ -27,6 +27,7 @@ let package = Package(
         .library(name: "SSFAccountManagment", targets: ["SSFAccountManagment"]),
         .library(name: "SSFAccountManagmentStorage", targets: ["SSFAccountManagmentStorage"]),
         .library(name: "SSFAssetManagment", targets: ["SSFAssetManagment"]),
+        .library(name: "SSFAssetManagmentStorage", targets: ["SSFAssetManagmentStorage"]),
         .library(name: "IrohaCrypto", targets: ["IrohaCrypto"]),
         .library(name: "keccak", targets: ["keccak"]), //TODO: generate xcframework
         .library(name: "RobinHood", targets: ["RobinHood"]), //TODO: get from github
@@ -45,7 +46,9 @@ let package = Package(
         .library(name: "SSFSoraSubsquidIndexer", targets: ["SSFSoraSubsquidIndexer"]),
         .library(name: "SSFSubqueryIndexer", targets: ["SSFSubqueryIndexer"]),
         .library(name: "SSFSubsquidIndexer", targets: ["SSFSubsquidIndexer"]),
-        .library(name: "SSFZetaIndexer", targets: ["SSFZetaIndexer"])
+        .library(name: "SSFZetaIndexer", targets: ["SSFZetaIndexer"]),
+        .library(name: "SSFBalances", targets: ["SSFBalances"]),
+        .library(name: "SSFSubstrateBalances", targets: ["SSFSubstrateBalances"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
@@ -78,6 +81,21 @@ let package = Package(
         .target(name: "RobinHood"),
         .target(name: "keccak"),
         .target(name: "SoraKeystore"),
+        .target(
+            name: "SSFBalances",
+            dependencies: ["SSFUtils", "SSFStorageQueryKit", "SSFModels", "SSFAccountManagment"]
+        ),
+        .target(
+            name: "SSFSubstrateBalances",
+            dependencies: [
+                "SSFStorageQueryKit",
+                "SSFUtils",
+                "SSFBalances",
+                "SSFChainRegistry",
+                "SSFModels",
+                "SSFChainConnection"
+            ]
+        ),
         .target(
             name: "SSFHelpers",
             dependencies: [
@@ -227,7 +245,8 @@ let package = Package(
                 "RobinHood",
                 "IrohaCrypto",
                 "SoraKeystore",
-                "SSFUtils"
+                "SSFUtils",
+                "SSFModels"
             ]
         ),
         .testTarget(
@@ -249,7 +268,8 @@ let package = Package(
                 "SSFCrypto",
                 "SSFChainConnection",
                 "SSFUtils",
-                "SSFSingleValueCache"
+                "SSFSingleValueCache",
+                "SSFChainRegistry"
             ]
         ),
         .testTarget(

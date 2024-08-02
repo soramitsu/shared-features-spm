@@ -13,85 +13,85 @@ public struct ChainAsset: Equatable, Hashable {
     }
 
     public var chainAssetType: SubstrateAssetType? {
-        asset.type
+        asset.tokenProperties?.type
     }
 
     public var isUtility: Bool {
-        chain.assets.first(where: { $0.id == asset.id })?.isUtility ?? false
+        true
     }
 
     public var isNative: Bool {
-        chain.assets.first(where: { $0.id == asset.id })?.isNative ?? false
+        false
     }
 
     public var currencyId: CurrencyId? {
         switch chainAssetType {
         case .normal:
             if chain.isSora, isUtility {
-                guard let currencyId = asset.currencyId else {
+                guard let currencyId = asset.tokenProperties?.currencyId else {
                     return nil
                 }
                 return CurrencyId.soraAsset(id: currencyId)
             }
             return nil
         case .ormlChain, .ormlAsset:
-            let symbol = asset.currencyId ?? asset.symbol
+            let symbol = asset.tokenProperties?.currencyId ?? asset.symbol
             let tokenSymbol = TokenSymbol(symbol: symbol)
             return CurrencyId.ormlAsset(symbol: tokenSymbol)
         case .foreignAsset:
-            guard let foreignAssetId = asset.currencyId else {
+            guard let foreignAssetId = asset.tokenProperties?.currencyId else {
                 return nil
             }
             return CurrencyId.foreignAsset(foreignAsset: foreignAssetId)
         case .stableAssetPoolToken:
-            guard let stableAssetPoolTokenId = asset.currencyId else {
+            guard let stableAssetPoolTokenId = asset.tokenProperties?.currencyId else {
                 return nil
             }
             return CurrencyId.stableAssetPoolToken(stableAssetPoolToken: stableAssetPoolTokenId)
         case .liquidCrowdloan:
-            guard let currencyId = asset.currencyId else {
+            guard let currencyId = asset.tokenProperties?.currencyId else {
                 return nil
             }
             return CurrencyId.liquidCrowdloan(liquidCrowdloan: currencyId)
         case .vToken:
-            let symbol = asset.currencyId ?? asset.symbol
+            let symbol = asset.tokenProperties?.currencyId ?? asset.symbol
             let tokenSymbol = TokenSymbol(symbol: symbol)
             return CurrencyId.vToken(symbol: tokenSymbol)
         case .vsToken:
-            let symbol = asset.currencyId ?? asset.symbol
+            let symbol = asset.tokenProperties?.currencyId ?? asset.symbol
             let tokenSymbol = TokenSymbol(symbol: symbol)
             return CurrencyId.vsToken(symbol: tokenSymbol)
         case .stable:
-            let symbol = asset.currencyId ?? asset.symbol
+            let symbol = asset.tokenProperties?.currencyId ?? asset.symbol
             let tokenSymbol = TokenSymbol(symbol: symbol)
             return CurrencyId.stable(symbol: tokenSymbol)
         case .equilibrium:
-            guard let currencyId = asset.currencyId else {
+            guard let currencyId = asset.tokenProperties?.currencyId else {
                 return nil
             }
             return CurrencyId.equilibrium(id: currencyId)
         case .soraAsset:
-            guard let currencyId = asset.currencyId else {
+            guard let currencyId = asset.tokenProperties?.currencyId else {
                 return nil
             }
             return CurrencyId.soraAsset(id: currencyId)
         case .assets:
-            guard let currencyId = asset.currencyId else {
+            guard let currencyId = asset.tokenProperties?.currencyId else {
                 return nil
             }
             return CurrencyId.assets(id: currencyId)
         case .assetId:
-            guard let currencyId = asset.currencyId else {
+            guard let currencyId = asset.tokenProperties?.currencyId else {
                 return nil
             }
             return CurrencyId.assetId(id: currencyId)
         case .token2:
-            guard let id = asset.currencyId else {
+            guard let id = asset.tokenProperties?.currencyId else {
                 return nil
             }
             return CurrencyId.token2(id: id)
         case .xcm:
-            guard let id = asset.currencyId else {
+            guard let id = asset.tokenProperties?.currencyId else {
                 return nil
             }
             return CurrencyId.xcm(id: id)
@@ -138,7 +138,7 @@ public extension ChainAsset {
     }
 
     var rawStakingType: RawStakingType? {
-        chain.assets.first(where: { $0.id == asset.id })?.staking
+        nil
     }
 
     var stakingType: StakingType? {
@@ -150,7 +150,38 @@ public extension ChainAsset {
     }
 
     var hasStaking: Bool {
-        let model: AssetModel? = chain.assets.first { $0.id == asset.id }
-        return model?.staking != nil
+        let model: AssetModel? = chain.tokens.tokens?.first { $0.id == asset.id }
+        return false
+    }
+
+    var storagePath: StorageCodingPath {
+        var storagePath: StorageCodingPath
+        switch chainAssetType {
+        case .normal, .equilibrium, .none:
+            storagePath = StorageCodingPath.account
+        case
+            .ormlChain,
+            .ormlAsset,
+            .foreignAsset,
+            .stableAssetPoolToken,
+            .liquidCrowdloan,
+            .vToken,
+            .vsToken,
+            .stable,
+            .assetId,
+            .token2,
+            .xcm:
+            storagePath = StorageCodingPath.tokens
+        case .assets:
+            storagePath = StorageCodingPath.assetsAccount
+        case .soraAsset:
+            if isUtility {
+                storagePath = StorageCodingPath.account
+            } else {
+                storagePath = StorageCodingPath.tokens
+            }
+        }
+
+        return storagePath
     }
 }

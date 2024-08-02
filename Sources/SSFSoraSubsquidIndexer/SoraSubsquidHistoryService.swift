@@ -57,25 +57,28 @@ actor SoraSubsquidHistoryService: HistoryService {
                     return true
                 }
 
-                if chainAsset.asset.isUtility, transaction.module?.rawValue == "staking",
+                if chainAsset.isUtility,
+                   transaction.module?.rawValue == "staking",
                    transaction.method?.rawValue != "rewarded"
                 {
                     return true
                 }
 
                 if let targetAssetId = transaction.data?.targetAssetId,
-                   targetAssetId == chainAsset.asset.currencyId
+                   targetAssetId == chainAsset.asset.tokenProperties?.currencyId
                 {
                     return true
                 }
 
                 if let baseAssetId = transaction.data?.baseAssetId,
-                   baseAssetId == chainAsset.asset.currencyId
+                   baseAssetId == chainAsset.asset.tokenProperties?.currencyId
                 {
                     return true
                 }
 
-                if let assetId = transaction.data?.assetId, assetId == chainAsset.asset.currencyId {
+                if let assetId = transaction.data?.assetId,
+                   assetId == chainAsset.asset.tokenProperties?.currencyId
+                {
                     return true
                 }
 

@@ -273,11 +273,12 @@ extension XcmCallFactoryTests {
             chainId: "0",
             paraId: "0",
             name: "model",
+            tokens: ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: []),
             xcm: chain,
             nodes: Set([node]),
-            addressPrefix: 0,
             icon: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            properties: ChainProperties(addressPrefix: "0")
         )
     }
 }

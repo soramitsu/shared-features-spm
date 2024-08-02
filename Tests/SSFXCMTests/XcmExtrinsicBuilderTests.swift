@@ -202,6 +202,7 @@ private extension XcmExtrinsicBuilderTests {
             chainId: "0",
             paraId: "0",
             name: "model",
+            tokens: ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: []),
             xcm: XcmChain(
                 xcmVersion: .V1,
                 destWeightIsPrimitive: true,
@@ -223,9 +224,10 @@ private extension XcmExtrinsicBuilderTests {
                 name: "node",
                 apikey: nil
             )]),
-            addressPrefix: 0,
+
             icon: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            properties: ChainProperties(addressPrefix: "0")
         )
 
         static let reserveTransferCall = ReserveTransferAssetsCall(

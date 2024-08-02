@@ -18,7 +18,7 @@ final class SubstrateTransferAssembly {
             throw TransferServiceError.accountNotExists
         }
 
-        let chainRegistry = ChainRegistryAssembly.createDefaultRegistry()
+        let chainRegistry = try ChainRegistryAssembly.createDefaultRegistry()
         let connection = try await chainRegistry.getSubstrateConnection(for: chain)
 
         let runtimeService = try await chainRegistry.getRuntimeProvider(

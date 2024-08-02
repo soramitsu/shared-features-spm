@@ -14,7 +14,7 @@ final class EthereumTransferServiceAssembly {
             throw TransferServiceError.accountNotExists
         }
 
-        let chainRegistry = ChainRegistryAssembly.createDefaultRegistry()
+        let chainRegistry = try ChainRegistryAssembly.createDefaultRegistry()
         let connection = try await chainRegistry.getEthereumConnection(for: chain)
         let privateKey = try EthereumPrivateKey(privateKey: secretKeyData.bytes)
         let address = try accountResponse.accountId.toAddress(using: .sfEthereum)

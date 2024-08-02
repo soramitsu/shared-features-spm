@@ -62,21 +62,31 @@ public enum ChainModelGenerator {
                 parentId: parentId,
                 paraId: paraId,
                 name: name ?? String(chainId.reversed()),
-                assets: [],
+                tokens: ChainRemoteTokens(
+                    type: .config,
+                    whitelist: nil,
+                    utilityId: nil,
+                    tokens: []
+                ),
                 xcm: xcm,
                 nodes: [node],
-                addressPrefix: UInt16(index),
                 types: types,
                 icon: URL(string: "https://github.com")!,
                 options: options.isEmpty ? nil : options,
                 externalApi: externalApi,
                 customNodes: nil,
-                iosMinAppVersion: nil
+                iosMinAppVersion: nil,
+                properties: ChainProperties(addressPrefix: String(index))
             )
 
             let asset = generateAssetWithId("", symbol: "", assetPresicion: 12, chainId: chainId)
             let chainAssets = Set(arrayLiteral: asset)
-            chain.assets = chainAssets
+            chain.tokens = ChainRemoteTokens(
+                type: .config,
+                whitelist: nil,
+                utilityId: nil,
+                tokens: chainAssets
+            )
             return chain
         }
     }
@@ -92,7 +102,7 @@ public enum ChainModelGenerator {
             parentId: chain.parentId,
             paraId: chain.paraId,
             name: chain.name,
-            assets: chain.assets,
+            tokens: chain.tokens,
             xcm: XcmChain(
                 xcmVersion: chain.xcm?.xcmVersion,
                 destWeightIsPrimitive: chain.xcm?.destWeightIsPrimitive,
@@ -100,14 +110,14 @@ public enum ChainModelGenerator {
                 availableDestinations: chain.xcm?.availableDestinations ?? []
             ),
             nodes: chain.nodes,
-            addressPrefix: chain.addressPrefix,
             types: chain.types,
             icon: chain.icon,
             options: chain.options,
             externalApi: chain.externalApi,
             selectedNode: chain.selectedNode,
             customNodes: chain.customNodes,
-            iosMinAppVersion: chain.iosMinAppVersion
+            iosMinAppVersion: chain.iosMinAppVersion,
+            properties: chain.properties
         )
     }
 
@@ -160,16 +170,16 @@ public enum ChainModelGenerator {
             parentId: nil,
             paraId: nil,
             name: UUID().uuidString,
-            assets: [],
+            tokens: ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: []),
             xcm: xcm,
             nodes: [node],
-            addressPrefix: addressPrefix,
             types: nil,
             icon: URL(string: "google.com")!,
             options: options.isEmpty ? nil : options,
             externalApi: externalApi,
             customNodes: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            properties: ChainProperties(addressPrefix: String(addressPrefix))
         )
         let chainAssetsArray: [AssetModel] = (0 ..< count).map { index in
             generateAssetWithId(
@@ -179,7 +189,12 @@ public enum ChainModelGenerator {
             )
         }
         let chainAssets = Set(chainAssetsArray)
-        chain.assets = chainAssets
+        chain.tokens = ChainRemoteTokens(
+            type: .config,
+            whitelist: nil,
+            utilityId: nil,
+            tokens: chainAssets
+        )
         return chain
     }
 
@@ -189,7 +204,7 @@ public enum ChainModelGenerator {
         assetPresicion: UInt16 = (9 ... 18).randomElement()!,
         chainId _: String = "",
         substrateAssetType: SubstrateAssetType = .normal,
-        currencyId: String? = nil
+        currencyId _: String? = nil
     ) -> AssetModel {
         AssetModel(
             id: identifier,
@@ -197,19 +212,13 @@ public enum ChainModelGenerator {
             symbol: symbol,
             precision: assetPresicion,
             icon: nil,
+            substrateType: substrateAssetType,
+            ethereumType: nil,
+            tokenProperties: TokenProperties(),
             price: nil,
-            fiatDayChange: nil,
-            currencyId: currencyId,
-            existentialDeposit: nil,
-            color: nil,
-            isUtility: false,
-            isNative: false,
-            staking: nil,
-            purchaseProviders: nil,
-            type: substrateAssetType,
-            ethereumType: .normal,
-            priceProvider: nil,
-            coingeckoPriceId: nil
+            priceId: nil,
+            coingeckoPriceId: nil,
+            priceProvider: nil
         )
     }
 

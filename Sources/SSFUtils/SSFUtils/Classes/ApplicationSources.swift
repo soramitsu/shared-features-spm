@@ -11,7 +11,7 @@ public final class ApplicationSourcesImpl: ApplicationSources {
 
     public var chainsSourceUrl: URL {
         #if DEBUG
-            GitHubUrl.url(suffix: "chains/v6/chains_dev.json", branch: .developFree)
+            GitHubUrl.url(suffix: "chains/chains.json", branch: .mwr819)
         #else
             GitHubUrl.url(suffix: "chains/v6/chains.json")
         #endif
@@ -24,13 +24,14 @@ public final class ApplicationSourcesImpl: ApplicationSources {
 
 private enum GitHubUrl {
     private static var baseUrl: URL {
-        URL(string: "https://raw.githubusercontent.com/soramitsu/shared-features-utils/")!
+        URL(string: "http://raw.githubusercontent.com/soramitsu/shared-features-utils/")!
     }
 
     enum DefaultBranch: String {
         case master
         case develop
         case developFree = "develop-free"
+        case mwr819 = "MWR-819"
     }
 
     static func url(suffix: String, branch: DefaultBranch = .master) -> URL {

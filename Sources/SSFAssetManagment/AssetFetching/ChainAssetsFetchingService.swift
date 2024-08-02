@@ -42,7 +42,7 @@ public actor ChainAssetsFetchingService {
     private var allChainAssets: [ChainAsset] = []
     private let chainAssetsFetcher: ChainAssetsFetchWorkerProtocol
 
-    init(chainAssetsFetcher: ChainAssetsFetchWorkerProtocol) {
+    public init(chainAssetsFetcher: ChainAssetsFetchWorkerProtocol) {
         self.chainAssetsFetcher = chainAssetsFetcher
     }
 }

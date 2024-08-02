@@ -11,6 +11,13 @@ public protocol StorageFacadeProtocol: AnyObject {
         mapper: AnyCoreDataMapper<T, U>
     ) -> CoreDataRepository<T, U>
         where T: Identifiable, U: NSManagedObject
+
+    func createAsyncRepository<T, U>(
+        filter: NSPredicate?,
+        sortDescriptors: [NSSortDescriptor],
+        mapper: AnyCoreDataMapper<T, U>
+    ) -> AsyncCoreDataRepositoryDefault<T, U>
+        where T: Identifiable, U: NSManagedObject
 }
 
 public extension StorageFacadeProtocol {
@@ -26,6 +33,14 @@ public extension StorageFacadeProtocol {
     {
         let mapper = AnyCoreDataMapper(CodableCoreDataMapper<T, U>())
         return createRepository(filter: nil, sortDescriptors: [], mapper: mapper)
+    }
+
+    func createAsyncRepository<T, U>()
+        -> AsyncCoreDataRepositoryDefault<T, U> where T: Identifiable & Codable,
+        U: NSManagedObject & CoreDataCodable
+    {
+        let mapper = AnyCoreDataMapper(CodableCoreDataMapper<T, U>())
+        return createAsyncRepository(filter: nil, sortDescriptors: [], mapper: mapper)
     }
 
     func createRepository<T, U>(

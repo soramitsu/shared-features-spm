@@ -12,7 +12,7 @@ enum ChainAccountFetchingError: Error {
     case accountNotExists
 }
 
-extension ChainAccountResponse {
+public extension ChainAccountResponse {
     func toAddress() -> AccountAddress? {
         let chainFormat: SFChainFormat = isEthereumBased ? .sfEthereum : .sfSubstrate(addressPrefix)
         return try? accountId.toAddress(using: chainFormat)
@@ -86,7 +86,8 @@ extension MetaAccountModel {
 
         for chainAccount in chainAccounts {
             let chainFormat: SFChainFormat = chainAccount
-                .ethereumBased ? .sfEthereum : .sfSubstrate(chain.addressPrefix)
+                .ethereumBased ? .sfEthereum :
+                .sfSubstrate(UInt16(chain.properties.addressPrefix) ?? 69)
             if let chainAddress = try? chainAccount.accountId.toAddress(using: chainFormat),
                chainAddress == address
             {
@@ -96,7 +97,7 @@ extension MetaAccountModel {
                     publicKey: chainAccount.publicKey,
                     name: name,
                     cryptoType: CryptoType(rawValue: substrateCryptoType) ?? .sr25519,
-                    addressPrefix: chain.addressPrefix,
+                    addressPrefix: UInt16(chain.properties.addressPrefix) ?? 69,
                     isEthereumBased: chainAccount.ethereumBased,
                     isChainAccount: true,
                     walletId: metaId

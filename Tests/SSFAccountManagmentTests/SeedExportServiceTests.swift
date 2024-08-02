@@ -98,17 +98,17 @@ extension SeedExportServiceTests {
             parentId: "2",
             paraId: "test",
             name: "test",
-            assets: [],
+            tokens: ChainRemoteTokens(
+                type: .config,
+                whitelist: nil,
+                utilityId: nil,
+                tokens: []
+            ),
             xcm: nil,
             nodes: [],
-            addressPrefix: 1,
-            types: nil,
             icon: nil,
-            options: [.crowdloans, .ethereum, .testnet],
-            externalApi: nil,
-            selectedNode: nil,
-            customNodes: [],
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            properties: .init(addressPrefix: "1", rank: "2", paraId: "test", ethereumBased: true)
         )
 
         static let response = ChainAccountResponse(

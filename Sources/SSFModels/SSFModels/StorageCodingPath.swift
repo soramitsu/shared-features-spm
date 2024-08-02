@@ -131,6 +131,8 @@ public enum StorageCodingPath: Equatable, CaseIterable, StorageCodingPathProtoco
             return (moduleName: "MulticollateralBondingCurvePool", itemName: "CollateralReserves")
         case .eqOraclePricePoint:
             return (moduleName: "Oracle", itemName: "PricePoints")
+        case .assetsAccount:
+            return (moduleName: "Assets", itemName: "Account")
         }
     }
 
@@ -194,4 +196,5 @@ public enum StorageCodingPath: Equatable, CaseIterable, StorageCodingPathProtoco
     case polkaswapXykPool
     case polkaswapTbcPool
     case eqOraclePricePoint
+    case assetsAccount
 }

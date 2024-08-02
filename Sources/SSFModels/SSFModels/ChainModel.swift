@@ -17,27 +17,84 @@ public enum BlockExplorerType: String, Codable {
     case zeta
 }
 
+public enum ChainRemoteTokensType: String, Codable {
+    case config
+    case sora
+}
+
+public struct ChainRemoteTokens: Codable, Hashable {
+    public let type: ChainRemoteTokensType
+    public let whitelist: String?
+    public let utilityId: String?
+    public let tokens: Set<AssetModel>?
+
+    public init(
+        type: ChainRemoteTokensType,
+        whitelist: String?,
+        utilityId: String?,
+        tokens: Set<AssetModel>?
+    ) {
+        self.type = type
+        self.whitelist = whitelist
+        self.utilityId = utilityId
+        self.tokens = tokens
+    }
+
+    public static func == (lhs: ChainRemoteTokens, rhs: ChainRemoteTokens) -> Bool {
+        lhs.type == rhs.type &&
+            lhs.utilityId == rhs.utilityId &&
+            lhs.tokens == rhs.tokens
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(tokens)
+    }
+}
+
+public struct ChainProperties: Codable {
+    public let addressPrefix: String
+    public let rank: String?
+    public let paraId: String?
+    public let ethereumBased: Bool?
+
+    public init(
+        addressPrefix: String,
+        rank: String? = nil,
+        paraId: String? = nil,
+        ethereumBased: Bool? = nil
+    ) {
+        self.addressPrefix = addressPrefix
+        self.rank = rank
+        self.paraId = paraId
+        self.ethereumBased = ethereumBased
+    }
+}
+
 public final class ChainModel: Codable, Identifiable {
     public typealias Id = String
 
-    public var identifier: String { chainId }
-    public let rank: UInt16?
     public let disabled: Bool
     public let chainId: Id
+    public let externalApi: ExternalApiSet?
+    public var tokens: ChainRemoteTokens
+
+    public var identifier: String { chainId }
+    public let rank: UInt16?
+
     public let parentId: Id?
     public let paraId: String?
     public let name: String
-    public var assets: Set<AssetModel>
+
     public let xcm: XcmChain?
     public let nodes: Set<ChainNodeModel>
-    public let addressPrefix: UInt16
     public let types: TypesSettings?
     public let icon: URL?
     public let options: [ChainOptions]?
-    public let externalApi: ExternalApiSet?
+
     public var selectedNode: ChainNodeModel?
     public let customNodes: Set<ChainNodeModel>?
     public let iosMinAppVersion: String?
+    public let properties: ChainProperties
 
     public init(
         rank: UInt16?,
@@ -46,17 +103,17 @@ public final class ChainModel: Codable, Identifiable {
         parentId: Id? = nil,
         paraId: String?,
         name: String,
-        assets: Set<AssetModel> = [],
+        tokens: ChainRemoteTokens,
         xcm: XcmChain?,
         nodes: Set<ChainNodeModel>,
-        addressPrefix: UInt16,
         types: TypesSettings? = nil,
         icon: URL?,
         options: [ChainOptions]? = nil,
         externalApi: ExternalApiSet? = nil,
         selectedNode: ChainNodeModel? = nil,
         customNodes: Set<ChainNodeModel>? = nil,
-        iosMinAppVersion: String?
+        iosMinAppVersion: String?,
+        properties: ChainProperties
     ) {
         self.rank = rank
         self.disabled = disabled
@@ -64,10 +121,9 @@ public final class ChainModel: Codable, Identifiable {
         self.parentId = parentId
         self.paraId = paraId
         self.name = name
-        self.assets = assets
+        self.tokens = tokens
         self.xcm = xcm
         self.nodes = nodes
-        self.addressPrefix = addressPrefix
         self.types = types
         self.icon = icon
         self.options = options
@@ -75,6 +131,7 @@ public final class ChainModel: Codable, Identifiable {
         self.selectedNode = selectedNode
         self.customNodes = customNodes
         self.iosMinAppVersion = iosMinAppVersion
+        self.properties = properties
     }
 
     public var isRelaychain: Bool {
@@ -97,7 +154,7 @@ public final class ChainModel: Codable, Identifiable {
         if isEthereumBased {
             return .sfEthereum
         } else {
-            return .sfSubstrate(addressPrefix)
+            return .sfSubstrate(UInt16(properties.addressPrefix) ?? 69)
         }
     }
 
@@ -167,7 +224,7 @@ public final class ChainModel: Codable, Identifiable {
     }
 
     public func utilityAssets() -> Set<AssetModel> {
-        assets.filter { $0.isUtility }
+        tokens.tokens ?? []
     }
 
     public var erasPerDay: UInt32 {
@@ -191,9 +248,9 @@ public final class ChainModel: Codable, Identifiable {
     }
 
     public var chainAssets: [ChainAsset] {
-        assets.map {
+        tokens.tokens?.compactMap {
             ChainAsset(chain: self, asset: $0)
-        }
+        } ?? []
     }
 
     public var knownChainEquivalent: Chain? {
@@ -211,9 +268,7 @@ public final class ChainModel: Codable, Identifiable {
     }
 
     public func utilityChainAssets() -> [ChainAsset] {
-        assets.filter { $0.isUtility }.map {
-            ChainAsset(chain: self, asset: $0)
-        }
+        []
     }
 
     public func seedTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
@@ -242,17 +297,17 @@ public final class ChainModel: Codable, Identifiable {
             parentId: parentId,
             paraId: paraId,
             name: name,
-            assets: assets,
+            tokens: tokens,
             xcm: xcm,
             nodes: nodes,
-            addressPrefix: addressPrefix,
             types: types,
             icon: icon,
             options: options,
             externalApi: externalApi,
             selectedNode: node,
             customNodes: customNodes,
-            iosMinAppVersion: iosMinAppVersion
+            iosMinAppVersion: iosMinAppVersion,
+            properties: properties
         )
     }
 
@@ -264,17 +319,17 @@ public final class ChainModel: Codable, Identifiable {
             parentId: parentId,
             paraId: paraId,
             name: name,
-            assets: assets,
+            tokens: tokens,
             xcm: xcm,
             nodes: nodes,
-            addressPrefix: addressPrefix,
             types: types,
             icon: icon,
             options: options,
             externalApi: externalApi,
             selectedNode: selectedNode,
             customNodes: Set(newCustomNodes),
-            iosMinAppVersion: iosMinAppVersion
+            iosMinAppVersion: iosMinAppVersion,
+            properties: properties
         )
     }
 }
@@ -283,7 +338,7 @@ public extension ChainModel {
     func accountRequest(_ accountId: AccountId? = nil) -> ChainAccountRequest {
         ChainAccountRequest(
             chainId: chainId,
-            addressPrefix: addressPrefix,
+            addressPrefix: UInt16(properties.addressPrefix) ?? 69,
             isEthereumBased: isEthereumBased,
             accountId: accountId
         )
@@ -295,12 +350,11 @@ extension ChainModel: Hashable {
         lhs.rank == rhs.rank
             && lhs.chainId == rhs.chainId
             && lhs.externalApi == rhs.externalApi
-            && lhs.assets == rhs.assets
+            && lhs.tokens == rhs.tokens
             && lhs.options == rhs.options
             && lhs.types == rhs.types
             && lhs.icon == rhs.icon
             && lhs.name == rhs.name
-            && lhs.addressPrefix == rhs.addressPrefix
             && lhs.nodes == rhs.nodes
             && lhs.iosMinAppVersion == rhs.iosMinAppVersion
             && lhs.selectedNode == rhs.selectedNode

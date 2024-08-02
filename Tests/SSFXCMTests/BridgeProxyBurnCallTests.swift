@@ -163,11 +163,12 @@ extension BridgeProxyBurnCallTests {
             chainId: "b0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe",
             paraId: "1",
             name: "test",
+            tokens: ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: []),
             xcm: nil,
             nodes: Set([ChainNodeModel(url: TestData.url, name: "test", apikey: nil)]),
-            addressPrefix: 1,
             icon: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            properties: ChainProperties(addressPrefix: "1")
         )
 
         static let subNetworkId = BridgeTypesSubNetworkId(from: chain)
