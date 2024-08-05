@@ -31,4 +31,17 @@ public final class AccountStorageTestFacade: StorageFacadeProtocol {
             sortDescriptors: sortDescriptors
         )
     }
+
+    public func createAsyncRepository<T, U>(
+        filter: NSPredicate?,
+        sortDescriptors: [NSSortDescriptor],
+        mapper: AnyCoreDataMapper<T, U>
+    ) -> AsyncCoreDataRepositoryDefault<T, U> where T: Identifiable, U: NSManagedObject {
+        AsyncCoreDataRepositoryDefault(
+            databaseService: databaseService,
+            mapper: mapper,
+            filter: filter,
+            sortDescriptors: sortDescriptors
+        )
+    }
 }

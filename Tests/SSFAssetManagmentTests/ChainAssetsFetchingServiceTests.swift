@@ -426,20 +426,20 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
             parentId: "2",
             paraId: "test",
             name: "test",
-            assets: [TestData.asset, TestData.assetWithStacking],
+            tokens: ChainRemoteTokens(
+                type: .config,
+                whitelist: nil,
+                utilityId: nil,
+                tokens: [TestData.asset, TestData.assetWithStacking]
+            ),
             xcm: nil,
             nodes: [],
-            addressPrefix: 1,
-            types: nil,
             icon: nil,
-            options: [.crowdloans, .ethereum, .testnet],
-            externalApi: nil,
-            selectedNode: nil,
-            customNodes: [],
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            properties: .init(addressPrefix: "1", rank: "2", paraId: "test", ethereumBased: true)
         )
 
-        let extectedAssetArray = chain.assets.map { ChainAsset(chain: chain, asset: $0) }
+        let extectedAssetArray = chain.tokens.tokens?.compactMap { ChainAsset(chain: chain, asset: $0) }
 
         let chainAssetsFetcher = ChainAssetsFetchWorkerProtocolMock()
         chainAssetsFetcher.getChainAssetsModelsReturnValue = extectedAssetArray
@@ -465,12 +465,22 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
         let chain = TestData.chain
         let asset = TestData.asset
         let chainAsset = ChainAsset(chain: chain, asset: asset)
-        chain.assets = [asset]
+        chain.tokens = ChainRemoteTokens(
+            type: .config,
+            whitelist: nil,
+            utilityId: nil,
+            tokens: [asset]
+        )
 
         let chainWithStacking = TestData.chainWithStacking
         let assetWithStacking = TestData.assetWithStacking
         let chainAssetWithStacking = ChainAsset(chain: chainWithStacking, asset: assetWithStacking)
-        chainWithStacking.assets = [assetWithStacking]
+        chainWithStacking.tokens = ChainRemoteTokens(
+            type: .config,
+            whitelist: nil,
+            utilityId: nil,
+            tokens: [assetWithStacking]
+        )
 
         let extectedAssetArray = [chainAsset, chainAssetWithStacking]
 
@@ -498,12 +508,22 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
         let chain = TestData.chain
         let asset = TestData.asset
         let chainAsset = ChainAsset(chain: chain, asset: asset)
-        chain.assets = [asset]
+        chain.tokens = ChainRemoteTokens(
+            type: .config,
+            whitelist: nil,
+            utilityId: nil,
+            tokens: [asset]
+        )
 
         let chainWithStacking = TestData.chainWithStacking
         let assetWithStacking = TestData.assetWithStacking
         let chainAssetWithStacking = ChainAsset(chain: chainWithStacking, asset: assetWithStacking)
-        chainWithStacking.assets = [assetWithStacking]
+        chainWithStacking.tokens = ChainRemoteTokens(
+            type: .config,
+            whitelist: nil,
+            utilityId: nil,
+            tokens: [assetWithStacking]
+        )
 
         let extectedAssetArray = [chainAsset, chainAssetWithStacking]
 
@@ -531,12 +551,17 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
         let chain = TestData.chain
         let asset = TestData.asset
         let chainAsset = ChainAsset(chain: chain, asset: asset)
-        chain.assets = [asset]
+        chain.tokens = ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: [asset])
 
         let chainWithStacking = TestData.chainWithStacking
         let assetWithStacking = TestData.assetWithStacking
         let chainAssetWithStacking = ChainAsset(chain: chainWithStacking, asset: assetWithStacking)
-        chainWithStacking.assets = [assetWithStacking]
+        chainWithStacking.tokens = ChainRemoteTokens(
+            type: .config,
+            whitelist: nil,
+            utilityId: nil,
+            tokens: [assetWithStacking]
+        )
 
         let extectedAssetArray = [chainAsset, chainAssetWithStacking]
 
@@ -562,9 +587,14 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
     func testFetchSortIsPolkadotOrKusama() async {
         // arrange
         let chain = TestData.chain
-        chain.assets = [TestData.asset, TestData.assetWithStacking]
+        chain.tokens = ChainRemoteTokens(
+            type: .config,
+            whitelist: nil,
+            utilityId: nil,
+            tokens: [TestData.asset, TestData.assetWithStacking]
+        )
 
-        let extectedAssetArray = chain.assets.map { ChainAsset(chain: chain, asset: $0) }
+        let extectedAssetArray = chain.tokens.tokens?.map { ChainAsset(chain: chain, asset: $0) }
 
         let chainAssetsFetcher = ChainAssetsFetchWorkerProtocolMock()
         chainAssetsFetcher.getChainAssetsModelsReturnValue = extectedAssetArray
@@ -594,20 +624,20 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
             parentId: "2",
             paraId: "test",
             name: "test",
-            assets: [TestData.asset, TestData.assetWithStacking],
+            tokens: ChainRemoteTokens(
+                type: .config,
+                whitelist: nil,
+                utilityId: nil,
+                tokens: [TestData.asset, TestData.assetWithStacking]
+            ),
             xcm: nil,
             nodes: [],
-            addressPrefix: 1,
-            types: nil,
             icon: nil,
-            options: [.crowdloans, .ethereum, .testnet],
-            externalApi: nil,
-            selectedNode: nil,
-            customNodes: [],
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            properties: .init(addressPrefix: "1", rank: "2", paraId: "test", ethereumBased: true)
         )
 
-        let extectedAssetArray = chain.assets.map { ChainAsset(chain: chain, asset: $0) }
+        let extectedAssetArray = chain.tokens.tokens?.compactMap { ChainAsset(chain: chain, asset: $0) }
 
         let chainAssetsFetcher = ChainAssetsFetchWorkerProtocolMock()
         chainAssetsFetcher.getChainAssetsModelsReturnValue = extectedAssetArray
@@ -635,20 +665,19 @@ private extension ChainAssetsFetchingServiceTests {
             rank: 1,
             disabled: true,
             chainId: "Kusama",
-            parentId: "2",
             paraId: "test",
             name: "test",
-            assets: [asset],
+            tokens: ChainRemoteTokens(
+                type: .config,
+                whitelist: nil,
+                utilityId: nil,
+                tokens: [asset]
+            ),
             xcm: nil,
             nodes: [],
-            addressPrefix: 1,
-            types: nil,
             icon: nil,
-            options: [.crowdloans, .ethereum, .testnet],
-            externalApi: nil,
-            selectedNode: nil,
-            customNodes: [],
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            properties: .init(addressPrefix: "test", ethereumBased: true, crowdloans: true)
         )
 
         static let asset = AssetModel(
@@ -656,40 +685,32 @@ private extension ChainAssetsFetchingServiceTests {
             name: "test",
             symbol: "XOR",
             precision: 1,
-            icon: nil,
-            price: Decimal(string: "1"),
-            fiatDayChange: nil,
-            currencyId: nil,
-            existentialDeposit: nil,
-            color: nil,
-            isUtility: false,
-            isNative: false,
-            staking: nil,
-            purchaseProviders: nil,
-            type: .assetId,
+            substrateType: .soraAsset,
             ethereumType: nil,
-            priceProvider: nil,
-            coingeckoPriceId: nil
+            tokenProperties: nil,
+            price: nil,
+            priceId: nil,
+            coingeckoPriceId: nil,
+            priceProvider: nil
         )
-
+        
         static let chainWithStacking = ChainModel(
             rank: 2,
             disabled: true,
             chainId: "91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3",
-            parentId: "2",
             paraId: "test",
             name: "test1",
-            assets: [assetWithStacking],
+            tokens: ChainRemoteTokens(
+                type: .config,
+                whitelist: nil,
+                utilityId: nil,
+                tokens: [assetWithStacking]
+            ),
             xcm: nil,
             nodes: [],
-            addressPrefix: 1,
-            types: nil,
             icon: nil,
-            options: [],
-            externalApi: nil,
-            selectedNode: nil,
-            customNodes: [],
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            properties: .init(addressPrefix: "1", crowdloans: false)
         )
 
         static let assetWithStacking = AssetModel(
@@ -697,20 +718,13 @@ private extension ChainAssetsFetchingServiceTests {
             name: "test",
             symbol: "XOR2",
             precision: 1,
-            icon: nil,
-            price: Decimal(string: "2"),
-            fiatDayChange: nil,
-            currencyId: nil,
-            existentialDeposit: nil,
-            color: nil,
-            isUtility: false,
-            isNative: false,
-            staking: .paraChain,
-            purchaseProviders: nil,
-            type: .assetId,
+            substrateType: .soraAsset,
             ethereumType: nil,
-            priceProvider: nil,
-            coingeckoPriceId: nil
+            tokenProperties: TokenProperties(stacking: "relaychain"),
+            price: nil,
+            priceId: nil,
+            coingeckoPriceId: nil,
+            priceProvider: nil
         )
     }
 }

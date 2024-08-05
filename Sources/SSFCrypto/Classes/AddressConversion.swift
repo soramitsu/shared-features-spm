@@ -7,7 +7,9 @@ public enum AddressFactory {
     private static let substrateFactory = SS58AddressFactory()
 
     private static func chainFormat(of chain: ChainModel) -> SFChainFormat {
-        chain.isEthereumBased ? .sfEthereum : .sfSubstrate(chain.addressPrefix)
+        chain
+            .isEthereumBased ? .sfEthereum :
+            .sfSubstrate(UInt16(chain.properties.addressPrefix) ?? 69)
     }
 
     public static func address(

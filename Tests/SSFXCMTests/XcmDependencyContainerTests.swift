@@ -67,6 +67,7 @@ extension XcmDependencyContainerTests {
             chainId: "0",
             paraId: "1001",
             name: "test1",
+            tokens: ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: []),
             xcm: XcmChain(
                 xcmVersion: .V3,
                 destWeightIsPrimitive: true,
@@ -88,9 +89,9 @@ extension XcmDependencyContainerTests {
                 name: "test1",
                 apikey: nil
             )]),
-            addressPrefix: 0,
             icon: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            properties: ChainProperties(addressPrefix: "0")
         )
 
         static let runtimeProvider = RuntimeProvider(

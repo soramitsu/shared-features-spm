@@ -67,19 +67,13 @@ public final class ChainModelMapper {
             symbol: symbol,
             precision: UInt16(bitPattern: entity.precision),
             icon: entity.icon,
+            substrateType: createChainAssetModelType(from: entity.type),
+            ethereumType: nil,
+            tokenProperties: TokenProperties(),
             price: entity.price as Decimal?,
-            fiatDayChange: entity.fiatDayChange as Decimal?,
-            currencyId: entity.currencyId,
-            existentialDeposit: entity.existentialDeposit,
-            color: entity.color,
-            isUtility: entity.isUtility,
-            isNative: entity.isNative,
-            staking: staking,
-            purchaseProviders: purchaseProviders,
-            type: createChainAssetModelType(from: entity.type),
-            ethereumType: createEthereumAssetType(from: entity.ethereumType),
-            priceProvider: priceProvider,
-            coingeckoPriceId: entity.priceId
+            priceId: nil,
+            coingeckoPriceId: nil,
+            priceProvider: nil
         )
     }
 
@@ -106,35 +100,18 @@ public final class ChainModelMapper {
         from model: ChainModel,
         context: NSManagedObjectContext
     ) {
-        let assets = model.assets.map {
+        let assets = (model.tokens.tokens ?? []).map {
             let assetEntity = CDAsset(context: context)
-            assetEntity.id = $0.id
+            assetEntity.id = $0.id ?? "0"
             assetEntity.icon = $0.icon
             assetEntity.precision = Int16(bitPattern: $0.precision)
-            assetEntity.priceId = $0.coingeckoPriceId
             assetEntity.price = $0.price as NSDecimalNumber?
-            assetEntity.fiatDayChange = $0.fiatDayChange as NSDecimalNumber?
             assetEntity.symbol = $0.symbol
-            assetEntity.existentialDeposit = $0.existentialDeposit
-            assetEntity.color = $0.color
             assetEntity.name = $0.name
-            assetEntity.currencyId = $0.currencyId
-            assetEntity.type = $0.type?.rawValue
-            assetEntity.isUtility = $0.isUtility
-            assetEntity.isNative = $0.isNative
-            assetEntity.staking = $0.staking?.rawValue
-            assetEntity.ethereumType = $0.ethereumType?.rawValue
+            assetEntity.type = $0.substrateType?.rawValue
 
             let priceProviderContext = CDPriceProvider(context: context)
-            priceProviderContext.type = $0.priceProvider?.type.rawValue
-            priceProviderContext.id = $0.priceProvider?.id
-            if let precision = $0.priceProvider?.precision {
-                priceProviderContext.precision = "\(precision)"
-            }
             assetEntity.priceProvider = priceProviderContext
-
-            let purchaseProviders: [String]? = $0.purchaseProviders?.map(\.rawValue)
-            assetEntity.purchaseProviders = purchaseProviders
 
             return assetEntity
         }
@@ -512,15 +489,17 @@ extension ChainModelMapper: CoreDataMapperProtocol {
             parentId: entity.parentId,
             paraId: nil,
             name: entity.name!,
-            xcm: xcm, nodes: Set(nodes),
-            addressPrefix: UInt16(bitPattern: entity.addressPrefix),
+            tokens: ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: []),
+            xcm: xcm,
+            nodes: Set(nodes),
             types: types,
             icon: entity.icon,
             options: options?.compactMap { ChainOptions(rawValue: $0) },
             externalApi: externalApiSet,
             selectedNode: selectedNode,
             customNodes: customNodesSet,
-            iosMinAppVersion: entity.minimalAppVersion
+            iosMinAppVersion: entity.minimalAppVersion,
+            properties: ChainProperties(addressPrefix: String(entity.addressPrefix))
         )
 
         let assetsArray: [AssetModel] = entity.assets.or([]).compactMap { anyAsset in
@@ -532,7 +511,12 @@ extension ChainModelMapper: CoreDataMapperProtocol {
         }
         let assets = Set(assetsArray)
 
-        chainModel.assets = assets
+        chainModel.tokens = ChainRemoteTokens(
+            type: .config,
+            whitelist: nil,
+            utilityId: nil,
+            tokens: assets
+        )
 
         return chainModel
     }
@@ -552,7 +536,6 @@ extension ChainModelMapper: CoreDataMapperProtocol {
         entity.types = model.types?.url
         entity.typesOverrideCommon = model.types.map { NSNumber(value: $0.overridesCommon) }
 
-        entity.addressPrefix = Int16(bitPattern: model.addressPrefix)
         entity.icon = model.icon
         entity.isEthereumBased = model.isEthereumBased
         entity.isTestnet = model.isTestnet

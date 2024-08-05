@@ -28,8 +28,8 @@ public protocol ChainRegistryProtocol: AnyObject {
 public final class ChainRegistry {
     private let runtimeProviderPool: RuntimeProviderPoolProtocol
     private let connectionPool: ConnectionPoolProtocol
-    private let chainSyncService: ChainSyncServiceProtocol
-    private let chainsTypesSyncService: ChainsTypesSyncServiceProtocol
+    private let chainsDataFetcher: ChainsDataFetcherProtocol
+    private let chainsTypesDataFetcher: ChainTypesRemoteDataFercherProtocol
     private let runtimeSyncService: RuntimeSyncServiceProtocol
 
     private let mutex = NSLock()
@@ -39,21 +39,21 @@ public final class ChainRegistry {
     public init(
         runtimeProviderPool: RuntimeProviderPoolProtocol,
         connectionPool: ConnectionPoolProtocol,
-        chainSyncService: ChainSyncServiceProtocol,
-        chainsTypesSyncService: ChainsTypesSyncServiceProtocol,
+        chainsDataFetcher: ChainsDataFetcherProtocol,
+        chainsTypesDataFetcher: ChainTypesRemoteDataFercherProtocol,
         runtimeSyncService: RuntimeSyncServiceProtocol
     ) {
         self.runtimeProviderPool = runtimeProviderPool
         self.connectionPool = connectionPool
-        self.chainSyncService = chainSyncService
+        self.chainsDataFetcher = chainsDataFetcher
         self.runtimeSyncService = runtimeSyncService
-        self.chainsTypesSyncService = chainsTypesSyncService
+        self.chainsTypesDataFetcher = chainsTypesDataFetcher
         syncUpServices()
     }
 
     private func syncUpServices() {
-        chainSyncService.syncUp()
-        chainsTypesSyncService.syncUp()
+        chainsDataFetcher.syncUp()
+        chainsTypesDataFetcher.syncUp()
     }
 }
 
@@ -65,7 +65,7 @@ extension ChainRegistry: ChainRegistryProtocol {
         usedRuntimePaths: [String: [String]],
         runtimeItem: RuntimeMetadataItemProtocol?
     ) async throws -> RuntimeProviderProtocol {
-        let chainModel = try await chainSyncService.getChainModel(for: chainId)
+        let chainModel = try await chainsDataFetcher.getChainModel(for: chainId)
 
         let runtimeMetadataItem: RuntimeMetadataItemProtocol
         if let runtimeItem = runtimeItem {
@@ -77,7 +77,7 @@ extension ChainRegistry: ChainRegistryProtocol {
                 with: connection
             )
         }
-        let chainTypes = try await chainsTypesSyncService.getTypes(for: chainId)
+        let chainTypes = try await chainsTypesDataFetcher.getTypes(for: chainId)
         let runtimeProvider = runtimeProviderPool.setupRuntimeProvider(
             for: runtimeMetadataItem,
             chainTypes: chainTypes,
@@ -91,7 +91,7 @@ extension ChainRegistry: ChainRegistryProtocol {
         usedRuntimePaths: [String: [String]],
         runtimeItem: RuntimeMetadataItemProtocol?
     ) async throws -> RuntimeSnapshot {
-        let chainModel = try await chainSyncService.getChainModel(for: chainId)
+        let chainModel = try await chainsDataFetcher.getChainModel(for: chainId)
 
         let runtimeMetadataItem: RuntimeMetadataItemProtocol
         if let runtimeItem = runtimeItem {
@@ -103,7 +103,7 @@ extension ChainRegistry: ChainRegistryProtocol {
                 with: connection
             )
         }
-        let chainTypes = try await chainsTypesSyncService.getTypes(for: chainId)
+        let chainTypes = try await chainsTypesDataFetcher.getTypes(for: chainId)
         let readySnaphot = try await runtimeProviderPool.readySnaphot(
             for: runtimeMetadataItem,
             chainTypes: chainTypes,
@@ -127,10 +127,10 @@ extension ChainRegistry: ChainRegistryProtocol {
     }
 
     public func getChain(for chainId: ChainModel.Id) async throws -> ChainModel {
-        try await chainSyncService.getChainModel(for: chainId)
+        try await chainsDataFetcher.getChainModel(for: chainId)
     }
 
     public func getChains() async throws -> [ChainModel] {
-        try await chainSyncService.getChainModels()
+        try await chainsDataFetcher.getChainModels()
     }
 }

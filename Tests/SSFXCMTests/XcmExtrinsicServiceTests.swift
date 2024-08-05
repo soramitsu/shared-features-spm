@@ -158,18 +158,34 @@ private extension XcmExtrinsicServiceTests {
             chainId: "0",
             paraId: "1001",
             name: "test1",
-            assets: Set([.init(
-                id: "0",
-                name: "0",
-                symbol: "0",
-                precision: 0,
-                currencyId: "0",
-                existentialDeposit: "0",
-                color: "0",
-                isUtility: true,
-                isNative: true,
-                staking: .paraChain
-            )]),
+            tokens: ChainRemoteTokens(
+                type: .config,
+                whitelist: nil,
+                utilityId: nil,
+                tokens: Set(
+                    [
+                        .init(
+                            id: "0",
+                            name: "0",
+                            symbol: "0",
+                            precision: 0,
+                            substrateType: .soraAsset,
+                            ethereumType: nil,
+                            tokenProperties:
+                                TokenProperties(
+                                    priceId: "0",
+                                    currencyId: "0",
+                                    color: "0",
+                                    type: .soraAsset,
+                                    isNative: true
+                                ),
+                            price: nil,
+                            priceId: nil,
+                            coingeckoPriceId: nil,
+                            priceProvider: nil
+                        ),
+                    ]
+                )),
             xcm: XcmChain(
                 xcmVersion: .V3,
                 destWeightIsPrimitive: true,
@@ -191,9 +207,9 @@ private extension XcmExtrinsicServiceTests {
                 name: "test1",
                 apikey: nil
             )]),
-            addressPrefix: 0,
             icon: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            properties: ChainProperties(addressPrefix: "0")
         )
 
         static let paths: [XcmCallPath] = [

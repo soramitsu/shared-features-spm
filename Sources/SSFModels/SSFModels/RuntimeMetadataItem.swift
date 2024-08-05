@@ -13,7 +13,7 @@ public struct RuntimeMetadataItem: Codable & Equatable, RuntimeMetadataItemProto
     public let txVersion: UInt32
     public let metadata: Data
 
-    enum CodingKeys: String, CodingKey {
+    public enum CodingKeys: String, CodingKey {
         case chain
         case version
         case txVersion

@@ -32,30 +32,38 @@ class BaseHistoryServiceTestCase: XCTestCase {
             name: "asset name",
             symbol: assetSymbol,
             precision: precision,
-            isUtility: true,
-            isNative: true,
-            type: .normal,
-            ethereumType: ethereumType
+            substrateType: nil,
+            ethereumType: ethereumType,
+            tokenProperties:
+                TokenProperties(
+                    priceId: nil,
+                    currencyId: nil,
+                    color: nil,
+                    type: .normal,
+                    isNative: true
+                ),
+            price: nil,
+            priceId: nil,
+            coingeckoPriceId: nil,
+            priceProvider: nil
         )
 
         let chain = ChainModel(
-            rank: nil,
+            rank: 1,
             disabled: false,
             chainId: "1",
-            parentId: nil,
-            paraId: nil,
-            name: "",
-            assets: [asset],
+            parentId: "2",
+            paraId: "test",
+            name: "test",
+            tokens: ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: [asset]),
             xcm: nil,
             nodes: [],
-            addressPrefix: 1,
             types: nil,
             icon: nil,
-            options: [],
+            options: nil,
             externalApi: externalApi,
-            selectedNode: nil,
-            customNodes: nil,
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            properties: ChainProperties(addressPrefix: "1")
         )
 
         let chainAsset = ChainAsset(

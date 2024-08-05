@@ -5,32 +5,37 @@ import SSFUtils
 
 // MARK: - Normal
 
-struct AccountInfoStorageWrapper: StorageWrapper {
-    let identifier: String
-    let data: Data
+public struct AccountInfoStorageWrapper: StorageWrapper {
+    public let identifier: String
+    public let data: Data
+
+    public init(identifier: String, data: Data) {
+        self.identifier = identifier
+        self.data = data
+    }
 }
 
-struct AccountInfo: Codable, Equatable {
+public struct AccountInfo: Codable, Equatable {
     @StringCodable var nonce: UInt32
     @StringCodable var consumers: UInt32
     @StringCodable var providers: UInt32
-    let data: AccountData
+    public let data: AccountData
 
-    init(ethBalance: BigUInt) {
+    public init(ethBalance: BigUInt) {
         nonce = 0
         consumers = 0
         providers = 0
         data = AccountData(ethBalance: ethBalance)
     }
 
-    init(nonce: UInt32, consumers: UInt32, providers: UInt32, data: AccountData) {
+    public init(nonce: UInt32, consumers: UInt32, providers: UInt32, data: AccountData) {
         self.nonce = nonce
         self.consumers = consumers
         self.providers = providers
         self.data = data
     }
 
-    init?(ormlAccountInfo: OrmlAccountInfo?) {
+    public init?(ormlAccountInfo: OrmlAccountInfo?) {
         guard let ormlAccountInfo = ormlAccountInfo else {
             return nil
         }
@@ -46,7 +51,7 @@ struct AccountInfo: Codable, Equatable {
         )
     }
 
-    init?(equilibriumFree: BigUInt?) {
+    public init?(equilibriumFree: BigUInt?) {
         guard let equilibriumFree = equilibriumFree else {
             return nil
         }
@@ -62,7 +67,7 @@ struct AccountInfo: Codable, Equatable {
         )
     }
 
-    init?(assetAccount: AssetAccount?) {
+    public init?(assetAccount: AssetAccount?) {
         guard let assetAccount = assetAccount else {
             return nil
         }
@@ -77,16 +82,16 @@ struct AccountInfo: Codable, Equatable {
         )
     }
 
-    func nonZero() -> Bool {
+    public func nonZero() -> Bool {
         data.total > 0
     }
 
-    func zero() -> Bool {
+    public func zero() -> Bool {
         data.total == BigUInt.zero
     }
 }
 
-struct AccountData: Codable, Equatable {
+public struct AccountData: Codable, Equatable {
     enum CodingKeys: String, CodingKey {
         case free
         case reserved
@@ -101,21 +106,21 @@ struct AccountData: Codable, Equatable {
     @StringCodable var frozen: BigUInt
     @StringCodable var flags: BigUInt
 
-    init(ethBalance: BigUInt) {
+    public init(ethBalance: BigUInt) {
         free = ethBalance
         reserved = 0
         frozen = 0
         flags = 0
     }
 
-    init(free: BigUInt, reserved: BigUInt, frozen: BigUInt, flags: BigUInt? = .zero) {
+    public init(free: BigUInt, reserved: BigUInt, frozen: BigUInt, flags: BigUInt? = .zero) {
         self.free = free
         self.reserved = reserved
         self.frozen = frozen
         self.flags = flags ?? .zero
     }
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(free, forKey: .free)
         try container.encode(reserved, forKey: .reserved)
@@ -123,7 +128,7 @@ struct AccountData: Codable, Equatable {
         try container.encode(flags, forKey: .flags)
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         do {
@@ -166,7 +171,7 @@ struct AccountData: Codable, Equatable {
     }
 }
 
-extension AccountData {
+public extension AccountData {
     var total: BigUInt { free + reserved }
     var locked: BigUInt { frozen }
     var stakingAvailable: BigUInt {
@@ -182,7 +187,7 @@ extension AccountData {
 
 // MARK: - Orml
 
-struct OrmlAccountInfo: Codable, Equatable {
+public struct OrmlAccountInfo: Codable, Equatable {
     @StringCodable var free: BigUInt
     @StringCodable var reserved: BigUInt
     @StringCodable var frozen: BigUInt
@@ -190,26 +195,26 @@ struct OrmlAccountInfo: Codable, Equatable {
 
 // MARK: - Assets Account
 
-struct AssetAccount: Codable {
+public struct AssetAccount: Codable {
     @StringCodable var balance: BigUInt
 }
 
 // MARK: - Equilibrium
 
-struct EquilibriumAccountInfo: Decodable {
+public struct EquilibriumAccountInfo: Decodable {
     @StringCodable var nonce: BigUInt
     @StringCodable var consumers: BigUInt
     @StringCodable var providers: BigUInt
     @StringCodable var sufficients: BigUInt
-    var data: EquilibriumAccountData
+    public var data: EquilibriumAccountData
 }
 
-enum EquilibriumAccountData: Decodable {
+public enum EquilibriumAccountData: Decodable {
     static let v0Field = "V0"
 
     case v0data(info: EquilibriumV0AccountData)
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
         let rawValue = try container.decode(String.self)
 
@@ -227,10 +232,10 @@ enum EquilibriumAccountData: Decodable {
     }
 }
 
-struct EquilibriumV0AccountData: Decodable {
+public struct EquilibriumV0AccountData: Decodable {
     let balance: [EqulibriumBalanceData]
 
-    func mapBalances() -> [String: BigUInt] {
+    public func mapBalances() -> [String: BigUInt] {
         var map = [String: BigUInt]()
         for balanceData in balance {
             switch balanceData.positive {
@@ -273,5 +278,23 @@ enum EquilibruimPositive: Decodable {
                 debugDescription: "Unexpected EquilibruimPositive"
             )
         }
+    }
+}
+
+extension AccountInfo: ScaleDecodable {
+    public init(scaleDecoder: ScaleDecoding) throws {
+        nonce = try UInt32(scaleDecoder: scaleDecoder)
+        consumers = try UInt32(scaleDecoder: scaleDecoder)
+        providers = try UInt32(scaleDecoder: scaleDecoder)
+        data = try AccountData(scaleDecoder: scaleDecoder)
+    }
+}
+
+extension AccountData: ScaleDecodable {
+    public init(scaleDecoder: ScaleDecoding) throws {
+        free = try BigUInt(scaleDecoder: scaleDecoder)
+        reserved = try BigUInt(scaleDecoder: scaleDecoder)
+        frozen = .zero
+        flags = .zero
     }
 }

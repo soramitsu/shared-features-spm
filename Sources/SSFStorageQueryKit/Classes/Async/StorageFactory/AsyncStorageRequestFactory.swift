@@ -44,4 +44,10 @@ protocol AsyncStorageRequestFactory {
         storagePath: any StorageCodingPathProtocol,
         at blockHash: Data?
     ) async throws -> [StorageResponse<T>] where T: Decodable
+
+    func queryWorkersResult(
+        for keys: [Data],
+        at blockHash: Data?,
+        engine: JSONRPCEngine
+    ) async throws -> [[StorageUpdate]]
 }

@@ -7,13 +7,13 @@ public enum ChainRegistryAssembly {
         chainsUrl: URL = ApplicationSourcesImpl.shared.chainsSourceUrl,
         chainTypesUrls: URL = ApplicationSourcesImpl.shared.chainTypesSourceUrl
     ) -> ChainRegistryProtocol {
-        let chainSyncService = ChainSyncService(
+        let chainsDataFetcher = ChainsDataFetcher(
             chainsUrl: chainsUrl,
             operationQueue: OperationQueue(),
             dataFetchFactory: NetworkOperationFactory()
         )
 
-        let chainsTypesSyncService = ChainsTypesSyncService(
+        let chainsTypesDataFetcher = ChainTypesRemoteDataFercher(
             url: chainTypesUrls,
             dataOperationFactory: NetworkOperationFactory(),
             operationQueue: OperationQueue()
@@ -24,8 +24,8 @@ public enum ChainRegistryAssembly {
         let chainRegistry = ChainRegistry(
             runtimeProviderPool: RuntimeProviderPool(),
             connectionPool: ConnectionPool(),
-            chainSyncService: chainSyncService,
-            chainsTypesSyncService: chainsTypesSyncService,
+            chainsDataFetcher: chainsDataFetcher,
+            chainsTypesDataFetcher: chainsTypesDataFetcher,
             runtimeSyncService: runtimeSyncService
         )
 

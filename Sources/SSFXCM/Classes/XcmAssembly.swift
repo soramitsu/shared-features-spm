@@ -31,13 +31,13 @@ public enum XcmAssembly {
 
         let extrinsicBuilder = XcmExtrinsicBuilder()
 
-        let chainSyncService = ChainSyncService(
+        let chainSyncService = ChainsDataFetcher(
             chainsUrl: sourceConfig?.chainsSourceUrl ?? XcmConfig.shared.chainsSourceUrl,
             operationQueue: OperationQueue(),
             dataFetchFactory: NetworkOperationFactory()
         )
 
-        let chainsTypesSyncService = ChainsTypesSyncService(
+        let chainsTypesSyncService = ChainTypesRemoteDataFercher(
             url: sourceConfig?.chainTypesSourceUrl ?? XcmConfig.shared.chainTypesSourceUrl,
             dataOperationFactory: NetworkOperationFactory(),
             operationQueue: OperationQueue()
@@ -48,8 +48,8 @@ public enum XcmAssembly {
         let chainRegistry = ChainRegistry(
             runtimeProviderPool: RuntimeProviderPool(),
             connectionPool: ConnectionPool(),
-            chainSyncService: chainSyncService,
-            chainsTypesSyncService: chainsTypesSyncService,
+            chainsDataFetcher: chainSyncService,
+            chainsTypesDataFetcher: chainsTypesSyncService,
             runtimeSyncService: runtimeSyncService
         )
 

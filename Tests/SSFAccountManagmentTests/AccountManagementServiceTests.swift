@@ -102,20 +102,19 @@ private extension AccountManagementServiceTests {
             rank: 1,
             disabled: true,
             chainId: "Kusama",
-            parentId: "2",
             paraId: "test",
             name: "test",
-            assets: [asset],
+            tokens: ChainRemoteTokens(
+                type: .config,
+                whitelist: nil,
+                utilityId: nil,
+                tokens: [asset]
+            ),
             xcm: nil,
             nodes: [],
-            addressPrefix: 1,
-            types: nil,
             icon: nil,
-            options: [.crowdloans, .ethereum, .testnet],
-            externalApi: nil,
-            selectedNode: nil,
-            customNodes: [],
-            iosMinAppVersion: nil
+            iosMinAppVersion: nil,
+            properties: .init(addressPrefix: "1", rank: "2", paraId: "test", ethereumBased: true)
         )
 
         static let asset = AssetModel(
@@ -123,20 +122,13 @@ private extension AccountManagementServiceTests {
             name: "test",
             symbol: "XOR",
             precision: 1,
-            icon: nil,
-            price: Decimal(integerLiteral: 1),
-            fiatDayChange: nil,
-            currencyId: nil,
-            existentialDeposit: nil,
-            color: nil,
-            isUtility: false,
-            isNative: false,
-            staking: nil,
-            purchaseProviders: nil,
-            type: .assetId,
+            substrateType: .soraAsset,
             ethereumType: nil,
-            priceProvider: nil,
-            coingeckoPriceId: nil
+            tokenProperties: nil,
+            price: nil,
+            priceId: nil,
+            coingeckoPriceId: nil,
+            priceProvider: nil
         )
 
         static let chainAccounts = ChainAccountModel(
