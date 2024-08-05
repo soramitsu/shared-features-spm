@@ -204,7 +204,7 @@ public enum ChainModelGenerator {
         assetPresicion: UInt16 = (9 ... 18).randomElement()!,
         chainId _: String = "",
         substrateAssetType: SubstrateAssetType = .normal,
-        currencyId _: String? = nil
+        currencyId: String? = nil
     ) -> AssetModel {
         AssetModel(
             id: identifier,
@@ -214,7 +214,14 @@ public enum ChainModelGenerator {
             icon: nil,
             substrateType: substrateAssetType,
             ethereumType: nil,
-            tokenProperties: TokenProperties(),
+            tokenProperties:
+            TokenProperties(
+                priceId: nil,
+                currencyId: currencyId,
+                color: nil,
+                type: substrateAssetType,
+                isNative: true
+            ),
             price: nil,
             priceId: nil,
             coingeckoPriceId: nil,

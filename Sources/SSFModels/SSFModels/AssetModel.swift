@@ -6,19 +6,22 @@ public struct TokenProperties: Codable, Hashable {
     public let color: String?
     public let type: SubstrateAssetType?
     public let isNative: Bool?
+    public let stacking: String?
 
     public init(
         priceId: String? = nil,
         currencyId: String? = nil,
         color: String? = nil,
         type: SubstrateAssetType? = nil,
-        isNative: Bool = false
+        isNative: Bool = false,
+        stacking: String? = ""
     ) {
         self.priceId = priceId
         self.currencyId = currencyId
         self.color = color
         self.type = type
         self.isNative = isNative
+        self.stacking = stacking
     }
 }
 

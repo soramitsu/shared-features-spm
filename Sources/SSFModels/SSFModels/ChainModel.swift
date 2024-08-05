@@ -56,17 +56,20 @@ public struct ChainProperties: Codable {
     public let rank: String?
     public let paraId: String?
     public let ethereumBased: Bool?
+    public let crowdloans: Bool?
 
     public init(
         addressPrefix: String,
         rank: String? = nil,
         paraId: String? = nil,
-        ethereumBased: Bool? = nil
+        ethereumBased: Bool? = nil,
+        crowdloans: Bool? = nil
     ) {
         self.addressPrefix = addressPrefix
         self.rank = rank
         self.paraId = paraId
         self.ethereumBased = ethereumBased
+        self.crowdloans = crowdloans
     }
 }
 
@@ -143,7 +146,7 @@ public final class ChainModel: Codable, Identifiable {
     }
 
     public var isEthereum: Bool {
-        options?.contains(.ethereum) == true
+        properties.ethereumBased ?? false
     }
 
     public var supportsNft: Bool {
@@ -211,7 +214,7 @@ public final class ChainModel: Codable, Identifiable {
     }
 
     public var hasCrowdloans: Bool {
-        options?.contains(.crowdloans) ?? false
+        properties.crowdloans ?? false
     }
 
     public var hasPolkaswap: Bool {

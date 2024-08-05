@@ -39,7 +39,7 @@ class BaseHistoryServiceTestCase: XCTestCase {
                     priceId: nil,
                     currencyId: nil,
                     color: nil,
-                    type: .soraAsset,
+                    type: .normal,
                     isNative: true
                 ),
             price: nil,
@@ -49,20 +49,19 @@ class BaseHistoryServiceTestCase: XCTestCase {
         )
 
         let chain = ChainModel(
-            rank: nil,
+            rank: 1,
             disabled: false,
             chainId: "1",
-            paraId: nil,
-            name: "",
-            tokens: ChainRemoteTokens(
-                type: .config,
-                whitelist: nil,
-                utilityId: nil,
-                tokens: [asset]
-            ),
+            parentId: "2",
+            paraId: "test",
+            name: "test",
+            tokens: ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: [asset]),
             xcm: nil,
             nodes: [],
+            types: nil,
             icon: nil,
+            options: nil,
+            externalApi: externalApi,
             iosMinAppVersion: nil,
             properties: ChainProperties(addressPrefix: "1")
         )

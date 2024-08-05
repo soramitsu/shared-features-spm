@@ -106,7 +106,7 @@ public struct ChainAsset: Equatable, Hashable {
     }
 
     public func defineEcosystem() -> ChainEcosystem {
-        if chain.options?.contains(.ethereum) == true {
+        if chain.properties.ethereumBased ?? false {
             return .ethereum
         }
         if chain.parentId == Chain.polkadot.genesisHash || chain.chainId == Chain.polkadot
@@ -151,7 +151,7 @@ public extension ChainAsset {
 
     var hasStaking: Bool {
         let model: AssetModel? = chain.tokens.tokens?.first { $0.id == asset.id }
-        return false
+        return model?.tokenProperties?.stacking != nil
     }
 
     var storagePath: StorageCodingPath {

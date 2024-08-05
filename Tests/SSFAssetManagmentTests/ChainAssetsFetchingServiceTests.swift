@@ -677,7 +677,7 @@ private extension ChainAssetsFetchingServiceTests {
             nodes: [],
             icon: nil,
             iosMinAppVersion: nil,
-            properties: .init(addressPrefix: "test")
+            properties: .init(addressPrefix: "test", ethereumBased: true, crowdloans: true)
         )
 
         static let asset = AssetModel(
@@ -710,7 +710,7 @@ private extension ChainAssetsFetchingServiceTests {
             nodes: [],
             icon: nil,
             iosMinAppVersion: nil,
-            properties: .init(addressPrefix: "1")
+            properties: .init(addressPrefix: "1", crowdloans: false)
         )
 
         static let assetWithStacking = AssetModel(
@@ -720,7 +720,7 @@ private extension ChainAssetsFetchingServiceTests {
             precision: 1,
             substrateType: .soraAsset,
             ethereumType: nil,
-            tokenProperties: nil,
+            tokenProperties: TokenProperties(stacking: "relaychain"),
             price: nil,
             priceId: nil,
             coingeckoPriceId: nil,
