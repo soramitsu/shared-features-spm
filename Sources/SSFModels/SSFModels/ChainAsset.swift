@@ -134,7 +134,7 @@ public struct ChainAssetId: Equatable, Codable, Hashable {
 
 public extension ChainAsset {
     var chainAssetId: ChainAssetId {
-        ChainAssetId(chainId: chain.chainId, assetId: asset.id)
+        ChainAssetId(chainId: chain.chainId, assetId: asset.tokenProperties?.currencyId ?? "")
     }
 
     var rawStakingType: RawStakingType? {
