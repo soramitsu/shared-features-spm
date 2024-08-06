@@ -269,6 +269,7 @@ extension XcmCallFactoryTests {
         )
 
         static let model = ChainModel(
+            ecosystem: .substrate,
             rank: 0,
             disabled: false,
             chainId: "0",

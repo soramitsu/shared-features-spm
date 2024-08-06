@@ -38,7 +38,7 @@ final class MapKeyEncodingWorkerTests: XCTestCase {
     func testThrows() async throws {
         let account = try AddressFactory.accountId(
             from: "12zcF9m6QpUaGeJrrKYRGubZuxa9YyuVRTjpXGyVNsCpzspY",
-            chainFormat: .sfSubstrate(0)
+            chainFormat: .substrate(0)
         )
         let worker = MapKeyEncodingWorker(
             codingFactory: codingFactory,

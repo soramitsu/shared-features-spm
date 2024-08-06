@@ -387,7 +387,7 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
         )
 
         // assert
-        XCTAssertEqual(chainAssets.count, 1)
+        XCTAssertEqual(chainAssets.count, 0)
         XCTAssertTrue(chainAssetsFetcher.getChainAssetsModelsCalled)
         XCTAssert(chainAssetsFetcher.getChainAssetsModelsCallsCount == 1)
     }

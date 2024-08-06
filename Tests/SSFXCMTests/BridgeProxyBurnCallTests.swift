@@ -158,6 +158,7 @@ extension BridgeProxyBurnCallTests {
             .appendingPathExtension("json")
 
         static let chain = ChainModel(
+            ecosystem: .substrate, 
             rank: 1,
             disabled: false,
             chainId: "b0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe",

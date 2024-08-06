@@ -551,6 +551,7 @@ extension ChainModelMapper: CoreDataMapperProtocol {
         if let rank = model.rank {
             entity.rank = "\(rank)"
         }
+        entity.ecosystem = model.ecosystem.rawValue
         entity.disabled = model.disabled
         entity.chainId = model.chainId
         entity.parentId = model.parentId

@@ -83,15 +83,16 @@ extension MnemonicExportServiceTests {
             substratePublicKey: Data(),
             ethereumAddress: nil,
             ethereumPublicKey: nil,
+            tonAddress: nil,
+            tonPublicKey: nil,
+            tonContractVersion: nil,
             chainAccounts: [TestData.chainAccount],
             assetKeysOrder: nil,
-            assetFilterOptions: [],
             canExportEthereumMnemonic: false,
             unusedChainIds: nil,
             selectedCurrency: .defaultCurrency(),
             networkManagmentFilter: nil,
             assetsVisibility: [],
-            zeroBalanceAssetsHidden: true,
             hasBackup: false,
             favouriteChainIds: []
         )

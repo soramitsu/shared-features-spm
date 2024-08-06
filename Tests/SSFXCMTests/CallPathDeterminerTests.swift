@@ -119,8 +119,7 @@ extension CallPathDeterminerTests {
             signingWrapperData: .init(
                 publicKeyData: Data(),
                 secretKeyData: Data()
-            ),
-            chainType: .substrate
+            )
         )
     }
 

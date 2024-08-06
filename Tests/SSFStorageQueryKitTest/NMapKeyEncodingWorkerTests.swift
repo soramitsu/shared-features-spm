@@ -17,7 +17,7 @@ final class NMapKeyEncodingWorkerTests: XCTestCase {
     func testNMapEntryType() async throws {
         let account = try AddressFactory.accountId(
             from: "1zugcag7cJVBtVRnFxv5Qftn7xKAnR6YJ9x4x3XLgGgmNnS",
-            chainFormat: .sfSubstrate(0)
+            chainFormat: .substrate(0)
         )
         let worker = NMapKeyEncodingWorker(
             codingFactory: codingFactory,
@@ -58,7 +58,7 @@ final class NMapKeyEncodingWorkerTests: XCTestCase {
     func testThrows1() async throws {
         let account = try AddressFactory.accountId(
             from: "12zcF9m6QpUaGeJrrKYRGubZuxa9YyuVRTjpXGyVNsCpzspY",
-            chainFormat: .sfSubstrate(0)
+            chainFormat: .substrate(0)
         )
         let worker = NMapKeyEncodingWorker(
             codingFactory: codingFactory,
@@ -87,7 +87,7 @@ final class NMapKeyEncodingWorkerTests: XCTestCase {
     func testThrows2() async throws {
         let account = try AddressFactory.accountId(
             from: "12zcF9m6QpUaGeJrrKYRGubZuxa9YyuVRTjpXGyVNsCpzspY",
-            chainFormat: .sfSubstrate(0)
+            chainFormat: .substrate(0)
         )
         let worker = NMapKeyEncodingWorker(
             codingFactory: codingFactory,
