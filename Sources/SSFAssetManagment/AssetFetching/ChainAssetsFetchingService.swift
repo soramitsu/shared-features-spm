@@ -105,7 +105,13 @@ private extension ChainAssetsFetchingService {
         case let .chainIds(ids):
             return chainAssets.filter { ids.contains($0.chain.chainId) }
         case .supportNfts:
-            return chainAssets.filter { $0.chain.isEthereum }
+            return chainAssets.filter {
+                switch $0.chain.ecosystem {
+                case .substrate, .ethereumBased: return false
+                case .ethereum: return true
+                case .ton: return true
+                }
+            }
         }
     }
 

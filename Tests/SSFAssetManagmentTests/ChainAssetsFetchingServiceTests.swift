@@ -420,6 +420,7 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
     func testFetchSortPrice() async {
         // arrange
         let chain = ChainModel(
+            ecosystem: .substrate,
             rank: 1,
             disabled: true,
             chainId: "Kusama",
@@ -589,6 +590,7 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
     func testFetchSortAssetId() async {
         // arrange
         let chain = ChainModel(
+            ecosystem: .substrate,
             rank: 3,
             disabled: true,
             chainId: "Kusama",
@@ -634,6 +636,7 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
 private extension ChainAssetsFetchingServiceTests {
     enum TestData {
         static let chain = ChainModel(
+            ecosystem: .substrate,
             rank: 1,
             disabled: true,
             chainId: "Kusama",
@@ -669,13 +672,13 @@ private extension ChainAssetsFetchingServiceTests {
             isNative: false,
             staking: nil,
             purchaseProviders: nil,
-            type: .assetId,
-            ethereumType: nil,
+            assetType: .substrate(substrateType: .assetId),
             priceProvider: nil,
             coingeckoPriceId: nil
         )
 
         static let chainWithStacking = ChainModel(
+            ecosystem: .substrate,
             rank: 2,
             disabled: true,
             chainId: "91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3",
@@ -711,8 +714,7 @@ private extension ChainAssetsFetchingServiceTests {
             isNative: false,
             staking: .paraChain,
             purchaseProviders: nil,
-            type: .assetId,
-            ethereumType: nil,
+            assetType: .substrate(substrateType: .assetId),
             priceProvider: nil,
             coingeckoPriceId: nil
         )

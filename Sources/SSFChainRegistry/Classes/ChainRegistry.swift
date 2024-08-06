@@ -23,6 +23,7 @@ public protocol ChainRegistryProtocol: AnyObject {
         usedRuntimePaths: [String: [String]],
         runtimeItem: RuntimeMetadataItemProtocol?
     ) async throws -> RuntimeSnapshot
+    func getTonApiAssembly() throws -> TonAPIAssembly
 }
 
 public final class ChainRegistry {
@@ -136,5 +137,9 @@ extension ChainRegistry: ChainRegistryProtocol {
 
     public func getChains() async throws -> [ChainModel] {
         try await chainSyncService.getChainModels()
+    }
+    
+    public func getTonApiAssembly() throws -> TonAPIAssembly {
+        try connectionPool.getTonApiAssembly()
     }
 }

@@ -56,6 +56,7 @@ public enum ChainModelGenerator {
             )
 
             let chain = ChainModel(
+                ecosystem: .substrate,
                 rank: nil,
                 disabled: false,
                 chainId: chainId,
@@ -87,6 +88,7 @@ public enum ChainModelGenerator {
         availableAssets: [XcmAvailableAsset]
     ) -> ChainModel {
         ChainModel(
+            ecosystem: .substrate,
             rank: nil,
             disabled: chain.disabled,
             chainId: chain.chainId,
@@ -156,6 +158,7 @@ public enum ChainModelGenerator {
         )
 
         let chain = ChainModel(
+            ecosystem: .substrate,
             rank: nil,
             disabled: false,
             chainId: chainId,
@@ -209,8 +212,7 @@ public enum ChainModelGenerator {
             isNative: false,
             staking: nil,
             purchaseProviders: nil,
-            type: substrateAssetType,
-            ethereumType: .normal,
+            assetType: .substrate(substrateType: substrateAssetType),
             priceProvider: nil,
             coingeckoPriceId: nil
         )

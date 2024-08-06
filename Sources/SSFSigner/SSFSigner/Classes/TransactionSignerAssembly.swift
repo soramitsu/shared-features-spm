@@ -1,25 +1,31 @@
 import Foundation
 import SSFModels
 
+public enum TransactionSignerAssemblyError: Error {
+    case unsupportedEcossytem
+}
+
 public enum TransactionSignerAssembly {
     public static func signer(
-        for chainType: ChainBaseType,
+        for ecosystem: Ecosystem,
         publicKeyData: Data,
         secretKeyData: Data,
         cryptoType: CryptoType
-    ) -> TransactionSignerProtocol {
-        switch chainType {
+    ) throws -> TransactionSignerProtocol {
+        switch ecosystem {
         case .substrate:
             return SubstrateTransactionSigner(
                 publicKeyData: publicKeyData,
                 secretKeyData: secretKeyData,
                 cryptoType: cryptoType
             )
-        case .ethereum:
+        case .ethereum, .ethereumBased:
             return EthereumTransactionSigner(
                 publicKeyData: publicKeyData,
                 secretKeyData: secretKeyData
             )
+        case .ton:
+            throw TransactionSignerAssemblyError.unsupportedEcossytem
         }
     }
 }

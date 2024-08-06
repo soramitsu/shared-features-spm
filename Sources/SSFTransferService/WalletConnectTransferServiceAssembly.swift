@@ -9,7 +9,7 @@ public class WalletConnectTransferServiceAssembly {
         chain: ChainModel
     ) async throws -> WalletConnectTransferService {
         let chainRegistry = ChainRegistryAssembly.createDefaultRegistry()
-        let connection = try await chainRegistry.getEthereumConnection(for: chain)
+        let connection = try chainRegistry.getEthereumConnection(for: chain)
         let privateKey = try EthereumPrivateKey(privateKey: privateKey.bytes)
         let ethereumService = EthereumServiceDefault(connection: connection)
 

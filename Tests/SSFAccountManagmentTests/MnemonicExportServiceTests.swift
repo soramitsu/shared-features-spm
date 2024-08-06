@@ -72,7 +72,7 @@ extension MnemonicExportServiceTests {
             accountId: Data(),
             publicKey: Data(),
             cryptoType: 23,
-            ethereumBased: false
+            ecosystem: .substrate
         )
 
         static let account = MetaAccountModel(
@@ -97,6 +97,7 @@ extension MnemonicExportServiceTests {
         )
 
         static let chain = ChainModel(
+            ecosystem: .substrate,
             rank: 1,
             disabled: true,
             chainId: "Kusama",
@@ -124,7 +125,7 @@ extension MnemonicExportServiceTests {
             name: "test",
             cryptoType: .ecdsa,
             addressPrefix: 1,
-            isEthereumBased: false,
+            ecosystem: .substrate,
             isChainAccount: true,
             walletId: ""
         )

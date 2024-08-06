@@ -90,17 +90,19 @@ public final class RuntimeMetadata {
 
     public func multiAddressParameter(
         accountId: AccountId,
-        chainFormat: SFChainFormat
-    ) -> MultiAddress {
+        chainFormat: ChainFormat
+    ) throws -> MultiAddress {
         switch chainFormat {
-        case .sfEthereum:
+        case .ethereum:
             return MultiAddress.address20(accountId)
-        case .sfSubstrate:
+        case .substrate:
             if version == 13 {
                 return .indexedString(accountId)
             } else {
                 return MultiAddress.accoundId(accountId)
             }
+        case .ton:
+            throw ChainFormatError.wrongFormat
         }
     }
 }

@@ -10,7 +10,7 @@ public struct SubstrateTransfer {
     public init(
         amount: BigUInt,
         receiver: String,
-        tip: BigUInt
+        tip: BigUInt?
     ) {
         self.amount = amount
         self.receiver = receiver

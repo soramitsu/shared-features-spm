@@ -75,9 +75,8 @@ final class SubstrateTransferServiceDefault: SubstrateTransferService {
     ) -> AsyncThrowingStream<BigUInt, Error> {
         func accountId(from address: String?, chain: ChainModel) -> AccountId {
             guard let address = address,
-                  let accountId = try? AddressFactory.accountId(from: address, chain: chain) else
-            {
-                return AddressFactory.randomAccountId(for: chain.chainFormat)
+                  let accountId = try? AddressFactory.accountId(from: address, chain: chain) else {
+                return AddressFactory.randomAccountId(for: .substrate(chain.addressPrefix))
             }
 
             return accountId

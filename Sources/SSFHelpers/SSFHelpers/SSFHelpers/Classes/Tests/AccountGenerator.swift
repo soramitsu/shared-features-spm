@@ -18,15 +18,16 @@ public enum AccountGenerator {
             substratePublicKey: Data.random(of: 32)!,
             ethereumAddress: Data.random(of: 20)!,
             ethereumPublicKey: Data.random(of: 20)!,
+            tonAddress: nil,
+            tonPublicKey: nil, 
+            tonContractVersion: nil,
             chainAccounts: chainAccounts,
             assetKeysOrder: nil,
-            assetFilterOptions: [],
             canExportEthereumMnemonic: true,
             unusedChainIds: nil,
             selectedCurrency: Currency.defaultCurrency(),
             networkManagmentFilter: nil,
             assetsVisibility: [],
-            zeroBalanceAssetsHidden: true,
             hasBackup: false,
             favouriteChainIds: []
         )
@@ -38,7 +39,7 @@ public enum AccountGenerator {
             accountId: Data.random(of: 32)!,
             publicKey: Data.random(of: 32)!,
             cryptoType: 0,
-            ethereumBased: Bool.random()
+            ecosystem: .substrate
         )
     }
 }

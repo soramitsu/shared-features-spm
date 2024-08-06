@@ -48,7 +48,7 @@ final class EthereumTransferServiceDefault: EthereumTransferService {
         transfer: EthereumTransfer,
         chainAsset: ChainAsset
     ) async throws -> String {
-        switch chainAsset.asset.ethereumType {
+        switch chainAsset.asset.assetType.ethereumAssetType {
         case .normal:
             return try await transferNative(transfer: transfer, chainAsset: chainAsset)
         case .erc20, .bep20:
@@ -246,7 +246,7 @@ final class EthereumTransferServiceDefault: EthereumTransferService {
         baseFeePerGas: EthereumQuantity,
         chainAsset: ChainAsset
     ) async throws -> BigUInt {
-        switch chainAsset.asset.ethereumType {
+        switch chainAsset.asset.assetType.ethereumAssetType {
         case .normal:
             let address = try EthereumAddress(rawAddress: transfer.receiver.hexToBytes())
             let call = EthereumCall(to: address)

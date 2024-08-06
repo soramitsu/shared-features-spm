@@ -90,7 +90,7 @@ public struct ChainAccountImportMnemonicRequest {
     let username: String
     let derivationPath: String
     let cryptoType: CryptoType
-    let isEthereum: Bool
+    let ecosystem: Ecosystem
     let meta: MetaAccountModel
     let chainId: ChainModel.Id
 }
@@ -100,7 +100,7 @@ public struct ChainAccountImportSeedRequest {
     let username: String
     let derivationPath: String
     let cryptoType: CryptoType
-    let isEthereum: Bool
+    let ecosystem: Ecosystem
     let meta: MetaAccountModel
     let chainId: ChainModel.Id
 }
@@ -110,7 +110,7 @@ public struct ChainAccountImportKeystoreRequest {
     let password: String
     let username: String
     let cryptoType: CryptoType
-    let isEthereum: Bool
+    let ecosystem: Ecosystem
     let meta: MetaAccountModel
     let chainId: ChainModel.Id
 }

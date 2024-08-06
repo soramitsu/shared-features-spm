@@ -30,7 +30,7 @@ final class SubstrateTransferCallFactoryDefault: SubstrateTransferCallFactory {
         amount: BigUInt,
         chainAsset: ChainAsset
     ) -> any RuntimeCallable {
-        switch chainAsset.chainAssetType {
+        switch chainAsset.chainAssetType.substrateAssetType {
         case .normal, .none:
             return transferNormalAssetWith(
                 specific: .init(from: chainAsset.chain),

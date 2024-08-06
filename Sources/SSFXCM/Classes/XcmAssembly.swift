@@ -22,9 +22,9 @@ public enum XcmAssembly {
         fromChainData: FromChainData,
         sourceConfig: XcmConfigProtocol?,
         chainRegistry: ChainRegistryProtocol?
-    ) -> XcmExtrinsicServices {
-        let signingWrapper = TransactionSignerAssembly.signer(
-            for: fromChainData.chainType,
+    ) throws -> XcmExtrinsicServices {
+        let signingWrapper = try TransactionSignerAssembly.signer(
+            for: .substrate,
             publicKeyData: fromChainData.signingWrapperData.publicKeyData,
             secretKeyData: fromChainData.signingWrapperData.secretKeyData,
             cryptoType: fromChainData.cryptoType
@@ -104,22 +104,19 @@ public extension XcmAssembly {
         public let chainMetadata: RuntimeMetadataItemProtocol?
         public let accountId: AccountId
         public let signingWrapperData: SigningWrapperData
-        public let chainType: ChainBaseType
 
         public init(
             chainId: String,
             cryptoType: CryptoType,
             chainMetadata: RuntimeMetadataItemProtocol?,
             accountId: AccountId,
-            signingWrapperData: SigningWrapperData,
-            chainType: ChainBaseType
+            signingWrapperData: SigningWrapperData
         ) {
             self.chainId = chainId
             self.cryptoType = cryptoType
             self.chainMetadata = chainMetadata
             self.accountId = accountId
             self.signingWrapperData = signingWrapperData
-            self.chainType = chainType
         }
     }
 }

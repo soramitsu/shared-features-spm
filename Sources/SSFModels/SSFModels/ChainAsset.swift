@@ -11,9 +11,13 @@ public struct ChainAsset: Equatable, Hashable {
         self.chain = chain
         self.asset = asset
     }
+    
+    public var identifier: String {
+        [chain.identifier, asset.id].joined(separator: " : ")
+    }
 
-    public var chainAssetType: SubstrateAssetType? {
-        asset.type
+    public var chainAssetType: ChainAssetType {
+        asset.assetType
     }
 
     public var isUtility: Bool {
@@ -25,7 +29,7 @@ public struct ChainAsset: Equatable, Hashable {
     }
 
     public var currencyId: CurrencyId? {
-        switch chainAssetType {
+        switch chainAssetType.substrateAssetType {
         case .normal:
             if chain.isSora, isUtility {
                 guard let currencyId = asset.currencyId else {
@@ -101,7 +105,17 @@ public struct ChainAsset: Equatable, Hashable {
     }
 
     public func uniqueKey(accountId: AccountId) -> ChainAssetKey {
-        let accountIdHex = (accountId as NSData).toHexString()
+        let accountIdHex: String
+        switch chain.ecosystem {
+        case .substrate, .ethereumBased, .ethereum:
+            accountIdHex = (accountId as NSData).toHexString()
+        case .ton:
+            if let tonAddress = try? accountId.asTonAddress() {
+                accountIdHex = tonAddress.toRaw()
+            } else {
+                accountIdHex = (accountId as NSData).toHexString()
+            }
+        }
         return [asset.id, chain.chainId, accountIdHex].joined(separator: ":")
     }
 
@@ -159,5 +173,15 @@ public extension ChainAsset {
     var hasStaking: Bool {
         let model: AssetModel? = chain.assets.first { $0.id == asset.id }
         return model?.staking != nil
+    }
+}
+
+public struct DisplayAddress {
+    public let address: AccountAddress
+    public let username: String
+    
+    public init(address: AccountAddress, username: String) {
+        self.address = address
+        self.username = username
     }
 }

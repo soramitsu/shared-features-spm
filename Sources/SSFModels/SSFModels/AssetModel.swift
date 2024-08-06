@@ -18,8 +18,7 @@ public struct AssetModel: Equatable, Codable, Hashable {
     public let isNative: Bool
     public let staking: RawStakingType?
     public let purchaseProviders: [PurchaseProvider]?
-    public let type: SubstrateAssetType?
-    public let ethereumType: EthereumAssetType?
+    public let assetType: ChainAssetType
     public let priceProvider: PriceProvider?
 
     public let coingeckoPriceId: PriceId?
@@ -50,8 +49,7 @@ public struct AssetModel: Equatable, Codable, Hashable {
         isNative: Bool,
         staking: RawStakingType? = nil,
         purchaseProviders: [PurchaseProvider]? = nil,
-        type: SubstrateAssetType? = nil,
-        ethereumType: EthereumAssetType? = nil,
+        assetType: ChainAssetType,
         priceProvider: PriceProvider? = nil,
         coingeckoPriceId: PriceId? = nil
     ) {
@@ -69,8 +67,7 @@ public struct AssetModel: Equatable, Codable, Hashable {
         self.isNative = isNative
         self.staking = staking
         self.purchaseProviders = purchaseProviders
-        self.type = type
-        self.ethereumType = ethereumType
+        self.assetType = assetType
         self.priceProvider = priceProvider
         self.coingeckoPriceId = coingeckoPriceId
     }
@@ -93,8 +90,19 @@ public struct AssetModel: Equatable, Codable, Hashable {
             [PurchaseProvider]?.self,
             forKey: .purchaseProviders
         )
-        type = try? container.decode(SubstrateAssetType?.self, forKey: .type)
-        ethereumType = try? container.decode(EthereumAssetType?.self, forKey: .ethereumType)
+
+        let assetType: ChainAssetType? = try ChainAssetType(from: decoder)
+        guard let assetType else {
+            throw DecodingError.valueNotFound(
+                ChainAssetType.self,
+                DecodingError.Context(codingPath: [
+                    Self.CodingKeys.type,
+                    Self.CodingKeys.ethereumType,
+                    Self.CodingKeys.tonType
+                ], debugDescription: "missing base asset type")
+            )
+        }
+        self.assetType = assetType
 
         coingeckoPriceId = try? container.decode(String?.self, forKey: .priceId)
         priceProvider = try container.decodeIfPresent(PriceProvider.self, forKey: .priceProvider)
@@ -121,8 +129,7 @@ public struct AssetModel: Equatable, Codable, Hashable {
             isNative: isNative,
             staking: staking,
             purchaseProviders: purchaseProviders,
-            type: type,
-            ethereumType: ethereumType,
+            assetType: assetType,
             priceProvider: priceProvider,
             coingeckoPriceId: coingeckoPriceId
         )
@@ -141,8 +148,7 @@ public struct AssetModel: Equatable, Codable, Hashable {
             lhs.isNative == rhs.isNative &&
             lhs.staking == rhs.staking &&
             lhs.purchaseProviders == rhs.purchaseProviders &&
-            lhs.type == rhs.type &&
-            lhs.ethereumType == rhs.ethereumType &&
+            lhs.assetType == rhs.assetType &&
             lhs.priceProvider == rhs.priceProvider
     }
 
@@ -169,5 +175,6 @@ extension AssetModel {
         case ethereumType
         case priceProvider
         case precision
+        case tonType
     }
 }

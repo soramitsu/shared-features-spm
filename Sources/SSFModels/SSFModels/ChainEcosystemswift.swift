@@ -42,10 +42,6 @@ public enum ChainEcosystem: String, Equatable {
             return .westend
         }
 
-        if chain.isEthereum {
-            return .westend
-        }
-
         if chain.isRococo || chain.parentId == Constants.rococoGenesisHash {
             return .rococo
         }

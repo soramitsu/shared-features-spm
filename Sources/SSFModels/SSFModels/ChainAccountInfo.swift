@@ -7,7 +7,7 @@ public struct ChainAccountResponse: Equatable {
     public let name: String
     public let cryptoType: CryptoType
     public let addressPrefix: UInt16
-    public let isEthereumBased: Bool
+    public let ecosystem: Ecosystem
     public let isChainAccount: Bool
     public let walletId: String
 
@@ -18,7 +18,7 @@ public struct ChainAccountResponse: Equatable {
         name: String,
         cryptoType: CryptoType,
         addressPrefix: UInt16,
-        isEthereumBased: Bool,
+        ecosystem: Ecosystem,
         isChainAccount: Bool,
         walletId: String
     ) {
@@ -28,7 +28,7 @@ public struct ChainAccountResponse: Equatable {
         self.name = name
         self.cryptoType = cryptoType
         self.addressPrefix = addressPrefix
-        self.isEthereumBased = isEthereumBased
+        self.ecosystem = ecosystem
         self.isChainAccount = isChainAccount
         self.walletId = walletId
     }

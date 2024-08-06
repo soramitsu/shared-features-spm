@@ -99,6 +99,7 @@ final class AccountManagementServiceTests: XCTestCase {
 private extension AccountManagementServiceTests {
     enum TestData {
         static let chain = ChainModel(
+            ecosystem: .substrate,
             rank: 1,
             disabled: true,
             chainId: "Kusama",
@@ -134,8 +135,7 @@ private extension AccountManagementServiceTests {
             isNative: false,
             staking: nil,
             purchaseProviders: nil,
-            type: .assetId,
-            ethereumType: nil,
+            assetType: .substrate(substrateType: .assetId),
             priceProvider: nil,
             coingeckoPriceId: nil
         )
@@ -145,7 +145,7 @@ private extension AccountManagementServiceTests {
             accountId: Data(),
             publicKey: Data(),
             cryptoType: 2,
-            ethereumBased: false
+            ecosystem: .substrate
         )
 
         static let account = MetaAccountModel(
