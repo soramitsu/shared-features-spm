@@ -15,6 +15,8 @@ public enum StorageRequestWorkerType {
     case nMap(params: [[any NMapKeyParamProtocol]])
     case encodable(params: [any Encodable])
     case simple
+    case prefix
+    case prefixEncodable(params: [any Encodable])
 }
 
 final class StorageRequestWorkerBuilderDefault<T: Decodable>: StorageRequestWorkerBuilder {
@@ -39,6 +41,18 @@ final class StorageRequestWorkerBuilderDefault<T: Decodable>: StorageRequestWork
             )
         case .simple:
             return SimpleStorageRequestWorker<T>(
+                runtimeService: runtimeService,
+                connection: connection,
+                storageRequestFactory: storageRequestFactory
+            )
+        case .prefix:
+            return PrefixStorageRequestWorker<T>(
+                runtimeService: runtimeService,
+                connection: connection,
+                storageRequestFactory: storageRequestFactory
+            )
+        case .prefixEncodable:
+            return PrefixEncodableStorageRequestWorker<T>(
                 runtimeService: runtimeService,
                 connection: connection,
                 storageRequestFactory: storageRequestFactory

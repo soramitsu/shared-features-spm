@@ -152,6 +152,30 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
         return mergeResult
     }
 
+    func queryItemsByPrefix<T>(
+        engine: JSONRPCEngine,
+        keyParams: [any Encodable],
+        factory: RuntimeCoderFactoryProtocol,
+        storagePath: any StorageCodingPathProtocol,
+        at _: Data?
+    ) async throws -> [StorageResponse<T>] where T: Decodable {
+        let keysWorker = MapKeyEncodingWorker(
+            codingFactory: factory,
+            path: storagePath,
+            storageKeyFactory: storageKeyFactory,
+            keyParams: keyParams
+        )
+        let keys = try await keysWorker.performEncoding()
+
+        return try await queryItemsByPrefix(
+            engine: engine,
+            keys: keys,
+            factory: factory,
+            storagePath: storagePath,
+            at: nil
+        )
+    }
+
     // MARK: - Private methods
 
     func queryWorkersResult(

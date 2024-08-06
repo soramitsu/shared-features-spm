@@ -48,6 +48,7 @@ let package = Package(
         .library(name: "SSFSubsquidIndexer", targets: ["SSFSubsquidIndexer"]),
         .library(name: "SSFZetaIndexer", targets: ["SSFZetaIndexer"]),
         .library(name: "SSFBalances", targets: ["SSFBalances"]),
+        .library(name: "SSFBalancesStorage", targets: ["SSFBalancesStorage"]),
         .library(name: "SSFSubstrateBalances", targets: ["SSFSubstrateBalances"])
     ],
     dependencies: [
@@ -84,6 +85,10 @@ let package = Package(
         .target(
             name: "SSFBalances",
             dependencies: ["SSFUtils", "SSFStorageQueryKit", "SSFModels", "SSFAccountManagment"]
+        ),
+        .target(
+            name: "SSFBalancesStorage",
+            dependencies: ["RobinHood", "SSFBalances", "SSFUtils", "SSFAccountManagment"]
         ),
         .target(
             name: "SSFSubstrateBalances",

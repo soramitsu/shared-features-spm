@@ -10,4 +10,5 @@ struct StorageRequestMock: StorageRequest {
 struct MultipleStorageRequstMock: MultipleRequest {
     let parametersType: MultipleStorageRequestParametersType
     let storagePath: any StorageCodingPathProtocol
+    var keyType: SSFStorageQueryKit.MapKeyType
 }

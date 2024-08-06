@@ -105,7 +105,7 @@ public actor AccountInfoRemoteServiceDefault: AccountInfoRemoteService {
             return response.1
         } else {
             let request = createSubstrateRequest(for: chainAsset, accountId: accountId)
-            let response = try await storagePerformer.perform([request])
+            let response = try await storagePerformer.perform([request], chain: chainAsset.chain)
             let map = try createSubstrateMap(from: response, chain: chainAsset.chain)
             let accountInfo = map[chainAsset.chainAssetId] ?? nil
             return accountInfo
@@ -120,7 +120,7 @@ public actor AccountInfoRemoteServiceDefault: AccountInfoRemoteService {
     ) async throws -> [ChainAssetId: AccountInfo?] {
         let requests = chain.chainAssets
             .map { createSubstrateRequest(for: $0, accountId: accountId) }
-        let result = try await storagePerformer.perform(requests)
+        let result = try await storagePerformer.perform(requests, chain: chain)
         let map = try createSubstrateMap(from: result, chain: chain)
         return map
     }
