@@ -27,6 +27,7 @@ let package = Package(
         .library(name: "SSFAccountManagment", targets: ["SSFAccountManagment"]),
         .library(name: "SSFAccountManagmentStorage", targets: ["SSFAccountManagmentStorage"]),
         .library(name: "SSFAssetManagment", targets: ["SSFAssetManagment"]),
+        .library(name: "SSFAssetManagmentStorage", targets: ["SSFAssetManagmentStorage"]),
         .library(name: "IrohaCrypto", targets: ["IrohaCrypto"]),
         .library(name: "keccak", targets: ["keccak"]), //TODO: generate xcframework
         .library(name: "RobinHood", targets: ["RobinHood"]), //TODO: get from github
