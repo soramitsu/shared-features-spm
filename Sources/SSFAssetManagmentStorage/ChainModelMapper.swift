@@ -65,6 +65,7 @@ public final class ChainModelMapper {
             id: id,
             name: name,
             symbol: symbol,
+            isUtility: entity.isUtility,
             precision: UInt16(bitPattern: entity.precision),
             icon: entity.icon,
             substrateType: createChainAssetModelType(from: entity.type),

@@ -32,6 +32,7 @@ public struct AssetModel: Equatable, Codable, Hashable {
     public let id: String
     public let name: String
     public let symbol: String
+    public let isUtility: Bool
     public let precision: UInt16
     public let icon: URL?
     public let substrateType: SubstrateAssetType?
@@ -50,6 +51,7 @@ public struct AssetModel: Equatable, Codable, Hashable {
         id: String,
         name: String,
         symbol: String,
+        isUtility: Bool,
         precision: UInt16,
         icon: URL? = nil,
         substrateType: SubstrateAssetType?,
@@ -63,6 +65,7 @@ public struct AssetModel: Equatable, Codable, Hashable {
         self.id = id
         self.symbol = symbol
         self.name = name
+        self.isUtility = isUtility
         self.precision = precision
         self.icon = icon
         self.substrateType = substrateType
@@ -80,6 +83,7 @@ public struct AssetModel: Equatable, Codable, Hashable {
         id = try container.decode(String.self, forKey: .id)
         name = try container.decode(String.self, forKey: .name)
         symbol = try container.decode(String.self, forKey: .symbol)
+        isUtility = try container.decode(Bool.self, forKey: .isUtility)
         precision = try container.decode(UInt16.self, forKey: .precision)
         icon = try? container.decode(URL?.self, forKey: .icon)
         substrateType = try? container.decode(SubstrateAssetType?.self, forKey: .substrateType)
@@ -98,6 +102,7 @@ public struct AssetModel: Equatable, Codable, Hashable {
             id: id,
             name: name,
             symbol: symbol,
+            isUtility: isUtility,
             precision: precision,
             icon: icon,
             substrateType: substrateType,
@@ -113,6 +118,7 @@ public struct AssetModel: Equatable, Codable, Hashable {
     public static func == (lhs: AssetModel, rhs: AssetModel) -> Bool {
         lhs.id == rhs.id &&
             lhs.name == rhs.name &&
+            lhs.isUtility == rhs.isUtility &&
             lhs.precision == rhs.precision &&
             lhs.icon == rhs.icon &&
             lhs.symbol == rhs.symbol &&
@@ -134,6 +140,7 @@ extension AssetModel {
         case id
         case name
         case symbol
+        case isUtility
         case precision
         case icon
         case tokenProperties
