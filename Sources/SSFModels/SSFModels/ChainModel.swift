@@ -16,6 +16,10 @@ public enum BlockExplorerType: String, Codable {
     case reef
     case oklink
     case zeta
+    case fire
+    case vicscan
+    case zchain
+    case klaytn
 }
 
 public final class ChainModel: Codable, Identifiable {
