@@ -200,8 +200,6 @@ public enum ChainModelGenerator {
             symbol: symbol,
             precision: assetPresicion,
             icon: nil,
-            price: nil,
-            fiatDayChange: nil,
             currencyId: currencyId,
             existentialDeposit: nil,
             color: nil,
@@ -212,7 +210,8 @@ public enum ChainModelGenerator {
             type: substrateAssetType,
             ethereumType: .normal,
             priceProvider: nil,
-            coingeckoPriceId: nil
+            coingeckoPriceId: nil,
+            priceData: []
         )
     }
 
