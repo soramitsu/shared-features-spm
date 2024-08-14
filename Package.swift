@@ -49,7 +49,8 @@ let package = Package(
         .library(name: "SSFZetaIndexer", targets: ["SSFZetaIndexer"]),
         .library(name: "SSFBalances", targets: ["SSFBalances"]),
         .library(name: "SSFBalancesStorage", targets: ["SSFBalancesStorage"]),
-        .library(name: "SSFSubstrateBalances", targets: ["SSFSubstrateBalances"])
+        .library(name: "SSFSubstrateBalances", targets: ["SSFSubstrateBalances"]),
+        .library(name: "SSFTransactionHistory", targets: ["SSFTransactionHistory"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
@@ -70,6 +71,11 @@ let package = Package(
         .binaryTarget(name: "sr25519lib", path: "Binaries/sr25519lib.xcframework"),
         .binaryTarget(name: "sorawallet", path: "Binaries/sorawallet.xcframework"),
         .binaryTarget(name: "MPQRCoreSDK", path: "Binaries/MPQRCoreSDK.xcframework"),
+        .binaryTarget(
+            name: "XNetworking",
+            url: "https://nexus.iroha.tech/repository/maven-soramitsu/jp/co/soramitsu/xnetworking/lib-IOS/1.0.8/lib-IOS-1.0.8.zip",
+            checksum: "9da6503f89518f99a2f412d20a8e991672713dd23b7b99be768e17a6279b6161"
+        ),
         .target(
             name: "scrypt",
             sources: [
@@ -114,6 +120,10 @@ let package = Package(
                 "IrohaCrypto",
                 "SSFCrypto"
             ]
+        ),
+        .target(
+            name: "SSFTransactionHistory",
+            dependencies: [ "XNetworking", "SSFUtils" ]
         ),
         .testTarget(
             name: "SSFKeyPairTests",
