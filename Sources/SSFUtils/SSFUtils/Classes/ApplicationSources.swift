@@ -24,7 +24,7 @@ public final class ApplicationSourcesImpl: ApplicationSources {
 
 private enum GitHubUrl {
     private static var baseUrl: URL {
-        URL(string: "http://raw.githubusercontent.com/soramitsu/shared-features-utils/")!
+        URL(string: "https://raw.githubusercontent.com/soramitsu/shared-features-utils/")!
     }
 
     enum DefaultBranch: String {
