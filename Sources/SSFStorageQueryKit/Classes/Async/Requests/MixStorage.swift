@@ -10,7 +10,7 @@ public protocol MixStorageRequest {
 
     var parametersType: MixStorageRequestParametersType { get }
     var storagePath: any StorageCodingPathProtocol { get }
-    
+
     var requestId: String { get }
 }
 
@@ -18,7 +18,7 @@ public extension MixStorageRequest {
     var responseType: Response.Type {
         Response.self
     }
-    
+
     var responseTypeRegistry: String {
         String(describing: Response.self)
     }

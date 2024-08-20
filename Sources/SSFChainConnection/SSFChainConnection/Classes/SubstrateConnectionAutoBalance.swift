@@ -52,7 +52,7 @@ public final class SubstrateConnectionAutoBalance: ChainConnectionProtocol {
 
 extension SubstrateConnectionAutoBalance: WebSocketEngineDelegate {
     public func webSocketDidChangeState(
-        engine: WebSocketEngine,
+        engine _: WebSocketEngine,
         to newState: WebSocketEngine.State
     ) {
         switch newState {

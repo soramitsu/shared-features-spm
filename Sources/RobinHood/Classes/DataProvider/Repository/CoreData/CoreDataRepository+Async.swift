@@ -30,12 +30,13 @@ extension CoreDataRepository {
                             $0
                         )
                     }
-                    
-                    var predicate: NSPredicate? = NSCompoundPredicate(orPredicateWithSubpredicates: predicates)
+
+                    var predicate: NSPredicate? =
+                        NSCompoundPredicate(orPredicateWithSubpredicates: predicates)
 
                     if let filter = strongSelf.filter {
                         predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
-                            filter
+                            filter,
                         ] + predicates)
                     }
 

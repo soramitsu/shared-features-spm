@@ -13,20 +13,18 @@ struct PoolXykPoolProvidersStorageMultipleRequest: MultipleRequest {
     var keyType: SSFStorageQueryKit.MapKeyType {
         .poolProvidersKey
     }
-    
+
     var parametersType: SSFStorageQueryKit.MultipleStorageRequestParametersType {
         let params = parameters.compactMap {
             [
                 [NMapKeyParam(value: $0.reservesId)],
-                [NMapKeyParam(value: $0.accountId)]
+                [NMapKeyParam(value: $0.accountId)],
             ]
         }
         return .multipleNMap(params: params)
     }
-    
+
     var storagePath: any SSFModels.StorageCodingPathProtocol {
-        return SSFPolkaswap.StorageCodingPath.poolProviders
+        SSFPolkaswap.StorageCodingPath.poolProviders
     }
-    
-    
 }

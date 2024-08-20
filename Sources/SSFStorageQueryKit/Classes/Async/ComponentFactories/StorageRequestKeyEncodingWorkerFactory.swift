@@ -1,7 +1,7 @@
 import Foundation
+import SSFModels
 import SSFRuntimeCodingService
 import SSFUtils
-import SSFModels
 
 protocol StorageRequestKeyEncodingWorkerFactory {
     func buildFactory(
@@ -20,21 +20,21 @@ final class StorageRequestKeyEncodingWorkerFactoryDefault: StorageRequestKeyEnco
         storageKeyFactory: StorageKeyFactoryProtocol
     ) -> StorageKeyEncoder {
         switch workerType {
-        case .encodable(let params):
+        case let .encodable(params):
             return MapKeyEncodingWorker(
                 codingFactory: codingFactory,
                 path: storageCodingPath,
                 storageKeyFactory: storageKeyFactory,
                 keyParams: params
             )
-        case .nMap(let params):
+        case let .nMap(params):
             return NMapKeyEncodingWorker(
                 codingFactory: codingFactory,
                 path: storageCodingPath,
                 storageKeyFactory: storageKeyFactory,
                 keyParams: params
             )
-        case .prefixEncodable(let params):
+        case let .prefixEncodable(params):
             return MapKeyEncodingWorker(
                 codingFactory: codingFactory,
                 path: storageCodingPath,

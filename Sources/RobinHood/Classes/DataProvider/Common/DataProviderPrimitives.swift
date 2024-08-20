@@ -60,7 +60,7 @@ enum DataProviderDiff<T> {
 
     /// Existing local item
     case local(newItem: T)
-    
+
     /// Existing item has been removed.
     /// Identifier of the item is passed as associated value.
     case delete(deletedIdentifier: String)
@@ -99,7 +99,7 @@ public struct DataProviderObserverOptions {
     /// observer's local data and persistent data if a repository doesn't have any synchronization
     /// mechanism.
     public var waitsInProgressSyncOnAdd: Bool
-    
+
     /// Asks data provider to notify observer if no difference from remote.
     /// If this value is `false` (default value) then observer is only notified when
     /// there are difference from remote source.
@@ -159,7 +159,7 @@ public struct StreamableProviderObserverOptions {
     /// Refreshes list using data source when one from repository is empty.
     /// By default ```true```.
     public var refreshWhenEmpty: Bool
-    
+
     /// Will notify just when local repository was updated.
     /// By default ```false```.
     public var notifyJustWhenUpdated: Bool

@@ -20,7 +20,7 @@ public struct RemoveLiquidityInfo {
         self.totalIssuances = totalIssuances
         self.slippage = slippage
     }
-    
+
     public let dexId: String
     public let baseAsset: PooledAssetInfo
     public let targetAsset: PooledAssetInfo

@@ -10,7 +10,7 @@ public final class QRDecoderDefault: QRDecoder {
         BokoloCashDecoder(),
         SoraQRDecoder(),
         CexQRDecoder(),
-        DesiredCryptocurrencyDecoder()
+        DesiredCryptocurrencyDecoder(),
     ]
 
     private let qrDecoders: [QRDecoder]

@@ -25,14 +25,14 @@ public struct AssetModel: Equatable, Codable, Hashable, Identifiable {
         if let priceProvider = priceProvider {
             return priceProvider.id
         }
-        
+
         return coingeckoPriceId
     }
 
     public var symbolUppercased: String {
         symbol.uppercased()
     }
-    
+
     public var priceData: [PriceData]
 
     public init(
@@ -123,9 +123,9 @@ public struct AssetModel: Equatable, Codable, Hashable, Identifiable {
             priceData: priceData
         )
     }
-    
+
     public func getPrice(for currency: Currency) -> PriceData? {
-        return priceData.first { $0.currencyId == currency.id }
+        priceData.first { $0.currencyId == currency.id }
     }
 
     public static func == (lhs: AssetModel, rhs: AssetModel) -> Bool {

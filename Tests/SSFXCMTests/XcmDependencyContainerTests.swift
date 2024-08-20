@@ -92,7 +92,7 @@ extension XcmDependencyContainerTests {
             )]),
             addressPrefix: 0,
             icon: nil,
-            iosMinAppVersion: nil, 
+            iosMinAppVersion: nil,
             identityChain: nil
         )
 

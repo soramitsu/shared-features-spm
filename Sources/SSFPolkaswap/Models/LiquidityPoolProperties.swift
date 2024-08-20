@@ -5,17 +5,17 @@ import SSFUtils
 public struct LiquidityPoolProperties: Codable, Hashable {
     let reservesId: AccountId
     let feeId: AccountId
-    
+
     public init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
-        self.reservesId = try container.decode(AccountId.self)
-        self.feeId = try container.decode(AccountId.self)
+        reservesId = try container.decode(AccountId.self)
+        feeId = try container.decode(AccountId.self)
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.unkeyedContainer()
-        try container.encode(self.reservesId)
-        try container.encode(self.feeId)
+        try container.encode(reservesId)
+        try container.encode(feeId)
     }
 }
 

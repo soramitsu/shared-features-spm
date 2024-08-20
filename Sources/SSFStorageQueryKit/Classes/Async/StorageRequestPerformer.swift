@@ -1,10 +1,10 @@
 import Foundation
 import RobinHood
+import SSFChainRegistry
 import SSFModels
 import SSFRuntimeCodingService
 import SSFSingleValueCache
 import SSFUtils
-import SSFChainRegistry
 
 public protocol StorageRequestPerformer {
     func performSingle<T: Decodable>(
@@ -21,25 +21,25 @@ public protocol StorageRequestPerformer {
     func performMultiple<K: Decodable & Hashable, T: Decodable>(
         _ request: MultipleRequest,
         chain: ChainModel
-    ) async throws -> [K:T]?
+    ) async throws -> [K: T]?
 
     func performMultiple<K: Decodable & ScaleCodable & Hashable, T: Decodable>(
         _ request: MultipleRequest,
         withCacheOptions: CachedStorageRequestTrigger,
         chain: ChainModel
-    ) async -> AsyncThrowingStream<CachedStorageResponse<[K:T]>, Error>
-    
+    ) async -> AsyncThrowingStream<CachedStorageResponse<[K: T]>, Error>
+
     func performPrefix<K: Decodable & ScaleCodable & Hashable, T: Decodable>(
         _ request: PrefixRequest,
         withCacheOptions: CachedStorageRequestTrigger,
         chain: ChainModel
-    ) async -> AsyncThrowingStream<CachedStorageResponse<[K:T]>, Error>
+    ) async -> AsyncThrowingStream<CachedStorageResponse<[K: T]>, Error>
 
     func performPrefix<K: Decodable & Hashable, T: Decodable>(
         _ request: PrefixRequest,
         chain: ChainModel
     ) async throws -> [K: T]?
-    
+
     func perform(
         _ requests: [any MixStorageRequest],
         chain: ChainModel
@@ -48,14 +48,13 @@ public protocol StorageRequestPerformer {
 
 public actor StorageRequestPerformerDefault: StorageRequestPerformer {
     private let chainRegistry: ChainRegistryProtocol
-    
+
     private lazy var storageRequestFactory: AsyncStorageRequestFactory =
         AsyncStorageRequestDefault()
 
-    private lazy var cacheStorage: AsyncSingleValueRepository = {
+    private lazy var cacheStorage: AsyncSingleValueRepository =
         SingleValueCacheRepositoryFactoryDefault().createAsyncSingleValueCacheRepository()
-    }()
-    
+
     public init(chainRegistry: ChainRegistryProtocol) {
         self.chainRegistry = chainRegistry
     }
@@ -71,9 +70,9 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
             usedRuntimePaths: [:],
             runtimeItem: nil
         )
-        
+
         let connection = try chainRegistry.getSubstrateConnection(for: chain)
-        
+
         let worker = StorageRequestWorkerBuilderDefault<T>().buildWorker(
             runtimeService: runtimeService,
             connection: connection,
@@ -130,15 +129,15 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
     public func performMultiple<K: Decodable & Hashable, T: Decodable>(
         _ request: MultipleRequest,
         chain: ChainModel
-    ) async throws -> [K:T]? {
+    ) async throws -> [K: T]? {
         let runtimeService = try await chainRegistry.getRuntimeProvider(
             chainId: chain.chainId,
             usedRuntimePaths: [:],
             runtimeItem: nil
         )
-        
+
         let connection = try chainRegistry.getSubstrateConnection(for: chain)
-        
+
         let worker = StorageRequestWorkerBuilderDefault<T>().buildWorker(
             runtimeService: runtimeService,
             connection: connection,
@@ -146,12 +145,16 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
             type: request.parametersType.workerType
         )
 
-        let valueExtractor = MultipleSingleStorageResponseValueExtractor(runtimeService: runtimeService)
+        let valueExtractor =
+            MultipleSingleStorageResponseValueExtractor(runtimeService: runtimeService)
         let response: [StorageResponse<T>] = try await worker.perform(
             params: request.parametersType.workerType,
             storagePath: request.storagePath
         )
-        let values: [K:T]? = try await valueExtractor.extractValue(request: request, storageResponse: response)
+        let values: [K: T]? = try await valueExtractor.extractValue(
+            request: request,
+            storageResponse: response
+        )
         try? save(
             response: response,
             params: request.parametersType.workerType,
@@ -166,12 +169,12 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         _ request: MultipleRequest,
         withCacheOptions: CachedStorageRequestTrigger,
         chain: ChainModel
-    ) async -> AsyncThrowingStream<CachedStorageResponse<[K:T]>, Error>  {
-        AsyncThrowingStream<CachedStorageResponse<[K:T]>, Error> { continuation in
+    ) async -> AsyncThrowingStream<CachedStorageResponse<[K: T]>, Error> {
+        AsyncThrowingStream<CachedStorageResponse<[K: T]>, Error> { continuation in
             Task {
                 if withCacheOptions == .onAll || withCacheOptions.isEmpty {
                     try? await getCacheMultipleValue(for: request, with: continuation, chain: chain)
-                    let value: [K:T]? = try await performMultiple(request, chain: chain)
+                    let value: [K: T]? = try await performMultiple(request, chain: chain)
                     let response = CachedStorageResponse(value: value, type: .remote)
                     continuation.yield(response)
                     continuation.finish()
@@ -183,7 +186,7 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
                     return
                 }
                 if withCacheOptions.contains(.onPerform) {
-                    let value: [K:T]? = try await performMultiple(request, chain: chain)
+                    let value: [K: T]? = try await performMultiple(request, chain: chain)
                     let response = CachedStorageResponse(value: value, type: .remote)
                     continuation.yield(response)
                     continuation.finish()
@@ -192,7 +195,6 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
             }
         }
     }
-    
 
     public func performPrefix<K: Decodable & Hashable, T: Decodable>(
         _ request: PrefixRequest,
@@ -203,9 +205,9 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
             usedRuntimePaths: [:],
             runtimeItem: nil
         )
-        
+
         let connection = try chainRegistry.getSubstrateConnection(for: chain)
-        
+
         let worker = StorageRequestWorkerBuilderDefault<T>().buildWorker(
             runtimeService: runtimeService,
             connection: connection,
@@ -218,7 +220,10 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
             params: request.parametersType.workerType,
             storagePath: request.storagePath
         )
-        let values: [K: T]? = try await valueExtractor.extractValue(request: request, storageResponse: response)
+        let values: [K: T]? = try await valueExtractor.extractValue(
+            request: request,
+            storageResponse: response
+        )
         try? save(
             response: response,
             params: request.parametersType.workerType,
@@ -228,17 +233,17 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
 
         return values
     }
-    
+
     public func performPrefix<K: Decodable & ScaleCodable & Hashable, T: Decodable>(
         _ request: PrefixRequest,
         withCacheOptions: CachedStorageRequestTrigger,
         chain: ChainModel
-    ) async -> AsyncThrowingStream<CachedStorageResponse<[K:T]>, Error>  {
-        return AsyncThrowingStream<CachedStorageResponse<[K:T]>, Error> { continuation in
+    ) async -> AsyncThrowingStream<CachedStorageResponse<[K: T]>, Error> {
+        return AsyncThrowingStream<CachedStorageResponse<[K: T]>, Error> { continuation in
             Task {
                 if withCacheOptions == .onAll || withCacheOptions.isEmpty {
                     try? await getCachePagedValue(for: request, with: continuation, chain: chain)
-                    let value: [K:T]? = try await performPrefix(request, chain: chain)
+                    let value: [K: T]? = try await performPrefix(request, chain: chain)
                     let response = CachedStorageResponse(value: value, type: .remote)
                     continuation.yield(response)
                     continuation.finish()
@@ -250,7 +255,7 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
                     return
                 }
                 if withCacheOptions.contains(.onPerform) {
-                    let value: [K:T]? = try await performPrefix(request, chain: chain)
+                    let value: [K: T]? = try await performPrefix(request, chain: chain)
                     let response = CachedStorageResponse(value: value, type: .remote)
                     continuation.yield(response)
                     continuation.finish()
@@ -259,7 +264,7 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
             }
         }
     }
-    
+
     public func perform(
         _ requests: [any MixStorageRequest],
         chain: ChainModel
@@ -269,7 +274,7 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
             usedRuntimePaths: [:],
             runtimeItem: nil
         )
-        
+
         let connection = try chainRegistry.getSubstrateConnection(for: chain)
         let codingFactory = try await runtimeService.fetchCoderFactory()
         let keysBuilder = MixStorageRequestsKeysBuilder(codingFactory: codingFactory)
@@ -278,17 +283,17 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
             connection: connection,
             storageRequestFactory: storageRequestFactory
         )
-        
+
         let keys = try keysBuilder.buildKeys(for: requests)
         let updates = try await requesrWorker.perform(keys: keys)
-        
+
         let decodingWorker = MixStorageDecodingListWorker(
             requests: requests,
             updates: updates,
             codingFactory: codingFactory
         )
         let responses = try decodingWorker.performDecoding()
-        
+
         return responses
     }
 
@@ -299,7 +304,7 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         with continuation: AsyncThrowingStream<CachedStorageResponse<T>, Error>.Continuation,
         chain: ChainModel
     ) async throws {
-        let cache: [Data:T]? = try? await getCache(
+        let cache: [Data: T]? = try? await getCache(
             params: request.parametersType.workerType,
             storagePath: request.storagePath,
             chain: chain
@@ -313,7 +318,7 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
 
     private func getCacheMultipleValue<K: Decodable & Hashable, T: Decodable>(
         for request: MultipleRequest,
-        with continuation: AsyncThrowingStream<CachedStorageResponse<[K:T]>, Error>.Continuation,
+        with continuation: AsyncThrowingStream<CachedStorageResponse<[K: T]>, Error>.Continuation,
         chain: ChainModel
     ) async throws where T: Decodable, K: Decodable & ScaleCodable, K: Hashable {
         let runtimeService = try await chainRegistry.getRuntimeProvider(
@@ -323,7 +328,7 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         )
         let keyExtractor = StorageKeyDataExtractor(runtimeService: runtimeService)
 
-        let cache: [Data:T]? = try? await getCache(
+        let cache: [Data: T]? = try? await getCache(
             params: request.parametersType.workerType,
             storagePath: request.storagePath,
             chain: chain
@@ -331,8 +336,8 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         guard let cache = cache else {
             return
         }
-        
-        let resultArray: [[K:T]] = try await cache.asyncCompactMap {
+
+        let resultArray: [[K: T]] = try await cache.asyncCompactMap {
             let key: K = try await keyExtractor.extractKey(
                 storageKey: $0.key,
                 storagePath: request.storagePath,
@@ -344,10 +349,10 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         let response = CachedStorageResponse(value: result, type: .cache)
         continuation.yield(response)
     }
-    
+
     private func getCachePagedValue<K, T>(
         for request: PrefixRequest,
-        with continuation: AsyncThrowingStream<CachedStorageResponse<[K:T]>, Error>.Continuation,
+        with continuation: AsyncThrowingStream<CachedStorageResponse<[K: T]>, Error>.Continuation,
         chain: ChainModel
     ) async throws where T: Decodable, K: Decodable & ScaleCodable, K: Hashable {
         let runtimeService = try await chainRegistry.getRuntimeProvider(
@@ -356,8 +361,8 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
             runtimeItem: nil
         )
         let keyExtractor = StorageKeyDataExtractor(runtimeService: runtimeService)
-        
-        let cache: [Data:T]? = try? await getCache(
+
+        let cache: [Data: T]? = try? await getCache(
             params: request.parametersType.workerType,
             storagePath: request.storagePath,
             chain: chain
@@ -365,8 +370,8 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         guard let cache = cache else {
             return
         }
-        
-        let resultArray: [[K:T]] = try await cache.asyncCompactMap {
+
+        let resultArray: [[K: T]] = try await cache.asyncCompactMap {
             let key: K = try await keyExtractor.extractKey(
                 storageKey: $0.key,
                 storagePath: request.storagePath,
@@ -378,12 +383,12 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         let response = CachedStorageResponse(value: result, type: .cache)
         continuation.yield(response)
     }
-    
+
     private func getCache<T: Decodable>(
         params: StorageRequestWorkerType,
         storagePath: any StorageCodingPathProtocol,
         chain: ChainModel
-    ) async throws -> [Data:T]? {
+    ) async throws -> [Data: T]? {
         let runtimeService = try await chainRegistry.getRuntimeProvider(
             chainId: chain.chainId,
             usedRuntimePaths: [:],
@@ -400,15 +405,15 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         let localKeys = try keys.compactMap { try createKey(from: $0, key: chain.chainId) }
         let cache = try await cacheStorage.fetch(by: localKeys, options: RepositoryFetchOptions())
 
-         let caches = cache.compactMap {
-            let item: [Data:T]? = try? decode(
+        let caches = cache.compactMap {
+            let item: [Data: T]? = try? decode(
                 object: $0,
                 codingFactory: codingFactory,
                 path: storagePath
             )
             return item
         }
-            
+
         return Dictionary(caches.flatMap { $0 }, uniquingKeysWith: { _, last in last })
     }
 
@@ -416,7 +421,7 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         object: SingleValueProviderObject,
         codingFactory: RuntimeCoderFactoryProtocol,
         path: any StorageCodingPathProtocol
-    ) throws -> [Data:T]? {
+    ) throws -> [Data: T]? {
         let decoder = StorageFallbackDecodingListWorker<T>(
             codingFactory: codingFactory,
             path: path,
@@ -425,16 +430,16 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         guard let value = try decoder.performDecoding().compactMap({ $0 }).first else {
             return nil
         }
-        
+
         let key = Data(hex: object.identifier)
-        
+
         return [key: value]
     }
 
     private func save<T: Decodable>(
         response: [StorageResponse<T>],
-        params: StorageRequestWorkerType,
-        storagePath: any StorageCodingPathProtocol,
+        params _: StorageRequestWorkerType,
+        storagePath _: any StorageCodingPathProtocol,
         chain: ChainModel
     ) throws {
         Task {
@@ -442,7 +447,7 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
                 guard let data = $0.data else {
                     return nil
                 }
-                
+
                 let identifier = try createKey(from: $0.key, key: chain.chainId)
 
                 return SingleValueProviderObject(identifier: identifier, payload: data)
@@ -451,13 +456,12 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
             await cacheStorage.save(models: objects)
         }
     }
-    
+
     private func createKey(from remoteKey: Data, key: String) throws -> String {
         let concatData = Data(key.utf8) + remoteKey
         return concatData.toHex()
     }
 }
-
 
 extension Sequence {
     func asyncMap<T>(

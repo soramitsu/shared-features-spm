@@ -123,7 +123,7 @@ extension XcmAssetMultilocationFetcherTests {
     enum TestData {
         static let multilocation = AssetMultilocation(
             id: "0",
-            symbol: "1", 
+            symbol: "1",
             parents: nil,
             interiors: [.onlyChild]
         )

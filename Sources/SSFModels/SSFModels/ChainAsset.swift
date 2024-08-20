@@ -126,7 +126,7 @@ public struct ChainAssetId: Equatable, Codable, Hashable {
         self.chainId = chainId
         self.assetId = assetId
     }
-    
+
     public init(id: String) {
         let components = id.components(separatedBy: ":")
         let chainId = components[0]

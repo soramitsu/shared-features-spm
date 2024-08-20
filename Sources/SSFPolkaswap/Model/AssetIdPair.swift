@@ -4,23 +4,23 @@ import SSFUtils
 public struct AssetIdPair: Codable, Hashable {
     public let baseAssetId: PolkaswapDexInfoAssetId
     public let targetAssetId: PolkaswapDexInfoAssetId
-    
+
     public init(baseAssetIdCode: String, targetAssetIdCode: String) {
-        self.baseAssetId = PolkaswapDexInfoAssetId(code: baseAssetIdCode)
-        self.targetAssetId = PolkaswapDexInfoAssetId(code: targetAssetIdCode)
+        baseAssetId = PolkaswapDexInfoAssetId(code: baseAssetIdCode)
+        targetAssetId = PolkaswapDexInfoAssetId(code: targetAssetIdCode)
     }
-    
+
     public init(baseAssetId: PolkaswapDexInfoAssetId, targetAssetId: PolkaswapDexInfoAssetId) {
         self.baseAssetId = baseAssetId
         self.targetAssetId = targetAssetId
     }
-    
+
     public init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
-        self.baseAssetId = try container.decode(PolkaswapDexInfoAssetId.self)
-        self.targetAssetId = try container.decode(PolkaswapDexInfoAssetId.self)
+        baseAssetId = try container.decode(PolkaswapDexInfoAssetId.self)
+        targetAssetId = try container.decode(PolkaswapDexInfoAssetId.self)
     }
-    
+
     public var poolId: String {
         "\(baseAssetId.code)-\(targetAssetId.code)"
     }

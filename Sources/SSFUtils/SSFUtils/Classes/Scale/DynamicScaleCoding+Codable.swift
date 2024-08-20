@@ -1,5 +1,6 @@
 import Foundation
 import SSFModels
+
 public enum HexCodingStrategy {
     static func encoding(data: Data, encoder: Encoder) throws {
         var container = encoder.singleValueContainer()

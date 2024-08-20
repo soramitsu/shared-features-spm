@@ -1,6 +1,6 @@
 import Foundation
-import SSFUtils
 import SSFRuntimeCodingService
+import SSFUtils
 
 public protocol PrefixResponseValueExtractor {
     func extractValue<K: Decodable, T: Decodable>(
@@ -32,7 +32,7 @@ public final class PrefixStorageResponseValueExtractor: PrefixResponseValueExtra
 
             dict[id] = $0.value
         }
-        
+
         return dict
     }
 }

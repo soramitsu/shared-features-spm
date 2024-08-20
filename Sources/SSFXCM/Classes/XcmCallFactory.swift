@@ -56,7 +56,7 @@ protocol XcmCallFactoryProtocol {
         amount: BigUInt,
         path: XcmCallPath
     ) throws -> RuntimeCall<BridgeProxyBurnCall>
-    
+
     func soraBridgeAppBurn(
         currencyId: String?,
         accountId: AccountId,
@@ -329,7 +329,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             args: args
         )
     }
-    
+
     func soraBridgeAppBurn(
         currencyId: String?,
         accountId: AccountId,
@@ -342,7 +342,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             recipient: .sora(accountId),
             amount: amount
         )
-        
+
         return RuntimeCall(
             moduleName: path.moduleName,
             callName: path.itemName,

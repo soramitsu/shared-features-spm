@@ -13,7 +13,7 @@ struct LiberlandBridgeProxyBurnCall: Codable {
 enum LiberlandAssetId: Codable {
     case lld
     case asset(String)
-    
+
     init(currencyId: String?) {
         guard let currencyId else {
             self = .lld
@@ -21,10 +21,10 @@ enum LiberlandAssetId: Codable {
         }
         self = .asset(currencyId)
     }
-    
+
     func encode(to encoder: any Encoder) throws {
         var container = encoder.unkeyedContainer()
-        
+
         switch self {
         case .lld:
             try container.encode("LLD")

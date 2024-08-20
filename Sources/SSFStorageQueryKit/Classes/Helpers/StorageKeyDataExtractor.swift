@@ -1,14 +1,12 @@
 import Foundation
-import SSFUtils
-import SSFRuntimeCodingService
 import SSFModels
+import SSFRuntimeCodingService
+import SSFUtils
 
 final class StorageKeyDataExtractor {
     private let runtimeService: RuntimeCodingServiceProtocol
 
-    private lazy var storageKeyFactory = {
-        StorageKeyFactory()
-    }()
+    private lazy var storageKeyFactory = StorageKeyFactory()
 
     init(runtimeService: RuntimeCodingServiceProtocol) {
         self.runtimeService = runtimeService
@@ -24,9 +22,14 @@ final class StorageKeyDataExtractor {
 
         let coderFactory = try await runtimeService.fetchCoderFactory()
 
-        let storagePathMetadata = coderFactory.metadata.getStorageMetadata(in: storagePath.moduleName, storageName: storagePath.itemName)
+        let storagePathMetadata = coderFactory.metadata.getStorageMetadata(
+            in: storagePath.moduleName,
+            storageName: storagePath.itemName
+        )
 
-        guard let keyName = try storagePathMetadata?.type.keyName(schemaResolver: coderFactory.metadata.schemaResolver) else {
+        guard let keyName = try storagePathMetadata?.type
+            .keyName(schemaResolver: coderFactory.metadata.schemaResolver) else
+        {
             throw ConvenienceError(error: "type not found")
         }
 

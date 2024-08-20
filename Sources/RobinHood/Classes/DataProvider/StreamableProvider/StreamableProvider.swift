@@ -136,7 +136,7 @@ public final class StreamableProvider<T: Identifiable> {
 
             let updates = items.map { DataProviderChange<T>.insert(newItem: $0) }
 
-            if !options.notifyJustWhenUpdated {            
+            if !options.notifyJustWhenUpdated {
                 dispatchInQueueWhenPossible(queue) {
                     updateBlock(updates)
                 }

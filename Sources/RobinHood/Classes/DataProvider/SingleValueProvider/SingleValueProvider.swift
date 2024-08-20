@@ -291,24 +291,25 @@ extension SingleValueProvider {
                 dispatchInQueueWhenPossible(repositoryObserver.queue) {
                     if let update = update {
                         switch update {
-                        case .insert(newItem: let newItem):
+                        case let .insert(newItem: newItem):
                             let change: DataProviderChange<T> = .insert(newItem: newItem)
                             repositoryObserver.updateBlock([change])
-                        case .update(newItem: let newItem):
+                        case let .update(newItem: newItem):
                             let change: DataProviderChange<T> = .update(newItem: newItem)
                             repositoryObserver.updateBlock([change])
-                        case .remote(newItem: let newItem):
+                        case let .remote(newItem: newItem):
                             let change: DataProviderChange<T> = .update(newItem: newItem)
                             repositoryObserver.updateBlock([change])
-                        case .local(newItem: let newItem):
+                        case let .local(newItem: newItem):
                             if repositoryObserver.options.notifyIfNoDiff {
                                 let change: DataProviderChange<T> = .update(newItem: newItem)
                                 repositoryObserver.updateBlock([change])
                             } else {
                                 repositoryObserver.updateBlock([])
                             }
-                        case .delete(deletedIdentifier: let deletedIdentifier):
-                            let change: DataProviderChange<T> = .delete(deletedIdentifier: deletedIdentifier)
+                        case let .delete(deletedIdentifier: deletedIdentifier):
+                            let change: DataProviderChange<T> =
+                                .delete(deletedIdentifier: deletedIdentifier)
                             repositoryObserver.updateBlock([change])
                         }
                     } else {

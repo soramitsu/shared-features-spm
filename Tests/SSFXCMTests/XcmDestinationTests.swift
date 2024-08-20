@@ -43,7 +43,7 @@ extension XcmDestinationTests {
             nodes: Set([ChainNodeModel(url: TestData.url, name: "test", apikey: nil)]),
             addressPrefix: 1,
             icon: nil,
-            iosMinAppVersion: nil, 
+            iosMinAppVersion: nil,
             identityChain: nil
         )
 

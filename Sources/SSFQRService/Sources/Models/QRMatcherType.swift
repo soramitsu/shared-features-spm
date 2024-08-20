@@ -40,7 +40,7 @@ public enum QRMatcherType {
             return uri
         }
     }
-    
+
     public var preinstalledWallet: String? {
         switch self {
         case .qrInfo, .walletConnect:
