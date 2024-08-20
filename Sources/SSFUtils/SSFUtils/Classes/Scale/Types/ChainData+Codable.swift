@@ -8,15 +8,15 @@ extension ChainData: Codable {
         case sha256 = "Sha256"
         case keccak256 = "Keccak256"
         case shaThree256 = "ShaThree256"
-        
+
         static func from(rawValue: String) -> Case? {
             if rawValue.lowercased().contains("raw") {
                 return .raw
             }
-            
+
             return Case(rawValue: rawValue)
         }
-        
+
         var intValue: UInt8 {
             switch self {
             case .none: return 0
@@ -27,36 +27,41 @@ extension ChainData: Codable {
             case .shaThree256: return 5
             }
         }
-        
+
         static func from(intValue: UInt8) -> Case? {
             for entr in allCases {
                 if entr.intValue == intValue {
                     return entr
                 }
             }
-            
+
             return nil
         }
     }
+
     public init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
         var type: Case
         do {
             let typeString = try container.decode(String.self)
             guard let typeFromString = Case.from(rawValue: typeString) else {
-                throw DecodingError.dataCorruptedError(in: container,
-                                                       debugDescription: "unexpected type found: \(typeString)")
+                throw DecodingError.dataCorruptedError(
+                    in: container,
+                    debugDescription: "unexpected type found: \(typeString)"
+                )
             }
             type = typeFromString
         } catch {
             let typeInt = try container.decode(UInt8.self)
             guard let typeFromInt = Case.from(intValue: typeInt) else {
-                throw DecodingError.dataCorruptedError(in: container,
-                                                       debugDescription: "unexpected type found: \(typeInt)")
+                throw DecodingError.dataCorruptedError(
+                    in: container,
+                    debugDescription: "unexpected type found: \(typeInt)"
+                )
             }
             type = typeFromInt
         }
-        
+
         if type == .none {
             self = .none
         } else {
@@ -80,8 +85,10 @@ extension ChainData: Codable {
             case .shaThree256:
                 self = .shaThree256(data: H256(value: data))
             default:
-                throw DecodingError.dataCorruptedError(in: container,
-                                                       debugDescription: "unexpected type found: \(type)")
+                throw DecodingError.dataCorruptedError(
+                    in: container,
+                    debugDescription: "unexpected type found: \(type)"
+                )
             }
         }
     }
@@ -92,19 +99,19 @@ extension ChainData: Codable {
         switch self {
         case .none:
             try container.encode(Case.none.rawValue)
-        case .raw(let data):
+        case let .raw(data):
             try container.encode(Case.raw.rawValue)
             try container.encode(data)
-        case .blakeTwo256(let hash):
+        case let .blakeTwo256(hash):
             try container.encode(Case.blakeTwo256.rawValue)
             try container.encode(hash.value)
-        case .sha256(let hash):
+        case let .sha256(hash):
             try container.encode(Case.sha256.rawValue)
             try container.encode(hash.value)
-        case .keccak256(let hash):
+        case let .keccak256(hash):
             try container.encode(Case.keccak256.rawValue)
             try container.encode(hash.value)
-        case .shaThree256(let hash):
+        case let .shaThree256(hash):
             try container.encode(Case.shaThree256.rawValue)
             try container.encode(hash.value)
         }

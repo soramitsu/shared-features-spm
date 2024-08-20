@@ -9,7 +9,7 @@ public struct DexInfos: Decodable, Equatable {
 
 public struct PolkaswapDexInfoAssetId: Codable, Hashable, Equatable {
     @ArrayCodable public var code: String
-    
+
     public func hash(into hasher: inout Hasher) {
         hasher.combine(code)
     }
@@ -19,7 +19,7 @@ extension PolkaswapDexInfoAssetId: ScaleCodable {
     public func encode(scaleEncoder: ScaleEncoding) throws {
         try code.encode(scaleEncoder: scaleEncoder)
     }
-    
+
     public init(scaleDecoder: ScaleDecoding) throws {
         code = try String(scaleDecoder: scaleDecoder)
     }

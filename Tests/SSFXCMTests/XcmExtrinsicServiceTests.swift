@@ -50,7 +50,7 @@ final class XcmExtrinsicServiceTests: XCTestCase {
             chainRegistry: chainRegistry,
             depsContainer: depsContainer,
             callPathDeterminer: determiner,
-            xcmFeeFetcher: feeFetcher, 
+            xcmFeeFetcher: feeFetcher,
             minAmountInspector: XcmMinAmountInspectorImpl()
         )
     }

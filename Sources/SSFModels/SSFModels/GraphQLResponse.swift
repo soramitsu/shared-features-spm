@@ -16,14 +16,17 @@ public enum GraphQLResponse<D: Decodable>: Decodable {
         let container = try decoder.singleValueContainer()
 
         let json = try container.decode(JSON.self)
-        
+
         if let data = json.data {
             let encoded = try JSONEncoder().encode(data)
             let value = try JSONDecoder().decode(D.self, from: encoded)
             self = .data(value)
         } else if let errors = json.errors {
             let encoded = try JSONEncoder().encode(errors)
-            let values = try JSONDecoder().decode([SubqueryErrors.SubqueryError].self, from: encoded)
+            let values = try JSONDecoder().decode(
+                [SubqueryErrors.SubqueryError].self,
+                from: encoded
+            )
             self = .errors(SubqueryErrors(errors: values))
         } else {
             throw DecodingError.dataCorruptedError(

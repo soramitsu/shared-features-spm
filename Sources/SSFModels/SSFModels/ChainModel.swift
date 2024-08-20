@@ -470,7 +470,7 @@ public extension ChainModel {
                 lhs.history == rhs.history &&
                 lhs.crowdloans == rhs.crowdloans &&
                 Set(lhs.explorers ?? []) == Set(rhs.explorers ?? []) &&
-            lhs.pricing == rhs.pricing
+                lhs.pricing == rhs.pricing
         }
     }
 

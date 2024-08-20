@@ -174,14 +174,14 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
         do {
             let fromChainModel = try await chainRegistry.getChain(for: fromChainId)
             var destChainModel = try await chainRegistry.getChain(for: destChainId)
-            
+
             try minAmountInspector.inspectMin(
                 amount: amount,
                 fromChainModel: fromChainModel,
                 destChainModel: destChainModel,
                 assetSymbol: assetSymbol
             )
-            
+
             let fromChainType = try XcmChainType.determineChainType(for: fromChainModel)
             let destChainType = try XcmChainType.determineChainType(for: destChainModel)
             let callPath = try await callPathDeterminer.determineCallPath(
@@ -385,7 +385,7 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             path: path
         )
     }
-    
+
     private func makeSoraBridgeAddBurnExtrinsic(
         currencyId: String?,
         accountId: AccountId,
@@ -665,7 +665,7 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             }
         }
     }
-    
+
     private func submitBridgeProxyBurn(
         currencyId: String,
         destChainModel: ChainModel,
@@ -693,7 +693,7 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             }
         }
     }
-    
+
     private func getSoraParachainModel(
         fromChainModel: ChainModel,
         destChainId: String
@@ -706,9 +706,9 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
         let soraParachainModel = try await chainRegistry.getChain(for: bridgeParachainId)
         return soraParachainModel
     }
-    
+
     // MARK: - Liberland Mainnet
-    
+
     private func estimateSoraAppBridgeProxyBurn(
         currencyId: String?,
         accountId: AccountId,
@@ -730,7 +730,7 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             }
         }
     }
-    
+
     private func submitSoraAppBridgeProxyBurn(
         currencyId: String?,
         accountId: AccountId,
@@ -756,7 +756,6 @@ final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {
             }
         }
     }
-    
 }
 
 private extension String {

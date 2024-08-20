@@ -1,7 +1,7 @@
 import Foundation
+import SSFModels
 import SSFStorageQueryKit
 import SSFUtils
-import SSFModels
 
 struct UserPoolsStorageRequest: PrefixRequest {
     let accountId: Data
@@ -9,11 +9,11 @@ struct UserPoolsStorageRequest: PrefixRequest {
     var keyType: SSFStorageQueryKit.MapKeyType {
         .accountPoolsKey
     }
-    
+
     var parametersType: PrefixStorageRequestParametersType {
         .encodable(params: [accountId])
     }
-    
+
     var storagePath: any SSFModels.StorageCodingPathProtocol {
         StorageCodingPath.userPools
     }

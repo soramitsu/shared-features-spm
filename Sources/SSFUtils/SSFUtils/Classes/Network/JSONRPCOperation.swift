@@ -37,7 +37,7 @@ public class JSONRPCOperation<P: Codable, T: Decodable>: BaseOperation<T> {
             let semaphore = DispatchSemaphore(value: 0)
 
             var optionalCallResult: Result<T, Error>?
-            
+
             guard let engine else {
                 throw JSONRPCOperationError.noConnection
             }

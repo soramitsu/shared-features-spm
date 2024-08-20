@@ -5,11 +5,15 @@ enum RequestConfiguratorFactoryError: Error {
 }
 
 protocol RequestConfiguratorFactory {
-    func buildRequestConfigurator(with type: NetworkRequestType, baseURL: URL) throws -> RequestConfigurator
+    func buildRequestConfigurator(with type: NetworkRequestType, baseURL: URL) throws
+        -> RequestConfigurator
 }
 
 final class BaseRequestConfiguratorFactory: RequestConfiguratorFactory {
-    func buildRequestConfigurator(with type: NetworkRequestType, baseURL: URL) throws -> RequestConfigurator {
+    func buildRequestConfigurator(
+        with type: NetworkRequestType,
+        baseURL _: URL
+    ) throws -> RequestConfigurator {
         switch type {
         case .plain:
             return RESTRequestConfigurator()

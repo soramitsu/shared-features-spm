@@ -27,7 +27,7 @@ public final class ReachabilityManager {
     private var listeners: [ReachabilityListenerWrapper] {
         get {
             lock.concurrentlyRead {
-                return _listeners
+                _listeners
             }
         }
         set {
@@ -36,6 +36,7 @@ public final class ReachabilityManager {
             }
         }
     }
+
     private var reachability: Reachability
     private let lock = ReaderWriterLock()
 

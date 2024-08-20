@@ -1,13 +1,12 @@
 import Foundation
-import SSFUtils
 import SSFRuntimeCodingService
+import SSFUtils
 
 final class MixStorageRequestsKeysBuilder {
-    private lazy var storageKeyFactory: StorageKeyFactoryProtocol = {
-        StorageKeyFactory()
-    }()
+    private lazy var storageKeyFactory: StorageKeyFactoryProtocol = StorageKeyFactory()
+
     private let codingFactory: RuntimeCoderFactoryProtocol
-    
+
     init(codingFactory: RuntimeCoderFactoryProtocol) {
         self.codingFactory = codingFactory
     }
@@ -24,7 +23,7 @@ final class MixStorageRequestsKeysBuilder {
                 )
                 let keys = try keysWorker.performEncoding()
                 return keys
-                
+
             case let .encodable(params):
                 let keysWorker = MapKeyEncodingWorker(
                     codingFactory: codingFactory,
@@ -34,7 +33,7 @@ final class MixStorageRequestsKeysBuilder {
                 )
                 let keys = try keysWorker.performEncoding()
                 return keys
-                
+
             case .simple:
                 let key = try storageKeyFactory.createStorageKey(
                     moduleName: request.storagePath.moduleName,
@@ -43,7 +42,7 @@ final class MixStorageRequestsKeysBuilder {
                 return [key]
             }
         }
-        
+
         return keys.reduce([], +)
     }
 }

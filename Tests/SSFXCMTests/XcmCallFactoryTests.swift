@@ -256,7 +256,7 @@ extension XcmCallFactoryTests {
                 bridgeParachainId: "2",
                 assets: [.init(
                     id: "0",
-                    symbol: "0", 
+                    symbol: "0",
                     minAmount: nil
                 )]
             )]
@@ -279,7 +279,7 @@ extension XcmCallFactoryTests {
             nodes: Set([node]),
             addressPrefix: 0,
             icon: nil,
-            iosMinAppVersion: nil, 
+            iosMinAppVersion: nil,
             identityChain: nil
         )
     }

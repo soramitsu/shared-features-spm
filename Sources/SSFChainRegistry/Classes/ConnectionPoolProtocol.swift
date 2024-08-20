@@ -56,7 +56,7 @@ public final class ConnectionPool: ConnectionPoolProtocol {
 
     public func getSubstrateConnection(
         for chainId: ChainModel.Id
-    )  throws -> SubstrateConnection {
+    ) throws -> SubstrateConnection {
         guard let autoBalance = autoBalancesByChainIds[chainId] as? SubstrateConnectionAutoBalance else {
             throw ConnectionPoolError.missingConnection
         }
@@ -84,10 +84,13 @@ public final class ConnectionPool: ConnectionPoolProtocol {
     public func getWeb3EthereumConnection(
         for chainId: ChainModel.Id
     ) throws -> Web3EthConnection {
-        guard let autoBalance =  lock.concurrentlyRead({ autoBalancesByChainIds[chainId] as? Web3EthConnectionAutoBalance }) else {
+        guard let autoBalance = lock
+            .concurrentlyRead({ autoBalancesByChainIds[chainId] as? Web3EthConnectionAutoBalance
+            }) else
+        {
             throw ConnectionPoolError.missingConnection
         }
-        
+
         return try autoBalance.connection()
     }
 
@@ -95,7 +98,8 @@ public final class ConnectionPool: ConnectionPoolProtocol {
 
     private func clearUnusedConnections() {
         lock.exclusivelyWrite { [weak self] in
-            self?.autoBalancesByChainIds = self?.autoBalancesByChainIds.filter { $0.value.isActive } ?? [:]
+            self?.autoBalancesByChainIds = self?.autoBalancesByChainIds
+                .filter { $0.value.isActive } ?? [:]
         }
     }
 }

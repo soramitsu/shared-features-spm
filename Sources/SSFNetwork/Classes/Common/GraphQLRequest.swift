@@ -1,6 +1,6 @@
 import Foundation
-import SSFModels
 import RobinHood
+import SSFModels
 
 public class GraphQLRequest: RequestConfig {
     public init(
@@ -11,7 +11,7 @@ public class GraphQLRequest: RequestConfig {
             HTTPHeader(
                 field: HttpHeaderKey.contentType.rawValue,
                 value: HttpContentType.json.rawValue
-            )
+            ),
         ]
 
         let info = JSON.dictionaryValue(["query": JSON.stringValue(query)])
@@ -25,16 +25,15 @@ public class GraphQLRequest: RequestConfig {
             body: data
         )
     }
-    
-    public override var cacheKey: String {
-        guard
-            let body,
-            let json = try? JSONDecoder().decode(JSON.self, from: body),
-            let key = json.dictValue?["query"]?.stringValue
-        else {
+
+    override public var cacheKey: String {
+        guard let body,
+              let json = try? JSONDecoder().decode(JSON.self, from: body),
+              let key = json.dictValue?["query"]?.stringValue else
+        {
             return super.cacheKey
         }
-        
+
         return key
     }
 }

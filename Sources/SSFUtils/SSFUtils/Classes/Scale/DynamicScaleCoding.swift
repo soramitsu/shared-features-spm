@@ -1,5 +1,6 @@
 import Foundation
 import SSFModels
+
 public protocol DynamicScaleEncoding {
     func append(json: JSON, type: String) throws
     func appendOption(json: JSON, type: String) throws

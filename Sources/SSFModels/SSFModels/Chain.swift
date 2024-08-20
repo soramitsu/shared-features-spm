@@ -87,7 +87,8 @@ public enum Chain: String, Codable, CaseIterable {
     public var erasPerDay: Int {
         switch self {
         case .polkadot, .ternoa, .equilibrium, .reef, .scuba, .genshiro: return 1
-        case .kusama, .westend, .rococo, .moonbeam, .soraMain, .soraTest, .liberland, .acala: return 4
+        case .kusama, .westend, .rococo, .moonbeam, .soraMain, .soraTest, .liberland,
+             .acala: return 4
         case .moonriver, .moonbaseAlpha: return 12
         }
     }

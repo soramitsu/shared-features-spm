@@ -7,18 +7,21 @@ public enum CachedNetworkResponseType {
 
 public struct CachedNetworkResponse<T> {
     public static var empty: CachedNetworkResponse<T> {
-        return CachedNetworkResponse(value: nil, type: .cache)
+        CachedNetworkResponse(value: nil, type: .cache)
     }
-    
+
     public var value: T?
     public var type: CachedNetworkResponseType
-    
+
     public init(value: T?, type: CachedNetworkResponseType) {
         self.value = value
         self.type = type
     }
-    
-    public func merge(with previous: CachedNetworkResponse<T>?, priorityType: CachedNetworkResponseType) -> CachedNetworkResponse<T> {
+
+    public func merge(
+        with previous: CachedNetworkResponse<T>?,
+        priorityType: CachedNetworkResponseType
+    ) -> CachedNetworkResponse<T> {
         var type: CachedNetworkResponseType
         switch (previous?.type, self.type) {
         case (.cache, .cache):
@@ -34,7 +37,7 @@ public struct CachedNetworkResponse<T> {
         case (nil, .remote):
             type = .remote
         }
-        
+
         return CachedNetworkResponse(value: value, type: type)
     }
 }

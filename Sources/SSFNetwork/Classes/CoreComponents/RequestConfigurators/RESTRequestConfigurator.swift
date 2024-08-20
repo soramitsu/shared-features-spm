@@ -17,14 +17,16 @@ final class RESTRequestConfigurator: RequestConfigurator {
             throw RESTRequestConfiguratorError.badURL
         }
 
-        if let endpoint = config.endpoint, let urlWithEndpoint = urlComponents.url?.appendingPathComponent(endpoint) {
+        if let endpoint = config.endpoint,
+           let urlWithEndpoint = urlComponents.url?.appendingPathComponent(endpoint)
+        {
             url = urlWithEndpoint
         }
 
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = config.method.rawValue
         urlRequest.httpBody = config.body
-        
+
         if let timeout = config.timeout {
             urlRequest.timeoutInterval = timeout
         }

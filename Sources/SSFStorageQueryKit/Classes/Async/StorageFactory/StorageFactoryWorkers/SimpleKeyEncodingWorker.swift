@@ -1,7 +1,7 @@
 import Foundation
+import SSFModels
 import SSFRuntimeCodingService
 import SSFUtils
-import SSFModels
 
 final class SimpleKeyEncodingWorker: StorageKeyEncoder {
     private let codingFactory: RuntimeCoderFactoryProtocol
@@ -19,6 +19,9 @@ final class SimpleKeyEncodingWorker: StorageKeyEncoder {
     }
 
     func performEncoding() throws -> [Data] {
-        return [try storageKeyFactory.createStorageKey(moduleName: path.moduleName, storageName: path.itemName)]
+        try [storageKeyFactory.createStorageKey(
+            moduleName: path.moduleName,
+            storageName: path.itemName
+        )]
     }
 }

@@ -16,7 +16,7 @@ public struct SupplyLiquidityInfo {
     public var amountMinB: Decimal {
         targetAssetAmount * (Decimal(1) - slippage / 100)
     }
-    
+
     public init(
         dexId: String,
         baseAsset: PooledAssetInfo,

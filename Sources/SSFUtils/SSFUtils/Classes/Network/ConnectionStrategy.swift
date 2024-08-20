@@ -8,40 +8,40 @@ public protocol ConnectionStrategy {
     var currentUrl: URL { get }
     var currentLoop: Int { get }
     var state: WebSocketEngine.State { get }
-    
+
     func set(webSocketEngine: WebSocketEngine)
     func changeState(_ newState: WebSocketEngine.State)
-    
+
     func disconnect()
     func cancelReconectionShedule()
-    
+
     func canReconnect() -> Bool
     func shouldRunInNextLoop() -> Bool
 }
 
 public final class ConnectionStrategyImpl: ConnectionStrategy {
-    
     // MARK: - Public properties
-    
+
     public weak var webSocketEngine: WebSocketEngine?
     public var currentConnection: WebSocketConnectionProtocol
     public var state: WebSocketEngine.State
     public var callbackQueue: DispatchQueue
     public var currentUrl: URL
     public var currentLoop: Int = 0
-    
+
     // MARK: - Private properties
-    
+
     private let urls: [URL]
     private let timeout: TimeInterval
     private let reconnectionStrategy: ReconnectionStrategyProtocol?
     private let logger: SDKLoggerProtocol?
-    private lazy var reconnectionScheduler: SchedulerProtocol = {
-        Scheduler(with: self, callbackQueue: callbackQueue)
-    }()
-    
+    private lazy var reconnectionScheduler: SchedulerProtocol = Scheduler(
+        with: self,
+        callbackQueue: callbackQueue
+    )
+
     // MARK: - Constuctor
-    
+
     public init?(
         urls: [URL],
         callbackQueue: DispatchQueue,
@@ -55,17 +55,17 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
         self.timeout = timeout
         self.reconnectionStrategy = reconnectionStrategy
         self.logger = logger
-        
+
         guard let url = urls.first else {
             return nil
         }
-        self.currentUrl = url
+        currentUrl = url
         let request = URLRequest(url: url, timeoutInterval: timeout)
         let engine = WSEngine(transport: TCPTransport(), certPinner: FoundationSecurity())
         let connection = WebSocket(request: request, engine: engine)
         connection.callbackQueue = callbackQueue
         currentConnection = connection
-        
+
         if autoconnect {
             state = .connecting
             currentConnection.connect()
@@ -73,39 +73,39 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
             state = .notConnected
         }
     }
-    
+
     // MARK: - Public methods
-    
+
     public func set(webSocketEngine: WebSocketEngine) {
         self.webSocketEngine = webSocketEngine
         currentConnection.delegate = webSocketEngine
     }
-    
+
     public func changeState(_ newState: WebSocketEngine.State) {
         state = newState
         updateConnection()
     }
-    
+
     public func disconnect() {
         currentConnection.disconnect()
     }
-    
+
     public func cancelReconectionShedule() {
         reconnectionScheduler.cancel()
     }
-    
+
     public func canReconnect() -> Bool {
         reconnectionStrategy != nil
     }
-    
+
     public func shouldRunInNextLoop() -> Bool {
         let currentUrlIndex = urls.firstIndex(of: currentUrl) ?? 0
         let nextIndex = currentUrlIndex + 1
         return !urls.indices.contains(nextIndex)
     }
-    
+
     // MARK: - Private methods
-    
+
     private func updateConnection() {
         logger?.debug("\(state)")
 
@@ -123,7 +123,7 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
             break
         }
     }
-    
+
     private func handleConnectingState() {
         let currentUrlIndex = urls.firstIndex(of: currentUrl) ?? 0
         let nextIndex = currentUrlIndex + 1
@@ -134,7 +134,7 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
         updateConnection(with: nextUrl)
         currentConnection.connect()
     }
-    
+
     private func handleWaitingNewLoopState() {
         currentLoop += 1
         if currentLoop > 5 {
@@ -143,12 +143,11 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
 
         sheduleReconnection()
     }
-    
+
     private func sheduleReconnection() {
-        guard
-            let reconnectionStrategy,
-            let nextDelay = reconnectionStrategy.reconnectAfter(attempt: currentLoop)
-        else {
+        guard let reconnectionStrategy,
+              let nextDelay = reconnectionStrategy.reconnectAfter(attempt: currentLoop) else
+        {
             return
         }
         reconnectionScheduler.notifyAfter(nextDelay)
@@ -157,7 +156,9 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
     private func updateConnection(
         with url: URL
     ) {
-        guard currentUrl != url, let currentWebScoketConnection = self.currentConnection as? WebSocket else {
+        guard currentUrl != url,
+              let currentWebScoketConnection = currentConnection as? WebSocket else
+        {
             return
         }
         let request = URLRequest(url: url, timeoutInterval: timeout)
@@ -170,7 +171,7 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
 // MARK: - SchedulerDelegate
 
 extension ConnectionStrategyImpl: SchedulerDelegate {
-    public func didTrigger(scheduler: any SchedulerProtocol) {
+    public func didTrigger(scheduler _: any SchedulerProtocol) {
         state = .connecting
         updateConnection()
     }

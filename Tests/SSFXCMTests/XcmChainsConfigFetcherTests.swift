@@ -203,7 +203,7 @@ extension XcmChainsConfigFetcherTests {
             )]),
             addressPrefix: 0,
             icon: nil,
-            iosMinAppVersion: nil, 
+            iosMinAppVersion: nil,
             identityChain: nil
         )
 
@@ -234,7 +234,7 @@ extension XcmChainsConfigFetcherTests {
             )]),
             addressPrefix: 1,
             icon: nil,
-            iosMinAppVersion: nil, 
+            iosMinAppVersion: nil,
             identityChain: nil
         )
 
@@ -252,7 +252,7 @@ extension XcmChainsConfigFetcherTests {
             )]),
             addressPrefix: 2,
             icon: nil,
-            iosMinAppVersion: nil, 
+            iosMinAppVersion: nil,
             identityChain: nil
         )
     }
