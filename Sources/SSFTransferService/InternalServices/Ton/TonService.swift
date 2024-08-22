@@ -3,24 +3,23 @@ import SSFChainRegistry
 import TonAPI
 import TonSwift
 
-protocol TonSendService {
+public protocol TonSendService {
     func loadSeqno(address: String) async throws -> UInt64
     func loadTransactionInfo(boc: String) async throws -> Components.Schemas.MessageConsequences
     func sendTransaction(boc: String) async throws
     func getTimeoutSafely(TTL: UInt64) async -> UInt64
-    
 }
 
-final class TonSendServiceDefault: TonSendService {
+public final class TonSendServiceDefault: TonSendService {
     private let chainRegistry: ChainRegistryProtocol
     
-    init(
+    public init(
         chainRegistry: ChainRegistryProtocol
     ) {
         self.chainRegistry = chainRegistry
     }
     
-    func loadSeqno(address: String) async throws -> UInt64 {
+    public func loadSeqno(address: String) async throws -> UInt64 {
         let tonAPIClient = try chainRegistry.getTonApiAssembly().tonAPIClient()
         let response = try await tonAPIClient.getAccountSeqno(
             path: .init(account_id: address)
@@ -29,20 +28,20 @@ final class TonSendServiceDefault: TonSendService {
         return UInt64(seqno)
     }
     
-    func loadTransactionInfo(boc: String) async throws -> Components.Schemas.MessageConsequences {
+    public func loadTransactionInfo(boc: String) async throws -> Components.Schemas.MessageConsequences {
         let tonAPIClient = try chainRegistry.getTonApiAssembly().tonAPIClient()
         let response = try await tonAPIClient.emulateMessageToWallet(body: .json(.init(boc: boc)))
         let info = try response.ok.body.json
         return info
     }
     
-    func sendTransaction(boc: String) async throws {
+    public func sendTransaction(boc: String) async throws {
         let tonAPIClient = try chainRegistry.getTonApiAssembly().tonAPIClient()
         let response = try await tonAPIClient.sendBlockchainMessage(body: .json(.init(boc: boc)))
         _ = try response.ok
     }
     
-    func getTimeoutSafely(TTL: UInt64) async -> UInt64 {
+    public func getTimeoutSafely(TTL: UInt64) async -> UInt64 {
         do {
             let tonAPIClient = try chainRegistry.getTonApiAssembly().tonAPIClient()
             let response = try await tonAPIClient.getRawTime(Operations.getRawTime.Input())

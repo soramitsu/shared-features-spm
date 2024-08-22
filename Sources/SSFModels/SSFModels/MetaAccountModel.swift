@@ -92,6 +92,18 @@ public struct ChainAccountRequest {
     public let addressPrefix: UInt16
     public let ecosystem: Ecosystem
     public let accountId: AccountId?
+    
+    public init(
+        chainId: ChainModel.Id,
+        addressPrefix: UInt16,
+        ecosystem: Ecosystem,
+        accountId: AccountId?
+    ) {
+        self.chainId = chainId
+        self.addressPrefix = addressPrefix
+        self.ecosystem = ecosystem
+        self.accountId = accountId
+    }
 }
 
 // MARK: - Replacing

@@ -170,7 +170,7 @@ public extension MetaAccountModel {
            accountId: accountId,
            publicKey: tonPublicKey,
            name: name,
-           cryptoType: .ecdsa,
+           cryptoType: .ed25519,
            addressPrefix: request.addressPrefix,
            ecosystem: request.ecosystem,
            isChainAccount: false,

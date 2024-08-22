@@ -3,6 +3,7 @@ import StreamURLSessionTransport
 import TonAPI
 import OpenAPIRuntime
 import HTTPTypes
+import TonConnectAPI
 
 public final class TonAPIAssembly {
     public let tonAPIURL: URL
@@ -30,6 +31,19 @@ public final class TonAPIAssembly {
         return tonAPIClient
     }
     
+    private var _tonConnectAPIClient: TonConnectAPI.Client?
+    public func tonConnectAPIClient() -> TonConnectAPI.Client {
+      if let tonConnectAPIClient = _tonConnectAPIClient {
+        return tonConnectAPIClient
+      }
+      let tonConnectAPIClient = TonConnectAPI.Client(
+        serverURL: (try? TonConnectAPI.Servers.server1()) ?? tonConnectURL,
+        transport: streamingTransport,
+        middlewares: [])
+      _tonConnectAPIClient = tonConnectAPIClient
+      return tonConnectAPIClient
+    }
+    
     // MARK: - Private
     
     private lazy var authTokenProvider: AuthTokenProvider = {
@@ -40,11 +54,26 @@ public final class TonAPIAssembly {
         StreamURLSessionTransport(urlSessionConfiguration: urlSessionConfiguration)
     }()
     
+    private lazy var streamingTransport: StreamURLSessionTransport = {
+      StreamURLSessionTransport(urlSessionConfiguration: streamingUrlSessionConfiguration)
+    }()
+    
     private var urlSessionConfiguration: URLSessionConfiguration {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = 60
         configuration.timeoutIntervalForResource = 60
         return configuration
+    }
+    
+    private var streamingUrlSessionConfiguration: URLSessionConfiguration {
+      let configuration = URLSessionConfiguration.default
+      configuration.timeoutIntervalForRequest = TimeInterval(Int.max)
+      configuration.timeoutIntervalForResource = TimeInterval(Int.max)
+      return configuration
+    }
+    
+    var tonConnectURL: URL {
+      URL(string: "https://bridge.tonapi.io/bridge")!
     }
 }
 

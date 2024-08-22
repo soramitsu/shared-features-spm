@@ -1,8 +1,9 @@
 import Foundation
 import SSFModels
 import TonSwift
+import BigInt
 
-protocol BocFactory {
+public protocol BocFactory {
     func createTonTransactionBoc(
         transfer: TonTransfer,
         seqno: UInt64,
@@ -15,15 +16,23 @@ protocol BocFactory {
         seqno: UInt64,
         timeout: UInt64
     ) async throws -> String
+    
+    func createTonConnectTransferBoc(
+        sender: TonSwift.Address,
+        contract: WalletContract,
+        parameter: SendTransactionParam,
+        seqno: UInt64,
+        timeout: UInt64
+    ) async throws -> String
 }
 
-final class BocFactoryImpl: BocFactory {
+public final class BocFactoryImpl: BocFactory {
     private let secretKey: Data
-    init(secretKey: Data) {
+    public init(secretKey: Data) {
         self.secretKey = secretKey
     }
     
-    func createTonTransactionBoc(
+    public func createTonTransactionBoc(
         transfer: TonTransfer,
         seqno: UInt64,
         timeout: UInt64
@@ -44,7 +53,7 @@ final class BocFactoryImpl: BocFactory {
         )
     }
     
-    func createJettonTransactionBoc(
+    public func createJettonTransactionBoc(
         transfer: TonTransfer,
         jettonWalletAddress: Address,
         seqno: UInt64,
@@ -59,6 +68,33 @@ final class BocFactoryImpl: BocFactory {
             recipientAddress: transfer.recipientAddress.address,
             isBounceable: transfer.recipientAddress.isBouncable,
             comment: transfer.comment,
+            timeout: timeout,
+            signClosure: { transfer in
+                return try await signTransfer(transfer)
+            }
+        )
+    }
+    
+    public func createTonConnectTransferBoc(
+        sender: TonSwift.Address,
+        contract: WalletContract,
+        parameter: SendTransactionParam,
+        seqno: UInt64,
+        timeout: UInt64
+    ) async throws -> String {
+        let payloads = parameter.messages.map { message in
+            TonConnectTransferMessageBuilder.Payload(
+                value: BigInt(integerLiteral: message.amount),
+                recipientAddress: message.address,
+                stateInit: message.stateInit,
+                payload: message.payload
+            )
+        }
+        return try await TonConnectTransferMessageBuilder.sendTonConnectTransfer(
+            contract: contract,
+            sender: sender,
+            seqno: seqno,
+            payloads: payloads,
             timeout: timeout,
             signClosure: { transfer in
                 return try await signTransfer(transfer)

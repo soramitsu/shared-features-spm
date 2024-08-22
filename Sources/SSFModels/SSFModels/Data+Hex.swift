@@ -15,4 +15,25 @@ public extension Data {
             self = try (NSData(hexString: hexStringSSF)) as Data
         }
     }
+    
+    init?(tonHex: String) {
+        let len = tonHex.count / 2
+        var data = Data(capacity: len)
+        var i = tonHex.startIndex
+        
+        for _ in 0..<len {
+            let j = tonHex.index(i, offsetBy: 2)
+            let bytes = tonHex[i..<j]
+            
+            if var num = UInt8(bytes, radix: 16) {
+                data.append(&num, count: 1)
+            } else {
+                return nil
+            }
+            
+            i = j
+        }
+        
+        self = data
+    }
 }
