@@ -4,7 +4,7 @@ import RobinHood
 public struct AssetModel: Equatable, Codable, Hashable, Identifiable {
     public typealias Id = String
     public typealias PriceId = String
-    
+
     public var identifier: String { id }
 
     public let id: String
