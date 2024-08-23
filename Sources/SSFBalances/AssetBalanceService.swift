@@ -7,7 +7,7 @@ import SSFUtils
 
 public typealias AssetBalanceSubscription = (
     id: AssetBalanceSubscriptionId,
-    publisher: PassthroughSubject<AssetBalanceInfo?, any Error>
+    publisher: PassthroughSubject<AssetBalanceInfo?, Never>
 )
 
 public typealias AssetsBalanceSubscription = (
@@ -162,7 +162,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
         on chainAsset: ChainAsset,
         accountId: AccountId
     ) async throws -> AssetBalanceSubscription {
-        let publisher = PassthroughSubject<AssetBalanceInfo?, Error>()
+        let publisher = PassthroughSubject<AssetBalanceInfo?, Never>()
 
         let updateClosure: (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void = { [weak self] _ in
             Task { [weak self] in
@@ -184,7 +184,8 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
 
         let failureClosure: (Error, Bool) -> Void = { [weak self] error, _ in
             guard let self else { return }
-            publisher.send(completion: .failure(error))
+            publisher.send(nil)
+//            publisher.send(completion: .failure(error))
         }
 
         let subscriptionId = try await subscriptionService.createBalanceSubscription(
