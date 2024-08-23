@@ -173,6 +173,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
                     publisher.send(balance)
                     try await self.localService.sync(remoteBalances: [balance])
                 } catch {
+                    print("OLOLOLO error \(error)")
                     let allBalances = try await self.localService.get()
                     let localBalance = allBalances
                         .first(where: { $0.chainAssetId == chainAsset.chainAssetId.id })
@@ -216,6 +217,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
                     publisher.send(balances)
                     try await self.localService.sync(remoteBalances: balances)
                 } catch {
+                    print("OLOLOLO error \(error)")
                     let allBalances = try await self.localService.get()
                     let ids = chainAssets.map { $0.chainAssetId.id }
                     let localBalances = allBalances.filter { ids.contains($0.chainAssetId) }
@@ -263,6 +265,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
                     publisher.send(remoteBalances)
                     try await self.localService.sync(remoteBalances: remoteBalances)
                 } catch {
+                    print("OLOLOLO error \(error)")
                     let allBalances = try await self.localService.get()
                     let ids = chain.chainAssets.map { $0.chainAssetId.id }
                     let localBalances = allBalances.filter { ids.contains($0.chainAssetId) }
@@ -308,6 +311,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
                     publisher.send(balances)
                     try await self.localService.sync(remoteBalances: balances)
                 } catch {
+                    print("OLOLOLO error \(error)")
                     let allBalances = try await self.localService.get()
                     let ids = chains.map { $0.chainAssets }.reduce([], +).map { $0.chainAssetId.id }
                     let localBalances = allBalances.filter { ids.contains($0.chainAssetId) }
