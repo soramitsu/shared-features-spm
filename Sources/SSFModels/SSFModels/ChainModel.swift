@@ -15,7 +15,11 @@ public enum BlockExplorerType: String, Codable {
     case etherscan
     case reef
     case oklink
-    case zeta
+    case blockscout
+    case fire
+    case vicscan
+    case zchain
+    case klaytn
 }
 
 public final class ChainModel: Codable, Identifiable {
@@ -369,8 +373,19 @@ public extension ChainModel {
     }
 
     struct BlockExplorer: Codable, Hashable {
-        public let type: BlockExplorerType
+        enum CodingKeys: String, CodingKey {
+            case type
+            case url
+        }
+        
+        public let type: BlockExplorerType?
         public let url: URL
+        
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            type = try? container.decode(BlockExplorerType.self, forKey: .type)
+            url = try container.decode(URL.self, forKey: .url)
+        }
 
         public init?(type: String, url: URL) {
             guard let externalApiType = BlockExplorerType(rawValue: type) else {
