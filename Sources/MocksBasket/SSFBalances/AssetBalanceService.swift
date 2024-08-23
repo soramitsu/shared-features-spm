@@ -15,7 +15,7 @@ public struct AssetBalanceSubscriptionId {
     let chainAsset: ChainAsset
 }
 
-public protocol AssetBalanceService {
+public protocol AssetBalanceService: Actor {
     func getBalance(
         for chainAsset: ChainAsset,
         accountId: AccountId
@@ -60,7 +60,7 @@ public protocol AssetBalanceService {
 }
 
 
-public final class AssetBalanceServiceDefault {
+public actor AssetBalanceServiceDefault {
     let remoteService: AccountInfoRemoteService
     let subscriptionService: BalanceSubscriptionService
     
