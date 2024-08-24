@@ -33,7 +33,7 @@ public actor ConnectionPool: ConnectionPoolProtocol {
             return connection
         }
 
-        clearUnusedConnections()
+        await clearUnusedConnections()
 
         let nodes = chain.nodes.map { $0.url }
         let autoBalance = SubstrateConnectionAutoBalance(
@@ -44,7 +44,7 @@ public actor ConnectionPool: ConnectionPoolProtocol {
 
         autoBalancesByChainIds[chain.chainId] = autoBalance
 
-        return try autoBalance.connection()
+        return try await autoBalance.connection()
     }
 
     public func getSubstrateConnection(
@@ -54,7 +54,7 @@ public actor ConnectionPool: ConnectionPoolProtocol {
         guard let autoBalance = autoBalancesByChainIds[chainId] as? SubstrateConnectionAutoBalance else {
             throw ConnectionPoolError.missingConnection
         }
-        return try autoBalance.connection()
+        return try await autoBalance.connection()
     }
 
     public func setupWeb3EthereumConnection(for chain: ChainModel) async throws
@@ -64,7 +64,7 @@ public actor ConnectionPool: ConnectionPoolProtocol {
             return connection
         }
 
-        clearUnusedConnections()
+        await clearUnusedConnections()
 
         let autoBalance = Web3EthConnectionAutoBalance(chain: chain)
 
@@ -85,7 +85,13 @@ public actor ConnectionPool: ConnectionPoolProtocol {
 
     // MARK: - Private methods
 
-    private func clearUnusedConnections() {
-        autoBalancesByChainIds = autoBalancesByChainIds.filter { $0.value.isActive }
+    private func clearUnusedConnections() async {
+//        autoBalancesByChainIds = autoBalancesByChainIds.filter { $0.value.getActiveStatus() }
+        await autoBalancesByChainIds.asyncForEach { key, value in
+            let isActive = await value.getActiveStatus()
+            if !isActive {
+                autoBalancesByChainIds[key] = nil
+            }
+        }
     }
 }

@@ -16,7 +16,7 @@ public protocol WebSocketEngineDelegate: AnyObject {
         engine: WebSocketEngine,
         from oldState: WebSocketEngine.State,
         to newState: WebSocketEngine.State
-    )
+    ) async
 }
 
 public final class WebSocketEngine {
@@ -40,10 +40,12 @@ public final class WebSocketEngine {
 
     public private(set) var state: State = .notConnected {
         didSet {
-            if let delegate = delegate {
-                let oldState = oldValue
-                let newState = state
-                delegate.webSocketDidChangeState(engine: self, from: oldState, to: newState)
+            Task {
+                if let delegate = delegate {
+                    let oldState = oldValue
+                    let newState = state
+                    await delegate.webSocketDidChangeState(engine: self, from: oldState, to: newState)
+                }
             }
         }
     }

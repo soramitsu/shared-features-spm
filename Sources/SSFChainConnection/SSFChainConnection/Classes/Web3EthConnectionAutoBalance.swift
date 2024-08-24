@@ -14,6 +14,10 @@ public final class Web3EthConnectionAutoBalance: ChainConnectionProtocol {
     public init(chain: ChainModel) {
         self.chain = chain
     }
+    
+    public func getActiveStatus() async -> Bool {
+        return isActive
+    }
 
     public func connection() throws -> Web3EthConnection {
         guard let connection = currentConnection else {

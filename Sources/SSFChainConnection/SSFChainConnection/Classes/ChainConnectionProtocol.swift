@@ -2,6 +2,6 @@ import Foundation
 
 public protocol ChainConnectionProtocol {
     associatedtype T
-    var isActive: Bool { get }
-    func connection() throws -> T
+    func getActiveStatus() async -> Bool
+    func connection() async throws -> T
 }
