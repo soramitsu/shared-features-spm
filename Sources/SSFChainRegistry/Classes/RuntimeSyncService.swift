@@ -8,8 +8,8 @@ import SSFUtils
 public protocol RuntimeSyncServiceProtocol {
     func register(chain: ChainModel, with connection: SubstrateConnection) async throws
         -> RuntimeMetadataItem
-    func unregister(chainId: ChainModel.Id)
-    func getRuntimeItem(chainId: ChainModel.Id) throws -> RuntimeMetadataItem
+    func unregister(chainId: ChainModel.Id) async
+    func getRuntimeItem(chainId: ChainModel.Id) async throws -> RuntimeMetadataItem
 }
 
 public enum RuntimeSyncServiceError: Error {
@@ -20,7 +20,7 @@ public enum RuntimeSyncServiceError: Error {
     case missingRuntimeVersionResult
 }
 
-public final class RuntimeSyncService {
+public actor RuntimeSyncService {
     struct SyncResult {
         let chainId: ChainModel.Id
         let metadataSyncResult: Result<RuntimeMetadataItem?, Error>?
@@ -101,7 +101,10 @@ public final class RuntimeSyncService {
                 let result = processingOperation.result
                 switch result {
                 case let .success(syncResult):
-                    strongSelf.processSyncResult(syncResult)
+                    Task {
+                        await strongSelf.processSyncResult(syncResult)
+                    }
+                    
                     let metadataSyncResult = syncResult.metadataSyncResult
                     switch metadataSyncResult {
                     case let .success(item):
@@ -121,7 +124,9 @@ public final class RuntimeSyncService {
                         runtimeVersion: runtimeVersion
                     )
 
-                    strongSelf.processSyncResult(result)
+                    Task {
+                        await strongSelf.processSyncResult(result)
+                    }
                     continuation.resume(throwing: error)
                 case .none:
                     continuation.resume(throwing: RuntimeSyncServiceError.missingRuntimeItem)
@@ -130,13 +135,7 @@ public final class RuntimeSyncService {
         }
     }
 
-    private func processSyncResult(_ result: SyncResult) {
-        mutex.lock()
-
-        defer {
-            mutex.unlock()
-        }
-
+    private func processSyncResult(_ result: SyncResult) async {
         syncingChains[result.chainId] = nil
         addRetryRequestIfNeeded(for: result)
         notifyCompletion(for: result)
@@ -276,7 +275,7 @@ public final class RuntimeSyncService {
 }
 
 extension RuntimeSyncService: SchedulerDelegate {
-    public func didTrigger(scheduler _: SchedulerProtocol) {
+    public func didTrigger(scheduler _: SchedulerProtocol) async {
         mutex.lock()
 
         defer {
@@ -317,7 +316,7 @@ extension RuntimeSyncService: RuntimeSyncServiceProtocol {
         return runtimeMetadataItem
     }
 
-    public func unregister(chainId: ChainModel.Id) {
+    public func unregister(chainId: ChainModel.Id) async {
         mutex.lock()
 
         defer {
@@ -328,7 +327,7 @@ extension RuntimeSyncService: RuntimeSyncServiceProtocol {
         knownChains[chainId] = nil
     }
 
-    public func getRuntimeItem(chainId: ChainModel.Id) throws -> RuntimeMetadataItem {
+    public func getRuntimeItem(chainId: ChainModel.Id) async throws -> RuntimeMetadataItem {
         if let error = errors[chainId] {
             throw error
         }
