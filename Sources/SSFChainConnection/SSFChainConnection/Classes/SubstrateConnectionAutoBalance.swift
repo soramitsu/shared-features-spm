@@ -16,7 +16,7 @@ public actor SubstrateConnectionAutoBalance: ChainConnectionProtocol {
 
     private lazy var connectionIssuesCenter = NetworkIssuesCenterImpl.shared
 
-    private weak var currentConnection: SubstrateConnection?
+    private var currentConnection: SubstrateConnection?
     private var failedUrls: Set<URL?> = []
 
     public init(
