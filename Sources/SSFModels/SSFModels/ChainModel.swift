@@ -317,7 +317,7 @@ public final class ChainModel: Codable, Identifiable {
         )
     }
     
-    public func replacingAssets(_ assets: Set<AssetModel>) -> ChainModel {
+    public func replacingAssets(_ assets: [AssetModel]) -> ChainModel {
         ChainModel(
             ecosystem: ecosystem,
             rank: rank,
