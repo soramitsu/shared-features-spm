@@ -1,6 +1,7 @@
 import BigInt
 import Foundation
 import SSFModels
+
 public final class DynamicScaleEncoder {
     private var encoder: ScaleEncoder = .init()
 

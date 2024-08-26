@@ -82,7 +82,9 @@ extension PolkaswapExtrinsicBuilder: PoolsExtrinsicBuilder {
         }
     }
 
-    public func removeLiqudityExtrinsic(model: RemoveLiquidityInfo) throws -> ExtrinsicBuilderClosure {
+    public func removeLiqudityExtrinsic(model: RemoveLiquidityInfo) throws
+        -> ExtrinsicBuilderClosure
+    {
         guard let amountMinA = model.amountMinA
             .toSubstrateAmount(precision: model.baseAsset.precision),
             let amountMinB = model.amountMinB

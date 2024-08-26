@@ -4,7 +4,7 @@ import Starscream
 extension WebSocketEngine: WebSocketDelegate {
     public func didReceive(event: WebSocketEvent, client _: WebSocketClient) {
         mutex.lock()
-        
+
         defer {
             mutex.unlock()
         }
@@ -36,7 +36,7 @@ extension WebSocketEngine: WebSocketDelegate {
             handleDisconnectedEvent(reason: "reconnect suggested", code: 0)
         }
     }
-    
+
     private func handleTimeout() {
         handleCancelled(error: JSONRPCEngineError.timeout)
     }

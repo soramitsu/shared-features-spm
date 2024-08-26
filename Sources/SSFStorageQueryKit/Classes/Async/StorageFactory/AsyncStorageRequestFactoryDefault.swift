@@ -4,9 +4,7 @@ import SSFRuntimeCodingService
 import SSFUtils
 
 final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
-    private lazy var storageKeyFactory: StorageKeyFactoryProtocol = {
-        StorageKeyFactory()
-    }()
+    private lazy var storageKeyFactory: StorageKeyFactoryProtocol = StorageKeyFactory()
 
     // MARK: - AsyncStorageRequestFactory
 
@@ -153,13 +151,13 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
         )
         return mergeResult
     }
-    
+
     func queryItemsByPrefix<T>(
         engine: JSONRPCEngine,
         keyParams: [any Encodable],
         factory: RuntimeCoderFactoryProtocol,
         storagePath: any StorageCodingPathProtocol,
-        at blockHash: Data?
+        at _: Data?
     ) async throws -> [StorageResponse<T>] where T: Decodable {
         let keysWorker = MapKeyEncodingWorker(
             codingFactory: factory,
@@ -168,7 +166,7 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
             keyParams: keyParams
         )
         let keys = try keysWorker.performEncoding()
-        
+
         return try await queryItemsByPrefix(
             engine: engine,
             keys: keys,
@@ -177,7 +175,7 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
             at: nil
         )
     }
-    
+
     func queryWorkersResult(
         for keys: [Data],
         at blockHash: Data?,
@@ -248,7 +246,7 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
             return index1 < index2
         }
     }
-    
+
     private func queryKeysByPrefix(
         for key: Data,
         engine: JSONRPCEngine
@@ -284,8 +282,8 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
         for keys: [Data],
         engine: JSONRPCEngine
     ) async throws -> [[String]] {
-        return try await keys.asyncCompactMap {
-            return try await queryKeysByPrefix(for: $0, engine: engine)
+        try await keys.asyncCompactMap {
+            try await queryKeysByPrefix(for: $0, engine: engine)
         }
     }
 
@@ -296,7 +294,7 @@ final class AsyncStorageRequestDefault: AsyncStorageRequestFactory {
             of: T.self,
             returning: [T].self,
             body: { group in
-                workers.forEach { worker in
+                for worker in workers {
                     group.addTask {
                         try await worker.performCall()
                     }

@@ -42,9 +42,10 @@ public final class WebSocketEngine {
     private let jsonEncoder = JSONEncoder()
     private let jsonDecoder = JSONDecoder()
 
-    private(set) lazy var pingScheduler: SchedulerProtocol = {
-        Scheduler(with: self, callbackQueue: connectionStrategy.callbackQueue)
-    }()
+    private(set) lazy var pingScheduler: SchedulerProtocol = Scheduler(
+        with: self,
+        callbackQueue: connectionStrategy.callbackQueue
+    )
 
     private(set) var pendingRequests: [JSONRPCRequest] = []
     private(set) var inProgressRequests: [UInt16: JSONRPCRequest] = [:]
@@ -70,7 +71,7 @@ public final class WebSocketEngine {
         self.pingInterval = pingInterval
         self.connectionStrategy = connectionStrategy
         completionQueue = processingQueue ?? Self.sharedProcessingQueue
-        
+
         connectionStrategy.set(webSocketEngine: self)
         subscribeToReachabilityStatus()
     }
@@ -225,7 +226,7 @@ extension WebSocketEngine {
 
         return notifiableRequests
     }
-    
+
     func resetPendings() {
         pendingRequests = []
     }
@@ -475,12 +476,12 @@ extension WebSocketEngine {
             requests.forEach { $0.responseHandler?.handle(error: requestError) }
             return
         }
-        
+
         if reachabilityManager?.isReachable == false {
             connectionStrategy.changeState(.notReachable)
             return
         }
-        
+
         if connectionStrategy.shouldRunInNextLoop() {
             connectionStrategy.changeState(.waitingNewLoop)
         } else {
@@ -546,11 +547,11 @@ extension WebSocketEngine {
 
         connectionStrategy.currentConnection.connect()
     }
-    
+
     func disconnect() {
         connectionStrategy.disconnect()
     }
-    
+
     func cancelReconectionShedule() {
         connectionStrategy.cancelReconectionShedule()
     }

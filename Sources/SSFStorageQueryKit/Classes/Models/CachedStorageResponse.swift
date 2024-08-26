@@ -8,17 +8,20 @@ public enum CachedStorageResponseType {
 public struct CachedStorageResponse<T> {
     public var value: T?
     public var type: CachedStorageResponseType
-    
+
     public init(value: T?, type: CachedStorageResponseType) {
         self.value = value
         self.type = type
     }
-    
+
     public static var empty: CachedStorageResponse<T> {
-        return CachedStorageResponse(value: nil, type: .cache)
+        CachedStorageResponse(value: nil, type: .cache)
     }
-    
-    public func merge(with previous: CachedStorageResponse<T>?, priorityType: CachedStorageResponseType) -> CachedStorageResponse<T> {
+
+    public func merge(
+        with previous: CachedStorageResponse<T>?,
+        priorityType: CachedStorageResponseType
+    ) -> CachedStorageResponse<T> {
         var type: CachedStorageResponseType
         switch (previous?.type, self.type) {
         case (.cache, .cache):
@@ -34,7 +37,7 @@ public struct CachedStorageResponse<T> {
         case (nil, .remote):
             type = .remote
         }
-        
+
         return CachedStorageResponse(value: value, type: type)
     }
 }

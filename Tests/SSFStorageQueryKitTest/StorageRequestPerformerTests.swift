@@ -1,15 +1,15 @@
 import BigInt
 import MocksBasket
+import SSFChainRegistry
 import SSFCrypto
 import SSFModels
 import SSFRuntimeCodingService
 import SSFUtils
 import XCTest
-import SSFChainRegistry
 
 @testable import SSFStorageQueryKit
 
-//final class StorageRequestPerformerTests: XCTestCase {
+// final class StorageRequestPerformerTests: XCTestCase {
 //    private var polkadotRuntimeService: RuntimeProviderProtocol!
 //
 //    override func setUp() async throws {
@@ -26,7 +26,8 @@ import SSFChainRegistry
 //            changes: [["0x21f5afab8d010000", "0x21f5afab8d010000"]] // key, value
 //        )
 //        let chainRegistry = try await setUpChainRegistry()
-//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with: [storageUpdate])
+//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with:
+//        [storageUpdate])
 //        let performer = StorageRequestPerformerDefault(
 //            chainRegistry: chainRegistry
 //        )
@@ -34,7 +35,8 @@ import SSFChainRegistry
 //            parametersType: .simple,
 //            storagePath: StoragePathMock.custom(moduleName: "timestamp", itemName: "now")
 //        )
-//        let timestamp: String? = try await performer.performSingle(request, chain: createChainModel())
+//        let timestamp: String? = try await performer.performSingle(request, chain:
+//        createChainModel())
 //
 //        XCTAssertEqual(expectedTimespamp, timestamp)
 //    }
@@ -52,7 +54,8 @@ import SSFChainRegistry
 //            ]] // key, value
 //        )
 //        let chainRegistry = try await setUpChainRegistry()
-//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with: [storageUpdate])
+//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with:
+//        [storageUpdate])
 //        let performer = StorageRequestPerformerDefault(
 //            chainRegistry: chainRegistry
 //        )
@@ -60,7 +63,8 @@ import SSFChainRegistry
 //            parametersType: .encodable(param: expectedAccount),
 //            storagePath: StoragePathMock.custom(moduleName: "staking", itemName: "bonded")
 //        )
-//        let account: AccountId? = try await performer.performSingle(request, chain: createChainModel())
+//        let account: AccountId? = try await performer.performSingle(request, chain:
+//        createChainModel())
 //
 //        XCTAssertEqual(account, expectedAccount)
 //    }
@@ -75,7 +79,8 @@ import SSFChainRegistry
 //            changes: [["0x21f5afab8d010000", "0x02b55b1200"]] // key, value
 //        )
 //        let chainRegistry = try await setUpChainRegistry()
-//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with: [storageUpdate])
+//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with:
+//        [storageUpdate])
 //        let performer = StorageRequestPerformerDefault(
 //            chainRegistry: chainRegistry
 //        )
@@ -89,7 +94,8 @@ import SSFChainRegistry
 //                itemName: "erasValidatorPrefs"
 //            )
 //        )
-//        let result: ValidatorPrefs? = try await performer.performSingle(request, chain: createChainModel())
+//        let result: ValidatorPrefs? = try await performer.performSingle(request, chain:
+//        createChainModel())
 //        let extectedResult = ValidatorPrefs(
 //            commission: BigUInt(stringLiteral: "77000000"),
 //            blocked: false
@@ -106,7 +112,8 @@ import SSFChainRegistry
 //            changes: [["0x21f5afab8d010000", "0x21f5afab8d010000"]] // key, value
 //        )
 //        let chainRegistry = try await setUpChainRegistry()
-//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with: [storageUpdate])
+//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with:
+//        [storageUpdate])
 //        let performer = StorageRequestPerformerDefault(
 //            chainRegistry: chainRegistry
 //        )
@@ -117,7 +124,8 @@ import SSFChainRegistry
 //        // fetch remote and save
 //        let _: String? = try await performer.performSingle(request, chain: createChainModel())
 //
-//        let stream: AsyncThrowingStream<CachedStorageResponse<String?>, Error> = await performer.performSingle(
+//        let stream: AsyncThrowingStream<CachedStorageResponse<String?>, Error> = await
+//        performer.performSingle(
 //            request,
 //            withCacheOptions: [.onAll],
 //            chain: createChainModel()
@@ -138,7 +146,8 @@ import SSFChainRegistry
 //            changes: [["0x21f5afab8d010000", "0x21f5afab8d010000"]] // key, value
 //        )
 //        let chainRegistry = try await setUpChainRegistry()
-//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with: [storageUpdate])
+//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with:
+//        [storageUpdate])
 //        let performer = StorageRequestPerformerDefault(
 //            chainRegistry: chainRegistry
 //        )
@@ -149,7 +158,8 @@ import SSFChainRegistry
 //        // fetch remote and save
 //        let _: String? = try await performer.performSingle(request, chain: createChainModel())
 //
-//        let stream: AsyncThrowingStream<CachedStorageResponse<String>, Error> = await performer.performSingle(
+//        let stream: AsyncThrowingStream<CachedStorageResponse<String>, Error> = await
+//        performer.performSingle(
 //            request,
 //            withCacheOptions: [.onPerform, .onCache],
 //            chain: createChainModel()
@@ -170,7 +180,8 @@ import SSFChainRegistry
 //            changes: [["0x21f5afab8d010000", "0x21f5afab8d010000"]] // key, value
 //        )
 //        let chainRegistry = try await setUpChainRegistry()
-//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with: [storageUpdate])
+//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with:
+//        [storageUpdate])
 //        let performer = StorageRequestPerformerDefault(
 //            chainRegistry: chainRegistry
 //        )
@@ -181,7 +192,8 @@ import SSFChainRegistry
 //        // fetch remote and save
 //        let _: String? = try await performer.performSingle(request, chain: createChainModel())
 //
-//        let stream: AsyncThrowingStream<CachedStorageResponse<String>, Error> = await performer.performSingle(
+//        let stream: AsyncThrowingStream<CachedStorageResponse<String>, Error> = await
+//        performer.performSingle(
 //            request,
 //            withCacheOptions: [.onCache],
 //            chain: createChainModel()
@@ -202,7 +214,8 @@ import SSFChainRegistry
 //            changes: [["0x21f5afab8d010000", "0x21f5afab8d010000"]] // key, value
 //        )
 //        let chainRegistry = try await setUpChainRegistry()
-//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with: [storageUpdate])
+//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with:
+//        [storageUpdate])
 //        let performer = StorageRequestPerformerDefault(
 //            chainRegistry: chainRegistry
 //        )
@@ -211,7 +224,8 @@ import SSFChainRegistry
 //            storagePath: StoragePathMock.custom(moduleName: "timestamp", itemName: "now")
 //        )
 //
-//        let stream: AsyncThrowingStream<CachedStorageResponse<String>, Error> = await performer.performSingle(
+//        let stream: AsyncThrowingStream<CachedStorageResponse<String>, Error> = await
+//        performer.performSingle(
 //            request,
 //            withCacheOptions: [.onPerform],
 //            chain: createChainModel()
@@ -258,7 +272,8 @@ import SSFChainRegistry
 //            ] // key, value
 //        )
 //        let chainRegistry = try await setUpChainRegistry()
-//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with: [storageUpdate])
+//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with:
+//        [storageUpdate])
 //        let performer = StorageRequestPerformerDefault(
 //            chainRegistry: chainRegistry
 //        )
@@ -267,7 +282,8 @@ import SSFChainRegistry
 //            parametersType: .multipleEncodable(params: [account1, account2, account3]),
 //            storagePath: StoragePathMock.custom(moduleName: "staking", itemName: "bonded")
 //        )
-//        let accounts: [String : AccountId?] = try await performer.performMultiple(request, chain: createChainModel())!
+//        let accounts: [String : AccountId?] = try await performer.performMultiple(request, chain:
+//        createChainModel())!
 //
 ////        XCTAssertEqual(accounts, [account1, account2, account3])
 //    }
@@ -286,7 +302,8 @@ import SSFChainRegistry
 //            ] // key, value
 //        )
 //        let chainRegistry = try await setUpChainRegistry()
-//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with: [storageUpdate])
+//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with:
+//        [storageUpdate])
 //        let performer = StorageRequestPerformerDefault(
 //            chainRegistry: chainRegistry
 //        )
@@ -309,7 +326,8 @@ import SSFChainRegistry
 //                itemName: "erasValidatorPrefs"
 //            )
 //        )
-//        let result: [String : ValidatorPrefs?] = try await performer.performMultiple(request, chain: createChainModel())!
+//        let result: [String : ValidatorPrefs?] = try await performer.performMultiple(request,
+//        chain: createChainModel())!
 //        let extectedResult1 = ValidatorPrefs(
 //            commission: BigUInt(stringLiteral: "77000000"),
 //            blocked: false
@@ -358,7 +376,8 @@ import SSFChainRegistry
 //            ] // key, value
 //        )
 //        let chainRegistry = try await setUpChainRegistry()
-//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with: [storageUpdate])
+//        chainRegistry.getSubstrateConnectionForReturnValue = createConnection(with:
+//        [storageUpdate])
 //        let performer = StorageRequestPerformerDefault(
 //            chainRegistry: chainRegistry
 //        )
@@ -367,10 +386,12 @@ import SSFChainRegistry
 //            parametersType: .multipleEncodable(params: [account1, account2, account3]),
 //            storagePath: StoragePathMock.custom(moduleName: "staking", itemName: "bonded")
 //        )
-//        let _: [String : AccountId?] = try await performer.performMultiple(request, chain: createChainModel())!
-//        let stream: AsyncThrowingStream<[String : AccountId?], Error> = await performer.performMultiple(
+//        let _: [String : AccountId?] = try await performer.performMultiple(request, chain:
+//        createChainModel())!
+//        let stream: AsyncThrowingStream<[String : AccountId?], Error> = await
+//        performer.performMultiple(
 //            request,
-//            withCacheOptions: .onAll, 
+//            withCacheOptions: .onAll,
 //            chain: createChainModel()
 //        )
 //
@@ -396,13 +417,14 @@ import SSFChainRegistry
 //        mock.completionResult = result
 //        return mock
 //    }
-//    
+//
 //    private func setUpChainRegistry() async throws -> ChainRegistryProtocolMock {
 //        let chainRegistry = ChainRegistryProtocolMock()
-//        chainRegistry.getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReturnValue = polkadotRuntimeService
+//        chainRegistry.getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemReturnValue =
+//        polkadotRuntimeService
 //        return chainRegistry
 //    }
-//    
+//
 //    private func createChainModel() -> ChainModel {
 //        ChainModel(
 //            rank: 0,
@@ -418,7 +440,7 @@ import SSFChainRegistry
 //            identityChain: nil
 //        )
 //    }
-//}
+// }
 
 // TODO: - Transfer this model to staking package
 struct ValidatorPrefs: Codable, Equatable {

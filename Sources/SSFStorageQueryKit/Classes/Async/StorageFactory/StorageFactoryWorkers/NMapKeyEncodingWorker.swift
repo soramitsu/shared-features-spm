@@ -34,7 +34,7 @@ final class NMapKeyEncodingWorker: StorageKeyEncoder {
         }
 
         let keyEntries = try nMapEntry.keys(using: codingFactory.metadata.schemaResolver)
-        
+
         let keys: [Data] = try keyParams.compactMap {
             guard keyEntries.count == $0.count else {
                 throw StorageKeyEncodingOperationError.incompatibleStorageType
@@ -51,7 +51,10 @@ final class NMapKeyEncodingWorker: StorageKeyEncoder {
 
             let keys: [Data] = try params.map { params in
                 let encodedParams: [Data] = try params.enumerated().map { index, param in
-                    try param.encode(encoder: codingFactory.createEncoder(), type: keyEntries[index])
+                    try param.encode(
+                        encoder: codingFactory.createEncoder(),
+                        type: keyEntries[index]
+                    )
                 }
 
                 return try storageKeyFactory.createStorageKey(
@@ -63,7 +66,7 @@ final class NMapKeyEncodingWorker: StorageKeyEncoder {
             }
             return keys
         }.reduce([], +)
-        
+
         return keys
     }
 

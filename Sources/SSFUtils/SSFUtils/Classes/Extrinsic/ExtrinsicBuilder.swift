@@ -38,7 +38,7 @@ public enum ExtrinsicBuilderError: Error {
 
 public final class ExtrinsicBuilder {
     static let payloadHashingTreshold = 256
-    
+
     public enum PayloadType {
         case regular
         case rawData
@@ -141,7 +141,7 @@ public final class ExtrinsicBuilder {
         using metadata: RuntimeMetadata
     ) throws -> Data {
         let call = try prepareExtrinsicCall(for: metadata)
-        
+
         switch payloadType {
         case .regular:
             try encoder.append(json: call, type: GenericType.call.name)
@@ -187,24 +187,22 @@ extension ExtrinsicBuilder: ExtrinsicBuilderProtocol {
 
         return self
     }
-    
-    
+
     public func with(appId: BigUInt) -> Self {
         self.appId = appId
-        self.signature = nil
+        signature = nil
 
         return self
     }
-
 
     public func with(shouldUseAtomicBatch: Bool) -> Self {
         self.shouldUseAtomicBatch = shouldUseAtomicBatch
         return self
     }
-    
+
     public func with(payloadType: PayloadType) -> Self {
         self.payloadType = payloadType
-        self.signature = nil
+        signature = nil
         return self
     }
 

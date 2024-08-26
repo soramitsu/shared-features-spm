@@ -1,20 +1,20 @@
 //
-//  File.swift
-//  
+//  MixStorageDecodingListWorker.swift
+//
 //
 //  Created by Soramitsu on 13.04.2024.
 //
 
 import Foundation
+import SSFModels
 import SSFRuntimeCodingService
 import SSFUtils
-import SSFModels
 
 final class MixStorageDecodingListWorker: StorageDecodable, StorageModifierHandling {
     private let requests: [any MixStorageRequest]
     private let updates: [[StorageUpdate]]
     private let codingFactory: RuntimeCoderFactoryProtocol
-    
+
     init(
         requests: [any MixStorageRequest],
         updates: [[StorageUpdate]],
@@ -24,14 +24,14 @@ final class MixStorageDecodingListWorker: StorageDecodable, StorageModifierHandl
         self.updates = updates
         self.codingFactory = codingFactory
     }
-    
+
     func performDecoding() throws -> [MixStorageResponse] {
         let dataList = updates
             .flatMap { $0 }
             .flatMap { StorageUpdateData(update: $0).changes }
             .map { $0.value }
-        
-        let responses: [MixStorageResponse] = try zip(requests, dataList).map { (request, data) in
+
+        let responses: [MixStorageResponse] = try zip(requests, dataList).map { request, data in
             var json: JSON?
             if let data = data {
                 json = try decode(
@@ -48,7 +48,7 @@ final class MixStorageDecodingListWorker: StorageDecodable, StorageModifierHandl
             let response = MixStorageResponse(request: request, json: json)
             return response
         }
-        
+
         return responses
     }
 }

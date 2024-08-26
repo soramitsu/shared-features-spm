@@ -20,7 +20,7 @@ final class MixStorageRequestsWorkerDefault: MixStorageRequestWorker {
         self.connection = connection
         self.storageRequestFactory = storageRequestFactory
     }
-    
+
     func perform(keys: [Data]) async throws -> [[StorageUpdate]] {
         let updates = try await storageRequestFactory.queryWorkersResult(
             for: keys,

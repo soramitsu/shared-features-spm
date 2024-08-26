@@ -1,7 +1,7 @@
 import Foundation
-import SSFUtils
-import SSFRuntimeCodingService
 import SSFModels
+import SSFRuntimeCodingService
+import SSFUtils
 
 final class PrefixEncodableStorageRequestWorker<P: Decodable>: StorageRequestWorker {
     private let runtimeService: RuntimeCodingServiceProtocol
@@ -22,7 +22,7 @@ final class PrefixEncodableStorageRequestWorker<P: Decodable>: StorageRequestWor
         params: StorageRequestWorkerType,
         storagePath: any StorageCodingPathProtocol
     ) async throws -> [StorageResponse<T>] {
-        guard case .prefixEncodable(let params) = params else {
+        guard case let .prefixEncodable(params) = params else {
             throw StorageRequestWorkerError.invalidParameters(
                 moduleName: storagePath.moduleName,
                 itemName: storagePath.itemName
@@ -30,7 +30,7 @@ final class PrefixEncodableStorageRequestWorker<P: Decodable>: StorageRequestWor
         }
 
         let coderFactoryOperation = try await runtimeService.fetchCoderFactory()
-    
+
         let response: [StorageResponse<T>] = try await storageRequestFactory.queryItemsByPrefix(
             engine: connection,
             keyParams: params,

@@ -13,10 +13,10 @@ final class RESTNetworkClient {
         response: URLResponse
     ) throws -> Data {
         guard let statusCode = (response as? HTTPURLResponse)?.statusCode else {
-            throw NetworkingError.init(status: .unknown)
+            throw NetworkingError(status: .unknown)
         }
         guard 200 ..< 299 ~= statusCode else {
-            throw NetworkingError.init(errorCode: statusCode)
+            throw NetworkingError(errorCode: statusCode)
         }
 
         return data

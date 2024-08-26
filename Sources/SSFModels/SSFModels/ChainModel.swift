@@ -326,7 +326,7 @@ public final class ChainModel: Codable, Identifiable {
             parentId: parentId,
             paraId: paraId,
             name: name,
-            assets: assets,
+            assets: Set(assets),
             xcm: xcm,
             nodes: nodes,
             addressPrefix: addressPrefix,
@@ -431,10 +431,10 @@ public extension ChainModel {
             case type
             case url
         }
-        
+
         public let type: BlockExplorerType?
         public let url: URL
-        
+
         public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             type = try? container.decode(BlockExplorerType.self, forKey: .type)
@@ -527,7 +527,7 @@ public extension ChainModel {
                 lhs.history == rhs.history &&
                 lhs.crowdloans == rhs.crowdloans &&
                 Set(lhs.explorers ?? []) == Set(rhs.explorers ?? []) &&
-            lhs.pricing == rhs.pricing
+                lhs.pricing == rhs.pricing
         }
     }
 

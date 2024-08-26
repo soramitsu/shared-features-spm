@@ -126,8 +126,6 @@ private extension AccountManagementServiceTests {
             symbol: "XOR",
             precision: 1,
             icon: nil,
-            price: Decimal(integerLiteral: 1),
-            fiatDayChange: nil,
             currencyId: nil,
             existentialDeposit: nil,
             color: nil,

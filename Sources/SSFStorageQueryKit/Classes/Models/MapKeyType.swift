@@ -36,7 +36,7 @@ public enum MapKeyType: String {
             return 32
         }
     }
-    
+
     func extractKeys(from storageResponseKey: String) -> String {
         let bytesPerHexSymbol = 2
 
@@ -47,19 +47,22 @@ public enum MapKeyType: String {
             let hasherBytes = 32
             let parameterLength = bytesCount * bytesPerHexSymbol
             let secondAssetId = String(storageResponseKey.suffix(parameterLength))
-            let firstAssetId = String(storageResponseKey.suffix(parameterLength * 2 + hasherBytes)).prefix(parameterLength)
+            let firstAssetId = String(storageResponseKey.suffix(parameterLength * 2 + hasherBytes))
+                .prefix(parameterLength)
             return firstAssetId + secondAssetId
         case .accountPoolsKey:
             let hasherBytes = 32
             let parameterLength = bytesCount * bytesPerHexSymbol
             let assetId = String(storageResponseKey.suffix(parameterLength))
-            let accountId = String(storageResponseKey.suffix(parameterLength * 2 + hasherBytes)).prefix(parameterLength)
+            let accountId = String(storageResponseKey.suffix(parameterLength * 2 + hasherBytes))
+                .prefix(parameterLength)
 
             return accountId + assetId
         case .poolProvidersKey:
             let parameterLength = bytesCount * bytesPerHexSymbol
             let assetId = String(storageResponseKey.suffix(parameterLength))
-            let accountId = String(storageResponseKey.suffix(parameterLength * 2)).prefix(parameterLength)
+            let accountId = String(storageResponseKey.suffix(parameterLength * 2))
+                .prefix(parameterLength)
 
             return accountId + assetId
         }

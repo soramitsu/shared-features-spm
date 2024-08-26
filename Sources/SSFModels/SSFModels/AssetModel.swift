@@ -1,16 +1,17 @@
 import Foundation
+import RobinHood
 
-public struct AssetModel: Equatable, Codable, Hashable {
+public struct AssetModel: Equatable, Codable, Hashable, Identifiable {
     public typealias Id = String
     public typealias PriceId = String
+
+    public var identifier: String { id }
 
     public let id: String
     public let name: String
     public let symbol: String
     public let precision: UInt16
     public let icon: URL?
-    public let price: Decimal?
-    public let fiatDayChange: Decimal?
     public let currencyId: String?
     public let existentialDeposit: String?
     public let color: String?
@@ -26,7 +27,7 @@ public struct AssetModel: Equatable, Codable, Hashable {
         if let priceProvider = priceProvider {
             return priceProvider.id
         }
-        
+
         return coingeckoPriceId
     }
 
@@ -34,14 +35,14 @@ public struct AssetModel: Equatable, Codable, Hashable {
         symbol.uppercased()
     }
 
+    public var priceData: [PriceData]
+
     public init(
         id: String,
         name: String,
         symbol: String,
         precision: UInt16,
         icon: URL? = nil,
-        price: Decimal? = nil,
-        fiatDayChange: Decimal? = nil,
         currencyId: String? = nil,
         existentialDeposit: String? = nil,
         color: String? = nil,
@@ -51,15 +52,14 @@ public struct AssetModel: Equatable, Codable, Hashable {
         purchaseProviders: [PurchaseProvider]? = nil,
         assetType: ChainAssetType,
         priceProvider: PriceProvider? = nil,
-        coingeckoPriceId: PriceId? = nil
+        coingeckoPriceId: PriceId? = nil,
+        priceData: [PriceData] = []
     ) {
         self.id = id
         self.symbol = symbol
         self.name = name
         self.precision = precision
         self.icon = icon
-        self.price = price
-        self.fiatDayChange = fiatDayChange
         self.currencyId = currencyId
         self.existentialDeposit = existentialDeposit
         self.color = color
@@ -70,6 +70,7 @@ public struct AssetModel: Equatable, Codable, Hashable {
         self.assetType = assetType
         self.priceProvider = priceProvider
         self.coingeckoPriceId = coingeckoPriceId
+        self.priceData = priceData
     }
 
     public init(from decoder: Decoder) throws {
@@ -107,21 +108,18 @@ public struct AssetModel: Equatable, Codable, Hashable {
         coingeckoPriceId = try? container.decode(String?.self, forKey: .priceId)
         priceProvider = try container.decodeIfPresent(PriceProvider.self, forKey: .priceProvider)
 
-        price = nil
-        fiatDayChange = nil
+        priceData = []
     }
 
     public func encode(to _: Encoder) throws {}
 
-    public func replacingPrice(_ priceData: PriceData) -> AssetModel {
+    public func replacingPrice(_ priceData: [PriceData]) -> AssetModel {
         AssetModel(
             id: id,
             name: name,
             symbol: symbol,
             precision: precision,
             icon: icon,
-            price: Decimal(string: priceData.price),
-            fiatDayChange: priceData.fiatDayChange,
             currencyId: currencyId,
             existentialDeposit: existentialDeposit,
             color: color,
@@ -131,8 +129,13 @@ public struct AssetModel: Equatable, Codable, Hashable {
             purchaseProviders: purchaseProviders,
             assetType: assetType,
             priceProvider: priceProvider,
-            coingeckoPriceId: coingeckoPriceId
+            coingeckoPriceId: coingeckoPriceId,
+            priceData: priceData
         )
+    }
+
+    public func getPrice(for currency: Currency) -> PriceData? {
+        priceData.first { $0.currencyId == currency.id }
     }
 
     public static func == (lhs: AssetModel, rhs: AssetModel) -> Bool {

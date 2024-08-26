@@ -31,7 +31,8 @@ public enum XcmAssembly {
         )
 
         let extrinsicBuilder = XcmExtrinsicBuilder()
-        let chainRegistry = chainRegistry ?? Self.createInternalChainRegistry(sourceConfig: sourceConfig)
+        let chainRegistry = chainRegistry ?? Self
+            .createInternalChainRegistry(sourceConfig: sourceConfig)
 
         let xcmChainsConfigFetcher = XcmChainsConfigFetcher(chainRegistry: chainRegistry)
         let depsContainer = XcmDependencyContainer(
@@ -58,7 +59,7 @@ public enum XcmAssembly {
             chainRegistry: chainRegistry,
             depsContainer: depsContainer,
             callPathDeterminer: callPathDeterminer,
-            xcmFeeFetcher: destinationFeeFetcher, 
+            xcmFeeFetcher: destinationFeeFetcher,
             minAmountInspector: XcmMinAmountInspectorImpl()
         )
 
@@ -68,7 +69,7 @@ public enum XcmAssembly {
             availableDestionationFetching: xcmChainsConfigFetcher
         )
     }
-    
+
     private static func createInternalChainRegistry(
         sourceConfig: XcmConfigProtocol?
     ) -> ChainRegistryProtocol {

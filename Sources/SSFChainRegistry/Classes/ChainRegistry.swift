@@ -69,7 +69,7 @@ extension ChainRegistry: ChainRegistryProtocol {
         if let cachedProvider = runtimeProviderPool.getRuntimeProvider(for: chainId) {
             return cachedProvider
         }
-        
+
         let chainModel = try await chainSyncService.getChainModel(for: chainId)
 
         let runtimeMetadataItem: RuntimeMetadataItemProtocol

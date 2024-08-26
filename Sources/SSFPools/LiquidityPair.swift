@@ -6,7 +6,7 @@ public struct LiquidityPair: Codable, Comparable {
     public static func < (lhs: LiquidityPair, rhs: LiquidityPair) -> Bool {
         lhs.pairId < rhs.pairId
     }
-    
+
     public enum CodingKeys: String, CodingKey {
         case dexId
         case pairId

@@ -39,16 +39,16 @@ public enum StorageEntryType {
             return nil
         }
     }
-    
-    public func hashers(schemaResolver: Schema.Resolver) throws -> [StorageHasher] {
+
+    public func hashers(schemaResolver _: Schema.Resolver) throws -> [StorageHasher] {
         switch self {
         case .plain:
             return []
-        case .map(let value):
+        case let .map(value):
             return [value.hasher]
-        case .doubleMap(let value):
+        case let .doubleMap(value):
             return [value.hasher, value.key2Hasher]
-        case .nMap(let value):
+        case let .nMap(value):
             return value.hashers
         }
     }

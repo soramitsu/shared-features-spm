@@ -58,7 +58,6 @@ public struct AccountPool: Codable {
         self.accountPoolShare = accountPoolShare
         self.reservesId = reservesId
     }
-    
 
     init(accountPool: AccountPool) {
         self.init(
@@ -87,7 +86,7 @@ public struct AccountPool: Codable {
         copy.apy = apy
         return copy
     }
-    
+
     public var liquidityPair: LiquidityPair {
         LiquidityPair(
             dexId: dexId,

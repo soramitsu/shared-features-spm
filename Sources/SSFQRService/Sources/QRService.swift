@@ -32,7 +32,7 @@ public final class QRServiceDefault: QRService {
     }
 
     // MARK: - QRService
-    
+
     public func lookingMatcher(for code: String) throws -> QRMatcherType {
         try searchMatcher(for: code)
     }
@@ -49,7 +49,7 @@ public final class QRServiceDefault: QRService {
     }
 
     // MARK: - Private methods
-    
+
     private func searchMatcher(for code: String) throws -> QRMatcherType {
         let qrMatcherTypes = matchers
             .map { $0.match(code: code) }

@@ -10,16 +10,16 @@ public struct ScaleTuple<T1: ScaleCodableMapKey, T2: ScaleCodableMapKey>: ScaleC
         self.first = first
         self.second = second
     }
-    
+
     enum CodingKeys: CodingKey {
         case first
         case second
     }
-    
+
     public init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
-        self.first = try container.decode(T1.self)
-        self.second = try container.decode(T2.self)
+        first = try container.decode(T1.self)
+        second = try container.decode(T2.self)
     }
 
     public init(scaleDecoder: ScaleDecoding) throws {

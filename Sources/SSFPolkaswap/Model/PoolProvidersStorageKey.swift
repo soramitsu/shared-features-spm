@@ -5,22 +5,22 @@ import SSFUtils
 public struct PoolProvidersStorageKey: Codable, Hashable {
     let reservesId: AccountId
     let accountId: AccountId
-    
+
     public init(reservesId: AccountId, accountId: AccountId) {
         self.reservesId = reservesId
         self.accountId = accountId
     }
-    
+
     public init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
-        self.reservesId = try container.decode(AccountId.self)
-        self.accountId = try container.decode(AccountId.self)
+        reservesId = try container.decode(AccountId.self)
+        accountId = try container.decode(AccountId.self)
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.unkeyedContainer()
-        try container.encode(self.reservesId)
-        try container.encode(self.accountId)
+        try container.encode(reservesId)
+        try container.encode(accountId)
     }
 }
 

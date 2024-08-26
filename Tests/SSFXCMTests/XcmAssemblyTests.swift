@@ -7,7 +7,7 @@ final class XcmAssemblyTests: XCTestCase {
         // act
         let service = try XcmAssembly.createExtrincisServices(
             fromChainData: TestData.fromChainData,
-            sourceConfig: XcmConfig.shared, 
+            sourceConfig: XcmConfig.shared,
             chainRegistry: nil
         )
 
