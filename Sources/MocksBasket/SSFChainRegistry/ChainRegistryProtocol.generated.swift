@@ -162,4 +162,43 @@ public init() {}
         return try getReadySnapshotChainIdUsedRuntimePathsRuntimeItemClosure.map({ try $0(chainId, usedRuntimePaths, runtimeItem) }) ?? getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReturnValue
     }
 
+    //MARK: - performHotBoot
+
+    public var performHotBootCallsCount = 0
+    public var performHotBootCalled: Bool {
+        return performHotBootCallsCount > 0
+    }
+    public var performHotBootClosure: (() -> Void)?
+
+    public func performHotBoot() {
+        performHotBootCallsCount += 1
+        performHotBootClosure?()
+    }
+
+    //MARK: - performColdBoot
+
+    public var performColdBootCallsCount = 0
+    public var performColdBootCalled: Bool {
+        return performColdBootCallsCount > 0
+    }
+    public var performColdBootClosure: (() -> Void)?
+
+    public func performColdBoot() {
+        performColdBootCallsCount += 1
+        performColdBootClosure?()
+    }
+
+    //MARK: - subscribeToChains
+
+    public var subscribeToChainsCallsCount = 0
+    public var subscribeToChainsCalled: Bool {
+        return subscribeToChainsCallsCount > 0
+    }
+    public var subscribeToChainsClosure: (() -> Void)?
+
+    public func subscribeToChains() {
+        subscribeToChainsCallsCount += 1
+        subscribeToChainsClosure?()
+    }
+
 }

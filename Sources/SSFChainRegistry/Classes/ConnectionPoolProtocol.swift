@@ -3,95 +3,98 @@ import SSFChainConnection
 import SSFModels
 import SSFUtils
 
-public enum ConnectionPoolError: Error {
-    case missingConnection
-}
+public typealias ChainConnection = JSONRPCEngine
 
 public protocol ConnectionPoolProtocol {
-    func setupSubstrateConnection(for chain: ChainModel) async throws -> SubstrateConnection
-    func getSubstrateConnection(for chainId: ChainModel.Id) async throws -> SubstrateConnection
+    associatedtype T
 
-    func setupWeb3EthereumConnection(for chain: ChainModel) async throws -> Web3EthConnection
-    func getWeb3EthereumConnection(for chainId: ChainModel.Id) async throws -> Web3EthConnection
+    func setupConnection(for chain: ChainModel) async throws -> T
+    func getConnection(for chainId: ChainModel.Id) async -> T?
+    func setDelegate(_ delegate: ConnectionPoolDelegate) async
+    func resetConnection(for chainId: ChainModel.Id) async
 }
 
-protocol ConnectionPoolDelegate: AnyObject {
-    func webSocketDidChangeState(url: URL, state: WebSocketEngine.State)
+public protocol ConnectionPoolDelegate: AnyObject {
+    func webSocketDidChangeState(chainId: ChainModel.Id, state: WebSocketEngine.State)
 }
 
-public actor ConnectionPool: ConnectionPoolProtocol {
-    private var autoBalancesByChainIds: [ChainModel.Id: any ChainConnectionProtocol] = [:]
+public actor ConnectionPool {
+    struct ConnectionWrapper {
+        let chainId: String
+        let connection: WeakWrapper
+    }
 
-    public init() {}
+    private let connectionFactory: ConnectionFactoryProtocol
+    private lazy var injector = NodeApiKeyInjector()
+    private weak var delegate: ConnectionPoolDelegate?
 
-    // MARK: - Public methods
+    private(set) var connections: [ConnectionWrapper] = []
 
-    public func setupSubstrateConnection(for chain: ChainModel) async throws
-        -> SubstrateConnection
-    {
-        if let connection = try? await getSubstrateConnection(for: chain.chainId) {
+    public init(connectionFactory: ConnectionFactoryProtocol) {
+        self.connectionFactory = connectionFactory
+    }
+
+    private func clearUnusedConnections() {
+        let filtred = connections.filter { $0.connection.target != nil }
+        connections = filtred
+    }
+}
+
+// MARK: - ConnectionPoolProtocol
+
+extension ConnectionPool: ConnectionPoolProtocol {
+    public typealias T = ChainConnection
+
+    public func setupConnection(for chain: ChainModel) async throws -> ChainConnection {
+        if let connection = await getConnection(for: chain.chainId) {
             return connection
         }
+        let nodesForPreparing: [ChainNodeModel]
+        if let selectedNode = chain.selectedNode {
+            nodesForPreparing = [selectedNode]
+        } else {
+            nodesForPreparing = Array(chain.nodes)
+        }
 
-        await clearUnusedConnections()
-
-        let nodes = chain.nodes.map { $0.url }
-        let autoBalance = SubstrateConnectionAutoBalance(
-            urls: nodes,
-            selectedUrl: chain.selectedNode?.url,
-            chainId: chain.chainId
+        let preparedUrls = injector.injectKey(nodes: nodesForPreparing)
+        let connection = try connectionFactory.createConnection(
+            connectionName: chain.chainId,
+            for: preparedUrls,
+            delegate: self
         )
 
-        autoBalancesByChainIds[chain.chainId] = autoBalance
-
-        return try await autoBalance.connection()
+        let wrapper = ConnectionWrapper(chainId: chain.chainId, connection: WeakWrapper(target: connection))
+        connections.append(wrapper)
+        return connection
     }
 
-    public func getSubstrateConnection(
-        for chainId: ChainModel
-            .Id
-    ) async throws -> SubstrateConnection {
-        guard let autoBalance = autoBalancesByChainIds[chainId] as? SubstrateConnectionAutoBalance else {
-            throw ConnectionPoolError.missingConnection
-        }
-        return try await autoBalance.connection()
+    public func getConnection(for chainId: ChainModel.Id) async -> ChainConnection? {
+        connections.first(where: { $0.chainId == chainId })?.connection.target as? ChainConnection
     }
 
-    public func setupWeb3EthereumConnection(for chain: ChainModel) async throws
-        -> Web3EthConnection
-    {
-        if let connection = try? await getWeb3EthereumConnection(for: chain.chainId) {
-            return connection
-        }
-
-        await clearUnusedConnections()
-
-        let autoBalance = Web3EthConnectionAutoBalance(chain: chain)
-
-        autoBalancesByChainIds[chain.chainId] = autoBalance
-
-        return try autoBalance.connection()
+    public func setDelegate(_ delegate: any ConnectionPoolDelegate) async {
+        self.delegate = delegate
     }
 
-    public func getWeb3EthereumConnection(
-        for chainId: ChainModel
-            .Id
-    ) async throws -> Web3EthConnection {
-        guard let autoBalance = autoBalancesByChainIds[chainId] as? Web3EthConnectionAutoBalance else {
-            throw ConnectionPoolError.missingConnection
+    public func resetConnection(for chainId: ChainModel.Id) async {
+        if let connection = await getConnection(for: chainId) {
+            connection.disconnectIfNeeded()
         }
-        return try autoBalance.connection()
+        connections = connections.filter { $0.chainId == chainId }
     }
+}
 
-    // MARK: - Private methods
+// MARK: - WebSocketEngineDelegate
 
-    private func clearUnusedConnections() async {
-//        autoBalancesByChainIds = autoBalancesByChainIds.filter { $0.value.getActiveStatus() }
-        await autoBalancesByChainIds.asyncForEach { key, value in
-            let isActive = await value.getActiveStatus()
-            if !isActive {
-                autoBalancesByChainIds[key] = nil
-            }
+extension ConnectionPool: WebSocketEngineDelegate {
+    public func webSocketDidChangeState(
+        engine: WebSocketEngine,
+        to newState: WebSocketEngine.State
+    ) {
+        guard let chainId = engine.connectionName else {
+            return
         }
+
+        delegate?.webSocketDidChangeState(chainId: chainId, state: newState)
     }
 }

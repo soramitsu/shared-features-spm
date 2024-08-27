@@ -1,4 +1,5 @@
 import Foundation
+import RobinHood
 
 public protocol RuntimeMetadataItemProtocol {
     var chain: String { get }
@@ -49,4 +50,8 @@ public struct RuntimeMetadataItem: Codable & Equatable, RuntimeMetadataItemProto
         try container.encode(txVersion, forKey: .txVersion)
         try container.encode(metadata, forKey: .metadata)
     }
+}
+
+extension RuntimeMetadataItem: Identifiable {
+    public var identifier: String { chain }
 }

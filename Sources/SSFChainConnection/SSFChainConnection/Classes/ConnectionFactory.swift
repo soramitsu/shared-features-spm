@@ -1,30 +1,41 @@
 import Foundation
 import SSFUtils
 
-protocol ConnectionFactoryProtocol {
+public typealias ChainConnection = JSONRPCEngine
+
+public protocol ConnectionFactoryProtocol {
     func createConnection(
         connectionName: String?,
-        for url: URL,
+        for urls: [URL],
         delegate: WebSocketEngineDelegate
-    ) -> SubstrateConnection
+    ) throws -> ChainConnection
 }
 
-final class ConnectionFactory: ConnectionFactoryProtocol {
+public final class ConnectionFactory: ConnectionFactoryProtocol {
     private lazy var processingQueue: DispatchQueue = .init(
         label: "jp.co.soramitsu.fearless.wallet.ws.SSFChainConnection",
         qos: .userInitiated
     )
-
-    func createConnection(
+    
+    public init() {
+        
+    }
+    
+    public func createConnection(
         connectionName: String?,
-        for url: URL,
+        for urls: [URL],
         delegate: WebSocketEngineDelegate
-    ) -> SubstrateConnection {
+    ) throws -> ChainConnection {
+        guard let connectionStrategy = ConnectionStrategyImpl(
+            urls: urls,
+            callbackQueue: processingQueue
+        ) else {
+            throw ConnectionPoolError.noConnection
+        }
         let engine = WebSocketEngine(
             connectionName: connectionName,
-            url: url,
-            processingQueue: processingQueue,
-            logger: nil
+            connectionStrategy: connectionStrategy,
+            processingQueue: processingQueue
         )
         engine.delegate = delegate
         return engine

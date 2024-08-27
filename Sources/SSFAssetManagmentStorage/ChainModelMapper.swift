@@ -13,12 +13,8 @@ public final class ChainModelMapper {
 
     public typealias DataProviderModel = ChainModel
     public typealias CoreDataEntity = CDChain
-
-    private let apiKeyInjector: ApiKeyInjector
-
-    public init(apiKeyInjector: ApiKeyInjector) {
-        self.apiKeyInjector = apiKeyInjector
-    }
+    
+    public init() { }
 
     private func createAsset(from entity: CDAsset) -> AssetModel? {
         var symbol: String?
@@ -81,10 +77,8 @@ public final class ChainModelMapper {
     private func createChainNode(from entity: CDChainNode, chainId: String) -> ChainNodeModel {
         let apiKey: ChainNodeModel.ApiKey?
 
-        if let keyName = entity.apiKeyName,
-           let nodeApiKey = apiKeyInjector.getNodeApiKey(for: chainId, apiKeyName: keyName)
-        {
-            apiKey = ChainNodeModel.ApiKey(queryName: nodeApiKey, keyName: keyName)
+        if let queryName = entity.apiQueryName, let keyName = entity.apiKeyName {
+            apiKey = ChainNodeModel.ApiKey(queryName: queryName, keyName: keyName)
         } else {
             apiKey = nil
         }
@@ -427,7 +421,7 @@ public final class ChainModelMapper {
         {
             return nil
         }
-        return apiKeyInjector.getBlockExplorerKey(for: blockExplorerType, chainId: chainId)
+        return nil
     }
 }
 

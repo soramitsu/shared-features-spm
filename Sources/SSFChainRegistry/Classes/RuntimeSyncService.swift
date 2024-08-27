@@ -6,10 +6,11 @@ import SSFNetwork
 import SSFUtils
 
 public protocol RuntimeSyncServiceProtocol {
-    func register(chain: ChainModel, with connection: SubstrateConnection) async throws
-        -> RuntimeMetadataItem
+    func register(chain: ChainModel, with connection: SubstrateConnection) async
     func unregister(chainId: ChainModel.Id) async
-    func getRuntimeItem(chainId: ChainModel.Id) async throws -> RuntimeMetadataItem
+    func apply(version: RuntimeVersion, for chainId: ChainModel.Id) async
+    func hasChain(with chainId: ChainModel.Id) async -> Bool
+    func isChainSyncing(_ chainId: ChainModel.Id) async -> Bool
 }
 
 public enum RuntimeSyncServiceError: Error {
@@ -60,29 +61,54 @@ public actor RuntimeSyncService {
 
     private func performSync(
         for chainId: ChainModel.Id,
-        runtimeVersion: RuntimeVersion
-    ) async throws -> RuntimeMetadataItem {
+        newVersion: RuntimeVersion? = nil
+    ) {
         guard let connection = knownChains[chainId] else {
-            throw RuntimeSyncServiceError.missingConnection
+            return
         }
 
-        let metadataSyncWrapper = createMetadataSyncOperation(
-            for: chainId,
-            runtimeVersion: runtimeVersion,
-            connection: connection
-        )
+        let metadataSyncWrapper = newVersion.map {
+            createMetadataSyncOperation(
+                for: chainId,
+                runtimeVersion: $0,
+                connection: connection
+            )
+        }
 
-        let dependencies = metadataSyncWrapper.allOperations
+        if metadataSyncWrapper == nil {
+            return
+        }
+
+        let dependencies = (metadataSyncWrapper?.allOperations ?? [])
 
         let processingOperation = ClosureOperation<SyncResult> {
             SyncResult(
                 chainId: chainId,
-                metadataSyncResult: metadataSyncWrapper.targetOperation.result,
-                runtimeVersion: runtimeVersion
+                metadataSyncResult: metadataSyncWrapper?.targetOperation.result,
+                runtimeVersion: newVersion
             )
         }
 
         dependencies.forEach { processingOperation.addDependency($0) }
+
+        processingOperation.completionBlock = { [weak self] in
+            Task {
+                do {
+                    let result = try processingOperation.extractNoCancellableResultData()
+                    await self?.processSyncResult(result)
+                } catch let error as BaseOperationError where error == .parentOperationCancelled {
+                    return
+                } catch {
+                    let result = SyncResult(
+                        chainId: chainId,
+                        metadataSyncResult: .failure(error),
+                        runtimeVersion: newVersion
+                    )
+
+                    await self?.processSyncResult(result)
+                }
+            }
+        }
 
         let wrapper = CompoundOperationWrapper(
             targetOperation: processingOperation,
@@ -92,47 +118,6 @@ public actor RuntimeSyncService {
         syncingChains[chainId] = wrapper
 
         operationQueue.addOperations(wrapper.allOperations, waitUntilFinished: false)
-
-        return try await withUnsafeThrowingContinuation { continuation in
-            processingOperation.completionBlock = { [weak self] in
-                guard let strongSelf = self else {
-                    return
-                }
-                let result = processingOperation.result
-                switch result {
-                case let .success(syncResult):
-                    Task {
-                        await strongSelf.processSyncResult(syncResult)
-                    }
-                    
-                    let metadataSyncResult = syncResult.metadataSyncResult
-                    switch metadataSyncResult {
-                    case let .success(item):
-                        guard let item = item else {
-                            return
-                        }
-                        continuation.resume(returning: item)
-                    case let .failure(error):
-                        continuation.resume(throwing: error)
-                    case .none:
-                        continuation.resume(throwing: RuntimeSyncServiceError.missingRuntimeItem)
-                    }
-                case let .failure(error):
-                    let result = SyncResult(
-                        chainId: chainId,
-                        metadataSyncResult: .failure(error),
-                        runtimeVersion: runtimeVersion
-                    )
-
-                    Task {
-                        await strongSelf.processSyncResult(result)
-                    }
-                    continuation.resume(throwing: error)
-                case .none:
-                    continuation.resume(throwing: RuntimeSyncServiceError.missingRuntimeItem)
-                }
-            }
-        }
     }
 
     private func processSyncResult(_ result: SyncResult) async {
@@ -276,20 +261,13 @@ public actor RuntimeSyncService {
 
 extension RuntimeSyncService: SchedulerDelegate {
     public func didTrigger(scheduler _: SchedulerProtocol) async {
-        mutex.lock()
-
-        defer {
-            mutex.unlock()
-        }
-
         retryScheduler = nil
 
         for requestKeyValue in retryAttempts where syncingChains[requestKeyValue.key] == nil {
-            if let runtimeVersion = requestKeyValue.value.runtimeVersion {
+            if requestKeyValue.value.runtimeVersion != nil {
                 Task {
-                    try? await performSync(
-                        for: requestKeyValue.key,
-                        runtimeVersion: runtimeVersion
+                    await performSync(
+                        for: requestKeyValue.key
                     )
                 }
             }
@@ -298,45 +276,35 @@ extension RuntimeSyncService: SchedulerDelegate {
 }
 
 extension RuntimeSyncService: RuntimeSyncServiceProtocol {
-    public func register(
-        chain: ChainModel,
-        with connection: SubstrateConnection
-    ) async throws -> RuntimeMetadataItem {
-        if let runtimeMetadataItem = metadataItems[chain.chainId] {
-            return runtimeMetadataItem
+    public func register(chain: ChainModel, with connection: ChainConnection) async {
+        guard let knownConnection = knownChains[chain.chainId] else {
+            knownChains[chain.chainId] = connection
+            return
         }
 
-        knownChains[chain.chainId] = connection
+        if knownConnection.connectionName != connection.connectionName {
+            knownChains[chain.chainId] = connection
 
-        let runtimeVersion = try await getRemoteRuntimeVersion(with: connection)
-        let runtimeMetadataItem = try await performSync(
-            for: chain.chainId,
-            runtimeVersion: runtimeVersion
-        )
-        return runtimeMetadataItem
+            performSync(for: chain.chainId)
+        }
     }
 
     public func unregister(chainId: ChainModel.Id) async {
-        mutex.lock()
-
-        defer {
-            mutex.unlock()
-        }
-
         clearOperations(for: chainId)
         knownChains[chainId] = nil
     }
 
-    public func getRuntimeItem(chainId: ChainModel.Id) async throws -> RuntimeMetadataItem {
-        if let error = errors[chainId] {
-            throw error
-        }
-        guard !metadataItems.isEmpty else {
-            throw RuntimeSyncServiceError.runtimeItemsNotLoaded
-        }
-        guard let metadataItem = metadataItems[chainId] else {
-            throw RuntimeSyncServiceError.missingRuntimeItem
-        }
-        return metadataItem
+    public func apply(version: RuntimeVersion, for chainId: ChainModel.Id) async {
+        clearOperations(for: chainId)
+
+        performSync(for: chainId, newVersion: version)
+    }
+
+    public func hasChain(with chainId: ChainModel.Id) async -> Bool {
+        return knownChains[chainId] != nil
+    }
+
+    public func isChainSyncing(_ chainId: ChainModel.Id) async -> Bool {
+        return (syncingChains[chainId] != nil) || (retryAttempts[chainId] != nil)
     }
 }
