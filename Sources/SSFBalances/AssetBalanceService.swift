@@ -5,6 +5,11 @@ import SSFModels
 import SSFStorageQueryKit
 import SSFUtils
 
+public typealias ChainAssetBalanceSubscription = (
+    id: AssetBalanceSubscriptionId,
+    publisher: PassthroughSubject<ChainAssetBalanceInfo?, Never>
+)
+
 public typealias AssetBalanceSubscription = (
     id: AssetBalanceSubscriptionId,
     publisher: PassthroughSubject<AssetBalanceInfo?, Never>
@@ -48,7 +53,7 @@ public protocol AssetBalanceService {
     func subscribeBalance(
         on chainAsset: ChainAsset,
         accountId: AccountId
-    ) async throws -> AssetBalanceSubscription
+    ) async throws -> ChainAssetBalanceSubscription
 
     func subscribeBalances(
         on chainAssets: [ChainAsset],
@@ -161,8 +166,8 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
     public func subscribeBalance(
         on chainAsset: ChainAsset,
         accountId: AccountId
-    ) async throws -> AssetBalanceSubscription {
-        let publisher = PassthroughSubject<AssetBalanceInfo?, Never>()
+    ) async throws -> ChainAssetBalanceSubscription {
+        let publisher = PassthroughSubject<ChainAssetBalanceInfo?, Never>()
 
         let updateClosure: (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void = { [weak self] _ in
             Task { [weak self] in
@@ -170,22 +175,20 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
 
                 do {
                     let balance = try await self.getBalance(for: chainAsset, accountId: accountId)
-                    publisher.send(balance)
+                    publisher.send(ChainAssetBalanceInfo(chainAsset: chainAsset, balanceInfo: balance))
                     try await self.localService.sync(remoteBalances: [balance])
                 } catch {
                     print("OLOLOLO error \(error)")
                     let allBalances = try await self.localService.get()
                     let localBalance = allBalances
                         .first(where: { $0.chainAssetId == chainAsset.chainAssetId.id })
-                    publisher.send(localBalance)
+                    publisher.send(ChainAssetBalanceInfo(chainAsset: chainAsset, balanceInfo: localBalance))
                 }
             }
         }
 
         let failureClosure: (Error, Bool) -> Void = { [weak self] error, _ in
-            guard let self else { return }
             publisher.send(nil)
-//            publisher.send(completion: .failure(error))
         }
 
         let subscriptionId = try await subscriptionService.createBalanceSubscription(
