@@ -6,10 +6,16 @@ import TonAPI
 public struct TonJettonBalance: Codable {
     public let item: TonJettonItem
     public let quantity: BigUInt
+    public let priceData: [PriceData]
     
-    public init(item: TonJettonItem, quantity: BigUInt) {
+    public init(
+        item: TonJettonItem,
+        quantity: BigUInt,
+        priceData: [PriceData]
+    ) {
         self.item = item
         self.quantity = quantity
+        self.priceData = priceData
     }
 }
 
