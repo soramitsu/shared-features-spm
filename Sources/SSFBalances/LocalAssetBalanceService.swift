@@ -30,12 +30,6 @@ extension LocalAssetBalanceServiceDefault: LocalAssetBalanceService {
     }
 
     public func sync(remoteBalances: [AssetBalanceInfo]) async throws {
-        let remotePairs = Set(remoteBalances)
-        let localPairs = try await Set(repository.fetchAll(with: RepositoryFetchOptions()))
-
-        let newOrUpdatedItems = Array(remotePairs.subtracting(localPairs))
-        let removedItems = localPairs.subtracting(remotePairs).map(\.identifier)
-
-        await repository.save(models: newOrUpdatedItems, deleteIds: removedItems)
+        try await repository.save(models: remoteBalances)
     }
 }
