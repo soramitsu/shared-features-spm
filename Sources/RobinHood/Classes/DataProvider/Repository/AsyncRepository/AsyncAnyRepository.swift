@@ -1,6 +1,6 @@
 import Foundation
 
-public final class AsyncAnyRepository<T: Identifiable>: AsyncCoreDataRepository {
+public actor AsyncAnyRepository<T: Identifiable>: AsyncCoreDataRepository {
     public typealias Model = T
 
     private let _save: ([Model], [String]) async -> Void
