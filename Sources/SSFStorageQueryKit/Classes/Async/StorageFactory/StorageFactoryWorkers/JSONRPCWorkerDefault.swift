@@ -23,7 +23,7 @@ class JSONRPCWorker<P: Codable, T: Decodable> {
     }
 
     func performCall() async throws -> T {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withUnsafeThrowingContinuation { continuation in
             currentTask = Task {
                 let timeoutTask = Task {
                     let duration = UInt64(timeout * 1_000_000_000)
