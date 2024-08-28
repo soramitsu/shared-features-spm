@@ -2,7 +2,8 @@ import Foundation
 import RobinHood
 
 public protocol LocalAssetBalanceService {
-    func get() async throws -> [AssetBalanceInfo]
+    func get(by identifier: String) async throws -> AssetBalanceInfo?
+    func getAll() async throws -> [AssetBalanceInfo]
     func sync(remoteBalances: [AssetBalanceInfo]) async throws
 }
 
@@ -25,7 +26,11 @@ public actor LocalAssetBalanceServiceDefault {
 }
 
 extension LocalAssetBalanceServiceDefault: LocalAssetBalanceService {
-    public func get() async throws -> [AssetBalanceInfo] {
+    public func get(by identifier: String) async throws -> AssetBalanceInfo? {
+        try await repository.fetch(by: identifier)
+    }
+    
+    public func getAll() async throws -> [AssetBalanceInfo] {
         try await repository.fetchAll(with: RepositoryFetchOptions())
     }
 
