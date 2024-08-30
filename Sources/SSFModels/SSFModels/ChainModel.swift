@@ -370,6 +370,7 @@ extension ChainModel: Hashable {
             && lhs.xcm == rhs.xcm
             && lhs.disabled == rhs.disabled
             && lhs.identityChain == rhs.identityChain
+            && lhs.ecosystem == rhs.ecosystem
     }
 
     public func hash(into hasher: inout Hasher) {

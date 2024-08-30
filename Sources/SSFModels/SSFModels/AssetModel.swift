@@ -152,8 +152,7 @@ public struct AssetModel: Equatable, Codable, Hashable, Identifiable {
             lhs.staking == rhs.staking &&
             lhs.purchaseProviders == rhs.purchaseProviders &&
             lhs.assetType == rhs.assetType &&
-            lhs.priceProvider == rhs.priceProvider &&
-            lhs.priceData == rhs.priceData
+            lhs.priceProvider == rhs.priceProvider
     }
 
     public func hash(into hasher: inout Hasher) {
