@@ -49,8 +49,8 @@ let package = Package(
         .library(name: "SSFZetaIndexer", targets: ["SSFZetaIndexer"]),
         .library(name: "SSFBalances", targets: ["SSFBalances"]),
         .library(name: "SSFBalancesStorage", targets: ["SSFBalancesStorage"]),
-        .library(name: "SSFSubstrateBalances", targets: ["SSFSubstrateBalances"]),
-        .library(name: "SSFTransactionHistory", targets: ["SSFTransactionHistory"])
+        .library(name: "SSFSubstrateBalances", targets: ["SSFSubstrateBalances"])
+//        .library(name: "SSFTransactionHistory", targets: ["SSFTransactionHistory"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
