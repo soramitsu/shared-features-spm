@@ -74,7 +74,7 @@ let package = Package(
         .binaryTarget(
             name: "XNetworking",
             url: "https://nexus.iroha.tech/repository/maven-soramitsu/jp/co/soramitsu/xnetworking/lib-IOS/1.0.8/lib-IOS-1.0.8.zip",
-            checksum: "9da6503f89518f99a2f412d20a8e991672713dd23b7b99be768e17a6279b6161"
+            checksum: "f253b0e3b3ed1409233de311a8534450160c522002c5336021d67de2e080a940"
         ),
         .target(
             name: "scrypt",
