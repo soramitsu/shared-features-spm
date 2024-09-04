@@ -71,11 +71,11 @@ let package = Package(
         .binaryTarget(name: "sr25519lib", path: "Binaries/sr25519lib.xcframework"),
         .binaryTarget(name: "sorawallet", path: "Binaries/sorawallet.xcframework"),
         .binaryTarget(name: "MPQRCoreSDK", path: "Binaries/MPQRCoreSDK.xcframework"),
-        .binaryTarget(
-            name: "XNetworking",
-            url: "https://nexus.iroha.tech/repository/maven-soramitsu/jp/co/soramitsu/xnetworking/lib-IOS/1.0.9/lib-IOS-1.0.9.zip",
-            checksum: "03b2f05a005122ecbac30d7aaa06c2515d123e964b559548d6195f742eea5c53"
-        ),
+//        .binaryTarget(
+//            name: "XNetworking",
+//            url: "https://nexus.iroha.tech/repository/maven-soramitsu/jp/co/soramitsu/xnetworking/lib-IOS/1.0.9/lib-IOS-1.0.9.zip",
+//            checksum: "03b2f05a005122ecbac30d7aaa06c2515d123e964b559548d6195f742eea5c53"
+//        ),
         .target(
             name: "scrypt",
             sources: [
@@ -121,10 +121,10 @@ let package = Package(
                 "SSFCrypto"
             ]
         ),
-        .target(
-            name: "SSFTransactionHistory",
-            dependencies: [ "XNetworking", "SSFUtils" ]
-        ),
+//        .target(
+//            name: "SSFTransactionHistory",
+//            dependencies: [ "XNetworking", "SSFUtils" ]
+//        ),
         .testTarget(
             name: "SSFKeyPairTests",
             dependencies: [
