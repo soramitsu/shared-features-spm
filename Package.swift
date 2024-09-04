@@ -73,8 +73,8 @@ let package = Package(
         .binaryTarget(name: "MPQRCoreSDK", path: "Binaries/MPQRCoreSDK.xcframework"),
         .binaryTarget(
             name: "XNetworking",
-            url: "https://nexus.iroha.tech/repository/maven-soramitsu/jp/co/soramitsu/xnetworking/lib-IOS/1.0.8/lib-IOS-1.0.8.zip",
-            checksum: "9da6503f89518f99a2f412d20a8e991672713dd23b7b99be768e17a6279b6161"
+            url: "https://nexus.iroha.tech/repository/maven-soramitsu/jp/co/soramitsu/xnetworking/lib-IOS/1.0.9/lib-IOS-1.0.9.zip",
+            checksum: "03b2f05a005122ecbac30d7aaa06c2515d123e964b559548d6195f742eea5c53"
         ),
         .target(
             name: "scrypt",
