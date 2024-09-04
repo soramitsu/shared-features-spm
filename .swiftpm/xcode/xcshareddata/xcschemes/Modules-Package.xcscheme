@@ -485,6 +485,62 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Modules_SSFPoolsStorage"
+               BuildableName = "Modules_SSFPoolsStorage"
+               BlueprintName = "Modules_SSFPoolsStorage"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Modules_SSFAssetManagmentStorage"
+               BuildableName = "Modules_SSFAssetManagmentStorage"
+               BlueprintName = "Modules_SSFAssetManagmentStorage"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Modules_SSFAccountManagmentStorage"
+               BuildableName = "Modules_SSFAccountManagmentStorage"
+               BlueprintName = "Modules_SSFAccountManagmentStorage"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "Modules_MocksBasket"
+               BuildableName = "Modules_MocksBasket"
+               BlueprintName = "Modules_MocksBasket"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "Modules_SSFTransferServiceTests"
                BuildableName = "Modules_SSFTransferServiceTests"
                BlueprintName = "Modules_SSFTransferServiceTests"
@@ -499,9 +555,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Modules_SSFIndexers"
-               BuildableName = "Modules_SSFIndexers"
-               BlueprintName = "Modules_SSFIndexers"
+               BlueprintIdentifier = "MocksBasket"
+               BuildableName = "MocksBasket"
+               BlueprintName = "MocksBasket"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -513,9 +569,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Modules_SSFIndexersTests"
-               BuildableName = "Modules_SSFIndexersTests"
-               BlueprintName = "Modules_SSFIndexersTests"
+               BlueprintIdentifier = "MPQRCoreSDK"
+               BuildableName = "MPQRCoreSDK"
+               BlueprintName = "MPQRCoreSDK"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -527,9 +583,37 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SSFIndexers"
-               BuildableName = "SSFIndexers"
-               BlueprintName = "SSFIndexers"
+               BlueprintIdentifier = "scrypt"
+               BuildableName = "scrypt"
+               BlueprintName = "scrypt"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFBalances"
+               BuildableName = "SSFBalances"
+               BlueprintName = "SSFBalances"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFBalancesStorage"
+               BuildableName = "SSFBalancesStorage"
+               BlueprintName = "SSFBalancesStorage"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -558,6 +642,20 @@
                BlueprintIdentifier = "SSFGiantsquidIndexer"
                BuildableName = "SSFGiantsquidIndexer"
                BlueprintName = "SSFGiantsquidIndexer"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFIndexers"
+               BuildableName = "SSFIndexers"
+               BlueprintName = "SSFIndexers"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -639,37 +737,37 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SSFZetaIndexer"
-               BuildableName = "SSFZetaIndexer"
-               BlueprintName = "SSFZetaIndexer"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SSFBalances"
-               BuildableName = "SSFBalances"
-               BlueprintName = "SSFBalances"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "SSFSubstrateBalances"
                BuildableName = "SSFSubstrateBalances"
                BlueprintName = "SSFSubstrateBalances"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFTransactionHistory"
+               BuildableName = "SSFTransactionHistory"
+               BlueprintName = "SSFTransactionHistory"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SSFZetaIndexer"
+               BuildableName = "SSFZetaIndexer"
+               BlueprintName = "SSFZetaIndexer"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -775,9 +873,6 @@
                <Test
                   Identifier = "XcmAssetMultilocationFetcherTests/testVersionedMultilocationWithRetryError()">
                </Test>
-               <Test
-                  Identifier = "XcmFeeServiceTests">
-               </Test>
             </SkippedTests>
          </TestableReference>
          <TestableReference
@@ -799,11 +894,6 @@
                BlueprintName = "SSFStorageQueryKitTest"
                ReferencedContainer = "container:">
             </BuildableReference>
-            <SkippedTests>
-               <Test
-                  Identifier = "StorageRequestPerformerTests/testCashOnAllSingle()">
-               </Test>
-            </SkippedTests>
          </TestableReference>
          <TestableReference
             skipped = "NO">
@@ -812,6 +902,16 @@
                BlueprintIdentifier = "SSFTransferServiceTests"
                BuildableName = "SSFTransferServiceTests"
                BlueprintName = "SSFTransferServiceTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "WebSocketEngineTests"
+               BuildableName = "WebSocketEngineTests"
+               BlueprintName = "WebSocketEngineTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>

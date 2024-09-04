@@ -24,7 +24,7 @@ final class QRDecoderTests: XCTestCase {
             XCTAssertEqual(bokoloCashQRInfo.address, address)
             XCTAssertEqual(bokoloCashQRInfo.assetId, assetId)
             XCTAssertNil(bokoloCashQRInfo.transactionAmount)
-        case .sora, .cex:
+        case .sora, .cex, .desiredCryptocurrency:
             XCTExpectFailure()
         }
     }
@@ -51,7 +51,7 @@ final class QRDecoderTests: XCTestCase {
             XCTAssertEqual(bokoloCashQRInfo.address, address)
             XCTAssertEqual(bokoloCashQRInfo.assetId, assetId)
             XCTAssertEqual(bokoloCashQRInfo.transactionAmount, amount)
-        case .sora, .cex:
+        case .sora, .cex, .desiredCryptocurrency:
             XCTExpectFailure()
         }
     }
@@ -84,7 +84,7 @@ final class QRDecoderTests: XCTestCase {
             XCTAssertEqual(info.username, username)
             XCTAssertEqual(info.assetId, assetId)
             XCTAssertEqual(info.amount, amount)
-        case .bokoloCash, .cex:
+        case .bokoloCash, .cex, .desiredCryptocurrency:
             XCTExpectFailure()
         }
     }
@@ -117,7 +117,7 @@ final class QRDecoderTests: XCTestCase {
             XCTAssertEqual(info.username, username)
             XCTAssertEqual(info.assetId, assetId)
             XCTAssertEqual(info.amount, amount)
-        case .bokoloCash, .cex:
+        case .bokoloCash, .cex, .desiredCryptocurrency:
             XCTExpectFailure()
         }
     }
