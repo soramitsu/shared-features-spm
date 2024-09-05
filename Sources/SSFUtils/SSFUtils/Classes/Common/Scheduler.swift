@@ -43,7 +43,7 @@ public final class Scheduler: NSObject, SchedulerProtocol {
             repeating: DispatchTimeInterval.never
         )
         timer?.setEventHandler { [weak self] in
-            Task {
+            Task { [weak self] in
                 await self?.handleTrigger()
             }
         }

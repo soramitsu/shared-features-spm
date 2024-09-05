@@ -22,10 +22,10 @@ extension WebSocketEngine: WebSocketDelegate {
             handleErrorEvent(error)
         case .cancelled:
             handleCancelled()
-        case .timeout:
-            handleTimeout()
-        case let .waiting(error):
-            handleDisconnectedEvent(reason: error.localizedDescription, code: 0)
+//        case .timeout:
+//            handleTimeout()
+//        case let .waiting(error):
+//            handleDisconnectedEvent(reason: error.localizedDescription, code: 0)
         case .pong, .ping, .viabilityChanged:
             logger?.warning("Unhandled event \(event)")
         case let .reconnectSuggested(reconnectSuggested):

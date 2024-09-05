@@ -92,7 +92,7 @@ public actor RuntimeSyncService {
         dependencies.forEach { processingOperation.addDependency($0) }
 
         processingOperation.completionBlock = { [weak self] in
-            Task {
+            Task { [weak self] in
                 do {
                     let result = try processingOperation.extractNoCancellableResultData()
                     await self?.processSyncResult(result)
