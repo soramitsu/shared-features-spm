@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-enum QRExtractionError: Error {
+public enum QRExtractionError: Error {
     case invalidImage
     case detectorUnavailable
     case noFeatures

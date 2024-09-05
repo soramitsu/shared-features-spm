@@ -49,7 +49,8 @@ let package = Package(
         .library(name: "SSFZetaIndexer", targets: ["SSFZetaIndexer"]),
         .library(name: "SSFBalances", targets: ["SSFBalances"]),
         .library(name: "SSFBalancesStorage", targets: ["SSFBalancesStorage"]),
-        .library(name: "SSFSubstrateBalances", targets: ["SSFSubstrateBalances"])
+        .library(name: "SSFSubstrateBalances", targets: ["SSFSubstrateBalances"]),
+        .library(name: "SSFTransactionHistory", targets: ["SSFTransactionHistory"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
@@ -62,7 +63,7 @@ let package = Package(
         .package(url: "https://github.com/daisuke-t-jp/xxHash-Swift", from: "1.1.1"),
         .package(url: "https://github.com/SwiftyBeaver/SwiftyBeaver.git", .upToNextMajor(from: "2.0.0")),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.50.4"),
-        .package(url: "https://github.com/bnsports/Web3.swift.git", branch: "master")
+        .package(url: "https://github.com/soramitsu/web3-swift", exact: "7.7.7")
     ],
     targets: [
         .binaryTarget(name: "blake2lib", path: "Binaries/blake2lib.xcframework"),
@@ -70,6 +71,11 @@ let package = Package(
         .binaryTarget(name: "sr25519lib", path: "Binaries/sr25519lib.xcframework"),
         .binaryTarget(name: "sorawallet", path: "Binaries/sorawallet.xcframework"),
         .binaryTarget(name: "MPQRCoreSDK", path: "Binaries/MPQRCoreSDK.xcframework"),
+        .binaryTarget(
+            name: "XNetworking",
+            url: "https://nexus.iroha.tech/repository/maven-soramitsu/jp/co/soramitsu/xnetworking/lib-IOS/1.0.9/lib-IOS-1.0.9.zip",
+            checksum: "03b2f05a005122ecbac30d7aaa06c2515d123e964b559548d6195f742eea5c53"
+        ),
         .target(
             name: "scrypt",
             sources: [
@@ -115,6 +121,10 @@ let package = Package(
                 "SSFCrypto"
             ]
         ),
+        .target(
+            name: "SSFTransactionHistory",
+            dependencies: [ "XNetworking", "SSFUtils" ]
+        ),
         .testTarget(
             name: "SSFKeyPairTests",
             dependencies: [
@@ -139,7 +149,7 @@ let package = Package(
         .target(
             name: "SSFChainConnection",
             dependencies: [
-                .product(name: "Web3", package: "Web3.swift"),
+                .product(name: "Web3", package: "web3-swift"),
                 "SSFUtils"
             ]
         ),
@@ -326,7 +336,7 @@ let package = Package(
         .target(
             name: "SSFChainRegistry",
             dependencies: [
-                .product(name: "Web3", package: "Web3.swift"),
+                .product(name: "Web3", package: "web3-swift"),
                 "SSFUtils",
                 "RobinHood",
                 "SSFModels",
@@ -400,8 +410,8 @@ let package = Package(
             dependencies: ["SSFSingleValueCache"]
         ),
         .target(name: "SSFTransferService", dependencies: [
-            .product(name: "Web3", package: "Web3.swift"),
-            .product(name: "Web3ContractABI", package: "Web3.swift"),
+            .product(name: "Web3", package: "web3-swift"),
+            .product(name: "Web3ContractABI", package: "web3-swift"),
             "SSFModels",
             "BigInt",
             "SSFUtils",
@@ -414,8 +424,8 @@ let package = Package(
         .testTarget(
             name: "SSFTransferServiceTests",
             dependencies: [
-                .product(name: "Web3", package: "Web3.swift"),
-                .product(name: "Web3ContractABI", package: "Web3.swift"),
+                .product(name: "Web3", package: "web3-swift"),
+                .product(name: "Web3ContractABI", package: "web3-swift"),
                 "SSFTransferService",
                 "SSFModels",
                 "BigInt",
