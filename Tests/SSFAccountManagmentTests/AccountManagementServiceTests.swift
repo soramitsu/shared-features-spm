@@ -121,6 +121,7 @@ private extension AccountManagementServiceTests {
             id: "2",
             name: "test",
             symbol: "XOR",
+            isUtility: true,
             precision: 1,
             substrateType: .soraAsset,
             ethereumType: nil,

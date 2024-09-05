@@ -17,7 +17,7 @@ public struct ChainAsset: Equatable, Hashable {
     }
 
     public var isUtility: Bool {
-        true
+        asset.isUtility
     }
 
     public var isNative: Bool {
