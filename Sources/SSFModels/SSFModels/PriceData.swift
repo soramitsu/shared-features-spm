@@ -1,6 +1,11 @@
 import Foundation
+import RobinHood
 
-public struct PriceData: Codable, Equatable {
+public struct PriceData: Codable, Equatable, Identifiable {
+    public typealias Id = String
+
+    public var identifier: String { priceId }
+
     public let currencyId: String
     public let priceId: String
     public let price: String

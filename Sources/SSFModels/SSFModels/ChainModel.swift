@@ -287,6 +287,29 @@ public final class ChainModel: Codable, Identifiable {
             identityChain: identityChain
         )
     }
+    
+    public func replacing(_ assets: [AssetModel]) -> ChainModel {
+        ChainModel(
+            rank: rank,
+            disabled: disabled,
+            chainId: chainId,
+            parentId: parentId,
+            paraId: paraId,
+            name: name,
+            assets: Set(assets),
+            xcm: xcm,
+            nodes: nodes,
+            addressPrefix: addressPrefix,
+            types: types,
+            icon: icon,
+            options: options,
+            externalApi: externalApi,
+            selectedNode: selectedNode,
+            customNodes: customNodes,
+            iosMinAppVersion: iosMinAppVersion,
+            identityChain: identityChain
+        )
+    }
 }
 
 public extension ChainModel {
@@ -377,10 +400,10 @@ public extension ChainModel {
             case type
             case url
         }
-        
+
         public let type: BlockExplorerType?
         public let url: URL
-        
+
         public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             type = try? container.decode(BlockExplorerType.self, forKey: .type)
