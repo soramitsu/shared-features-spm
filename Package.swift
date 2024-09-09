@@ -374,7 +374,8 @@ let package = Package(
                 "SSFStorageQueryKit",
                 "SSFPools",
                 "sorawallet",
-                "SSFPoolsStorage"
+                "SSFPoolsStorage",
+                "SSFExtrinsicKit"
             ]
         ),
         .target(
