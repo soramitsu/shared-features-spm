@@ -162,6 +162,34 @@ public extension MetaAccountModel {
             favouriteChainIds: favouriteChainIds
         )
     }
+    
+    func replacingTon(
+        tonPublicKey: Data?,
+        tonAddress: TonSwift.Address?,
+        tonContractVersion: TonContractVersion?
+    ) -> MetaAccountModel {
+        MetaAccountModel(
+            metaId: metaId,
+            name: name,
+            substrateAccountId: substrateAccountId,
+            substrateCryptoType: substrateCryptoType,
+            substratePublicKey: substratePublicKey,
+            ethereumAddress: ethereumAddress,
+            ethereumPublicKey: ethereumPublicKey,
+            tonAddress: tonAddress,
+            tonPublicKey: tonPublicKey,
+            tonContractVersion: tonContractVersion,
+            chainAccounts: chainAccounts,
+            assetKeysOrder: assetKeysOrder,
+            canExportEthereumMnemonic: canExportEthereumMnemonic,
+            unusedChainIds: unusedChainIds,
+            selectedCurrency: selectedCurrency,
+            networkManagmentFilter: networkManagmentFilter,
+            assetsVisibility: assetsVisibility,
+            hasBackup: hasBackup,
+            favouriteChainIds: favouriteChainIds
+        )
+    }
 
     func replacingEthereumPublicKey(_ newEthereumPublicKey: Data?) -> MetaAccountModel {
         MetaAccountModel(
