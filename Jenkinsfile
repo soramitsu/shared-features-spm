@@ -10,7 +10,9 @@ def pipeline = new org.ios.AppPipeline(
   sonarProjectName: "shared-features-spm",
   lintEnable: 'false',
   disableUpdatePods: true,
-  disableInstallPods: true
+  disableInstallPods: true,
+  appEnable: false,
+  sharedFeature: true
 )
 
-pipeline.runPipeline()
+pipeline.runPipeline('sora')
