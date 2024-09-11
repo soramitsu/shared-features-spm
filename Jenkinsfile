@@ -8,7 +8,9 @@ def pipeline = new org.ios.AppPipeline(
   //buildCmd: "xcodebuild -scheme Modules-Package -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.4'",
   sonarProjectKey: "sora:shared-features-spm",
   sonarProjectName: "shared-features-spm",
-  lintEnable: 'false',
+  lintEnable: 'true',
+  linterFile: './tools/swiftformat/swiftformat',
+  lintDir: './Sources/'
   disableUpdatePods: true,
   disableInstallPods: true,
   appEnable: false,
