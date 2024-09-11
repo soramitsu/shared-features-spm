@@ -10,7 +10,7 @@ def pipeline = new org.ios.AppPipeline(
   sonarProjectName: "shared-features-spm",
   lintEnable: 'true',
   linterFile: './tools/swiftformat/swiftformat',
-  lintDir: './Sources/'
+  lintDir: './Sources/',
   disableUpdatePods: true,
   disableInstallPods: true,
   appEnable: false,
