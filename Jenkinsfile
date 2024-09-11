@@ -4,7 +4,7 @@ def pipeline = new org.ios.AppPipeline(
   steps: this,
   dojoProductType: "sora-mobile",
   sharedFeatureBuild: "xcodebuild -scheme Modules-Package -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.4'",
-  sharedFeatureTest: sharedFeatureBuild + " test",
+  sharedFeatureTest: ${sharedFeatureBuild} + " test",
   //sharedFeatureTest: "xcodebuild -scheme Modules-Package -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.4' test",
   sonarProjectKey: "sora:shared-features-spm",
   sonarProjectName: "shared-features-spm",
