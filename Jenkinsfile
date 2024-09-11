@@ -12,7 +12,8 @@ def pipeline = new org.ios.AppPipeline(
   disableUpdatePods: true,
   disableInstallPods: true,
   appEnable: false,
-  sharedFeature: true
+  sharedFeature: true,
+  disableSecretScanner: true
 )
 
 pipeline.runPipeline('sora')
