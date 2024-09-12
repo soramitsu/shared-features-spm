@@ -168,15 +168,15 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
         accountId: AccountId
     ) async throws -> ChainAssetBalanceSubscription {
         let publisher = PassthroughSubject<ChainAssetBalanceInfo?, Never>()
+        
+        let localBalance = try? await localService.get(by: chainAsset.chainAssetId.id)
+        publisher.send(ChainAssetBalanceInfo(chainAsset: chainAsset, balanceInfo: localBalance))
 
         let updateClosure: (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void = { [weak self] _ in
             Task { [weak self] in
                 guard let self else { return }
 
                 do {
-                    let localBalance = try? await self.localService.get(by: chainAsset.chainAssetId.id)
-                    publisher.send(ChainAssetBalanceInfo(chainAsset: chainAsset, balanceInfo: localBalance))
-                    
                     let balance = try await self.getBalance(for: chainAsset, accountId: accountId)
                     publisher.send(ChainAssetBalanceInfo(chainAsset: chainAsset, balanceInfo: balance))
     
