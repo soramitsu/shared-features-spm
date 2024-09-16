@@ -30,9 +30,9 @@ public actor SubstrateConnectionAutoBalance: ChainConnectionProtocol {
     }
 
     // MARK: - Public methods
-    
+
     public func getActiveStatus() async -> Bool {
-        return isActive
+        isActive
     }
 
     public func connection() async throws -> SubstrateConnection {

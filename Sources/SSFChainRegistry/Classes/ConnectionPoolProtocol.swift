@@ -86,7 +86,6 @@ public actor ConnectionPool: ConnectionPoolProtocol {
     // MARK: - Private methods
 
     private func clearUnusedConnections() async {
-//        autoBalancesByChainIds = autoBalancesByChainIds.filter { $0.value.getActiveStatus() }
         await autoBalancesByChainIds.asyncForEach { key, value in
             let isActive = await value.getActiveStatus()
             if !isActive {

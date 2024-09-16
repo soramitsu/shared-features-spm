@@ -168,7 +168,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
         accountId: AccountId
     ) async throws -> ChainAssetBalanceSubscription {
         let publisher = PassthroughSubject<ChainAssetBalanceInfo?, Never>()
-        
+
         let localBalance = try? await localService.get(by: chainAsset.chainAssetId.id)
         publisher.send(ChainAssetBalanceInfo(chainAsset: chainAsset, balanceInfo: localBalance))
 
@@ -178,19 +178,25 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
 
                 do {
                     let balance = try await self.getBalance(for: chainAsset, accountId: accountId)
-                    publisher.send(ChainAssetBalanceInfo(chainAsset: chainAsset, balanceInfo: balance))
-    
+                    publisher.send(ChainAssetBalanceInfo(
+                        chainAsset: chainAsset,
+                        balanceInfo: balance
+                    ))
+
                     try await self.localService.sync(remoteBalances: [balance])
                 } catch {
-                    print("OLOLOLO error \(error)")
                     let allBalances = try await self.localService.getAll()
-                    let localBalance = allBalances.first(where: { $0.chainAssetId == chainAsset.chainAssetId.id })
-                    publisher.send(ChainAssetBalanceInfo(chainAsset: chainAsset, balanceInfo: localBalance))
+                    let localBalance = allBalances
+                        .first(where: { $0.chainAssetId == chainAsset.chainAssetId.id })
+                    publisher.send(ChainAssetBalanceInfo(
+                        chainAsset: chainAsset,
+                        balanceInfo: localBalance
+                    ))
                 }
             }
         }
 
-        let failureClosure: (Error, Bool) -> Void = { error, _ in
+        let failureClosure: (Error, Bool) -> Void = { _, _ in
             publisher.send(nil)
         }
 
@@ -224,7 +230,6 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
                     publisher.send(balances)
                     try await self.localService.sync(remoteBalances: balances)
                 } catch {
-                    print("OLOLOLO error \(error)")
                     let allBalances = try await self.localService.getAll()
                     let ids = chainAssets.map { $0.chainAssetId.id }
                     let localBalances = allBalances.filter { ids.contains($0.chainAssetId) }
@@ -272,7 +277,6 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
                     publisher.send(remoteBalances)
                     try await self.localService.sync(remoteBalances: remoteBalances)
                 } catch {
-                    print("OLOLOLO error \(error)")
                     let allBalances = try await self.localService.getAll()
                     let ids = chain.chainAssets.map { $0.chainAssetId.id }
                     let localBalances = allBalances.filter { ids.contains($0.chainAssetId) }
@@ -317,7 +321,6 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
                     publisher.send(balances)
                     try await self.localService.sync(remoteBalances: balances)
                 } catch {
-                    print("OLOLOLO error \(error)")
                     let allBalances = try await self.localService.getAll()
                     let ids = chains.map { $0.chainAssets }.reduce([], +).map { $0.chainAssetId.id }
                     let localBalances = allBalances.filter { ids.contains($0.chainAssetId) }

@@ -104,7 +104,7 @@ public actor RuntimeSyncService {
                     Task {
                         await strongSelf.processSyncResult(syncResult)
                     }
-                    
+
                     let metadataSyncResult = syncResult.metadataSyncResult
                     switch metadataSyncResult {
                     case let .success(item):

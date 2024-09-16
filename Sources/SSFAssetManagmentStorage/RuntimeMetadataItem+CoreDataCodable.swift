@@ -1,7 +1,7 @@
+import CoreData
 import Foundation
 import RobinHood
 import SSFModels
-import CoreData
 
 extension CDRuntimeMetadataItem: CoreDataCodable {
     public func populate(from decoder: Decoder, using _: NSManagedObjectContext) throws {

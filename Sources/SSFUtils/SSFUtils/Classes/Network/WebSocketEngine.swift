@@ -44,7 +44,11 @@ public final class WebSocketEngine {
                 if let delegate = delegate {
                     let oldState = oldValue
                     let newState = state
-                    await delegate.webSocketDidChangeState(engine: self, from: oldState, to: newState)
+                    await delegate.webSocketDidChangeState(
+                        engine: self,
+                        from: oldState,
+                        to: newState
+                    )
                 }
             }
         }

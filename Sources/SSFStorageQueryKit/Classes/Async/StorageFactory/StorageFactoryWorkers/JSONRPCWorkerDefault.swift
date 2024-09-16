@@ -29,7 +29,6 @@ class JSONRPCWorker<P: Codable, T: Decodable> {
                     let duration = UInt64(timeout * 1_000_000_000)
                     try await Task.sleep(nanoseconds: duration)
                     continuation.resume(throwing: JSONRPCWorkerContinuationError())
-                    return
                 }
 
                 do {
@@ -39,7 +38,6 @@ class JSONRPCWorker<P: Codable, T: Decodable> {
                     ) { (result: Result<T, Error>) in
                         timeoutTask.cancel()
                         continuation.resume(with: result)
-                        return
                     }
                 } catch {
                     continuation.resume(throwing: error)

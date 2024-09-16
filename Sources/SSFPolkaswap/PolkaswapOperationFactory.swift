@@ -18,7 +18,8 @@ protocol PolkaswapOperationFactory {
     func dexInfos() async throws -> CompoundOperationWrapper<[String]>
     func accountPools(accountId: Data, baseAssetId: String) async throws
         -> CompoundOperationWrapper<[AccountPool]>
-    func poolProperties(baseAssetId: String) async throws -> CompoundOperationWrapper<[LiquidityPair]>
+    func poolProperties(baseAssetId: String) async throws
+        -> CompoundOperationWrapper<[LiquidityPair]>
     func poolProperties(baseAssetId: String, targetAssetId: String) async
         -> CompoundOperationWrapper<PolkaswapAccountId?>
     func poolProvidersBalance(reservesId: Data?, accountId: Data) async throws
@@ -138,7 +139,9 @@ extension PolkaswapOperationFactoryDefault: PolkaswapOperationFactory {
         )
     }
 
-    func poolProperties(baseAssetId: String) async throws -> CompoundOperationWrapper<[LiquidityPair]> {
+    func poolProperties(baseAssetId: String) async throws
+        -> CompoundOperationWrapper<[LiquidityPair]>
+    {
         guard let runtimeOperation = await chainRegistry.getRuntimeProvider(for: chain.chainId) else {
             return CompoundOperationWrapper
                 .createWithError(ChainRegistryError.connectionUnavailable)
