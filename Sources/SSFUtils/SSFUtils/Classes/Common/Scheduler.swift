@@ -6,7 +6,7 @@ public protocol SchedulerProtocol: AnyObject {
 }
 
 public protocol SchedulerDelegate: AnyObject {
-    func didTrigger(scheduler: SchedulerProtocol)
+    func didTrigger(scheduler: SchedulerProtocol) async
 }
 
 public final class Scheduler: NSObject, SchedulerProtocol {
@@ -43,7 +43,9 @@ public final class Scheduler: NSObject, SchedulerProtocol {
             repeating: DispatchTimeInterval.never
         )
         timer?.setEventHandler { [weak self] in
-            self?.handleTrigger()
+            Task { [weak self] in
+                await self?.handleTrigger()
+            }
         }
 
         timer?.resume()
@@ -66,7 +68,7 @@ public final class Scheduler: NSObject, SchedulerProtocol {
     }
 
     @objc
-    private func handleTrigger() {
+    private func handleTrigger() async {
         lock.lock()
 
         defer {
@@ -77,10 +79,12 @@ public final class Scheduler: NSObject, SchedulerProtocol {
 
         if let callbackQueue = callbackQueue {
             callbackQueue.async {
-                self.delegate?.didTrigger(scheduler: self)
+                Task {
+                    await self.delegate?.didTrigger(scheduler: self)
+                }
             }
         } else {
-            delegate?.didTrigger(scheduler: self)
+            await delegate?.didTrigger(scheduler: self)
         }
     }
 }

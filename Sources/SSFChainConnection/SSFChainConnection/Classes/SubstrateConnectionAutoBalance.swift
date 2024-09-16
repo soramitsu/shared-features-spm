@@ -4,10 +4,10 @@ import SSFUtils
 
 public typealias SubstrateConnection = JSONRPCEngine
 
-public final class SubstrateConnectionAutoBalance: ChainConnectionProtocol {
+public actor SubstrateConnectionAutoBalance: ChainConnectionProtocol {
     public typealias T = SubstrateConnection
 
-    public var isActive: Bool = true
+    private var isActive: Bool = true
 
     private let chainId: ChainModel.Id
     private let urls: [URL]
@@ -16,7 +16,7 @@ public final class SubstrateConnectionAutoBalance: ChainConnectionProtocol {
 
     private lazy var connectionIssuesCenter = NetworkIssuesCenterImpl.shared
 
-    private weak var currentConnection: SubstrateConnection?
+    private var currentConnection: SubstrateConnection?
     private var failedUrls: Set<URL?> = []
 
     public init(
@@ -31,7 +31,11 @@ public final class SubstrateConnectionAutoBalance: ChainConnectionProtocol {
 
     // MARK: - Public methods
 
-    public func connection() throws -> SubstrateConnection {
+    public func getActiveStatus() async -> Bool {
+        isActive
+    }
+
+    public func connection() async throws -> SubstrateConnection {
         guard let connection = currentConnection else {
             return try setupConnection(ignoredUrl: nil)
         }

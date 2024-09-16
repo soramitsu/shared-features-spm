@@ -36,7 +36,7 @@ extension SubstrateBalanceSubscriptionService: BalanceSubscriptionService {
             accountId
         ).toHex(includePrefix: true)
 
-        if let assetId = chainAsset?.asset.id {
+        if let assetId = chainAsset?.asset.tokenProperties?.currencyId {
             storageKey = try keyFactory.tokensAccountsKeyForId(
                 accountId,
                 assetId: Data(hex: assetId)

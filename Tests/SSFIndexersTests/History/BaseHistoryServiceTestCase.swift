@@ -31,6 +31,7 @@ class BaseHistoryServiceTestCase: XCTestCase {
             id: contractaddress ?? "2",
             name: "asset name",
             symbol: assetSymbol,
+            isUtility: true,
             precision: precision,
             substrateType: nil,
             ethereumType: ethereumType,

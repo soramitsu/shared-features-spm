@@ -210,6 +210,7 @@ public enum ChainModelGenerator {
             id: identifier,
             name: "",
             symbol: symbol,
+            isUtility: true,
             precision: assetPresicion,
             icon: nil,
             substrateType: substrateAssetType,
