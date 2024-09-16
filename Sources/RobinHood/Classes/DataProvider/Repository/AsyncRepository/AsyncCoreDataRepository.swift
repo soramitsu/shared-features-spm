@@ -34,11 +34,11 @@ public extension AsyncCoreDataRepository {
     }
 
     func save(models: [Model]) async throws {
-        try await save(models: models, deleteIds: [])
+        await save(models: models, deleteIds: [])
     }
 
     func remove(models: [Model]) async throws {
-        try await save(models: [], deleteIds: models.map { $0.identifier })
+        await save(models: [], deleteIds: models.map { $0.identifier })
     }
 }
 

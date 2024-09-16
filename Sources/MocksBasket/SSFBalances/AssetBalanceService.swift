@@ -160,8 +160,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             }
         }
         
-        let failureClosure: (Error, Bool) -> Void = { [weak self] error, _ in
-            guard let self else { return }
+        let failureClosure: (Error, Bool) -> Void = { error, _ in
             publisher.send(completion: .failure(error))
         }
 
@@ -192,8 +191,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             }
         }
         
-        let failureClosure: (Error, Bool) -> Void = { [weak self] error, _ in
-            guard let self else { return }
+        let failureClosure: (Error, Bool) -> Void = { error, _ in
             publisher.send(completion: .failure(error))
         }
         
@@ -226,8 +224,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             }
         }
         
-        let failureClosure: (Error, Bool) -> Void = { [weak self] error, _ in
-            guard let self else { return }
+        let failureClosure: (Error, Bool) -> Void = { error, _ in
             publisher.send(completion: .failure(error))
         }
         
@@ -260,8 +257,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             }
         }
         
-        let failureClosure: (Error, Bool) -> Void = { [weak self] error, _ in
-            guard let self else { return }
+        let failureClosure: (Error, Bool) -> Void = { error, _ in
             publisher.send(completion: .failure(error))
         }
         
