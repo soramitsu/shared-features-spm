@@ -4,6 +4,11 @@ import SSFModels
 import SSFUtils
 
 public enum AddressFactory {
+    public enum Constants {
+        public static let substrateAccountIdLehgth = 32
+        public static let ethereumAccountIdLength = 20
+    }
+
     private static let substrateFactory = SS58AddressFactory()
 
     private static func chainFormat(of chain: ChainModel) -> SFChainFormat {

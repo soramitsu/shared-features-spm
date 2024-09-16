@@ -19,7 +19,12 @@ final class CexQRDecoder: QRDecoder {
         let substrateAccountId = try? address.toAccountIdWithTryExtractPrefix()
         let ethereumAccountId = try? address.toAccountIdWithTryExtractPrefix()
 
-        guard substrateAccountId != nil || ethereumAccountId != nil else {
+        let isSubstrateValid = substrateAccountId != nil && substrateAccountId?
+            .count == AddressFactory.Constants.substrateAccountIdLehgth
+        let isEthereumValid = ethereumAccountId != nil && ethereumAccountId?.count == AddressFactory
+            .Constants.ethereumAccountIdLength
+
+        guard isSubstrateValid || isEthereumValid else {
             throw QRDecoderError.brokenFormat
         }
 

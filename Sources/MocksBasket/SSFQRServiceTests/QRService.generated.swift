@@ -8,6 +8,28 @@ import UIKit
 public class QRServiceMock: QRService {
 public init() {}
 
+    //MARK: - lookingMatcher
+
+    public var lookingMatcherForThrowableError: Error?
+    public var lookingMatcherForCallsCount = 0
+    public var lookingMatcherForCalled: Bool {
+        return lookingMatcherForCallsCount > 0
+    }
+    public var lookingMatcherForReceivedCode: String?
+    public var lookingMatcherForReceivedInvocations: [String] = []
+    public var lookingMatcherForReturnValue: QRMatcherType!
+    public var lookingMatcherForClosure: ((String) throws -> QRMatcherType)?
+
+    public func lookingMatcher(for code: String) throws -> QRMatcherType {
+        if let error = lookingMatcherForThrowableError {
+            throw error
+        }
+        lookingMatcherForCallsCount += 1
+        lookingMatcherForReceivedCode = code
+        lookingMatcherForReceivedInvocations.append(code)
+        return try lookingMatcherForClosure.map({ try $0(code) }) ?? lookingMatcherForReturnValue
+    }
+
     //MARK: - extractQrCode
 
     public var extractQrCodeFromThrowableError: Error?
