@@ -89,8 +89,12 @@ public actor ConnectionPool: ConnectionPoolProtocol {
         await autoBalancesByChainIds.asyncForEach { key, value in
             let isActive = await value.getActiveStatus()
             if !isActive {
-                autoBalancesByChainIds[key] = nil
+                await clearAutoBalances(with: key)
             }
         }
+    }
+
+    func clearAutoBalances(with key: String) async {
+        autoBalancesByChainIds[key] = nil
     }
 }
