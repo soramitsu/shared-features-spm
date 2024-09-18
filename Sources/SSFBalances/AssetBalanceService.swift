@@ -7,7 +7,7 @@ import SSFUtils
 
 public typealias ChainAssetBalanceSubscription = (
     id: AssetBalanceSubscriptionId,
-    publisher: PassthroughSubject<ChainAssetBalanceInfo?, Never>
+    publisher: AnyPublisher<ChainAssetBalanceInfo?, Never>
 )
 
 public typealias AssetBalanceSubscription = (
@@ -40,6 +40,11 @@ public protocol AssetBalanceService {
         accountId: AccountId
     ) async throws -> [AssetBalanceInfo]
 
+    func getLocalBalances(
+        for chainAssets: [ChainAsset],
+        accountId: AccountId
+    ) async throws -> [AssetBalanceInfo?]
+
     func getBalances(
         for chain: ChainModel,
         accountId: AccountId
@@ -69,6 +74,16 @@ public protocol AssetBalanceService {
         on chains: [ChainModel],
         accountId: AccountId
     ) async throws -> AssetsBalanceSubscription
+
+    func getLocalBalance(
+        for chainAsset: ChainAsset,
+        accountId: AccountId
+    ) async throws -> AssetBalanceInfo?
+
+    func getLocalBalancePublisher(
+        on chainAsset: ChainAsset,
+        accountId: AccountId
+    ) async throws -> AnyPublisher<ChainAssetBalanceInfo?, Never>
 
     func unsubscribe(ids: [AssetBalanceSubscriptionId]) async throws
 }
@@ -124,6 +139,15 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
         }
     }
 
+    public func getLocalBalances(
+        for chainAssets: [ChainAsset],
+        accountId: AccountId
+    ) async throws -> [AssetBalanceInfo?] {
+        try await chainAssets.asyncMap { chainAsset in
+            try await getLocalBalance(for: chainAsset, accountId: accountId)
+        }
+    }
+
     public func getBalances(
         for chain: ChainModel,
         accountId: AccountId
@@ -163,14 +187,27 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
         return balances.reduce([], +)
     }
 
+    public func getLocalBalance(
+        for chainAsset: ChainAsset,
+        accountId _: AccountId
+    ) async throws -> AssetBalanceInfo? {
+        try await localService.get(by: chainAsset.chainAssetId.id)
+    }
+
+    public func getLocalBalancePublisher(
+        on chainAsset: ChainAsset,
+        accountId: AccountId
+    ) async throws -> AnyPublisher<ChainAssetBalanceInfo?, Never> {
+        let localBalance = try await getLocalBalance(for: chainAsset, accountId: accountId)
+        return Just(ChainAssetBalanceInfo(chainAsset: chainAsset, balanceInfo: localBalance))
+            .eraseToAnyPublisher()
+    }
+
     public func subscribeBalance(
         on chainAsset: ChainAsset,
         accountId: AccountId
     ) async throws -> ChainAssetBalanceSubscription {
         let publisher = PassthroughSubject<ChainAssetBalanceInfo?, Never>()
-
-        let localBalance = try? await localService.get(by: chainAsset.chainAssetId.id)
-        publisher.send(ChainAssetBalanceInfo(chainAsset: chainAsset, balanceInfo: localBalance))
 
         let updateClosure: (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void = { [weak self] _ in
             Task { [weak self] in
@@ -208,8 +245,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
         )
 
         let id = AssetBalanceSubscriptionId(subscriptionId: subscriptionId, chainAsset: chainAsset)
-
-        return (id: id, publisher: publisher)
+        return (id: id, publisher: publisher.eraseToAnyPublisher())
     }
 
     public func subscribeBalances(
@@ -238,8 +274,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             }
         }
 
-        let failureClosure: (Error, Bool) -> Void = { [weak self] error, _ in
-            guard let self else { return }
+        let failureClosure: (Error, Bool) -> Void = { error, _ in
             publisher.send(completion: .failure(error))
         }
 
@@ -285,7 +320,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             }
         }
 
-        let failureClosure: (Error, Bool) -> Void = { [weak self] error, _ in
+        let failureClosure: (Error, Bool) -> Void = { error, _ in
             publisher.send(completion: .failure(error))
         }
 
@@ -329,8 +364,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             }
         }
 
-        let failureClosure: (Error, Bool) -> Void = { [weak self] error, _ in
-            guard let self else { return }
+        let failureClosure: (Error, Bool) -> Void = { error, _ in
             publisher.send(completion: .failure(error))
         }
 
