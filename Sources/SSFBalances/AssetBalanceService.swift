@@ -210,11 +210,13 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
         let publisher = PassthroughSubject<ChainAssetBalanceInfo?, Never>()
 
         let updateClosure: (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void = { [weak self] _ in
+            print("OLOLO updateClosure")
             Task { [weak self] in
                 guard let self else { return }
 
                 do {
                     let balance = try await self.getBalance(for: chainAsset, accountId: accountId)
+                    print("OLOLO remoteBalance \(balance)")
                     publisher.send(ChainAssetBalanceInfo(
                         chainAsset: chainAsset,
                         balanceInfo: balance
@@ -222,6 +224,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
 
                     try await self.localService.sync(remoteBalances: [balance])
                 } catch {
+                    print("OLOLO error \(error)")
                     let allBalances = try await self.localService.getAll()
                     let localBalance = allBalances
                         .first(where: { $0.chainAssetId == chainAsset.chainAssetId.id })
@@ -233,7 +236,8 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             }
         }
 
-        let failureClosure: (Error, Bool) -> Void = { _, _ in
+        let failureClosure: (Error, Bool) -> Void = { error, _ in
+            print("OLOLO subscribe error \(error)")
             publisher.send(nil)
         }
 

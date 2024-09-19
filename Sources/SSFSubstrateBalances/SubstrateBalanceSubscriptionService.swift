@@ -29,12 +29,14 @@ extension SubstrateBalanceSubscriptionService: BalanceSubscriptionService {
         ) -> Void,
         failureClosure: @escaping (any Error, Bool) -> Void
     ) async throws -> UInt16 {
+        print("OLOLO 1")
         let connection: SubstrateConnection = try await chainRegistry
             .getSubstrateConnection(for: chainAsset!.chain)
 
         var storageKey = try keyFactory.systemAccountKeyForId(
             accountId
         ).toHex(includePrefix: true)
+        print("OLOLO 2")
 
         if let assetId = chainAsset?.asset.tokenProperties?.currencyId {
             storageKey = try keyFactory.tokensAccountsKeyForId(
@@ -42,13 +44,15 @@ extension SubstrateBalanceSubscriptionService: BalanceSubscriptionService {
                 assetId: Data(hex: assetId)
             ).toHex(includePrefix: true)
         }
-
-        return try connection.subscribe(
+        print("OLOLO 3")
+        let subscribeConnection = try connection.subscribe(
             RPCMethod.storageSubscribe,
             params: [[storageKey]],
             updateClosure: updateClosure,
             failureClosure: failureClosure
         )
+        print("OLOLO 4 \(subscribeConnection)")
+        return subscribeConnection
     }
 
     public func unsubscribe(id _: UInt16, chainAsset _: SSFModels.ChainAsset) throws {}

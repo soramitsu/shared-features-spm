@@ -288,6 +288,7 @@ extension WebSocketEngine {
     }
 
     func process(data: Data) {
+        print("OLOLO process(data: Data)")
         do {
             let response = try jsonDecoder.decode(JSONRPCBasicData.self, from: data)
 
@@ -399,6 +400,7 @@ extension WebSocketEngine {
     }
 
     func completeRequestForRemoteId(_ identifier: UInt16, data: Data) {
+        print("OLOLO completeRequestForRemoteId \(identifier)")
         if let request = inProgressRequests.removeValue(forKey: identifier) {
             notify(request: request, data: data)
         }
@@ -409,6 +411,7 @@ extension WebSocketEngine {
     }
 
     func processSubscriptionResponse(_ identifier: UInt16, data: Data) {
+        print("OLOLO processSubscriptionResponse \(identifier)")
         do {
             let response = try jsonDecoder.decode(JSONRPCData<String>.self, from: data)
             subscriptions[identifier]?.remoteId = response.result
@@ -434,21 +437,25 @@ extension WebSocketEngine {
     }
 
     func processSubscriptionUpdate(_ data: Data) throws {
+        print("OLOLO processSubscriptionUpdate \(data)")
         let basicResponse = try jsonDecoder.decode(
             JSONRPCSubscriptionBasicUpdate.self,
             from: data
         )
         let remoteId = basicResponse.params.subscription
 
+        print("OLOLO subscriptions \(subscriptions)")
         if let (_, subscription) = subscriptions
             .first(where: { $1.remoteId == remoteId })
         {
+            print("OLOLO subscription handled \(remoteId)")
             logger?.debug("Did receive update for subscription: \(remoteId)")
 
             completionQueue.async {
                 try? subscription.handle(data: data)
             }
         } else {
+            print("OLOLO subscription failed \(remoteId)")
             logger?.warning("No handler for subscription: \(remoteId)")
             if unknownResponsesByRemoteId[remoteId] == nil {
                 unknownResponsesByRemoteId[remoteId] = []

@@ -5,6 +5,7 @@ extension WebSocketEngine: WebSocketDelegate {
     public func didReceive(event: WebSocketEvent, client _: WebSocketClient) {
         mutex.lock()
 
+        print("OLOLO event \(event)")
         switch event {
         case let .binary(data):
             handleBinaryEvent(data: data)
@@ -79,6 +80,7 @@ extension WebSocketEngine: WebSocketDelegate {
     }
 
     private func handleBinaryEvent(data: Data) {
+        print("OLOLO handleBinaryEvent")
         if let decodedString = String(data: data, encoding: .utf8) {
             logger?.debug("Did receive data: \(decodedString.prefix(1024))")
         }
@@ -87,6 +89,7 @@ extension WebSocketEngine: WebSocketDelegate {
     }
 
     private func handleTextEvent(string: String) {
+        print("OLOLO handleTextEvent")
         logger?.debug("Did receive text: \(string.prefix(1024))")
         if let data = string.data(using: .utf8) {
             process(data: data)

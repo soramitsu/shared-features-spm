@@ -85,6 +85,7 @@ public final class JSONRPCSubscription<T: Decodable>: JSONRPCSubscribing {
     }
 
     public func handle(data: Data) throws {
+        print("OLOLO data \(data)")
         let entity = try jsonDecoder.decode(T.self, from: data)
         updateClosure(entity)
     }
