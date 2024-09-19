@@ -18,6 +18,8 @@ extension WebSocketEngine: WebSocketDelegate {
             handleErrorEvent(error)
         case .cancelled:
             handleCancelled()
+        case let .waiting(error):
+            handleDisconnectedEvent(reason: error.localizedDescription, code: 1)
         default:
             logger?.warning("Unhandled event \(event)")
         }
