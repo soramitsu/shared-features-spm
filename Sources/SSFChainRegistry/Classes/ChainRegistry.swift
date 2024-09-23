@@ -15,7 +15,7 @@ public protocol ChainRegistryProtocol: AnyObject {
     ) async throws -> RuntimeProviderProtocol
     func getSubstrateConnection(for chain: ChainModel) async throws -> SubstrateConnection
     func getEthereumConnection(for chain: ChainModel) async throws -> Web3EthConnection
-    func getRuntimeProvider(for chainId: ChainModel.Id) -> RuntimeProviderProtocol?
+    func getRuntimeProvider(for chainId: ChainModel.Id) async -> RuntimeProviderProtocol?
     func getChain(for chainId: ChainModel.Id) async throws -> ChainModel
     func getChains() async throws -> [ChainModel]
     func getReadySnapshot(
@@ -25,7 +25,7 @@ public protocol ChainRegistryProtocol: AnyObject {
     ) async throws -> RuntimeSnapshot
 }
 
-public final class ChainRegistry {
+public actor ChainRegistry {
     private let runtimeProviderPool: RuntimeProviderPoolProtocol
     private let connectionPool: ConnectionPoolProtocol
     private let chainsDataFetcher: ChainsDataFetcherProtocol
@@ -122,7 +122,7 @@ extension ChainRegistry: ChainRegistryProtocol {
         try await connectionPool.setupWeb3EthereumConnection(for: chain)
     }
 
-    public func getRuntimeProvider(for chainId: ChainModel.Id) -> RuntimeProviderProtocol? {
+    public func getRuntimeProvider(for chainId: ChainModel.Id) async -> RuntimeProviderProtocol? {
         readLock.concurrentlyRead { runtimeProviderPool.getRuntimeProvider(for: chainId) }
     }
 

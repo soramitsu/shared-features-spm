@@ -6,7 +6,7 @@ import SSFRuntimeCodingService
 import SSFSingleValueCache
 import SSFUtils
 
-public protocol StorageRequestPerformer {
+public protocol StorageRequestPerformer: Actor {
     func performSingle<T: Decodable>(
         _ request: StorageRequest,
         chain: ChainModel
@@ -46,7 +46,7 @@ public protocol StorageRequestPerformer {
     ) async throws -> [MixStorageResponse]
 }
 
-public final class StorageRequestPerformerDefault: StorageRequestPerformer {
+public actor StorageRequestPerformerDefault: StorageRequestPerformer {
     private let chainRegistry: ChainRegistryProtocol
 
     private lazy var storageRequestFactory: AsyncStorageRequestFactory =

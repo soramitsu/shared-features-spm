@@ -14,7 +14,7 @@ class JSONRPCWorker<P: Codable, T: Decodable> {
         engine: JSONRPCEngine,
         method: String,
         parameters: P,
-        timeout: TimeInterval = 10
+        timeout: TimeInterval = 20
     ) {
         self.engine = engine
         self.method = method
@@ -23,7 +23,7 @@ class JSONRPCWorker<P: Codable, T: Decodable> {
     }
 
     func performCall() async throws -> T {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withUnsafeThrowingContinuation { continuation in
             currentTask = Task {
                 let timeoutTask = Task {
                     let duration = UInt64(timeout * 1_000_000_000)
@@ -41,6 +41,7 @@ class JSONRPCWorker<P: Codable, T: Decodable> {
                     }
                 } catch {
                     continuation.resume(throwing: error)
+                    return
                 }
             }
         }

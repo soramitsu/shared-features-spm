@@ -35,7 +35,7 @@ actor PolkaswapWorkerDefault: PolkaswapWorker {
     }
 
     func getBaseAssetIds() async throws -> [String] {
-        let operation = try operationFactory.dexInfos()
+        let operation = try await operationFactory.dexInfos()
         operationManager.enqueue(operations: operation.allOperations, in: .transient)
 
         return try await withCheckedThrowingContinuation { continuation in
@@ -51,7 +51,7 @@ actor PolkaswapWorkerDefault: PolkaswapWorker {
     }
 
     func getAccountPools(accountId: Data, baseAssetId: String) async throws -> [AccountPool] {
-        let operation = try operationFactory.accountPools(
+        let operation = try await operationFactory.accountPools(
             accountId: accountId,
             baseAssetId: baseAssetId
         )
@@ -70,7 +70,7 @@ actor PolkaswapWorkerDefault: PolkaswapWorker {
     }
 
     func getPoolReservesId(baseAssetId: String) async throws -> [LiquidityPair] {
-        let operation = try operationFactory.poolProperties(baseAssetId: baseAssetId)
+        let operation = try await operationFactory.poolProperties(baseAssetId: baseAssetId)
         operationManager.enqueue(operations: operation.allOperations, in: .transient)
 
         return try await withCheckedThrowingContinuation { continuation in
@@ -89,7 +89,7 @@ actor PolkaswapWorkerDefault: PolkaswapWorker {
         baseAssetId: String,
         targetAssetId: String
     ) async throws -> PolkaswapAccountId {
-        let operation = operationFactory.poolProperties(
+        let operation = await operationFactory.poolProperties(
             baseAssetId: baseAssetId,
             targetAssetId: targetAssetId
         )
@@ -112,7 +112,7 @@ actor PolkaswapWorkerDefault: PolkaswapWorker {
     }
 
     func getPoolProviderBalance(reservesId: Data?, accountId: Data) async throws -> BigUInt {
-        let operation = try operationFactory.poolProvidersBalance(
+        let operation = try await operationFactory.poolProvidersBalance(
             reservesId: reservesId,
             accountId: accountId
         )
@@ -131,7 +131,7 @@ actor PolkaswapWorkerDefault: PolkaswapWorker {
     }
 
     func getPoolTotalIssuances(reservesId: Data?) async throws -> BigUInt {
-        let operation = try operationFactory.poolTotalIssuances(reservesId: reservesId)
+        let operation = try await operationFactory.poolTotalIssuances(reservesId: reservesId)
         operationManager.enqueue(operations: operation.allOperations, in: .transient)
 
         return try await withCheckedThrowingContinuation { continuation in
@@ -150,7 +150,7 @@ actor PolkaswapWorkerDefault: PolkaswapWorker {
         baseAssetId: String,
         targetAssetId: String
     ) async throws -> PolkaswapPoolReserves {
-        let operation = try operationFactory.poolReserves(
+        let operation = try await operationFactory.poolReserves(
             baseAssetId: baseAssetId,
             targetAssetId: targetAssetId
         )
@@ -173,7 +173,7 @@ actor PolkaswapWorkerDefault: PolkaswapWorker {
     }
 
     func getPoolsReserves(baseAssetId: String) async throws -> [LiquidityPair] {
-        let operation = try operationFactory.reservesKeysOperation(baseAssetId: baseAssetId)
+        let operation = try await operationFactory.reservesKeysOperation(baseAssetId: baseAssetId)
         operationManager.enqueue(operations: operation.allOperations, in: .transient)
 
         return try await withCheckedThrowingContinuation { continuation in

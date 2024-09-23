@@ -168,6 +168,7 @@ private extension XcmExtrinsicServiceTests {
                             id: "0",
                             name: "0",
                             symbol: "0",
+                            isUtility: true,
                             precision: 0,
                             substrateType: .soraAsset,
                             ethereumType: nil,

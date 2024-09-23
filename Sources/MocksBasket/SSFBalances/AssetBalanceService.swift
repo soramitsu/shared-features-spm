@@ -15,7 +15,7 @@ public struct AssetBalanceSubscriptionId {
     let chainAsset: ChainAsset
 }
 
-public protocol AssetBalanceService {
+public protocol AssetBalanceService: Actor {
     func getBalance(
         for chainAsset: ChainAsset,
         accountId: AccountId
@@ -60,7 +60,7 @@ public protocol AssetBalanceService {
 }
 
 
-public final class AssetBalanceServiceDefault {
+public actor AssetBalanceServiceDefault {
     let remoteService: AccountInfoRemoteService
     let subscriptionService: BalanceSubscriptionService
     
@@ -160,8 +160,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             }
         }
         
-        let failureClosure: (Error, Bool) -> Void = { [weak self] error, _ in
-            guard let self else { return }
+        let failureClosure: (Error, Bool) -> Void = { error, _ in
             publisher.send(completion: .failure(error))
         }
 
@@ -192,8 +191,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             }
         }
         
-        let failureClosure: (Error, Bool) -> Void = { [weak self] error, _ in
-            guard let self else { return }
+        let failureClosure: (Error, Bool) -> Void = { error, _ in
             publisher.send(completion: .failure(error))
         }
         
@@ -226,8 +224,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             }
         }
         
-        let failureClosure: (Error, Bool) -> Void = { [weak self] error, _ in
-            guard let self else { return }
+        let failureClosure: (Error, Bool) -> Void = { error, _ in
             publisher.send(completion: .failure(error))
         }
         
@@ -260,8 +257,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             }
         }
         
-        let failureClosure: (Error, Bool) -> Void = { [weak self] error, _ in
-            guard let self else { return }
+        let failureClosure: (Error, Bool) -> Void = { error, _ in
             publisher.send(completion: .failure(error))
         }
         

@@ -5,18 +5,6 @@ import SSFAssetManagment
 protocol AccountInfoFetchingProtocol {
     func fetch(
         for chainAsset: ChainAsset,
-        accountId: AccountId,
-        completionBlock: @escaping (ChainAsset, AccountInfo?) -> Void
-    )
-
-    func fetch(
-        for chainAssets: [ChainAsset],
-        accountId: AccountId,
-        completionBlock: @escaping ([ChainAsset: AccountInfo?]) -> Void
-    )
-
-    func fetch(
-        for chainAsset: ChainAsset,
         accountId: AccountId
     ) async throws -> (ChainAsset, AccountInfo?)
 

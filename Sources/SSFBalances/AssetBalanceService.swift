@@ -5,9 +5,14 @@ import SSFModels
 import SSFStorageQueryKit
 import SSFUtils
 
+public typealias ChainAssetBalanceSubscription = (
+    id: AssetBalanceSubscriptionId,
+    publisher: AnyPublisher<ChainAssetBalanceInfo?, Never>
+)
+
 public typealias AssetBalanceSubscription = (
     id: AssetBalanceSubscriptionId,
-    publisher: PassthroughSubject<AssetBalanceInfo?, any Error>
+    publisher: PassthroughSubject<AssetBalanceInfo?, Never>
 )
 
 public typealias AssetsBalanceSubscription = (
@@ -35,6 +40,11 @@ public protocol AssetBalanceService {
         accountId: AccountId
     ) async throws -> [AssetBalanceInfo]
 
+    func getLocalBalances(
+        for chainAssets: [ChainAsset],
+        accountId: AccountId
+    ) async throws -> [AssetBalanceInfo?]
+
     func getBalances(
         for chain: ChainModel,
         accountId: AccountId
@@ -48,7 +58,7 @@ public protocol AssetBalanceService {
     func subscribeBalance(
         on chainAsset: ChainAsset,
         accountId: AccountId
-    ) async throws -> AssetBalanceSubscription
+    ) async throws -> ChainAssetBalanceSubscription
 
     func subscribeBalances(
         on chainAssets: [ChainAsset],
@@ -64,6 +74,16 @@ public protocol AssetBalanceService {
         on chains: [ChainModel],
         accountId: AccountId
     ) async throws -> AssetsBalanceSubscription
+
+    func getLocalBalance(
+        for chainAsset: ChainAsset,
+        accountId: AccountId
+    ) async throws -> AssetBalanceInfo?
+
+    func getLocalBalancePublisher(
+        on chainAsset: ChainAsset,
+        accountId: AccountId
+    ) async throws -> AnyPublisher<ChainAssetBalanceInfo?, Never>
 
     func unsubscribe(ids: [AssetBalanceSubscriptionId]) async throws
 }
@@ -119,6 +139,15 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
         }
     }
 
+    public func getLocalBalances(
+        for chainAssets: [ChainAsset],
+        accountId: AccountId
+    ) async throws -> [AssetBalanceInfo?] {
+        try await chainAssets.asyncMap { chainAsset in
+            try await getLocalBalance(for: chainAsset, accountId: accountId)
+        }
+    }
+
     public func getBalances(
         for chain: ChainModel,
         accountId: AccountId
@@ -158,11 +187,27 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
         return balances.reduce([], +)
     }
 
+    public func getLocalBalance(
+        for chainAsset: ChainAsset,
+        accountId _: AccountId
+    ) async throws -> AssetBalanceInfo? {
+        try await localService.get(by: chainAsset.chainAssetId.id)
+    }
+
+    public func getLocalBalancePublisher(
+        on chainAsset: ChainAsset,
+        accountId: AccountId
+    ) async throws -> AnyPublisher<ChainAssetBalanceInfo?, Never> {
+        let localBalance = try await getLocalBalance(for: chainAsset, accountId: accountId)
+        return Just(ChainAssetBalanceInfo(chainAsset: chainAsset, balanceInfo: localBalance))
+            .eraseToAnyPublisher()
+    }
+
     public func subscribeBalance(
         on chainAsset: ChainAsset,
         accountId: AccountId
-    ) async throws -> AssetBalanceSubscription {
-        let publisher = PassthroughSubject<AssetBalanceInfo?, Error>()
+    ) async throws -> ChainAssetBalanceSubscription {
+        let publisher = PassthroughSubject<ChainAssetBalanceInfo?, Never>()
 
         let updateClosure: (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void = { [weak self] _ in
             Task { [weak self] in
@@ -170,20 +215,26 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
 
                 do {
                     let balance = try await self.getBalance(for: chainAsset, accountId: accountId)
-                    publisher.send(balance)
+                    publisher.send(ChainAssetBalanceInfo(
+                        chainAsset: chainAsset,
+                        balanceInfo: balance
+                    ))
+
                     try await self.localService.sync(remoteBalances: [balance])
                 } catch {
-                    let allBalances = try await self.localService.get()
+                    let allBalances = try await self.localService.getAll()
                     let localBalance = allBalances
                         .first(where: { $0.chainAssetId == chainAsset.chainAssetId.id })
-                    publisher.send(localBalance)
+                    publisher.send(ChainAssetBalanceInfo(
+                        chainAsset: chainAsset,
+                        balanceInfo: localBalance
+                    ))
                 }
             }
         }
 
-        let failureClosure: (Error, Bool) -> Void = { [weak self] error, _ in
-            guard let self else { return }
-            publisher.send(completion: .failure(error))
+        let failureClosure: (Error, Bool) -> Void = { _, _ in
+            publisher.send(nil)
         }
 
         let subscriptionId = try await subscriptionService.createBalanceSubscription(
@@ -194,8 +245,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
         )
 
         let id = AssetBalanceSubscriptionId(subscriptionId: subscriptionId, chainAsset: chainAsset)
-
-        return (id: id, publisher: publisher)
+        return (id: id, publisher: publisher.eraseToAnyPublisher())
     }
 
     public func subscribeBalances(
@@ -216,7 +266,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
                     publisher.send(balances)
                     try await self.localService.sync(remoteBalances: balances)
                 } catch {
-                    let allBalances = try await self.localService.get()
+                    let allBalances = try await self.localService.getAll()
                     let ids = chainAssets.map { $0.chainAssetId.id }
                     let localBalances = allBalances.filter { ids.contains($0.chainAssetId) }
                     publisher.send(localBalances)
@@ -224,8 +274,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             }
         }
 
-        let failureClosure: (Error, Bool) -> Void = { [weak self] error, _ in
-            guard let self else { return }
+        let failureClosure: (Error, Bool) -> Void = { error, _ in
             publisher.send(completion: .failure(error))
         }
 
@@ -263,7 +312,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
                     publisher.send(remoteBalances)
                     try await self.localService.sync(remoteBalances: remoteBalances)
                 } catch {
-                    let allBalances = try await self.localService.get()
+                    let allBalances = try await self.localService.getAll()
                     let ids = chain.chainAssets.map { $0.chainAssetId.id }
                     let localBalances = allBalances.filter { ids.contains($0.chainAssetId) }
                     publisher.send(localBalances)
@@ -271,8 +320,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             }
         }
 
-        let failureClosure: (Error, Bool) -> Void = { [weak self] error, _ in
-            guard let self else { return }
+        let failureClosure: (Error, Bool) -> Void = { error, _ in
             publisher.send(completion: .failure(error))
         }
 
@@ -308,7 +356,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
                     publisher.send(balances)
                     try await self.localService.sync(remoteBalances: balances)
                 } catch {
-                    let allBalances = try await self.localService.get()
+                    let allBalances = try await self.localService.getAll()
                     let ids = chains.map { $0.chainAssets }.reduce([], +).map { $0.chainAssetId.id }
                     let localBalances = allBalances.filter { ids.contains($0.chainAssetId) }
                     publisher.send(localBalances)
@@ -316,8 +364,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             }
         }
 
-        let failureClosure: (Error, Bool) -> Void = { [weak self] error, _ in
-            guard let self else { return }
+        let failureClosure: (Error, Bool) -> Void = { error, _ in
             publisher.send(completion: .failure(error))
         }
 

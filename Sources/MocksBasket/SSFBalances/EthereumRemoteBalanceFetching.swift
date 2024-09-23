@@ -33,7 +33,7 @@ public final actor EthereumRemoteBalanceFetching {
     }
 
     private func fetchETHBalance(for chainAsset: ChainAsset, address: String) async throws -> AccountInfo? {
-        let ws = await try chainRegistry.getEthereumConnection(for: chainAsset.chain)
+        let ws = try await chainRegistry.getEthereumConnection(for: chainAsset.chain)
         let ethereumAddress = try EthereumAddress(rawAddress: address.hexToBytes())
 
         return try await withCheckedThrowingContinuation { continuation in
@@ -59,7 +59,7 @@ public final actor EthereumRemoteBalanceFetching {
     }
 
     private func fetchERC20Balance(for chainAsset: ChainAsset, address: String) async throws -> AccountInfo? {
-        let ws = await try chainRegistry.getEthereumConnection(for: chainAsset.chain)
+        let ws = try await chainRegistry.getEthereumConnection(for: chainAsset.chain)
         let contractAddress = try EthereumAddress(hex: chainAsset.asset.id, eip55: false)
         let contract = ws.Contract(type: GenericERC20Contract.self, address: contractAddress)
         let ethAddress = try EthereumAddress(rawAddress: address.hexToBytes())
@@ -186,7 +186,6 @@ extension EthereumRemoteBalanceFetching: AccountInfoFetchingProtocol {
     ) async throws -> [ChainAssetKey: AccountInfo?] {
         let accountInfos = try await fetch(for: chainAssets, accountId: accountId)
         let mapped: [(ChainAssetKey, AccountInfo?)] = accountInfos.compactMap { chainAsset, accountInfo in
-            let request = chainAsset.chain.accountRequest()
             let key = chainAsset.uniqueKey(accountId: accountId)
             return (key, accountInfo)
         }

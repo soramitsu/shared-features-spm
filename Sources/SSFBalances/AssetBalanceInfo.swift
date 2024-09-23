@@ -19,6 +19,11 @@ public struct AssetBalanceInfo: Codable {
     public let price: Decimal?
     public let deltaPrice: Decimal?
 
+    public var totalBalance: Decimal? {
+        guard let price, let balance else { return nil }
+        return price * balance
+    }
+
     public init(
         chainId: String,
         assetId: String,

@@ -15,18 +15,19 @@ enum PolkaswapOperationFactoryError: Error {
 }
 
 protocol PolkaswapOperationFactory {
-    func dexInfos() throws -> CompoundOperationWrapper<[String]>
-    func accountPools(accountId: Data, baseAssetId: String) throws
+    func dexInfos() async throws -> CompoundOperationWrapper<[String]>
+    func accountPools(accountId: Data, baseAssetId: String) async throws
         -> CompoundOperationWrapper<[AccountPool]>
-    func poolProperties(baseAssetId: String) throws -> CompoundOperationWrapper<[LiquidityPair]>
-    func poolProperties(baseAssetId: String, targetAssetId: String)
+    func poolProperties(baseAssetId: String) async throws
+        -> CompoundOperationWrapper<[LiquidityPair]>
+    func poolProperties(baseAssetId: String, targetAssetId: String) async
         -> CompoundOperationWrapper<PolkaswapAccountId?>
-    func poolProvidersBalance(reservesId: Data?, accountId: Data) throws
+    func poolProvidersBalance(reservesId: Data?, accountId: Data) async throws
         -> CompoundOperationWrapper<BigUInt>
-    func poolTotalIssuances(reservesId: Data?) throws -> CompoundOperationWrapper<BigUInt>
-    func poolReserves(baseAssetId: String, targetAssetId: String) throws
+    func poolTotalIssuances(reservesId: Data?) async throws -> CompoundOperationWrapper<BigUInt>
+    func poolReserves(baseAssetId: String, targetAssetId: String) async throws
         -> CompoundOperationWrapper<PolkaswapPoolReserves?>
-    func reservesKeysOperation(baseAssetId: String) throws
+    func reservesKeysOperation(baseAssetId: String) async throws
         -> CompoundOperationWrapper<[LiquidityPair]>
 }
 
@@ -56,8 +57,8 @@ final class PolkaswapOperationFactoryDefault {
 }
 
 extension PolkaswapOperationFactoryDefault: PolkaswapOperationFactory {
-    func dexInfos() throws -> CompoundOperationWrapper<[String]> {
-        guard let runtimeProvider = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
+    func dexInfos() async throws -> CompoundOperationWrapper<[String]> {
+        guard let runtimeProvider = await chainRegistry.getRuntimeProvider(for: chain.chainId) else {
             return CompoundOperationWrapper
                 .createWithError(ChainRegistryError.runtimeMetadaUnavailable)
         }
@@ -90,8 +91,8 @@ extension PolkaswapOperationFactoryDefault: PolkaswapOperationFactory {
     func accountPools(
         accountId: Data,
         baseAssetId: String
-    ) throws -> CompoundOperationWrapper<[AccountPool]> {
-        guard let runtimeOperation = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
+    ) async throws -> CompoundOperationWrapper<[AccountPool]> {
+        guard let runtimeOperation = await chainRegistry.getRuntimeProvider(for: chain.chainId) else {
             return CompoundOperationWrapper
                 .createWithError(ChainRegistryError.runtimeMetadaUnavailable)
         }
@@ -138,8 +139,10 @@ extension PolkaswapOperationFactoryDefault: PolkaswapOperationFactory {
         )
     }
 
-    func poolProperties(baseAssetId: String) throws -> CompoundOperationWrapper<[LiquidityPair]> {
-        guard let runtimeOperation = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
+    func poolProperties(baseAssetId: String) async throws
+        -> CompoundOperationWrapper<[LiquidityPair]>
+    {
+        guard let runtimeOperation = await chainRegistry.getRuntimeProvider(for: chain.chainId) else {
             return CompoundOperationWrapper
                 .createWithError(ChainRegistryError.connectionUnavailable)
         }
@@ -195,8 +198,8 @@ extension PolkaswapOperationFactoryDefault: PolkaswapOperationFactory {
     func poolProperties(
         baseAssetId: String,
         targetAssetId: String
-    ) -> CompoundOperationWrapper<PolkaswapAccountId?> {
-        guard let runtimeOperation = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
+    ) async -> CompoundOperationWrapper<PolkaswapAccountId?> {
+        guard let runtimeOperation = await chainRegistry.getRuntimeProvider(for: chain.chainId) else {
             return CompoundOperationWrapper
                 .createWithError(ChainRegistryError.runtimeMetadaUnavailable)
         }
@@ -242,8 +245,8 @@ extension PolkaswapOperationFactoryDefault: PolkaswapOperationFactory {
     func poolProvidersBalance(
         reservesId: Data?,
         accountId: Data
-    ) throws -> CompoundOperationWrapper<BigUInt> {
-        guard let runtimeOperation = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
+    ) async throws -> CompoundOperationWrapper<BigUInt> {
+        guard let runtimeOperation = await chainRegistry.getRuntimeProvider(for: chain.chainId) else {
             return CompoundOperationWrapper
                 .createWithError(ChainRegistryError.runtimeMetadaUnavailable)
         }
@@ -278,8 +281,8 @@ extension PolkaswapOperationFactoryDefault: PolkaswapOperationFactory {
         )
     }
 
-    func poolTotalIssuances(reservesId: Data?) throws -> CompoundOperationWrapper<BigUInt> {
-        guard let runtimeOperation = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
+    func poolTotalIssuances(reservesId: Data?) async throws -> CompoundOperationWrapper<BigUInt> {
+        guard let runtimeOperation = await chainRegistry.getRuntimeProvider(for: chain.chainId) else {
             return CompoundOperationWrapper
                 .createWithError(ChainRegistryError.runtimeMetadaUnavailable)
         }
@@ -309,10 +312,10 @@ extension PolkaswapOperationFactoryDefault: PolkaswapOperationFactory {
         )
     }
 
-    func reservesKeysOperation(baseAssetId: String) throws
+    func reservesKeysOperation(baseAssetId: String) async throws
         -> CompoundOperationWrapper<[LiquidityPair]>
     {
-        guard let runtimeOperation = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
+        guard let runtimeOperation = await chainRegistry.getRuntimeProvider(for: chain.chainId) else {
             return CompoundOperationWrapper
                 .createWithError(ChainRegistryError.connectionUnavailable)
         }
@@ -358,8 +361,8 @@ extension PolkaswapOperationFactoryDefault: PolkaswapOperationFactory {
     func poolReserves(
         baseAssetId: String,
         targetAssetId: String
-    ) throws -> CompoundOperationWrapper<PolkaswapPoolReserves?> {
-        guard let runtimeOperation = chainRegistry.getRuntimeProvider(for: chain.chainId) else {
+    ) async throws -> CompoundOperationWrapper<PolkaswapPoolReserves?> {
+        guard let runtimeOperation = await chainRegistry.getRuntimeProvider(for: chain.chainId) else {
             return CompoundOperationWrapper
                 .createWithError(ChainRegistryError.connectionUnavailable)
         }

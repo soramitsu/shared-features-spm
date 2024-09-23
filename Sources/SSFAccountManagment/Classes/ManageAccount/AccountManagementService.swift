@@ -73,6 +73,6 @@ extension AccountManagementService: AccountManageble {
     }
 
     public func logout() async throws {
-        await accountManagementWorker.deleteAll(completion: {})
+        accountManagementWorker.deleteAll(completion: {})
     }
 }
