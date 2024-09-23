@@ -2,29 +2,27 @@ import Foundation
 import Starscream
 
 extension WebSocketEngine: WebSocketDelegate {
-    public func didReceive(event: WebSocketEvent, client _: WebSocketClient) {
-        mutex.lock()
-
-        switch event {
-        case let .binary(data):
-            handleBinaryEvent(data: data)
-        case let .text(string):
-            handleTextEvent(string: string)
-        case .connected:
-            handleConnectedEvent()
-        case let .disconnected(reason, code):
-            handleDisconnectedEvent(reason: reason, code: code)
-        case let .error(error):
-            handleErrorEvent(error)
-        case .cancelled:
-            handleCancelled()
-        case let .waiting(error):
-            handleDisconnectedEvent(reason: error.localizedDescription, code: 1)
-        default:
-            logger?.warning("Unhandled event \(event)")
+    public nonisolated func didReceive(event: WebSocketEvent, client _: WebSocketClient) {
+        Task {
+            switch event {
+            case let .binary(data):
+                await handleBinaryEvent(data: data)
+            case let .text(string):
+                await handleTextEvent(string: string)
+            case .connected:
+                await handleConnectedEvent()
+            case let .disconnected(reason, code):
+                await handleDisconnectedEvent(reason: reason, code: code)
+            case let .error(error):
+                await handleErrorEvent(error)
+            case .cancelled:
+                await handleCancelled()
+            case let .waiting(error):
+                await handleDisconnectedEvent(reason: error.localizedDescription, code: 1)
+            default:
+                logger?.warning("Unhandled event \(event)")
+            }
         }
-
-        mutex.unlock()
     }
 
     private func handleCancelled() {
@@ -130,7 +128,7 @@ extension WebSocketEngine: WebSocketDelegate {
 }
 
 extension WebSocketEngine: ReachabilityListenerDelegate {
-    public func didChangeReachability(by manager: ReachabilityManagerProtocol) {
+    public func didChangeReachability(by manager: ReachabilityManagerProtocol) async {
         mutex.lock()
 
         if manager.isReachable, case .notReachable = state {
@@ -168,8 +166,8 @@ extension WebSocketEngine: SchedulerDelegate {
     private func handlePing(scheduler _: SchedulerProtocol) {
         schedulePingIfNeeded()
 
-        connection.callbackQueue.async {
-            self.sendPing()
+        Task {
+            await self.sendPing()
         }
     }
 }

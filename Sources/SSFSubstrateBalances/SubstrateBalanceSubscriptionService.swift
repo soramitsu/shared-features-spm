@@ -43,7 +43,7 @@ extension SubstrateBalanceSubscriptionService: BalanceSubscriptionService {
             ).toHex(includePrefix: true)
         }
 
-        return try connection.subscribe(
+        return try await connection.subscribe(
             RPCMethod.storageSubscribe,
             params: [[storageKey]],
             updateClosure: updateClosure,

@@ -317,12 +317,6 @@ extension RuntimeSyncService: RuntimeSyncServiceProtocol {
     }
 
     public func unregister(chainId: ChainModel.Id) async {
-        mutex.lock()
-
-        defer {
-            mutex.unlock()
-        }
-
         clearOperations(for: chainId)
         knownChains[chainId] = nil
     }

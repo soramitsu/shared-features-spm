@@ -37,7 +37,7 @@ public actor SubstrateConnectionAutoBalance: ChainConnectionProtocol {
 
     public func connection() async throws -> SubstrateConnection {
         guard let connection = currentConnection else {
-            return try setupConnection(ignoredUrl: nil)
+            return try await setupConnection(ignoredUrl: nil)
         }
         return connection
     }
@@ -46,10 +46,10 @@ public actor SubstrateConnectionAutoBalance: ChainConnectionProtocol {
 
     private func setupConnection(
         ignoredUrl: URL?
-    ) throws -> SubstrateConnection {
+    ) async throws -> SubstrateConnection {
         if ignoredUrl == nil,
            let connection = currentConnection,
-           connection.url?.absoluteString == selecteUrl?.absoluteString
+           await connection.getUrl()?.absoluteString == selecteUrl?.absoluteString
         {
             return connection
         }
@@ -64,10 +64,10 @@ public actor SubstrateConnectionAutoBalance: ChainConnectionProtocol {
         }
 
         if let connection = currentConnection {
-            if connection.url == url {
+            if await connection.getUrl() == url {
                 return connection
             } else if ignoredUrl != nil {
-                connection.reconnect(url: url)
+                await connection.reconnect(url: url)
                 return connection
             }
         }
@@ -90,9 +90,9 @@ extension SubstrateConnectionAutoBalance: WebSocketEngineDelegate {
         engine: WebSocketEngine,
         from _: WebSocketEngine.State,
         to newState: WebSocketEngine.State
-    ) {
+    ) async {
         guard selecteUrl == nil,
-              let previousUrl = engine.url else
+              let previousUrl = await engine.getUrl() else
         {
             return
         }
@@ -101,7 +101,7 @@ extension SubstrateConnectionAutoBalance: WebSocketEngineDelegate {
         case let .waitingReconnection(attempt: attempt):
             isActive = true
             if attempt > NetworkConstants.websocketReconnectAttemptsLimit {
-                _ = try? setupConnection(ignoredUrl: previousUrl)
+                _ = try? await setupConnection(ignoredUrl: previousUrl)
             }
         case .notConnected:
             isActive = false

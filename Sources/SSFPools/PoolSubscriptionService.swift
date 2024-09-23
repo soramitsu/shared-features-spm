@@ -7,13 +7,13 @@ public protocol PoolSubscriptionService {
         accountId: Data,
         baseAssetId: String,
         updateClosure: @escaping (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void
-    ) throws -> UInt16
+    ) async throws -> UInt16
 
     func createPoolReservesSubscription(
         baseAssetId: String,
         targetAssetId: String,
         updateClosure: @escaping (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void
-    ) throws -> UInt16
+    ) async throws -> UInt16
 
-    func unsubscribe(id: UInt16) throws
+    func unsubscribe(id: UInt16) async throws
 }

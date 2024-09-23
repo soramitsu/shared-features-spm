@@ -28,7 +28,7 @@ protocol PoolsService {
         accountId: Data,
         baseAsset: PooledAssetInfo,
         targetAsset: PooledAssetInfo
-    ) throws -> (id: UInt16, publisher: PassthroughSubject<AccountPool, Error>)
+    ) async throws -> (id: UInt16, publisher: PassthroughSubject<AccountPool, Error>)
 
     func unsubscribe(id: UInt16) throws
 }
@@ -68,8 +68,8 @@ extension PolkaswapService: PoolsService {
             }
         }
 
-        let ids = try baseAssetIds.compactMap { baseAssetId in
-            try subscriptionService.createAccountPoolsSubscription(
+        let ids = try await baseAssetIds.asyncCompactMap { baseAssetId in
+            try await subscriptionService.createAccountPoolsSubscription(
                 accountId: accountId,
                 baseAssetId: baseAssetId,
                 updateClosure: updateClosure
@@ -100,7 +100,7 @@ extension PolkaswapService: PoolsService {
         accountId: Data,
         baseAsset: PooledAssetInfo,
         targetAsset: PooledAssetInfo
-    ) throws -> (id: UInt16, publisher: PassthroughSubject<AccountPool, Error>) {
+    ) async throws -> (id: UInt16, publisher: PassthroughSubject<AccountPool, Error>) {
         let publisher = PassthroughSubject<AccountPool, Error>()
 
         let updateClosure: (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void = { [weak self] _ in
@@ -119,7 +119,7 @@ extension PolkaswapService: PoolsService {
             }
         }
 
-        let id = try subscriptionService.createPoolReservesSubscription(
+        let id = try await subscriptionService.createPoolReservesSubscription(
             baseAssetId: baseAsset.id,
             targetAssetId: targetAsset.id,
             updateClosure: updateClosure
@@ -166,6 +166,8 @@ extension PolkaswapService: PoolsService {
     }
 
     func unsubscribe(id: UInt16) throws {
-        try subscriptionService.unsubscribe(id: id)
+        Task {
+            try await subscriptionService.unsubscribe(id: id)
+        }
     }
 }

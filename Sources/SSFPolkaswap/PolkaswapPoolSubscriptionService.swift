@@ -21,13 +21,13 @@ extension PolkaswapPoolSubscriptionService: PoolSubscriptionService {
         accountId: Data,
         baseAssetId: String,
         updateClosure: @escaping (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void
-    ) throws -> UInt16 {
+    ) async throws -> UInt16 {
         let storageKey = try keyFactory.accountPoolsKeyForId(
             accountId,
             baseAssetId: Data(hex: baseAssetId)
         ).toHex(includePrefix: true)
 
-        return try connection.subscribe(
+        return try await connection.subscribe(
             RPCMethod.storageSubscribe,
             params: [[storageKey]],
             updateClosure: updateClosure,
@@ -39,14 +39,14 @@ extension PolkaswapPoolSubscriptionService: PoolSubscriptionService {
         baseAssetId: String,
         targetAssetId: String,
         updateClosure: @escaping (JSONRPCSubscriptionUpdate<StorageUpdate>) -> Void
-    ) throws -> UInt16 {
+    ) async throws -> UInt16 {
         let storageKey = try keyFactory.poolReservesKey(
             baseAssetId: Data(hex: baseAssetId),
             targetAssetId: Data(hex: targetAssetId)
         )
         .toHex(includePrefix: true)
 
-        return try connection.subscribe(
+        return try await connection.subscribe(
             RPCMethod.storageSubscribe,
             params: [[storageKey]],
             updateClosure: updateClosure,
@@ -54,7 +54,7 @@ extension PolkaswapPoolSubscriptionService: PoolSubscriptionService {
         )
     }
 
-    func unsubscribe(id: UInt16) throws {
-        try connection.unsubsribe(id)
+    func unsubscribe(id: UInt16) async throws {
+        try await connection.unsubsribe(id)
     }
 }

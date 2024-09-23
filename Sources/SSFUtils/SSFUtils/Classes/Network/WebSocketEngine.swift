@@ -19,7 +19,7 @@ public protocol WebSocketEngineDelegate: AnyObject {
     ) async
 }
 
-public final class WebSocketEngine {
+public actor WebSocketEngine {
     public static let sharedProcessingQueue =
         DispatchQueue(label: "jp.co.soramitsu.fearless.ws.processing")
 
@@ -75,9 +75,9 @@ public final class WebSocketEngine {
     private(set) var subscriptions: [UInt16: JSONRPCSubscribing] = [:]
     private(set) var unknownResponsesByRemoteId: [String: [Data]] = [:]
 
-    public weak var delegate: WebSocketEngineDelegate?
-    public var url: URL?
-    public var connectionName: String?
+    weak var delegate: WebSocketEngineDelegate?
+    var url: URL?
+    var connectionName: String?
 
     public init(
         connectionName: String?,
@@ -89,7 +89,8 @@ public final class WebSocketEngine {
         autoconnect: Bool = true,
         connectionTimeout: TimeInterval = 10.0,
         pingInterval: TimeInterval = 30,
-        logger: SDKLoggerProtocol? = nil
+        logger: SDKLoggerProtocol? = nil,
+        delegate: WebSocketEngineDelegate?
     ) {
         self.connectionName = connectionName
         self.url = url
@@ -97,6 +98,7 @@ public final class WebSocketEngine {
         self.logger = logger
         self.reconnectionStrategy = reconnectionStrategy
         self.reachabilityManager = reachabilityManager
+        self.delegate = delegate
         completionQueue = processingQueue ?? Self.sharedProcessingQueue
         self.pingInterval = pingInterval
 
@@ -111,22 +113,31 @@ public final class WebSocketEngine {
 
         connection.callbackQueue = processingQueue ?? Self.sharedProcessingQueue
 
-        subscribeToReachabilityStatus()
-
-        if autoconnect {
-            connectIfNeeded()
+        Task { [weak self] in
+            await self?.subscribeToReachabilityStatus()
+            if autoconnect {
+                await self?.connectIfNeeded()
+            }
         }
     }
 
     deinit {
         clearReachabilitySubscription()
 
-        disconnectIfNeeded()
+        Task {
+            await disconnectIfNeeded()
+        }
     }
 
-    public func connectIfNeeded() {
-        mutex.lock()
+    public func getUrl() async -> URL? {
+        url
+    }
 
+    public func set(url: URL?) async {
+        self.url = url
+    }
+
+    public func connectIfNeeded() async {
         switch state {
         case .notConnected:
             startConnecting(0)
@@ -141,13 +152,9 @@ public final class WebSocketEngine {
         default:
             logger?.debug("Already connecting to socket")
         }
-
-        mutex.unlock()
     }
 
-    public func disconnectIfNeeded() {
-        mutex.lock()
-
+    public func disconnectIfNeeded() async {
         switch state {
         case .connected:
             state = .notConnected
@@ -177,16 +184,10 @@ public final class WebSocketEngine {
         default:
             logger?.debug("Already disconnected from socket")
         }
-
-        mutex.unlock()
     }
 
-    public func unsubsribe(_ identifier: UInt16) throws {
-        mutex.lock()
-
-        try processUnsubscription(identifier)
-
-        mutex.unlock()
+    public func unsubsribe(_ identifier: UInt16) async throws {
+        try await processUnsubscription(identifier)
     }
 }
 
@@ -315,7 +316,7 @@ extension WebSocketEngine {
         }
     }
 
-    public func addSubscription(_ subscription: JSONRPCSubscribing) {
+    public func addSubscription(_ subscription: JSONRPCSubscribing) async {
         subscriptions[subscription.requestId] = subscription
     }
 
@@ -325,11 +326,11 @@ extension WebSocketEngine {
         options: JSONRPCOptions,
         completion closure: ((Result<T, Error>) -> Void)?
     )
-        throws -> JSONRPCRequest
+        async throws -> JSONRPCRequest
     {
         let data: Data
 
-        let requestId = generateRequestId()
+        let requestId = await generateRequestId()
 
         if let params = params {
             let info = JSONRPCInfo(
@@ -369,14 +370,14 @@ extension WebSocketEngine {
         return request
     }
 
-    public func generateRequestId() -> UInt16 {
+    public func generateRequestId() async -> UInt16 {
         let items = pendingRequests.map(\.requestId) + inProgressRequests.map(\.key)
         let existingIds: Set<UInt16> = Set(items)
 
         let targetId = (1 ... UInt16.max).randomElement() ?? 1
 
         if existingIds.contains(targetId) {
-            return generateRequestId()
+            return await generateRequestId()
         }
 
         return targetId
@@ -532,7 +533,7 @@ extension WebSocketEngine {
         pingScheduler.notifyAfter(pingInterval)
     }
 
-    func sendPing() {
+    func sendPing() async {
         guard case .connected = state else {
             logger?.warning("Tried to send ping but not connected")
             return
@@ -542,12 +543,14 @@ extension WebSocketEngine {
 
         do {
             let options = JSONRPCOptions(resendOnReconnect: false)
-            _ = try callMethod(
+            _ = try await callMethod(
                 RPCMethod.helthCheck,
                 params: [String](),
                 options: options
             ) { [weak self] (result: Result<Health, Error>) in
-                self?.handlePing(result: result)
+                Task { [weak self] in
+                    await self?.handlePing(result: result)
+                }
             }
         } catch {
             logger?.error("Did receive ping error: \(error)")
@@ -582,7 +585,7 @@ extension WebSocketEngine {
         scheduleReconnectionOrDisconnect(NetworkConstants.websocketReconnectAttemptsLimit + 1)
     }
 
-    private func processUnsubscription(_ identifier: UInt16) throws {
+    private func processUnsubscription(_ identifier: UInt16) async throws {
         guard let subscription = subscriptions[identifier] else { return }
 
         let requestInfo = try jsonDecoder.decode(
@@ -590,13 +593,19 @@ extension WebSocketEngine {
             from: subscription.requestData
         )
 
-        _ = try callMethod(
+        _ = try await callMethod(
             RPCMethod.stateUnsubscribe,
             params: requestInfo.params,
             options: JSONRPCOptions(resendOnReconnect: false)
         ) { [weak self] (result: Result<Data, Error>) in
             guard case .success = result else { return }
-            self?.subscriptions.removeValue(forKey: identifier)
+            Task { [weak self] in
+                await self?.deleteSubscriptions(identifier: identifier)
+            }
         }
+    }
+
+    private func deleteSubscriptions(identifier: UInt16) async {
+        subscriptions.removeValue(forKey: identifier)
     }
 }

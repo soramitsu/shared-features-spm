@@ -108,7 +108,8 @@ extension XcmDependencyContainerTests {
 
         static let connectionChain = WebSocketEngine(
             connectionName: "test",
-            url: XcmConfig.shared.chainsSourceUrl
+            url: XcmConfig.shared.chainsSourceUrl,
+            delegate: nil
         )
     }
 }

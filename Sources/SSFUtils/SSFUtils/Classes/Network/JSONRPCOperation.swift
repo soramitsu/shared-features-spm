@@ -6,6 +6,47 @@ enum JSONRPCOperationError: Error {
 }
 
 public class JSONRPCOperation<P: Codable, T: Decodable>: BaseOperation<T> {
+    private let lockQueue = DispatchQueue(
+        label: "com.soramitsu.asyncOperation",
+        attributes: .concurrent
+    )
+
+    override public var isAsynchronous: Bool {
+        true
+    }
+
+    private var _isExecuting: Bool = false
+    override public private(set) var isExecuting: Bool {
+        get {
+            lockQueue.sync { () -> Bool in
+                _isExecuting
+            }
+        }
+        set {
+            willChangeValue(forKey: "isExecuting")
+            lockQueue.sync(flags: [.barrier]) {
+                _isExecuting = newValue
+            }
+            didChangeValue(forKey: "isExecuting")
+        }
+    }
+
+    private var _isFinished: Bool = false
+    override public private(set) var isFinished: Bool {
+        get {
+            lockQueue.sync { () -> Bool in
+                _isFinished
+            }
+        }
+        set {
+            willChangeValue(forKey: "isFinished")
+            lockQueue.sync(flags: [.barrier]) {
+                _isFinished = newValue
+            }
+            didChangeValue(forKey: "isFinished")
+        }
+    }
+
     public let engine: JSONRPCEngine
     private(set) var requestId: UInt16?
     public let method: String
@@ -21,66 +62,81 @@ public class JSONRPCOperation<P: Codable, T: Decodable>: BaseOperation<T> {
         super.init()
     }
 
+    override public func start() {
+        super.start()
+        guard !isCancelled else {
+            finish()
+            return
+        }
+
+        isFinished = false
+        isExecuting = true
+        main()
+    }
+
     override public func main() {
         super.main()
 
         if isCancelled {
+            finish()
             return
         }
 
-        if result != nil {
-            return
-        }
+        Task {
+            do {
+                let semaphore = DispatchSemaphore(value: 0)
 
-        do {
-            let semaphore = DispatchSemaphore(value: 0)
+                var optionalCallResult: Result<T, Error>?
 
-            var optionalCallResult: Result<T, Error>?
+                requestId = try await engine
+                    .callMethod(method, params: parameters) { (result: Result<
+                        T,
+                        Error
+                    >) in
+                        optionalCallResult = result
+                        semaphore.signal()
+                    }
 
-            requestId = try engine.callMethod(method, params: parameters) { (result: Result<
-                T,
-                Error
-            >) in
-                optionalCallResult = result
+                guard let callResult = optionalCallResult else {
+                    finish()
+                    return
+                }
 
-                semaphore.signal()
-            }
+                if case let .failure(error) = callResult,
+                   let jsonRPCEngineError = error as? JSONRPCEngineError,
+                   jsonRPCEngineError == .clientCancelled
+                {
+                    finish()
+                    return
+                }
 
-            let status = semaphore.wait(timeout: .now() + .seconds(timeout))
+                switch callResult {
+                case let .success(response):
+                    result = .success(response)
+                    finish()
+                case let .failure(error):
+                    result = .failure(error)
+                    finish()
+                }
 
-            if status == .timedOut {
-                result = .failure(JSONRPCOperationError.timeout)
-                return
-            }
-
-            guard let callResult = optionalCallResult else {
-                return
-            }
-
-            if case let .failure(error) = callResult,
-               let jsonRPCEngineError = error as? JSONRPCEngineError,
-               jsonRPCEngineError == .clientCancelled
-            {
-                return
-            }
-
-            switch callResult {
-            case let .success(response):
-                result = .success(response)
-            case let .failure(error):
+            } catch {
                 result = .failure(error)
+                finish()
             }
-
-        } catch {
-            result = .failure(error)
         }
     }
 
-    override public func cancel() {
-        if let requestId = requestId {
-            engine.cancelForIdentifier(requestId)
-        }
+    func finish() {
+        isExecuting = false
+        isFinished = true
+    }
 
+    override public func cancel() {
+        Task {
+            if let requestId = requestId {
+                await engine.cancelForIdentifier(requestId)
+            }
+        }
         super.cancel()
     }
 }
@@ -92,7 +148,8 @@ public extension JSONRPCOperation {
         let mockEngine = WebSocketEngine(
             connectionName: nil,
             url: URL(string: "https://wiki.fearlesswallet.io")!,
-            autoconnect: false
+            autoconnect: false,
+            delegate: nil
         )
         let operation = JSONRPCOperation<P, T>(engine: mockEngine, method: "")
         operation.result = .failure(error)

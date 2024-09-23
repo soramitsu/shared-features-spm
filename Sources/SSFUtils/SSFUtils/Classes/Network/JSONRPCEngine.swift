@@ -95,33 +95,33 @@ public final class JSONRPCSubscription<T: Decodable>: JSONRPCSubscribing {
 }
 
 public protocol JSONRPCEngine: AnyObject {
-    var url: URL? { get set }
-    var pendingEngineRequests: [JSONRPCRequest] { get }
+    func getUrl() async -> URL?
+    func set(url: URL?) async
+    func getPendingEngineRequests() async -> [JSONRPCRequest]
 
     func callMethod<P: Codable, T: Decodable>(
         _ method: String,
         params: P?,
         options: JSONRPCOptions,
         completion closure: ((Result<T, Error>) -> Void)?
-    ) throws -> UInt16
+    ) async throws -> UInt16
 
     func subscribe<P: Codable, T: Decodable>(
         _ method: String,
         params: P?,
         updateClosure: @escaping (T) -> Void,
         failureClosure: @escaping (Error, Bool) -> Void
-    )
-        throws -> UInt16
+    ) async throws -> UInt16
 
-    func cancelForIdentifier(_ identifier: UInt16)
+    func cancelForIdentifier(_ identifier: UInt16) async
 
-    func generateRequestId() -> UInt16
-    func addSubscription(_ subscription: JSONRPCSubscribing)
-    func reconnect(url: URL)
+    func generateRequestId() async -> UInt16
+    func addSubscription(_ subscription: JSONRPCSubscribing) async
+    func reconnect(url: URL) async
 
-    func connectIfNeeded()
-    func disconnectIfNeeded()
-    func unsubsribe(_ identifier: UInt16) throws
+    func connectIfNeeded() async
+    func disconnectIfNeeded() async
+    func unsubsribe(_ identifier: UInt16) async throws
 }
 
 public extension JSONRPCEngine {
@@ -129,8 +129,8 @@ public extension JSONRPCEngine {
         _ method: String,
         params: P?,
         completion closure: ((Result<T, Error>) -> Void)?
-    ) throws -> UInt16 {
-        try callMethod(
+    ) async throws -> UInt16 {
+        await try callMethod(
             method,
             params: params,
             options: JSONRPCOptions(),

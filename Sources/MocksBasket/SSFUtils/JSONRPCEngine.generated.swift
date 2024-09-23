@@ -6,6 +6,18 @@ public enum JSONRPCEngineMockError: Error {
 }
 
 public class JSONRPCEngineMock: JSONRPCEngine {
+    public func getUrl() async -> URL? {
+        nil
+    }
+    
+    public func set(url: URL?) async {
+        self.url = url
+    }
+    
+    public func getPendingEngineRequests() async -> [SSFUtils.JSONRPCRequest] {
+        pendingEngineRequests
+    }
+    
     public var url: URL?
 
     public var pendingEngineRequests: [SSFUtils.JSONRPCRequest] = []

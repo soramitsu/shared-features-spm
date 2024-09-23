@@ -2,7 +2,7 @@ import Foundation
 import Reachability
 
 public protocol ReachabilityListenerDelegate: AnyObject {
-    func didChangeReachability(by manager: ReachabilityManagerProtocol)
+    func didChangeReachability(by manager: ReachabilityManagerProtocol) async
 }
 
 public protocol ReachabilityManagerProtocol {
@@ -33,15 +33,21 @@ public final class ReachabilityManager {
 
         reachability = newReachability
 
-        reachability.whenReachable = { [weak self] _ in
-            if let strongSelf = self {
-                self?.listeners.forEach { $0.listener?.didChangeReachability(by: strongSelf) }
+        reachability.whenReachable = { _ in
+            Task { [weak self] in
+                if let strongSelf = self {
+                    await self?.listeners
+                        .asyncForEach { await $0.listener?.didChangeReachability(by: strongSelf) }
+                }
             }
         }
 
         reachability.whenUnreachable = { [weak self] _ in
-            if let strongSelf = self {
-                self?.listeners.forEach { $0.listener?.didChangeReachability(by: strongSelf) }
+            Task { [weak self] in
+                if let strongSelf = self {
+                    await self?.listeners
+                        .asyncForEach { await $0.listener?.didChangeReachability(by: strongSelf) }
+                }
             }
         }
     }

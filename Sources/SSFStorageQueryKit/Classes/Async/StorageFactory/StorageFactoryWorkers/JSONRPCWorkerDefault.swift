@@ -32,7 +32,7 @@ class JSONRPCWorker<P: Codable, T: Decodable> {
                 }
 
                 do {
-                    requestId = try engine.callMethod(
+                    requestId = try await engine.callMethod(
                         method,
                         params: parameters
                     ) { (result: Result<T, Error>) in

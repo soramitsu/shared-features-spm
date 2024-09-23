@@ -24,9 +24,9 @@ final class ConnectionFactory: ConnectionFactoryProtocol {
             connectionName: connectionName,
             url: url,
             processingQueue: processingQueue,
-            logger: nil
+            logger: nil,
+            delegate: delegate
         )
-        engine.delegate = delegate
         return engine
     }
 }

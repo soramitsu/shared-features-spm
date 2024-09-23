@@ -2,7 +2,7 @@ import Foundation
 import Starscream
 
 extension WebSocketEngine: JSONRPCEngine {
-    public var pendingEngineRequests: [JSONRPCRequest] {
+    public func getPendingEngineRequests() async -> [JSONRPCRequest] {
         pendingRequests
     }
 
@@ -11,14 +11,8 @@ extension WebSocketEngine: JSONRPCEngine {
         params: P?,
         options: JSONRPCOptions,
         completion closure: ((Result<T, Error>) -> Void)?
-    ) throws -> UInt16 {
-        mutex.lock()
-
-        defer {
-            mutex.unlock()
-        }
-
-        let request = try prepareRequest(
+    ) async throws -> UInt16 {
+        let request = try await prepareRequest(
             method: method,
             params: params,
             options: options,
@@ -35,16 +29,10 @@ extension WebSocketEngine: JSONRPCEngine {
         params: P?,
         updateClosure: @escaping (T) -> Void,
         failureClosure: @escaping (Error, Bool) -> Void
-    ) throws -> UInt16 {
-        mutex.lock()
-
-        defer {
-            mutex.unlock()
-        }
-
+    ) async throws -> UInt16 {
         let completion: ((Result<String, Error>) -> Void)? = nil
 
-        let request = try prepareRequest(
+        let request = try await prepareRequest(
             method: method,
             params: params,
             options: JSONRPCOptions(resendOnReconnect: true),
@@ -59,22 +47,18 @@ extension WebSocketEngine: JSONRPCEngine {
             failureClosure: failureClosure
         )
 
-        addSubscription(subscription)
+        await addSubscription(subscription)
 
         updateConnectionForRequest(request)
 
         return request.requestId
     }
 
-    public func cancelForIdentifier(_ identifier: UInt16) {
-        mutex.lock()
-
+    public func cancelForIdentifier(_ identifier: UInt16) async {
         cancelRequestForLocalId(identifier)
-
-        mutex.unlock()
     }
 
-    public func reconnect(url: URL) {
+    public func reconnect(url: URL) async {
         self.connection.delegate = nil
 
         self.url = url
