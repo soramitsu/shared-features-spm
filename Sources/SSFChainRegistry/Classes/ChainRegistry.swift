@@ -65,24 +65,31 @@ extension ChainRegistry: ChainRegistryProtocol {
         usedRuntimePaths: [String: [String]],
         runtimeItem: RuntimeMetadataItemProtocol?
     ) async throws -> RuntimeProviderProtocol {
+        print("OLOLO getRuntimeProvider")
         let chainModel = try await chainsDataFetcher.getChainModel(for: chainId)
-
+        print("OLOLO chainModel \(chainModel)")
+        
         let runtimeMetadataItem: RuntimeMetadataItemProtocol
         if let runtimeItem = runtimeItem {
             runtimeMetadataItem = runtimeItem
         } else {
             let connection = try await connectionPool.setupSubstrateConnection(for: chainModel)
+            print("OLOLO connection \(connection)")
             runtimeMetadataItem = try await runtimeSyncService.register(
                 chain: chainModel,
                 with: connection
             )
+            print("OLOLO runtimeMetadataItem \(runtimeMetadataItem)")
         }
+        print("OLOLO runtimeMetadataItem final  \(runtimeMetadataItem)")
         let chainTypes = try await chainsTypesDataFetcher.getTypes(for: chainId)
+        print("OLOLO chainTypes  \(chainTypes)")
         let runtimeProvider = runtimeProviderPool.setupRuntimeProvider(
             for: runtimeMetadataItem,
             chainTypes: chainTypes,
             usedRuntimePaths: usedRuntimePaths
         )
+        print("OLOLO runtimeProvider \(runtimeProvider)")
         return runtimeProvider
     }
 
