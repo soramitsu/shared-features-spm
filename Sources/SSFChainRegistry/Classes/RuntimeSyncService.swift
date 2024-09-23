@@ -62,6 +62,7 @@ public actor RuntimeSyncService {
         for chainId: ChainModel.Id,
         runtimeVersion: RuntimeVersion
     ) async throws -> RuntimeMetadataItem {
+        print("OLOLO knownChains \(knownChains)")
         guard let connection = knownChains[chainId] else {
             throw RuntimeSyncServiceError.missingConnection
         }
@@ -71,6 +72,7 @@ public actor RuntimeSyncService {
             runtimeVersion: runtimeVersion,
             connection: connection
         )
+        print("OLOLO metadataSyncWrapper \(metadataSyncWrapper)")
 
         let dependencies = metadataSyncWrapper.allOperations
 
@@ -99,6 +101,7 @@ public actor RuntimeSyncService {
                     return
                 }
                 let result = processingOperation.result
+                print("OLOLO performSync \(result)")
                 switch result {
                 case let .success(syncResult):
                     Task {
@@ -253,10 +256,13 @@ public actor RuntimeSyncService {
                 let result = remoteRuntimeVersionOperation.result
                 switch result {
                 case let .success(version):
+                    print("OLOLO getRemoteRuntimeVersion \(version)")
                     continuation.resume(returning: version)
                 case let .failure(error):
+                    print("OLOLO getRemoteRuntimeVersionError \(error)")
                     continuation.resume(throwing: error)
                 case .none:
+                    print("OLOLO getRemoteRuntimeVersionError missingRuntimeVersionResult")
                     continuation
                         .resume(throwing: RuntimeSyncServiceError.missingRuntimeVersionResult)
                 }
@@ -302,6 +308,7 @@ extension RuntimeSyncService: RuntimeSyncServiceProtocol {
         chain: ChainModel,
         with connection: SubstrateConnection
     ) async throws -> RuntimeMetadataItem {
+        print("OLOLO metadataItems \(metadataItems)")
         if let runtimeMetadataItem = metadataItems[chain.chainId] {
             return runtimeMetadataItem
         }
@@ -309,10 +316,12 @@ extension RuntimeSyncService: RuntimeSyncServiceProtocol {
         knownChains[chain.chainId] = connection
 
         let runtimeVersion = try await getRemoteRuntimeVersion(with: connection)
+        print("OLOLO runtimeVersion \(runtimeVersion)")
         let runtimeMetadataItem = try await performSync(
             for: chain.chainId,
             runtimeVersion: runtimeVersion
         )
+        print("OLOLO runtimeMetadataItem \(runtimeMetadataItem)")
         return runtimeMetadataItem
     }
 
