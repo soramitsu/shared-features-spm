@@ -67,9 +67,10 @@ extension AccountManagementService: AccountManageble {
         assetsVisibility.append(assetVisibility)
 
         let updatedAccount = wallet.replacingAssetsVisibility(assetsVisibility)
-        let managedAccount = ManagedMetaAccountModel(info: updatedAccount)
 
-        accountManagementWorker.save(account: managedAccount, completion: completion)
+        selectedWallet.performSave(value: updatedAccount, completionClosure: { _ in
+            completion()
+        })
     }
 
     public func logout() async throws {
