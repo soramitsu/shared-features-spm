@@ -34,7 +34,7 @@ final class SoraQRDecoder: QRDecoder {
 
         let fields = decodedString.components(separatedBy: SubstrateQRConstants.fieldsSeparator)
 
-        guard fields.count == 5 else {
+        guard fields.count >= 5 else {
             throw QRDecoderError.brokenFormat
         }
 
