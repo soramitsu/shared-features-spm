@@ -5,6 +5,8 @@ public enum WalletEcosystem: Equatable, Codable {
     case regular(Regular)
     case ton(Ton)
     
+    // MARK: - Regular
+
     public struct Regular: Equatable, Codable {
         public let substrateAccountId: Data
         public let substrateCryptoType: UInt8
@@ -27,24 +29,6 @@ public enum WalletEcosystem: Equatable, Codable {
             self.ethereumPublicKey = ethereumPublicKey
         }
     }
-    
-    public struct Ton: Equatable, Codable {
-        public let tonAddress: TonSwift.Address
-        public let tonPublicKey: Data
-        public let tonContractVersion: TonContractVersion
-        
-        public init(
-            tonAddress: TonSwift.Address,
-            tonPublicKey: Data,
-            tonContractVersion: TonContractVersion
-        ) {
-            self.tonAddress = tonAddress
-            self.tonPublicKey = tonPublicKey
-            self.tonContractVersion = tonContractVersion
-        }
-    }
-    
-    // MARK: - Regular
 
     public var substrateAccountId: Data? {
         switch self {
@@ -92,6 +76,22 @@ public enum WalletEcosystem: Equatable, Codable {
     }
     
     // MARK: - Ton
+    
+    public struct Ton: Equatable, Codable {
+        public let tonAddress: TonSwift.Address
+        public let tonPublicKey: Data
+        public let tonContractVersion: TonContractVersion
+        
+        public init(
+            tonAddress: TonSwift.Address,
+            tonPublicKey: Data,
+            tonContractVersion: TonContractVersion
+        ) {
+            self.tonAddress = tonAddress
+            self.tonPublicKey = tonPublicKey
+            self.tonContractVersion = tonContractVersion
+        }
+    }
 
     public var tonAddress: TonSwift.Address? {
         switch self {
