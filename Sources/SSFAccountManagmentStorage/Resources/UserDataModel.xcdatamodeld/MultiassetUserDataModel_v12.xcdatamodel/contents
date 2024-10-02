@@ -46,9 +46,9 @@
         <attribute name="name" attributeType="String"/>
         <attribute name="networkManagmentFilter" optional="YES" attributeType="String"/>
         <attribute name="order" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="substrateAccountId" attributeType="String"/>
-        <attribute name="substrateCryptoType" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="substratePublicKey" attributeType="Binary"/>
+        <attribute name="substrateAccountId" optional="YES" attributeType="String"/>
+        <attribute name="substrateCryptoType" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="substratePublicKey" optional="YES" attributeType="Binary"/>
         <attribute name="tonAddress" optional="YES" attributeType="Binary"/>
         <attribute name="tonContractVersion" optional="YES" attributeType="String"/>
         <attribute name="tonPublicKey" optional="YES" attributeType="Binary"/>

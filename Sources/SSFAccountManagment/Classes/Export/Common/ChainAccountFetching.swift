@@ -68,8 +68,8 @@ public extension MetaAccountModel {
 
         for chainAccount in chainAccounts {
             if let chainAddress = try? chainAccount.accountId.toAddress(using: chain.chainFormat),
-               chainAddress == address
-            {
+               let substrateCryptoType = ecosystem.substrateCryptoType,
+               chainAddress == address {
                 let account = ChainAccountResponse(
                     chainId: chain.chainId,
                     accountId: chainAccount.accountId,
@@ -85,23 +85,6 @@ public extension MetaAccountModel {
             }
         }
         return nil
-    }
-    
-    func tonWalletContract() -> TonSwift.WalletContract? {
-        guard let tonPublicKey else {
-            return nil
-        }
-
-        switch tonContractVersion {
-        case .v4R2:
-            return WalletV4R2(publicKey: tonPublicKey)
-        case .v5R1:
-            let walletId = WalletId(networkGlobalId: -239, workchain: 0)
-            let wallet = WalletV5R1(publicKey: tonPublicKey, walletId: walletId)
-            return wallet
-        case .none:
-            return nil
-        }
     }
 
    private func chainAccountResponse(
@@ -125,56 +108,68 @@ public extension MetaAccountModel {
        )
    }
 
-   private func substrateResponse(for request: ChainAccountRequest) -> ChainAccountResponse? {
-       guard let cryptoType = CryptoType(rawValue: substrateCryptoType) else {
-           return nil
-       }
+    private func substrateResponse(for request: ChainAccountRequest) -> ChainAccountResponse? {
+        guard
+            let substrateCryptoType = ecosystem.substrateCryptoType,
+            let cryptoType = CryptoType(rawValue: substrateCryptoType),
+            let substrateAccountId = ecosystem.substrateAccountId,
+            let substratePublicKey = ecosystem.substratePublicKey
+        else {
+            return nil
+        }
+        
+        return ChainAccountResponse(
+            chainId: request.chainId,
+            accountId: substrateAccountId,
+            publicKey: substratePublicKey,
+            name: name,
+            cryptoType: cryptoType,
+            addressPrefix: request.addressPrefix,
+            ecosystem: request.ecosystem,
+            isChainAccount: false,
+            walletId: metaId
+        )
+    }
 
-       return ChainAccountResponse(
-           chainId: request.chainId,
-           accountId: substrateAccountId,
-           publicKey: substratePublicKey,
-           name: name,
-           cryptoType: cryptoType,
-           addressPrefix: request.addressPrefix,
-           ecosystem: request.ecosystem,
-           isChainAccount: false,
-           walletId: metaId
-       )
-   }
+    private func ethereumResponse(for request: ChainAccountRequest) -> ChainAccountResponse? {
+        guard
+            let publicKey = ecosystem.ethereumPublicKey,
+            let accountId = ecosystem.ethereumAddress
+        else {
+            return nil
+        }
+        
+        return ChainAccountResponse(
+            chainId: request.chainId,
+            accountId: accountId,
+            publicKey: publicKey,
+            name: name,
+            cryptoType: .ecdsa,
+            addressPrefix: request.addressPrefix,
+            ecosystem: request.ecosystem,
+            isChainAccount: false,
+            walletId: metaId
+        )
+    }
 
-   private func ethereumResponse(for request: ChainAccountRequest) -> ChainAccountResponse? {
-       guard let publicKey = ethereumPublicKey, let accountId = ethereumAddress else {
-           return nil
-       }
-
-       return ChainAccountResponse(
-           chainId: request.chainId,
-           accountId: accountId,
-           publicKey: publicKey,
-           name: name,
-           cryptoType: .ecdsa,
-           addressPrefix: request.addressPrefix,
-           ecosystem: request.ecosystem,
-           isChainAccount: false,
-           walletId: metaId
-       )
-   }
-
-   private func tonResponse(for request: ChainAccountRequest) -> ChainAccountResponse? {
-       guard let tonPublicKey, let tonAddress, let accountId = try? tonAddress.asAccountId() else {
-           return nil
-       }
-       return ChainAccountResponse(
-           chainId: request.chainId,
-           accountId: accountId,
-           publicKey: tonPublicKey,
-           name: name,
-           cryptoType: .ed25519,
-           addressPrefix: request.addressPrefix,
-           ecosystem: request.ecosystem,
-           isChainAccount: false,
-           walletId: metaId
-       )
-   }
+    private func tonResponse(for request: ChainAccountRequest) -> ChainAccountResponse? {
+        guard 
+            let tonPublicKey = ecosystem.tonPublicKey,
+            let tonAddress = ecosystem.tonAddress,
+            let accountId = try? tonAddress.asAccountId()
+        else {
+            return nil
+        }
+        return ChainAccountResponse(
+            chainId: request.chainId,
+            accountId: accountId,
+            publicKey: tonPublicKey,
+            name: name,
+            cryptoType: .ed25519,
+            addressPrefix: request.addressPrefix,
+            ecosystem: request.ecosystem,
+            isChainAccount: false,
+            walletId: metaId
+        )
+    }
 }

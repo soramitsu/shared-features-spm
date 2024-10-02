@@ -3,6 +3,11 @@ import IrohaCrypto
 import SSFModels
 import SSFUtils
 
+public struct MetaAccountImportTonMnemonicRequest {
+    public let mnemonic: IRMnemonicProtocol
+    public let username: String
+}
+
 public struct MetaAccountImportMnemonicRequest {
     let mnemonic: IRMnemonicProtocol
     let username: String

@@ -9,20 +9,9 @@ public struct MetaAccountModel: Equatable, Codable, Identifiable {
 
     public let metaId: MetaAccountId
     public let name: String
-
-    public let substrateAccountId: Data
-    public let substrateCryptoType: UInt8
-    public let substratePublicKey: Data
-
-    public let ethereumAddress: Data?
-    public let ethereumPublicKey: Data?
-
-    public let tonAddress: TonSwift.Address?
-    public let tonPublicKey: Data?
-    public let tonContractVersion: TonContractVersion?
+    public let ecosystem: WalletEcosystem
 
     public let chainAccounts: Set<ChainAccountModel>
-
     public let assetKeysOrder: [String]?
     public let canExportEthereumMnemonic: Bool
     public let unusedChainIds: [String]?
@@ -35,14 +24,7 @@ public struct MetaAccountModel: Equatable, Codable, Identifiable {
     public init(
         metaId: MetaAccountId,
         name: String,
-        substrateAccountId: Data,
-        substrateCryptoType: UInt8,
-        substratePublicKey: Data,
-        ethereumAddress: Data?,
-        ethereumPublicKey: Data?,
-        tonAddress: TonSwift.Address?,
-        tonPublicKey: Data?,
-        tonContractVersion: TonContractVersion?,
+        ecosystem: WalletEcosystem,
         chainAccounts: Set<ChainAccountModel>,
         assetKeysOrder: [String]?,
         canExportEthereumMnemonic: Bool,
@@ -55,14 +37,7 @@ public struct MetaAccountModel: Equatable, Codable, Identifiable {
     ) {
         self.metaId = metaId
         self.name = name
-        self.substrateAccountId = substrateAccountId
-        self.substrateCryptoType = substrateCryptoType
-        self.substratePublicKey = substratePublicKey
-        self.ethereumAddress = ethereumAddress
-        self.ethereumPublicKey = ethereumPublicKey
-        self.tonAddress = tonAddress
-        self.tonPublicKey = tonPublicKey
-        self.tonContractVersion = tonContractVersion
+        self.ecosystem = ecosystem
         self.chainAccounts = chainAccounts
         self.assetKeysOrder = assetKeysOrder
         self.canExportEthereumMnemonic = canExportEthereumMnemonic
@@ -77,7 +52,7 @@ public struct MetaAccountModel: Equatable, Codable, Identifiable {
 
 public extension MetaAccountModel {
     var supportEthereum: Bool {
-        ethereumPublicKey != nil || chainAccounts.first(where: { $0.ecosystem == .ethereum || $0.ecosystem == .ethereum }) != nil
+        ecosystem.ethereumPublicKey != nil || chainAccounts.first(where: { $0.ecosystem == .ethereum || $0.ecosystem == .ethereum }) != nil
     }
     
     func isVisible(chainAsset: ChainAsset) -> Bool {
@@ -119,14 +94,7 @@ public extension MetaAccountModel {
         return MetaAccountModel(
             metaId: metaId,
             name: name,
-            substrateAccountId: substrateAccountId,
-            substrateCryptoType: substrateCryptoType,
-            substratePublicKey: substratePublicKey,
-            ethereumAddress: ethereumAddress,
-            ethereumPublicKey: ethereumPublicKey,
-            tonAddress: tonAddress,
-            tonPublicKey: tonPublicKey, 
-            tonContractVersion: tonContractVersion,
+            ecosystem: ecosystem,
             chainAccounts: newChainAccounts,
             assetKeysOrder: assetKeysOrder,
             canExportEthereumMnemonic: canExportEthereumMnemonic,
@@ -139,94 +107,87 @@ public extension MetaAccountModel {
         )
     }
 
-    func replacingEthereumAddress(_ newEthereumAddress: Data?) -> MetaAccountModel {
-        MetaAccountModel(
-            metaId: metaId,
-            name: name,
-            substrateAccountId: substrateAccountId,
-            substrateCryptoType: substrateCryptoType,
-            substratePublicKey: substratePublicKey,
-            ethereumAddress: newEthereumAddress,
-            ethereumPublicKey: ethereumPublicKey,
-            tonAddress: tonAddress,
-            tonPublicKey: tonPublicKey,
-            tonContractVersion: tonContractVersion,
-            chainAccounts: chainAccounts,
-            assetKeysOrder: assetKeysOrder,
-            canExportEthereumMnemonic: canExportEthereumMnemonic,
-            unusedChainIds: unusedChainIds,
-            selectedCurrency: selectedCurrency,
-            networkManagmentFilter: networkManagmentFilter,
-            assetsVisibility: assetsVisibility,
-            hasBackup: hasBackup,
-            favouriteChainIds: favouriteChainIds
-        )
-    }
-    
-    func replacingTon(
-        tonPublicKey: Data?,
-        tonAddress: TonSwift.Address?,
-        tonContractVersion: TonContractVersion?
-    ) -> MetaAccountModel {
-        MetaAccountModel(
-            metaId: metaId,
-            name: name,
-            substrateAccountId: substrateAccountId,
-            substrateCryptoType: substrateCryptoType,
-            substratePublicKey: substratePublicKey,
-            ethereumAddress: ethereumAddress,
-            ethereumPublicKey: ethereumPublicKey,
-            tonAddress: tonAddress,
-            tonPublicKey: tonPublicKey,
-            tonContractVersion: tonContractVersion,
-            chainAccounts: chainAccounts,
-            assetKeysOrder: assetKeysOrder,
-            canExportEthereumMnemonic: canExportEthereumMnemonic,
-            unusedChainIds: unusedChainIds,
-            selectedCurrency: selectedCurrency,
-            networkManagmentFilter: networkManagmentFilter,
-            assetsVisibility: assetsVisibility,
-            hasBackup: hasBackup,
-            favouriteChainIds: favouriteChainIds
-        )
-    }
-
-    func replacingEthereumPublicKey(_ newEthereumPublicKey: Data?) -> MetaAccountModel {
-        MetaAccountModel(
-            metaId: metaId,
-            name: name,
-            substrateAccountId: substrateAccountId,
-            substrateCryptoType: substrateCryptoType,
-            substratePublicKey: substratePublicKey,
-            ethereumAddress: ethereumAddress,
-            ethereumPublicKey: newEthereumPublicKey,
-            tonAddress: tonAddress,
-            tonPublicKey: tonPublicKey,
-            tonContractVersion: tonContractVersion,
-            chainAccounts: chainAccounts,
-            assetKeysOrder: assetKeysOrder,
-            canExportEthereumMnemonic: canExportEthereumMnemonic,
-            unusedChainIds: unusedChainIds,
-            selectedCurrency: selectedCurrency,
-            networkManagmentFilter: networkManagmentFilter,
-            assetsVisibility: assetsVisibility,
-            hasBackup: hasBackup,
-            favouriteChainIds: favouriteChainIds
-        )
-    }
+//    func replacingEthereumAddress(_ newEthereumAddress: Data?) -> MetaAccountModel {
+//        MetaAccountModel(
+//            metaId: metaId,
+//            name: name,
+//            substrateAccountId: substrateAccountId,
+//            substrateCryptoType: substrateCryptoType,
+//            substratePublicKey: substratePublicKey,
+//            ethereumAddress: newEthereumAddress,
+//            ethereumPublicKey: ethereumPublicKey,
+//            tonAddress: tonAddress,
+//            tonPublicKey: tonPublicKey,
+//            tonContractVersion: tonContractVersion,
+//            chainAccounts: chainAccounts,
+//            assetKeysOrder: assetKeysOrder,
+//            canExportEthereumMnemonic: canExportEthereumMnemonic,
+//            unusedChainIds: unusedChainIds,
+//            selectedCurrency: selectedCurrency,
+//            networkManagmentFilter: networkManagmentFilter,
+//            assetsVisibility: assetsVisibility,
+//            hasBackup: hasBackup,
+//            favouriteChainIds: favouriteChainIds
+//        )
+//    }
+//    
+//    func replacingTon(
+//        tonPublicKey: Data?,
+//        tonAddress: TonSwift.Address?,
+//        tonContractVersion: TonContractVersion?
+//    ) -> MetaAccountModel {
+//        MetaAccountModel(
+//            metaId: metaId,
+//            name: name,
+//            substrateAccountId: substrateAccountId,
+//            substrateCryptoType: substrateCryptoType,
+//            substratePublicKey: substratePublicKey,
+//            ethereumAddress: ethereumAddress,
+//            ethereumPublicKey: ethereumPublicKey,
+//            tonAddress: tonAddress,
+//            tonPublicKey: tonPublicKey,
+//            tonContractVersion: tonContractVersion,
+//            chainAccounts: chainAccounts,
+//            assetKeysOrder: assetKeysOrder,
+//            canExportEthereumMnemonic: canExportEthereumMnemonic,
+//            unusedChainIds: unusedChainIds,
+//            selectedCurrency: selectedCurrency,
+//            networkManagmentFilter: networkManagmentFilter,
+//            assetsVisibility: assetsVisibility,
+//            hasBackup: hasBackup,
+//            favouriteChainIds: favouriteChainIds
+//        )
+//    }
+//
+//    func replacingEthereumPublicKey(_ newEthereumPublicKey: Data?) -> MetaAccountModel {
+//        MetaAccountModel(
+//            metaId: metaId,
+//            name: name,
+//            substrateAccountId: substrateAccountId,
+//            substrateCryptoType: substrateCryptoType,
+//            substratePublicKey: substratePublicKey,
+//            ethereumAddress: ethereumAddress,
+//            ethereumPublicKey: newEthereumPublicKey,
+//            tonAddress: tonAddress,
+//            tonPublicKey: tonPublicKey,
+//            tonContractVersion: tonContractVersion,
+//            chainAccounts: chainAccounts,
+//            assetKeysOrder: assetKeysOrder,
+//            canExportEthereumMnemonic: canExportEthereumMnemonic,
+//            unusedChainIds: unusedChainIds,
+//            selectedCurrency: selectedCurrency,
+//            networkManagmentFilter: networkManagmentFilter,
+//            assetsVisibility: assetsVisibility,
+//            hasBackup: hasBackup,
+//            favouriteChainIds: favouriteChainIds
+//        )
+//    }
 
     func replacingName(_ walletName: String) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: walletName,
-            substrateAccountId: substrateAccountId,
-            substrateCryptoType: substrateCryptoType,
-            substratePublicKey: substratePublicKey,
-            ethereumAddress: ethereumAddress,
-            ethereumPublicKey: ethereumPublicKey,
-            tonAddress: tonAddress,
-            tonPublicKey: tonPublicKey, 
-            tonContractVersion: tonContractVersion,
+            ecosystem: ecosystem,
             chainAccounts: chainAccounts,
             assetKeysOrder: assetKeysOrder,
             canExportEthereumMnemonic: canExportEthereumMnemonic,
@@ -243,14 +204,7 @@ public extension MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
-            substrateAccountId: substrateAccountId,
-            substrateCryptoType: substrateCryptoType,
-            substratePublicKey: substratePublicKey,
-            ethereumAddress: ethereumAddress,
-            ethereumPublicKey: ethereumPublicKey,
-            tonAddress: tonAddress,
-            tonPublicKey: tonPublicKey, 
-            tonContractVersion: tonContractVersion,
+            ecosystem: ecosystem,
             chainAccounts: chainAccounts,
             assetKeysOrder: newAssetKeysOrder,
             canExportEthereumMnemonic: canExportEthereumMnemonic,
@@ -267,14 +221,7 @@ public extension MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
-            substrateAccountId: substrateAccountId,
-            substrateCryptoType: substrateCryptoType,
-            substratePublicKey: substratePublicKey,
-            ethereumAddress: ethereumAddress,
-            ethereumPublicKey: ethereumPublicKey,
-            tonAddress: tonAddress,
-            tonPublicKey: tonPublicKey, 
-            tonContractVersion: tonContractVersion,
+            ecosystem: ecosystem,
             chainAccounts: chainAccounts,
             assetKeysOrder: assetKeysOrder,
             canExportEthereumMnemonic: canExportEthereumMnemonic,
@@ -291,14 +238,7 @@ public extension MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
-            substrateAccountId: substrateAccountId,
-            substrateCryptoType: substrateCryptoType,
-            substratePublicKey: substratePublicKey,
-            ethereumAddress: ethereumAddress,
-            ethereumPublicKey: ethereumPublicKey,
-            tonAddress: tonAddress,
-            tonPublicKey: tonPublicKey, 
-            tonContractVersion: tonContractVersion,
+            ecosystem: ecosystem,
             chainAccounts: chainAccounts,
             assetKeysOrder: assetKeysOrder,
             canExportEthereumMnemonic: canExportEthereumMnemonic,
@@ -315,14 +255,7 @@ public extension MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
-            substrateAccountId: substrateAccountId,
-            substrateCryptoType: substrateCryptoType,
-            substratePublicKey: substratePublicKey,
-            ethereumAddress: ethereumAddress,
-            ethereumPublicKey: ethereumPublicKey,
-            tonAddress: tonAddress,
-            tonPublicKey: tonPublicKey, 
-            tonContractVersion: tonContractVersion,
+            ecosystem: ecosystem,
             chainAccounts: chainAccounts,
             assetKeysOrder: assetKeysOrder,
             canExportEthereumMnemonic: canExportEthereumMnemonic,
@@ -339,14 +272,7 @@ public extension MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
-            substrateAccountId: substrateAccountId,
-            substrateCryptoType: substrateCryptoType,
-            substratePublicKey: substratePublicKey,
-            ethereumAddress: ethereumAddress,
-            ethereumPublicKey: ethereumPublicKey,
-            tonAddress: tonAddress,
-            tonPublicKey: tonPublicKey, 
-            tonContractVersion: tonContractVersion,
+            ecosystem: ecosystem,
             chainAccounts: chainAccounts,
             assetKeysOrder: assetKeysOrder,
             canExportEthereumMnemonic: canExportEthereumMnemonic,
@@ -363,14 +289,7 @@ public extension MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
-            substrateAccountId: substrateAccountId,
-            substrateCryptoType: substrateCryptoType,
-            substratePublicKey: substratePublicKey,
-            ethereumAddress: ethereumAddress,
-            ethereumPublicKey: ethereumPublicKey,
-            tonAddress: tonAddress,
-            tonPublicKey: tonPublicKey,
-            tonContractVersion: tonContractVersion,
+            ecosystem: ecosystem,
             chainAccounts: chainAccounts,
             assetKeysOrder: assetKeysOrder,
             canExportEthereumMnemonic: canExportEthereumMnemonic,
@@ -387,14 +306,7 @@ public extension MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
-            substrateAccountId: substrateAccountId,
-            substrateCryptoType: substrateCryptoType,
-            substratePublicKey: substratePublicKey,
-            ethereumAddress: ethereumAddress,
-            ethereumPublicKey: ethereumPublicKey,
-            tonAddress: tonAddress,
-            tonPublicKey: tonPublicKey, 
-            tonContractVersion: tonContractVersion,
+            ecosystem: ecosystem,
             chainAccounts: chainAccounts,
             assetKeysOrder: assetKeysOrder,
             canExportEthereumMnemonic: canExportEthereumMnemonic,

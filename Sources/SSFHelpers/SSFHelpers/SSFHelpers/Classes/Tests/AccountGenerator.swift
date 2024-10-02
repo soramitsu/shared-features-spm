@@ -12,15 +12,14 @@ public enum AccountGenerator {
     {
         MetaAccountModel(
             metaId: UUID().uuidString,
-            name: UUID().uuidString,
-            substrateAccountId: Data.random(of: 32)!,
-            substrateCryptoType: 0,
-            substratePublicKey: Data.random(of: 32)!,
-            ethereumAddress: Data.random(of: 20)!,
-            ethereumPublicKey: Data.random(of: 20)!,
-            tonAddress: nil,
-            tonPublicKey: nil, 
-            tonContractVersion: nil,
+            name: UUID().uuidString, 
+            ecosystem: .regular(.init(
+                substrateAccountId: Data.random(of: 32)!,
+                substrateCryptoType: 0,
+                substratePublicKey: Data.random(of: 32)!,
+                ethereumAddress: Data.random(of: 20)!,
+                ethereumPublicKey: Data.random(of: 20)!)
+            ),
             chainAccounts: chainAccounts,
             assetKeysOrder: nil,
             canExportEthereumMnemonic: true,

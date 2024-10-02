@@ -3,6 +3,10 @@ import RobinHood
 import CoreData
 import SSFModels
 
+public enum MetaAccountMapperError: Error {
+    case ecosystemError
+}
+
 public final class MetaAccountMapper {
     public init() {}
 
@@ -48,8 +52,6 @@ extension MetaAccountMapper: CoreDataMapperProtocol {
             )
         }
 
-        let substrateAccountId = try Data(hexStringSSF: entity.substrateAccountId!)
-        let ethereumAddress = try entity.ethereumAddress.map { try Data(hexStringSSF: $0) }
         let assetsVisibility: [AssetVisibility]? = (entity.assetsVisibility?.allObjects as? [CDAssetVisibility])?.compactMap {
             guard let assetId = $0.assetId else {
                 return nil
@@ -62,22 +64,12 @@ extension MetaAccountMapper: CoreDataMapperProtocol {
             favouriteChainIds = (entityFavouriteChainIds as? [String]) ?? []
         }
         
-        var tonContractVersion: TonContractVersion?
-        if let rawValue = entity.tonContractVersion {
-           tonContractVersion = TonContractVersion(rawValue: rawValue)
-        }
+        let ecosystem = try createEcosystem(from: entity)
 
         return DataProviderModel(
             metaId: entity.metaId!,
-            name: entity.name!,
-            substrateAccountId: substrateAccountId,
-            substrateCryptoType: UInt8(bitPattern: Int8(entity.substrateCryptoType)),
-            substratePublicKey: entity.substratePublicKey!,
-            ethereumAddress: ethereumAddress,
-            ethereumPublicKey: entity.ethereumPublicKey,
-            tonAddress: try? entity.tonAddress?.asTonAddress(),
-            tonPublicKey: entity.tonPublicKey, 
-            tonContractVersion: tonContractVersion,
+            name: entity.name!, 
+            ecosystem: ecosystem,
             chainAccounts: Set(chainAccounts),
             assetKeysOrder: entity.assetKeysOrder as? [String],
             canExportEthereumMnemonic: entity.canExportEthereumMnemonic,
@@ -97,20 +89,22 @@ extension MetaAccountMapper: CoreDataMapperProtocol {
     ) throws {
         entity.metaId = model.metaId
         entity.name = model.name
-        entity.substrateAccountId = model.substrateAccountId.toHex()
-        entity.substrateCryptoType = Int16(bitPattern: UInt16(model.substrateCryptoType))
-        entity.substratePublicKey = model.substratePublicKey
-        entity.ethereumPublicKey = model.ethereumPublicKey
-        entity.ethereumAddress = model.ethereumAddress?.toHex()
+        entity.substrateAccountId = model.ecosystem.substrateAccountId?.toHex()
+        if let substrateCryptoType = model.ecosystem.substrateCryptoType {
+            entity.substrateCryptoType = Int16(bitPattern: UInt16(substrateCryptoType))
+        }
+        entity.substratePublicKey = model.ecosystem.substratePublicKey
+        entity.ethereumPublicKey = model.ecosystem.ethereumPublicKey
+        entity.ethereumAddress = model.ecosystem.ethereumAddress?.toHex()
         entity.assetKeysOrder = model.assetKeysOrder as? NSArray
         entity.canExportEthereumMnemonic = model.canExportEthereumMnemonic
         entity.unusedChainIds = model.unusedChainIds as? NSArray
         entity.networkManagmentFilter = model.networkManagmentFilter
         entity.hasBackup = model.hasBackup
         entity.favouriteChainIds = model.favouriteChainIds as? NSArray
-        entity.tonAddress = try model.tonAddress?.asAccountId()
-        entity.tonPublicKey = model.tonPublicKey
-        entity.tonContractVersion = model.tonContractVersion?.rawValue
+        entity.tonAddress = try model.ecosystem.tonAddress?.asAccountId()
+        entity.tonPublicKey = model.ecosystem.tonPublicKey
+        entity.tonContractVersion = model.ecosystem.tonContractVersion?.rawValue
 
         for assetVisibility in model.assetsVisibility {
             var assetVisibilityEntity = entity.assetsVisibility?.first { entity in
@@ -166,5 +160,42 @@ extension MetaAccountMapper: CoreDataMapperProtocol {
         currencyEntity.isSelected = model.selectedCurrency.isSelected ?? false
 
         entity.selectedCurrency = currencyEntity
+    }
+    
+    private func createEcosystem(
+        from entity: CoreDataEntity
+    ) throws -> WalletEcosystem {
+        if
+            let substrateAccountIdHex = entity.substrateAccountId,
+            let substratePublicKey = entity.substratePublicKey,
+            let substrateAccountId = try? Data(hexStringSSF: substrateAccountIdHex) {
+            let ethereumAddress = try? entity.ethereumAddress.map { try Data(hexStringSSF: $0) }
+
+            let regularData = WalletEcosystem.Regular(
+                substrateAccountId: substrateAccountId,
+                substrateCryptoType: UInt8(bitPattern: Int8(entity.substrateCryptoType)),
+                substratePublicKey: substratePublicKey,
+                ethereumAddress: ethereumAddress,
+                ethereumPublicKey: entity.ethereumPublicKey
+            )
+            let ecosystem = WalletEcosystem.regular(regularData)
+            return ecosystem
+        }
+        
+        if 
+            let rawValue = entity.tonContractVersion,
+            let tonContractVersion = TonContractVersion(rawValue: rawValue),
+            let tonAddress = try? entity.tonAddress?.asTonAddress(),
+            let tonPublicKey = entity.tonPublicKey {
+           
+            let tonData = WalletEcosystem.Ton(
+                tonAddress: tonAddress,
+                tonPublicKey: tonPublicKey,
+                tonContractVersion: tonContractVersion
+            )
+            let ecosystem = WalletEcosystem.ton(tonData)
+        }
+        
+        throw MetaAccountMapperError.ecosystemError
     }
 }

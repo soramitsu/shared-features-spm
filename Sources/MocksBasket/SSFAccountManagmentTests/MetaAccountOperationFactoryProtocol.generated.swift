@@ -22,11 +22,11 @@ public init() {}
     public var newMetaAccountOperationMnemonicRequestIsBackupedReturnValue: BaseOperation<MetaAccountModel>!
     public var newMetaAccountOperationMnemonicRequestIsBackupedClosure: ((MetaAccountImportMnemonicRequest, Bool) -> BaseOperation<MetaAccountModel>)?
 
-    public func newMetaAccountOperation(mnemonicRequest: MetaAccountImportMnemonicRequest, isBackuped: Bool) -> BaseOperation<MetaAccountModel> {
+    public func newMetaAccountOperation(mnemonicRequest: MetaAccountImportMnemonicRequest,         isBackedUp: Bool) -> BaseOperation<MetaAccountModel> {
         newMetaAccountOperationMnemonicRequestIsBackupedCallsCount += 1
-        newMetaAccountOperationMnemonicRequestIsBackupedReceivedArguments = (mnemonicRequest: mnemonicRequest, isBackuped: isBackuped)
-        newMetaAccountOperationMnemonicRequestIsBackupedReceivedInvocations.append((mnemonicRequest: mnemonicRequest, isBackuped: isBackuped))
-        return newMetaAccountOperationMnemonicRequestIsBackupedClosure.map({ $0(mnemonicRequest, isBackuped) }) ?? newMetaAccountOperationMnemonicRequestIsBackupedReturnValue
+        newMetaAccountOperationMnemonicRequestIsBackupedReceivedArguments = (mnemonicRequest: mnemonicRequest, isBackuped:         isBackedUp)
+        newMetaAccountOperationMnemonicRequestIsBackupedReceivedInvocations.append((mnemonicRequest: mnemonicRequest, isBackuped:         isBackedUp))
+        return newMetaAccountOperationMnemonicRequestIsBackupedClosure.map({ $0(mnemonicRequest,         isBackedUp) }) ?? newMetaAccountOperationMnemonicRequestIsBackupedReturnValue
     }
 
     //MARK: - newMetaAccountOperation
