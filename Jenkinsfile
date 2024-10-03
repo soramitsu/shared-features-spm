@@ -8,6 +8,7 @@ def jobParams = [
 
 def pipeline = new org.ios.AppPipeline(
     steps: this,
+    skipBranchParams: true,
     sonar: true,
     sonarProjectName: 'shared-features-spm',
     sonarProjectKey: 'sora:shared-features-spm',
