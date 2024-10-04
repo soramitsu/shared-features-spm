@@ -80,7 +80,7 @@ private extension AccountManagementWorkerTests {
             unusedChainIds: nil,
             selectedCurrency: .defaultCurrency(),
             networkManagmentFilter: nil,
-            assetsVisibility: [],
+            enabledAssetIds: [],
             zeroBalanceAssetsHidden: true,
             hasBackup: false,
             favouriteChainIds: []

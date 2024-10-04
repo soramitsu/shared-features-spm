@@ -51,7 +51,8 @@ final class AccountImportServiceTests: XCTestCase {
             source: source,
             username: TestData.accountName,
             cryptoType: .sr25519,
-            defaultChainId: "3266816be9fa51b32cfea58d3e33ca77246bc9618595a4300e44c8856a8d8a17"
+            defaultChainId: "3266816be9fa51b32cfea58d3e33ca77246bc9618595a4300e44c8856a8d8a17",
+            enabledAssetIds: []
         )
 
         // act
@@ -76,7 +77,8 @@ final class AccountImportServiceTests: XCTestCase {
             source: source,
             username: TestData.accountName,
             cryptoType: .sr25519,
-            defaultChainId: "3266816be9fa51b32cfea58d3e33ca77246bc9618595a4300e44c8856a8d8a17"
+            defaultChainId: "3266816be9fa51b32cfea58d3e33ca77246bc9618595a4300e44c8856a8d8a17",
+            enabledAssetIds: []
         )
 
         // act
@@ -100,7 +102,8 @@ final class AccountImportServiceTests: XCTestCase {
             source: source,
             username: TestData.accountName,
             cryptoType: .sr25519,
-            defaultChainId: "3266816be9fa51b32cfea58d3e33ca77246bc9618595a4300e44c8856a8d8a17"
+            defaultChainId: "3266816be9fa51b32cfea58d3e33ca77246bc9618595a4300e44c8856a8d8a17",
+            enabledAssetIds: []
         )
 
         // act
@@ -133,7 +136,7 @@ extension AccountImportServiceTests {
             unusedChainIds: nil,
             selectedCurrency: .defaultCurrency(),
             networkManagmentFilter: nil,
-            assetsVisibility: [],
+            enabledAssetIds: [],
             zeroBalanceAssetsHidden: true,
             hasBackup: false,
             favouriteChainIds: []

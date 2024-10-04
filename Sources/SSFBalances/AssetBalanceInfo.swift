@@ -6,6 +6,7 @@ public struct AssetBalanceInfo: Codable {
     public enum CodingKeys: String, CodingKey {
         case chainId
         case assetId
+        case accountId
         case chainAssetId
         case balance
         case price
@@ -15,6 +16,7 @@ public struct AssetBalanceInfo: Codable {
     public let chainAssetId: String
     public let chainId: String
     public let assetId: String
+    public let accountId: String
     public let balance: Decimal?
     public let price: Decimal?
     public let deltaPrice: Decimal?
@@ -27,13 +29,15 @@ public struct AssetBalanceInfo: Codable {
     public init(
         chainId: String,
         assetId: String,
+        accountId: String,
         balance: Decimal?,
         price: Decimal?,
         deltaPrice: Decimal?
     ) {
-        chainAssetId = "\(chainId):\(assetId)"
+        chainAssetId = "\(chainId):\(assetId):\(accountId)"
         self.chainId = chainId
         self.assetId = assetId
+        self.accountId = accountId
         self.balance = balance
         self.price = price
         self.deltaPrice = deltaPrice

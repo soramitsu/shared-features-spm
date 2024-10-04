@@ -24,7 +24,7 @@ public struct MetaAccountModel: Equatable, Codable, Identifiable {
     public let unusedChainIds: [String]?
     public let selectedCurrency: Currency
     public let networkManagmentFilter: String?
-    public let assetsVisibility: [AssetVisibility]
+    public let enabledAssetIds: Set<String>
     public let zeroBalanceAssetsHidden: Bool
     public let hasBackup: Bool
     public let favouriteChainIds: [ChainModel.Id]
@@ -44,7 +44,7 @@ public struct MetaAccountModel: Equatable, Codable, Identifiable {
         unusedChainIds: [String]?,
         selectedCurrency: Currency,
         networkManagmentFilter: ChainModel.Id?,
-        assetsVisibility: [AssetVisibility],
+        enabledAssetIds: Set<String>,
         zeroBalanceAssetsHidden: Bool,
         hasBackup: Bool,
         favouriteChainIds: [ChainModel.Id]
@@ -63,7 +63,7 @@ public struct MetaAccountModel: Equatable, Codable, Identifiable {
         self.unusedChainIds = unusedChainIds
         self.selectedCurrency = selectedCurrency
         self.networkManagmentFilter = networkManagmentFilter
-        self.assetsVisibility = assetsVisibility
+        self.enabledAssetIds = enabledAssetIds
         self.zeroBalanceAssetsHidden = zeroBalanceAssetsHidden
         self.hasBackup = hasBackup
         self.favouriteChainIds = favouriteChainIds
@@ -183,7 +183,7 @@ public extension MetaAccountModel {
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
             networkManagmentFilter: networkManagmentFilter,
-            assetsVisibility: assetsVisibility,
+            enabledAssetIds: enabledAssetIds,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
             hasBackup: hasBackup,
             favouriteChainIds: favouriteChainIds
@@ -206,7 +206,7 @@ public extension MetaAccountModel {
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
             networkManagmentFilter: networkManagmentFilter,
-            assetsVisibility: assetsVisibility,
+            enabledAssetIds: enabledAssetIds,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
             hasBackup: hasBackup,
             favouriteChainIds: favouriteChainIds
@@ -229,7 +229,7 @@ public extension MetaAccountModel {
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
             networkManagmentFilter: networkManagmentFilter,
-            assetsVisibility: assetsVisibility,
+            enabledAssetIds: enabledAssetIds,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
             hasBackup: hasBackup,
             favouriteChainIds: favouriteChainIds
@@ -252,7 +252,7 @@ public extension MetaAccountModel {
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
             networkManagmentFilter: networkManagmentFilter,
-            assetsVisibility: assetsVisibility,
+            enabledAssetIds: enabledAssetIds,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
             hasBackup: hasBackup,
             favouriteChainIds: favouriteChainIds
@@ -275,7 +275,7 @@ public extension MetaAccountModel {
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
             networkManagmentFilter: networkManagmentFilter,
-            assetsVisibility: assetsVisibility,
+            enabledAssetIds: enabledAssetIds,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
             hasBackup: hasBackup,
             favouriteChainIds: favouriteChainIds
@@ -298,7 +298,7 @@ public extension MetaAccountModel {
             unusedChainIds: newUnusedChainIds,
             selectedCurrency: selectedCurrency,
             networkManagmentFilter: networkManagmentFilter,
-            assetsVisibility: assetsVisibility,
+            enabledAssetIds: enabledAssetIds,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
             hasBackup: hasBackup,
             favouriteChainIds: favouriteChainIds
@@ -321,7 +321,7 @@ public extension MetaAccountModel {
             unusedChainIds: unusedChainIds,
             selectedCurrency: currency,
             networkManagmentFilter: networkManagmentFilter,
-            assetsVisibility: assetsVisibility,
+            enabledAssetIds: enabledAssetIds,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
             hasBackup: hasBackup,
             favouriteChainIds: favouriteChainIds
@@ -344,7 +344,7 @@ public extension MetaAccountModel {
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
             networkManagmentFilter: networkManagmentFilter,
-            assetsVisibility: assetsVisibility,
+            enabledAssetIds: enabledAssetIds,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
             hasBackup: hasBackup,
             favouriteChainIds: favouriteChainIds
@@ -367,14 +367,14 @@ public extension MetaAccountModel {
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
             networkManagmentFilter: identifire,
-            assetsVisibility: assetsVisibility,
+            enabledAssetIds: enabledAssetIds,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
             hasBackup: hasBackup,
             favouriteChainIds: favouriteChainIds
         )
     }
 
-    func replacingAssetsVisibility(_ newAssetsVisibility: [AssetVisibility]) -> MetaAccountModel {
+    func replacing(newEnabledAssetIds: Set<String>) -> MetaAccountModel {
         MetaAccountModel(
             metaId: metaId,
             name: name,
@@ -390,7 +390,7 @@ public extension MetaAccountModel {
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
             networkManagmentFilter: networkManagmentFilter,
-            assetsVisibility: newAssetsVisibility,
+            enabledAssetIds: newEnabledAssetIds,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
             hasBackup: hasBackup,
             favouriteChainIds: favouriteChainIds
@@ -413,7 +413,7 @@ public extension MetaAccountModel {
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
             networkManagmentFilter: networkManagmentFilter,
-            assetsVisibility: assetsVisibility,
+            enabledAssetIds: enabledAssetIds,
             zeroBalanceAssetsHidden: newZeroBalanceAssetsHidden,
             hasBackup: hasBackup,
             favouriteChainIds: favouriteChainIds
@@ -436,7 +436,7 @@ public extension MetaAccountModel {
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
             networkManagmentFilter: networkManagmentFilter,
-            assetsVisibility: assetsVisibility,
+            enabledAssetIds: enabledAssetIds,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
             hasBackup: isBackuped,
             favouriteChainIds: favouriteChainIds
@@ -459,7 +459,7 @@ public extension MetaAccountModel {
             unusedChainIds: unusedChainIds,
             selectedCurrency: selectedCurrency,
             networkManagmentFilter: networkManagmentFilter,
-            assetsVisibility: assetsVisibility,
+            enabledAssetIds: enabledAssetIds,
             zeroBalanceAssetsHidden: zeroBalanceAssetsHidden,
             hasBackup: hasBackup,
             favouriteChainIds: favouriteChainIds

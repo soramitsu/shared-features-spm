@@ -124,6 +124,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
         return AssetBalanceInfo(
             chainId: chainAsset.chain.chainId,
             assetId: chainAsset.asset.tokenProperties?.currencyId ?? "",
+            accountId: accountId.toHex(),
             balance: balance,
             price: nil,
             deltaPrice: nil
@@ -170,6 +171,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             return AssetBalanceInfo(
                 chainId: chain.chainId,
                 assetId: assetId,
+                accountId: accountId.toHex(),
                 balance: balance,
                 price: nil,
                 deltaPrice: nil
@@ -189,9 +191,10 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
 
     public func getLocalBalance(
         for chainAsset: ChainAsset,
-        accountId _: AccountId
+        accountId: AccountId
     ) async throws -> AssetBalanceInfo? {
-        try await localService.get(by: chainAsset.chainAssetId.id)
+        let id = "\(chainAsset.chainAssetId.id):\(accountId.toHex())"
+        return try await localService.get(by: id)
     }
 
     public func getLocalBalancePublisher(

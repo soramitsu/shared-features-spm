@@ -90,7 +90,7 @@ extension MnemonicExportServiceTests {
             unusedChainIds: nil,
             selectedCurrency: .defaultCurrency(),
             networkManagmentFilter: nil,
-            assetsVisibility: [],
+            enabledAssetIds: [],
             zeroBalanceAssetsHidden: true,
             hasBackup: false,
             favouriteChainIds: []
