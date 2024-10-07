@@ -4,8 +4,13 @@ import SSFModels
 import SSFUtils
 
 public struct MetaAccountImportTonMnemonicRequest {
-    public let mnemonic: IRMnemonicProtocol
+    public let mnemonic: String
     public let username: String
+    
+    public init(mnemonic: String, username: String) {
+        self.mnemonic = mnemonic
+        self.username = username
+    }
 }
 
 public struct MetaAccountImportMnemonicRequest {

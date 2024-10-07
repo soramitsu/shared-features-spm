@@ -194,6 +194,7 @@ extension MetaAccountMapper: CoreDataMapperProtocol {
                 tonContractVersion: tonContractVersion
             )
             let ecosystem = WalletEcosystem.ton(tonData)
+            return ecosystem
         }
         
         throw MetaAccountMapperError.ecosystemError

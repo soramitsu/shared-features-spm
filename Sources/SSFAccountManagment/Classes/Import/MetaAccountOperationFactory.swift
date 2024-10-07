@@ -259,9 +259,9 @@ private extension MetaAccountOperationFactory {
     }
 
     private func getTonQuery(
-        mnemonic: IRMnemonicProtocol
+        mnemonic: String
     ) throws -> TonAccountQuery {
-        let mnemonicArray = mnemonic.allWords()
+        let mnemonicArray = mnemonic.components(separatedBy: " ")
         let seed = Mnemonic.mnemonicToSeed(mnemonicArray: mnemonicArray)
         let keypair = try Mnemonic.mnemonicToPrivateKey(mnemonicArray: mnemonicArray)
 
@@ -322,7 +322,8 @@ extension MetaAccountOperationFactory: MetaAccountOperationFactoryProtocol {
             
             let metaId = metaAccount.metaId
             try saveSecretKey(tonQuery.privateKey, metaId: metaId, ecosystem: .ton)
-            try saveEntropy(mnemonicRequest.mnemonic.entropy(), metaId: metaId)
+            let entropy = Mnemonic.mnemonicToEntropy(mnemonicArray: mnemonicRequest.mnemonic.components(separatedBy: " "))
+            try saveEntropy(entropy, metaId: metaId)
             
             return metaAccount
         }
@@ -555,10 +556,7 @@ extension MetaAccountOperationFactory: MetaAccountOperationFactoryProtocol {
                 publicKey = query.publicKey
                 try saveSeed(query.seed, metaId: metaId, ecosystem: request.ecosystem)
             case .ton:
-                let tonQuery = try getTonQuery(mnemonic: request.mnemonic)
-                accountId = tonQuery.publicKey
-                privateKey = tonQuery.privateKey
-                publicKey = tonQuery.publicKey
+                throw AccountOperationFactoryError.unsupportedNetwork
             }
 
             try saveSecretKey(
