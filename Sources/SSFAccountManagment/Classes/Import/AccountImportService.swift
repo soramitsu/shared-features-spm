@@ -21,7 +21,7 @@ public protocol AccountImportable {
 }
 
 public protocol AccountCreatable {
-    func createNewMetaAccount() async throws -> MetaAccountModel
+    func createNewMetaAccount(enabledAssetIds: Set<String>) async throws -> MetaAccountModel
 }
 
 public final class AccountImportService {
@@ -78,8 +78,9 @@ public final class AccountImportService {
             DispatchQueue.main.async {
                 switch saveOperation.result {
                 case .success:
-                    self?.selectedWallet.setup()
-                    continuation.resume(returning: item)
+                    self?.selectedWallet.performSave(value: item) { _ in
+                        continuation.resume(returning: item)
+                    }
 
                 case let .failure(error):
                     continuation.resume(throwing: error)
@@ -93,7 +94,9 @@ public final class AccountImportService {
 }
 
 extension AccountImportService: AccountCreatable {
-    public func createNewMetaAccount() async throws -> MetaAccountModel {
+    public func createNewMetaAccount(enabledAssetIds: Set<String>) async throws
+        -> MetaAccountModel
+    {
         guard let mnemonic = try? mnemonicCreator.randomMnemonic(strength: .entropy128) else {
             throw CreateAccountError.invalidMnemonicFormat
         }
@@ -104,7 +107,8 @@ extension AccountImportService: AccountCreatable {
             substrateDerivationPath: "",
             ethereumDerivationPath: "",
             cryptoType: .sr25519,
-            defaultChainId: nil
+            defaultChainId: nil,
+            enabledAssetIds: enabledAssetIds
         )
         let operation = accountOperationFactory.newMetaAccountOperation(
             mnemonicRequest: request,
@@ -146,7 +150,8 @@ extension AccountImportService: AccountImportable {
                 substrateDerivationPath: data.substrateDerivationPath,
                 ethereumDerivationPath: data.ethereumDerivationPath,
                 cryptoType: request.cryptoType,
-                defaultChainId: request.defaultChainId
+                defaultChainId: request.defaultChainId,
+                enabledAssetIds: request.enabledAssetIds
             )
             operation = accountOperationFactory.newMetaAccountOperation(
                 mnemonicRequest: request,
@@ -159,7 +164,8 @@ extension AccountImportService: AccountImportable {
                 username: request.username,
                 substrateDerivationPath: data.substrateDerivationPath,
                 ethereumDerivationPath: data.ethereumDerivationPath,
-                cryptoType: request.cryptoType
+                cryptoType: request.cryptoType,
+                enabledAssetIds: request.enabledAssetIds
             )
             operation = accountOperationFactory.newMetaAccountOperation(
                 seedRequest: request,

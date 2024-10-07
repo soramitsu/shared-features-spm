@@ -42,25 +42,66 @@ public init() {}
         setCurrentAccountAccountCompletionClosureClosure?(account, completionClosure)
     }
 
-    //MARK: - update
+    //MARK: - getAllAccounts
 
-    public var updateVisibleForCompletionThrowableError: Error?
-    public var updateVisibleForCompletionCallsCount = 0
-    public var updateVisibleForCompletionCalled: Bool {
-        return updateVisibleForCompletionCallsCount > 0
+    public var getAllAccountsThrowableError: Error?
+    public var getAllAccountsCallsCount = 0
+    public var getAllAccountsCalled: Bool {
+        return getAllAccountsCallsCount > 0
     }
-    public var updateVisibleForCompletionReceivedArguments: (visible: Bool, chainAsset: ChainAsset, completion: () -> Void)?
-    public var updateVisibleForCompletionReceivedInvocations: [(visible: Bool, chainAsset: ChainAsset, completion: () -> Void)] = []
-    public var updateVisibleForCompletionClosure: ((Bool, ChainAsset, @escaping () -> Void) throws -> Void)?
+    public var getAllAccountsReturnValue: [MetaAccountModel]!
+    public var getAllAccountsClosure: (() throws -> [MetaAccountModel])?
 
-    public func update(visible: Bool, for chainAsset: ChainAsset, completion: @escaping () -> Void) throws {
-        if let error = updateVisibleForCompletionThrowableError {
+    public func getAllAccounts() throws -> [MetaAccountModel] {
+        if let error = getAllAccountsThrowableError {
             throw error
         }
-        updateVisibleForCompletionCallsCount += 1
-        updateVisibleForCompletionReceivedArguments = (visible: visible, chainAsset: chainAsset, completion: completion)
-        updateVisibleForCompletionReceivedInvocations.append((visible: visible, chainAsset: chainAsset, completion: completion))
-        try updateVisibleForCompletionClosure?(visible, chainAsset, completion)
+        getAllAccountsCallsCount += 1
+        return try getAllAccountsClosure.map({ try $0() }) ?? getAllAccountsReturnValue
+    }
+
+    //MARK: - updateEnabilibilty
+
+    public var updateEnabilibiltyForThrowableError: Error?
+    public var updateEnabilibiltyForCallsCount = 0
+    public var updateEnabilibiltyForCalled: Bool {
+        return updateEnabilibiltyForCallsCount > 0
+    }
+    public var updateEnabilibiltyForReceivedChainAssetId: String?
+    public var updateEnabilibiltyForReceivedInvocations: [String] = []
+    public var updateEnabilibiltyForReturnValue: MetaAccountModel!
+    public var updateEnabilibiltyForClosure: ((String) throws -> MetaAccountModel)?
+
+    public func updateEnabilibilty(for chainAssetId: String) throws -> MetaAccountModel {
+        if let error = updateEnabilibiltyForThrowableError {
+            throw error
+        }
+        updateEnabilibiltyForCallsCount += 1
+        updateEnabilibiltyForReceivedChainAssetId = chainAssetId
+        updateEnabilibiltyForReceivedInvocations.append(chainAssetId)
+        return try updateEnabilibiltyForClosure.map({ try $0(chainAssetId) }) ?? updateEnabilibiltyForReturnValue
+    }
+
+    //MARK: - update
+
+    public var updateEnabledAssetIdsThrowableError: Error?
+    public var updateEnabledAssetIdsCallsCount = 0
+    public var updateEnabledAssetIdsCalled: Bool {
+        return updateEnabledAssetIdsCallsCount > 0
+    }
+    public var updateEnabledAssetIdsReceivedEnabledAssetIds: Set<String>?
+    public var updateEnabledAssetIdsReceivedInvocations: [Set<String>] = []
+    public var updateEnabledAssetIdsReturnValue: MetaAccountModel!
+    public var updateEnabledAssetIdsClosure: ((Set<String>) throws -> MetaAccountModel)?
+
+    public func update(enabledAssetIds: Set<String>) throws -> MetaAccountModel {
+        if let error = updateEnabledAssetIdsThrowableError {
+            throw error
+        }
+        updateEnabledAssetIdsCallsCount += 1
+        updateEnabledAssetIdsReceivedEnabledAssetIds = enabledAssetIds
+        updateEnabledAssetIdsReceivedInvocations.append(enabledAssetIds)
+        return try updateEnabledAssetIdsClosure.map({ try $0(enabledAssetIds) }) ?? updateEnabledAssetIdsReturnValue
     }
 
     //MARK: - logout

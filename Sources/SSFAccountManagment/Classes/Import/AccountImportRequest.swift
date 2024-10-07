@@ -10,6 +10,7 @@ public struct MetaAccountImportMnemonicRequest {
     let ethereumDerivationPath: String
     let cryptoType: CryptoType
     let defaultChainId: ChainModel.Id?
+    let enabledAssetIds: Set<String>
 
     public init(
         mnemonic: IRMnemonicProtocol,
@@ -17,7 +18,8 @@ public struct MetaAccountImportMnemonicRequest {
         substrateDerivationPath: String,
         ethereumDerivationPath: String,
         cryptoType: CryptoType,
-        defaultChainId: ChainModel.Id?
+        defaultChainId: ChainModel.Id?,
+        enabledAssetIds: Set<String>
     ) {
         self.mnemonic = mnemonic
         self.username = username
@@ -25,6 +27,7 @@ public struct MetaAccountImportMnemonicRequest {
         self.ethereumDerivationPath = ethereumDerivationPath
         self.cryptoType = cryptoType
         self.defaultChainId = defaultChainId
+        self.enabledAssetIds = enabledAssetIds
     }
 }
 
@@ -35,6 +38,7 @@ public struct MetaAccountImportSeedRequest {
     let substrateDerivationPath: String
     let ethereumDerivationPath: String?
     let cryptoType: CryptoType
+    let enabledAssetIds: Set<String>
 
     public init(
         substrateSeed: String,
@@ -42,7 +46,8 @@ public struct MetaAccountImportSeedRequest {
         username: String,
         substrateDerivationPath: String,
         ethereumDerivationPath: String?,
-        cryptoType: CryptoType
+        cryptoType: CryptoType,
+        enabledAssetIds: Set<String>
     ) {
         self.substrateSeed = substrateSeed
         self.ethereumSeed = ethereumSeed
@@ -50,6 +55,7 @@ public struct MetaAccountImportSeedRequest {
         self.substrateDerivationPath = substrateDerivationPath
         self.ethereumDerivationPath = ethereumDerivationPath
         self.cryptoType = cryptoType
+        self.enabledAssetIds = enabledAssetIds
     }
 }
 
@@ -143,17 +149,20 @@ public struct MetaAccountImportRequest {
     let username: String
     let cryptoType: CryptoType
     let defaultChainId: ChainModel.Id?
+    let enabledAssetIds: Set<String>
 
     public init(
         source: MetaAccountImportRequestSource,
         username: String,
         cryptoType: CryptoType,
-        defaultChainId: ChainModel.Id?
+        defaultChainId: ChainModel.Id?,
+        enabledAssetIds: Set<String>
     ) {
         self.source = source
         self.username = username
         self.cryptoType = cryptoType
         self.defaultChainId = defaultChainId
+        self.enabledAssetIds = enabledAssetIds
     }
 }
 

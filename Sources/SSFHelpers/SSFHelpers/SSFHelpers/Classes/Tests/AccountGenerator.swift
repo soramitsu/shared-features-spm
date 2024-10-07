@@ -25,7 +25,7 @@ public enum AccountGenerator {
             unusedChainIds: nil,
             selectedCurrency: Currency.defaultCurrency(),
             networkManagmentFilter: nil,
-            assetsVisibility: [],
+            enabledAssetIds: [],
             zeroBalanceAssetsHidden: true,
             hasBackup: false,
             favouriteChainIds: []
