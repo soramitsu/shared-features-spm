@@ -4,14 +4,15 @@ import RobinHood
 import SSFBalances
 
 extension CDAssetBalance: CoreDataCodable {
-    public var entityIdentifierFieldName: String { #keyPath(CDAssetBalance.chainAssetId) }
+    public var entityIdentifierFieldName: String { #keyPath(CDAssetBalance.balanceId) }
 
     public func populate(from decoder: Decoder, using _: NSManagedObjectContext) throws {
         let container = try decoder.container(keyedBy: AssetBalanceInfo.CodingKeys.self)
 
         assetId = try container.decode(String.self, forKey: .assetId)
         chainId = try container.decode(String.self, forKey: .chainId)
-        chainAssetId = try container.decode(String.self, forKey: .chainAssetId)
+        accountId = try container.decode(String.self, forKey: .accountId)
+        balanceId = try container.decode(String.self, forKey: .balanceId)
         balance = try? container.decodeIfPresent(Decimal.self, forKey: .balance) as NSDecimalNumber?
         price = try? container.decodeIfPresent(Decimal.self, forKey: .price) as NSDecimalNumber?
         deltaPrice = try? container.decodeIfPresent(
@@ -25,7 +26,8 @@ extension CDAssetBalance: CoreDataCodable {
 
         try container.encode(assetId, forKey: .assetId)
         try container.encode(chainId, forKey: .chainId)
-        try container.encode(chainAssetId, forKey: .chainAssetId)
+        try container.encode(accountId, forKey: .accountId)
+        try container.encode(balanceId, forKey: .balanceId)
         try container.encodeIfPresent(balance as Decimal?, forKey: .balance)
         try container.encodeIfPresent(price as Decimal?, forKey: .price)
         try container.encodeIfPresent(deltaPrice as Decimal?, forKey: .deltaPrice)
