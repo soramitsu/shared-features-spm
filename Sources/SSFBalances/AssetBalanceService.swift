@@ -123,7 +123,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
 
         return AssetBalanceInfo(
             chainId: chainAsset.chain.chainId,
-            assetId: chainAsset.asset.tokenProperties?.currencyId ?? "",
+            assetId: chainAsset.asset.symbol,
             accountId: accountId.toHex(),
             balance: balance,
             price: nil,
@@ -157,9 +157,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
 
         return balacesMap.compactMap { id, accountInfo in
             guard let accountInfo = accountInfo,
-                  let chainAsset = chain.chainAssets.first(where: { $0.chainAssetId == id }),
-                  let assetId = chainAsset.asset.tokenProperties?.currencyId else
-            {
+                  let chainAsset = chain.chainAssets.first(where: { $0.chainAssetId == id }) else {
                 return nil
             }
 
@@ -170,7 +168,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
 
             return AssetBalanceInfo(
                 chainId: chain.chainId,
-                assetId: assetId,
+                assetId: chainAsset.asset.symbol,
                 accountId: accountId.toHex(),
                 balance: balance,
                 price: nil,

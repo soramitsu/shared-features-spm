@@ -92,7 +92,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
 
         return AssetBalanceInfo(
             chainId: chainAsset.chain.chainId,
-            assetId: chainAsset.asset.tokenProperties?.currencyId ?? "",
+            assetId: chainAsset.asset.symbol,
             accountId: accountId.toHex(),
             balance: balance,
             price: nil,
@@ -128,7 +128,7 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             
             return AssetBalanceInfo(
                 chainId: chainAsset.chain.chainId,
-                assetId: chainAsset.asset.tokenProperties?.currencyId ?? "",
+                assetId: chainAsset.asset.symbol,
                 accountId: accountId.toHex(),
                 balance: balance,
                 price: nil,
