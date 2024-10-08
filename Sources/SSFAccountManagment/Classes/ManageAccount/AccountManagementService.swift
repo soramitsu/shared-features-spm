@@ -15,7 +15,9 @@ public protocol AccountManageble {
         account: MetaAccountModel,
         completionClosure: @escaping (Result<MetaAccountModel, Error>) -> Void
     )
-    func update(visible: Bool, for chainAsset: ChainAsset, completion: @escaping () -> Void) throws
+    func getAllAccounts() async throws -> [MetaAccountModel]
+    func updateEnabilibilty(for chainAssetId: String) async throws -> MetaAccountModel
+    func update(enabledAssetIds: Set<String>) async throws -> MetaAccountModel
     func logout() async throws
 }
 
@@ -46,31 +48,46 @@ extension AccountManagementService: AccountManageble {
         selectedWallet.performSave(value: account, completionClosure: completionClosure)
     }
 
-    public func update(
-        visible: Bool,
-        for chainAsset: ChainAsset,
-        completion: @escaping () -> Void
-    ) throws {
-        let accountRequest = chainAsset.chain.accountRequest()
+    public func getAllAccounts() async throws -> [MetaAccountModel] {
+        try await accountManagementWorker.fetchAll()
+    }
 
-        guard let wallet = selectedWallet.value,
-              let accountId = wallet.fetch(for: accountRequest)?.accountId else
-        {
-            throw AccountManagerServiceError.unexpected
+    public func updateEnabilibilty(for chainAssetId: String) async throws -> MetaAccountModel {
+        try await withCheckedThrowingContinuation { continuation in
+            guard let wallet = selectedWallet.value else {
+                continuation.resume(throwing: AccountManagerServiceError.unexpected)
+                return
+            }
+
+            var enabledAssetIds = wallet.enabledAssetIds
+
+            if enabledAssetIds.contains(chainAssetId) {
+                enabledAssetIds.remove(chainAssetId)
+            } else {
+                enabledAssetIds.insert(chainAssetId)
+            }
+
+            let updatedAccount = wallet.replacing(newEnabledAssetIds: enabledAssetIds)
+
+            selectedWallet.performSave(value: updatedAccount, completionClosure: { _ in
+                continuation.resume(with: .success(updatedAccount))
+            })
         }
+    }
 
-        let chainAssetKey = chainAsset.uniqueKey(accountId: accountId)
+    public func update(enabledAssetIds: Set<String>) async throws -> MetaAccountModel {
+        try await withCheckedThrowingContinuation { continuation in
+            guard let wallet = selectedWallet.value else {
+                continuation.resume(throwing: AccountManagerServiceError.unexpected)
+                return
+            }
 
-        var assetsVisibility = wallet.assetsVisibility.filter { $0.assetId != chainAssetKey }
+            let updatedAccount = wallet.replacing(newEnabledAssetIds: enabledAssetIds)
 
-        let assetVisibility = AssetVisibility(assetId: chainAssetKey, hidden: !visible)
-        assetsVisibility.append(assetVisibility)
-
-        let updatedAccount = wallet.replacingAssetsVisibility(assetsVisibility)
-
-        selectedWallet.performSave(value: updatedAccount, completionClosure: { _ in
-            completion()
-        })
+            selectedWallet.performSave(value: updatedAccount, completionClosure: { _ in
+                continuation.resume(with: .success(updatedAccount))
+            })
+        }
     }
 
     public func logout() async throws {

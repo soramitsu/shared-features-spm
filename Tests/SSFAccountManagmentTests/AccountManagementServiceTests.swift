@@ -66,18 +66,21 @@ final class AccountManagementServiceTests: XCTestCase {
 
             let chainAsset = ChainAsset(chain: chain, asset: asset)
 
-            do {
-                try self?.service?.update(visible: true, for: chainAsset, completion: {
-                    // assert
-                    DispatchQueue.main.async {
+            Task { [weak self] in
+                do {
+                    let updatedAccount = try await self?.service?.updateEnabilibilty(for: chainAsset.chainAssetId.id)
+                    
+                    DispatchQueue.main.async { [weak self] in
                         XCTAssertTrue(
                             self?.accountManagementWorker?
                                 .saveAccountCompletionCalled ?? false
                         )
+                        
+                        XCTAssertTrue(updatedAccount != nil)
                     }
-                })
-            } catch {
-                XCTFail("UpdateVisability test failed with error - \(error)")
+                } catch {
+                    XCTFail("UpdateVisability test failed with error - \(error)")
+                }
             }
         })
     }
@@ -155,7 +158,7 @@ private extension AccountManagementServiceTests {
             unusedChainIds: nil,
             selectedCurrency: .defaultCurrency(),
             networkManagmentFilter: nil,
-            assetsVisibility: [],
+            enabledAssetIds: [],
             zeroBalanceAssetsHidden: true,
             hasBackup: false,
             favouriteChainIds: []
