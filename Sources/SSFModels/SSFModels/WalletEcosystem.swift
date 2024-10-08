@@ -29,6 +29,20 @@ public enum WalletEcosystem: Equatable, Codable {
             self.ethereumPublicKey = ethereumPublicKey
         }
     }
+    
+    public var isRegular: Bool {
+        switch self {
+        case .regular: return true
+        case .ton: return false
+        }
+    }
+    
+    public var isTon: Bool {
+        switch self {
+        case .regular: return false
+        case .ton: return true
+        }
+    }
 
     public var substrateAccountId: Data? {
         switch self {
