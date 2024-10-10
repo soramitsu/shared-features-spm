@@ -250,7 +250,8 @@ private extension MetaAccountOperationFactory {
         substrateCryptoType: CryptoType,
         ethereumPublicKey: Data?,
         isBackuped: Bool,
-        defaultChainId: ChainModel.Id? = nil
+        defaultChainId: ChainModel.Id? = nil,
+        enabledAssetIds: Set<String>
     ) throws -> MetaAccountModel {
         let substrateAccountId = try substratePublicKey.publicKeyToAccountId()
         let ethereumAddress = try ethereumPublicKey?.ethereumAddressFromPublicKey()
@@ -270,7 +271,7 @@ private extension MetaAccountOperationFactory {
             unusedChainIds: nil,
             selectedCurrency: Currency.defaultCurrency(),
             networkManagmentFilter: defaultChainId,
-            assetsVisibility: [],
+            enabledAssetIds: enabledAssetIds,
             zeroBalanceAssetsHidden: false,
             hasBackup: isBackuped,
             favouriteChainIds: []
@@ -306,7 +307,8 @@ extension MetaAccountOperationFactory: MetaAccountOperationFactoryProtocol {
                 substrateCryptoType: mnemonicRequest.cryptoType,
                 ethereumPublicKey: ethereumQuery.publicKey,
                 isBackuped: isBackuped,
-                defaultChainId: mnemonicRequest.defaultChainId
+                defaultChainId: mnemonicRequest.defaultChainId,
+                enabledAssetIds: mnemonicRequest.enabledAssetIds
             )
 
             let metaId = metaAccount.metaId
@@ -365,7 +367,8 @@ extension MetaAccountOperationFactory: MetaAccountOperationFactoryProtocol {
                 substratePublicKey: substrateQuery.publicKey,
                 substrateCryptoType: seedRequest.cryptoType,
                 ethereumPublicKey: ethereumQuery?.publicKey,
-                isBackuped: isBackuped
+                isBackuped: isBackuped,
+                enabledAssetIds: seedRequest.enabledAssetIds
             )
 
             let metaId = metaAccount.metaId
@@ -479,7 +482,7 @@ extension MetaAccountOperationFactory: MetaAccountOperationFactoryProtocol {
                 unusedChainIds: nil,
                 selectedCurrency: Currency.defaultCurrency(),
                 networkManagmentFilter: nil,
-                assetsVisibility: [],
+                enabledAssetIds: [],
                 zeroBalanceAssetsHidden: false,
                 hasBackup: isBackuped,
                 favouriteChainIds: []
