@@ -5,7 +5,7 @@ import UIKit
 public protocol QRService: AnyObject {
     func lookingMatcher(for code: String) throws -> QRMatcherType
     func extractQrCode(from image: UIImage) throws -> QRMatcherType
-    func generate(with qrType: QRType, qrSize: CGSize) async throws -> UIImage
+    func generate(with qrType: QRType, qrSize: CGSize) throws -> UIImage
 }
 
 public final class QRServiceDefault: QRService {
@@ -42,7 +42,7 @@ public final class QRServiceDefault: QRService {
         return matcher
     }
 
-    public func generate(with qrType: QRType, qrSize: CGSize) async throws -> UIImage {
+    public func generate(with qrType: QRType, qrSize: CGSize) throws -> UIImage {
         let payload = try encoder.encode(with: qrType)
         return try createQR(for: payload, qrSize: qrSize)
     }
