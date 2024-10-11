@@ -151,7 +151,7 @@ public extension ChainAsset {
 
     var hasStaking: Bool {
         let model: AssetModel? = chain.tokens.tokens?.first { $0.id == asset.id }
-        return model?.tokenProperties?.stacking != nil
+        return model?.tokenProperties?.staking != nil
     }
 
     var storagePath: StorageCodingPath {

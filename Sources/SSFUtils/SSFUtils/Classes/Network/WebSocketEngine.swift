@@ -170,7 +170,6 @@ public final class WebSocketEngine {
             connection.disconnect()
 
             logger?.debug("Cancel socket connection")
-
         case .waitingReconnection:
             logger?.debug("Cancel reconnection scheduler due to disconnection")
             reconnectionScheduler.cancel()

@@ -173,20 +173,21 @@ private extension XcmExtrinsicServiceTests {
                             substrateType: .soraAsset,
                             ethereumType: nil,
                             tokenProperties:
-                                TokenProperties(
-                                    priceId: "0",
-                                    currencyId: "0",
-                                    color: "0",
-                                    type: .soraAsset,
-                                    isNative: true
-                                ),
+                            TokenProperties(
+                                priceId: "0",
+                                currencyId: "0",
+                                color: "0",
+                                type: .soraAsset,
+                                isNative: true
+                            ),
                             price: nil,
                             priceId: nil,
                             coingeckoPriceId: nil,
                             priceProvider: nil
                         ),
                     ]
-                )),
+                )
+            ),
             xcm: XcmChain(
                 xcmVersion: .V3,
                 destWeightIsPrimitive: true,

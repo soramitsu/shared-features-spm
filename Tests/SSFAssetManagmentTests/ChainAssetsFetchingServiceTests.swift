@@ -439,7 +439,10 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
             properties: .init(addressPrefix: "1", rank: "2", paraId: "test", ethereumBased: true)
         )
 
-        let extectedAssetArray = chain.tokens.tokens?.compactMap { ChainAsset(chain: chain, asset: $0) }
+        let extectedAssetArray = chain.tokens.tokens?.compactMap { ChainAsset(
+            chain: chain,
+            asset: $0
+        ) }
 
         let chainAssetsFetcher = ChainAssetsFetchWorkerProtocolMock()
         chainAssetsFetcher.getChainAssetsModelsReturnValue = extectedAssetArray
@@ -551,7 +554,12 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
         let chain = TestData.chain
         let asset = TestData.asset
         let chainAsset = ChainAsset(chain: chain, asset: asset)
-        chain.tokens = ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: [asset])
+        chain.tokens = ChainRemoteTokens(
+            type: .config,
+            whitelist: nil,
+            utilityId: nil,
+            tokens: [asset]
+        )
 
         let chainWithStacking = TestData.chainWithStacking
         let assetWithStacking = TestData.assetWithStacking
@@ -637,7 +645,10 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
             properties: .init(addressPrefix: "1", rank: "2", paraId: "test", ethereumBased: true)
         )
 
-        let extectedAssetArray = chain.tokens.tokens?.compactMap { ChainAsset(chain: chain, asset: $0) }
+        let extectedAssetArray = chain.tokens.tokens?.compactMap { ChainAsset(
+            chain: chain,
+            asset: $0
+        ) }
 
         let chainAssetsFetcher = ChainAssetsFetchWorkerProtocolMock()
         chainAssetsFetcher.getChainAssetsModelsReturnValue = extectedAssetArray
@@ -694,7 +705,7 @@ private extension ChainAssetsFetchingServiceTests {
             coingeckoPriceId: nil,
             priceProvider: nil
         )
-        
+
         static let chainWithStacking = ChainModel(
             rank: 2,
             disabled: true,

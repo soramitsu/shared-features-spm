@@ -68,14 +68,15 @@ final class AccountManagementServiceTests: XCTestCase {
 
             Task { [weak self] in
                 do {
-                    let updatedAccount = try await self?.service?.updateEnabilibilty(for: chainAsset.chainAssetId.id)
-                    
+                    let updatedAccount = try await self?.service?
+                        .updateEnabilibilty(for: chainAsset.chainAssetId.id)
+
                     DispatchQueue.main.async { [weak self] in
                         XCTAssertTrue(
                             self?.accountManagementWorker?
                                 .saveAccountCompletionCalled ?? false
                         )
-                        
+
                         XCTAssertTrue(updatedAccount != nil)
                     }
                 } catch {

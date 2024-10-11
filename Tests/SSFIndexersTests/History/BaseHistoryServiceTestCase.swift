@@ -36,13 +36,13 @@ class BaseHistoryServiceTestCase: XCTestCase {
             substrateType: nil,
             ethereumType: ethereumType,
             tokenProperties:
-                TokenProperties(
-                    priceId: nil,
-                    currencyId: nil,
-                    color: nil,
-                    type: .normal,
-                    isNative: true
-                ),
+            TokenProperties(
+                priceId: nil,
+                currencyId: nil,
+                color: nil,
+                type: .normal,
+                isNative: true
+            ),
             price: nil,
             priceId: nil,
             coingeckoPriceId: nil,
@@ -56,7 +56,12 @@ class BaseHistoryServiceTestCase: XCTestCase {
             parentId: "2",
             paraId: "test",
             name: "test",
-            tokens: ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: [asset]),
+            tokens: ChainRemoteTokens(
+                type: .config,
+                whitelist: nil,
+                utilityId: nil,
+                tokens: [asset]
+            ),
             xcm: nil,
             nodes: [],
             types: nil,
