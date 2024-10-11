@@ -394,6 +394,19 @@ let package = Package(
                 "SSFPools"
             ]
         ),
+        .target(
+            name: "SSFPrices",
+            dependencies: [
+                .product(name: "Web3", package: "web3-swift"),
+                "SSFModels",
+                "RobinHood",
+                "SSFUtils",
+                "SSFNetwork",
+                "sorawallet",
+                "SoraKeystore",
+                "SSFSingleValueCache"
+            ]
+        ),
 
         //Tests targets
         .testTarget(

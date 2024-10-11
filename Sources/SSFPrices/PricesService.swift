@@ -4,12 +4,11 @@ import RobinHood
 
 protocol PricesServiceProtocol {
     func setup()
-    func updatePrices()
+    func subscribeForPrices(listener: PricesServiceListener)
 }
 
-protocol PricesDataProvider {
-    func getCachedPrices() async
-    func getUpdatedPrices() async
+protocol PricesServiceListener {
+    func didUpdatePrices(for chainAssets: [ChainAsset])
 }
 
 final class PricesService: PricesServiceProtocol {
@@ -20,27 +19,24 @@ final class PricesService: PricesServiceProtocol {
     private let operationQueue: OperationQueue
     private let logger: Logger
     private var pricesProvider: AnySingleValueProvider<[PriceData]>?
-    private let eventCenter: EventCenter
     private var chainAssets: [ChainAsset] = []
     private var currencies: [SSFModels.Currency] = []
     private var lastRequestDate: Date?
+    private var listeners: [PricesServiceListener] = []
 
     private init(
         chainRepository: AnyDataProviderRepository<ChainModel>,
         walletRepository: AnyDataProviderRepository<MetaAccountModel>,
         operationQueue: OperationQueue,
-        logger: Logger,
-        eventCenter: EventCenter
+        logger: Logger
     ) {
         self.chainRepository = chainRepository
         self.walletRepository = walletRepository
         self.operationQueue = operationQueue
         self.logger = logger
-        self.eventCenter = eventCenter
     }
 
     func setup() {
-        eventCenter.add(observer: self)
         let walletsOperation = walletRepository.fetchAllOperation(with: RepositoryFetchOptions())
         let chainsOperation = chainRepository.fetchAllOperation(with: RepositoryFetchOptions())
         let subscribeOperation = ClosureOperation { [weak self] in
@@ -57,7 +53,10 @@ final class PricesService: PricesServiceProtocol {
         operationQueue.addOperations([subscribeOperation, walletsOperation, chainsOperation], waitUntilFinished: false)
     }
 
-    func updatePrices() {
+    func subscribeForPrices(listener: PricesServiceListener) {
+        if !listeners.contains(listener) {
+            listeners.append(listener)
+        }
         pricesProvider?.refresh()
     }
 }
@@ -78,20 +77,10 @@ extension PricesService: PriceLocalSubscriptionHandler {
     }
 }
 
-extension PricesService: EventVisitorProtocol {
-    func processChainSyncDidComplete(event: ChainSyncDidComplete) {
-        let updatedChainAssets = event.newOrUpdatedChains.map(\.chainAssets).reduce([], +).uniq(predicate: { $0.chainAssetId })
-        observePrices(for: updatedChainAssets, currencies: currencies)
-    }
-
-    func processChainsUpdated(event: ChainsUpdatedEvent) {
-        let updatedChainAssets = event.updatedChains.map(\.chainAssets).reduce([], +).uniq(predicate: { $0.chainAssetId })
-        observePrices(for: updatedChainAssets, currencies: currencies)
-    }
-
-    func processMetaAccountChanged(event: MetaAccountModelChangedEvent) {
-        let currency = event.account.selectedCurrency
-        observePrices(for: chainAssets, currencies: [currency])
+extension PricesService: PriceDataSource {
+    func getPrices() async -> [ChainAsset] {
+        self.forceUpdate = true
+        self.pricesProvider?.refresh()
     }
 }
 
@@ -104,8 +93,7 @@ private extension PricesService {
             chainRepository: AnyDataProviderRepository(chainRepository),
             walletRepository: AnyDataProviderRepository(walletRepository),
             operationQueue: OperationQueue(),
-            logger: Logger.shared,
-            eventCenter: EventCenter.shared
+            logger: Logger.shared
         )
     }
 
@@ -153,7 +141,9 @@ private extension PricesService {
             []
         })
         saveOperation.completionBlock = { [weak self] in
-            self?.eventCenter.notify(with: PricesUpdated())
+            self.listeners.forEach { listener in
+                listener.didUpdatePrices(for: chainAssets)
+            }
         }
         operationQueue.addOperation(saveOperation)
     }
