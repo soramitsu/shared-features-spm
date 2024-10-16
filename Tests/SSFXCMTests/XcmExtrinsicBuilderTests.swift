@@ -197,25 +197,30 @@ final class XcmExtrinsicBuilderTests: XCTestCase {
 private extension XcmExtrinsicBuilderTests {
     private enum TestData {
         static let chainModel = ChainModel(
-            rank: 0,
             disabled: false,
             chainId: "0",
-            paraId: "0",
             name: "model",
-            tokens: ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: []),
+            tokens: ChainRemoteTokens(
+                type: .config,
+                whitelist: nil,
+                utilityId: nil,
+                tokens: []
+            ),
             xcm: XcmChain(
                 xcmVersion: .V1,
                 destWeightIsPrimitive: true,
                 availableAssets: [.init(
                     id: "0",
-                    symbol: "0"
+                    symbol: "0", 
+                    minAmount: nil
                 )],
                 availableDestinations: [.init(
                     chainId: "1",
                     bridgeParachainId: "2",
                     assets: [.init(
                         id: "0",
-                        symbol: "0"
+                        symbol: "0", 
+                        minAmount: nil
                     )]
                 )]
             ),
@@ -224,10 +229,14 @@ private extension XcmExtrinsicBuilderTests {
                 name: "node",
                 apikey: nil
             )]),
-
             icon: nil,
             iosMinAppVersion: nil,
-            properties: ChainProperties(addressPrefix: "0")
+            properties: ChainProperties(
+                addressPrefix: "0",
+                rank: "0",
+                paraId: "0"
+            ),
+            identityChain: nil
         )
 
         static let reserveTransferCall = ReserveTransferAssetsCall(

@@ -156,19 +156,29 @@ extension BridgeProxyBurnCallTests {
         static let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("test")
             .appendingPathExtension("json")
-
+        
         static let chain = ChainModel(
-            rank: 1,
             disabled: false,
             chainId: "b0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe",
-            paraId: "1",
             name: "test",
-            tokens: ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: []),
+            tokens: ChainRemoteTokens(
+                type: .config,
+                whitelist: nil,
+                utilityId: nil,
+                tokens: []
+            ),
             xcm: nil,
             nodes: Set([ChainNodeModel(url: TestData.url, name: "test", apikey: nil)]),
             icon: nil,
             iosMinAppVersion: nil,
-            properties: ChainProperties(addressPrefix: "1")
+            properties: .init(
+                addressPrefix: "1",
+                rank: "1",
+                paraId: "1",
+                ethereumBased: true,
+                crowdloans: nil
+            ),
+            identityChain: nil
         )
 
         static let subNetworkId = BridgeTypesSubNetworkId(from: chain)

@@ -54,7 +54,7 @@ final class PricesService: PricesServiceProtocol {
     }
 
     func subscribeForPrices(listener: PricesServiceListener) {
-        if !listeners.contains(listener) {
+        if !listeners.contains(where: listener) {
             listeners.append(listener)
         }
         pricesProvider?.refresh()

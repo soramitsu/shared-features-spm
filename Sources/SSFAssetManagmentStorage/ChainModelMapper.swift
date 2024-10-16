@@ -13,6 +13,9 @@ public final class ChainModelMapper: CoreDataMapperProtocol {
 
     public typealias DataProviderModel = ChainModel
     public typealias CoreDataEntity = CDChain
+    
+    public init() {}
+    
     private func createPriceData(from entity: CDPriceData) -> PriceData? {
         guard let currencyId = entity.currencyId,
               let priceId = entity.priceId,
@@ -119,7 +122,8 @@ public final class ChainModelMapper: CoreDataMapperProtocol {
         from model: ChainModel,
         context: NSManagedObjectContext
     ) {
-        let assets = (model.tokens.tokens ?? []).map { assetModel in
+        let tokens: Set<AssetModel> = model.tokens.tokens ?? []
+        let assets = tokens.compactMap { assetModel in
             let assetEntity = CDAsset(context: context)
             assetEntity.id = assetModel.id
             assetEntity.icon = assetModel.icon
@@ -130,10 +134,10 @@ public final class ChainModelMapper: CoreDataMapperProtocol {
             assetEntity.color = assetModel.tokenProperties?.color
             assetEntity.name = assetModel.name
             assetEntity.currencyId = assetModel.tokenProperties?.currencyId
-            assetEntity.type = assetModel.type?.rawValue
+            assetEntity.type = assetModel.tokenProperties?.type?.rawValue
             assetEntity.isUtility = assetModel.isUtility
-            assetEntity.isNative = assetModel.isNative
-            assetEntity.staking = assetModel.staking?.rawValue
+            assetEntity.isNative = assetModel.tokenProperties?.isNative ?? false
+            assetEntity.staking = assetModel.tokenProperties?.staking?.rawValue
             assetEntity.ethereumType = assetModel.ethereumType?.rawValue
 
             let priceProviderContext = CDPriceProvider(context: context)

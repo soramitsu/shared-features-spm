@@ -34,26 +34,15 @@ extension XcmDestinationTests {
             .appendingPathExtension("json")
 
         static let chain = ChainModel(
-            rank: 1,
             disabled: false,
             chainId: "1",
-            paraId: "1001",
             name: "test",
-            tokens: ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: []),
-            xcm: nil,
-            nodes: Set([ChainNodeModel(url: TestData.url, name: "test", apikey: nil)]),
-            icon: nil,
-            iosMinAppVersion: nil,
-            properties: ChainProperties(addressPrefix: "1")
-        )
-
-        static let errorChain = ChainModel(
-            rank: 1,
-            disabled: false,
-            chainId: "1",
-            paraId: "1",
-            name: "test",
-            tokens: ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: []),
+            tokens: ChainRemoteTokens(
+                type: .config,
+                whitelist: nil,
+                utilityId: nil,
+                tokens: []
+            ),
             xcm: nil,
             nodes: Set([ChainNodeModel(
                 url: TestData.url,
@@ -62,7 +51,36 @@ extension XcmDestinationTests {
             )]),
             icon: nil,
             iosMinAppVersion: nil,
-            properties: ChainProperties(addressPrefix: "1")
+            properties: ChainProperties(
+                addressPrefix: "0",
+                rank: "1"
+            ),
+            identityChain: nil
+        )
+
+        static let errorChain = ChainModel(
+            disabled: false,
+            chainId: "1",
+            name: "test",
+            tokens: ChainRemoteTokens(
+                type: .config,
+                whitelist: nil,
+                utilityId: nil,
+                tokens: []
+            ),
+            xcm: nil,
+            nodes: Set([ChainNodeModel(
+                url: TestData.url,
+                name: "test",
+                apikey: nil
+            )]),
+            icon: nil,
+            iosMinAppVersion: nil,
+            properties: ChainProperties(
+                addressPrefix: "1",
+                rank: "1"
+            ),
+            identityChain: nil
         )
     }
 }

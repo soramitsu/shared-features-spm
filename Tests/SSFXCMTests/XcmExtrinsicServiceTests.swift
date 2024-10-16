@@ -153,10 +153,8 @@ private extension XcmExtrinsicServiceTests {
         )
 
         static let fromChain = ChainModel(
-            rank: 0,
             disabled: false,
             chainId: "0",
-            paraId: "1001",
             name: "test1",
             tokens: ChainRemoteTokens(
                 type: .config,
@@ -168,22 +166,15 @@ private extension XcmExtrinsicServiceTests {
                             id: "0",
                             name: "0",
                             symbol: "0",
-                            isUtility: true,
                             precision: 0,
-                            substrateType: .soraAsset,
-                            ethereumType: nil,
-                            tokenProperties:
-                            TokenProperties(
+                            tokenProperties: TokenProperties(
                                 priceId: "0",
                                 currencyId: "0",
                                 color: "0",
                                 type: .soraAsset,
                                 isNative: true
                             ),
-                            price: nil,
-                            priceId: nil,
-                            coingeckoPriceId: nil,
-                            priceProvider: nil
+                            isUtility: true
                         ),
                     ]
                 )
@@ -193,14 +184,16 @@ private extension XcmExtrinsicServiceTests {
                 destWeightIsPrimitive: true,
                 availableAssets: [.init(
                     id: "0",
-                    symbol: "0"
+                    symbol: "0", 
+                    minAmount: nil
                 )],
                 availableDestinations: [.init(
                     chainId: "0",
                     bridgeParachainId: "2",
                     assets: [.init(
                         id: "1",
-                        symbol: "1"
+                        symbol: "1",
+                        minAmount: nil
                     )]
                 )]
             ),
@@ -211,7 +204,12 @@ private extension XcmExtrinsicServiceTests {
             )]),
             icon: nil,
             iosMinAppVersion: nil,
-            properties: ChainProperties(addressPrefix: "0")
+            properties: ChainProperties(
+                addressPrefix: "0",
+                rank: "0",
+                paraId: "1001"
+            ),
+            identityChain: nil
         )
 
         static let paths: [XcmCallPath] = [

@@ -14,9 +14,9 @@ final class OklinkHistoryRequest: RequestConfig {
         ]
 
         var headers: [HTTPHeader]?
-        if let apiKey = chainAsset.chain.externalApi?.history?.apiKey {
-            headers?.append(HTTPHeader(field: "Ok-Access-Key", value: apiKey))
-        }
+//        if let apiKey = chainAsset.chain.externalApi?.history?.apiKey {
+//            headers?.append(HTTPHeader(field: "Ok-Access-Key", value: apiKey))
+//        }
 
         super.init(
             baseURL: baseUrl,

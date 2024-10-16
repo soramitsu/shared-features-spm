@@ -173,10 +173,8 @@ final class XcmChainsConfigFetcherTests: XCTestCase {
 extension XcmChainsConfigFetcherTests {
     enum TestData {
         static let firstChain = ChainModel(
-            rank: 0,
             disabled: false,
             chainId: "0",
-            paraId: "1001",
             name: "test1",
             tokens: ChainRemoteTokens(
                 type: .config,
@@ -189,14 +187,16 @@ extension XcmChainsConfigFetcherTests {
                 destWeightIsPrimitive: true,
                 availableAssets: [.init(
                     id: "0",
-                    symbol: "0"
+                    symbol: "0", 
+                    minAmount: nil
                 )],
                 availableDestinations: [.init(
                     chainId: "0",
                     bridgeParachainId: "2",
                     assets: [.init(
                         id: "1",
-                        symbol: "1"
+                        symbol: "1",
+                        minAmount: nil
                     )]
                 )]
             ),
@@ -207,14 +207,13 @@ extension XcmChainsConfigFetcherTests {
             )]),
             icon: nil,
             iosMinAppVersion: nil,
-            properties: ChainProperties(addressPrefix: "0")
+            properties: ChainProperties(addressPrefix: "0"),
+            identityChain: nil
         )
 
         static let secondChain = ChainModel(
-            rank: 1,
             disabled: false,
             chainId: "1",
-            paraId: "1002",
             name: "test2",
             tokens: ChainRemoteTokens(
                 type: .config,
@@ -227,12 +226,17 @@ extension XcmChainsConfigFetcherTests {
                 destWeightIsPrimitive: true,
                 availableAssets: [.init(
                     id: "1",
-                    symbol: "1"
+                    symbol: "1",
+                    minAmount: nil
                 )],
                 availableDestinations: [.init(
                     chainId: "1",
                     bridgeParachainId: "2",
-                    assets: [.init(id: "0", symbol: "0")]
+                    assets: [.init(
+                        id: "0",
+                        symbol: "0",
+                        minAmount: nil
+                    )]
                 )]
             ),
             nodes: Set([ChainNodeModel(
@@ -242,14 +246,16 @@ extension XcmChainsConfigFetcherTests {
             )]),
             icon: nil,
             iosMinAppVersion: nil,
-            properties: ChainProperties(addressPrefix: "1")
+            properties: ChainProperties(
+                addressPrefix: "1",
+                paraId: "1002"
+            ),
+            identityChain: nil
         )
-
+        
         static let errorChain = ChainModel(
-            rank: 2,
             disabled: false,
             chainId: "2",
-            paraId: "1",
             name: "test3",
             tokens: ChainRemoteTokens(
                 type: .config,
@@ -265,7 +271,11 @@ extension XcmChainsConfigFetcherTests {
             )]),
             icon: nil,
             iosMinAppVersion: nil,
-            properties: ChainProperties(addressPrefix: "2")
+            properties: ChainProperties(
+                addressPrefix: "2",
+                paraId: "1"
+            ),
+            identityChain: nil
         )
     }
 }

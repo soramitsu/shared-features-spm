@@ -41,7 +41,7 @@ private extension ChainAssetsFetchWorkerTests {
     func prepareRepostory() -> CoreDataRepository<ChainModel, CDChain> {
         let facade = SubstrateStorageTestFacade()
         let apiKeyInjector = ApiKeyInjectorMock()
-        let mapper = ChainModelMapper(apiKeyInjector: apiKeyInjector)
+        let mapper = ChainModelMapper()
 
         let chains: [ChainModel] = (0 ..< 10).map { index in
             ChainModelGenerator.generateChain(

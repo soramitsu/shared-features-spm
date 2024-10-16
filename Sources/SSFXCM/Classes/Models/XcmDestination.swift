@@ -8,7 +8,7 @@ enum XcmChainType {
     case soraMainnet
 
     static func determineChainType(for chain: ChainModel) throws -> XcmChainType {
-        guard let paraId = UInt32(chain.paraId ?? "") else {
+        guard let paraId = UInt32(chain.properties.paraId ?? "") else {
             if chain.knownChainEquivalent == .soraMain || chain.knownChainEquivalent == .soraTest {
                 return .soraMainnet
             }
