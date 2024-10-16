@@ -50,7 +50,8 @@ let package = Package(
         .library(name: "SSFBalances", targets: ["SSFBalances"]),
         .library(name: "SSFBalancesStorage", targets: ["SSFBalancesStorage"]),
         .library(name: "SSFSubstrateBalances", targets: ["SSFSubstrateBalances"]),
-        .library(name: "SSFTransactionHistory", targets: ["SSFTransactionHistory"])
+        .library(name: "SSFTransactionHistory", targets: ["SSFTransactionHistory"]),
+        .library(name: "SSFPrices", targets: ["SSFPrices"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
@@ -397,14 +398,6 @@ let package = Package(
         .target(
             name: "SSFPrices",
             dependencies: [
-                .product(name: "Web3", package: "web3-swift"),
-                "SSFModels",
-                "RobinHood",
-                "SSFUtils",
-                "SSFNetwork",
-                "sorawallet",
-                "SoraKeystore",
-                "SSFSingleValueCache"
             ]
         ),
 

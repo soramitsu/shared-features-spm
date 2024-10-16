@@ -13,9 +13,9 @@ public final class ChainModelMapper: CoreDataMapperProtocol {
 
     public typealias DataProviderModel = ChainModel
     public typealias CoreDataEntity = CDChain
-    
+
     public init() {}
-    
+
     private func createPriceData(from entity: CDPriceData) -> PriceData? {
         guard let currencyId = entity.currencyId,
               let priceId = entity.priceId,
