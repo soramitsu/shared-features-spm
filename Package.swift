@@ -64,7 +64,7 @@ let package = Package(
         .package(url: "https://github.com/daisuke-t-jp/xxHash-Swift", from: "1.1.1"),
         .package(url: "https://github.com/SwiftyBeaver/SwiftyBeaver.git", .upToNextMajor(from: "2.0.0")),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.50.4"),
-        .package(url: "https://github.com/soramitsu/web3-swift", exact: "7.7.7")
+        .package(url: "https://github.com/bnsports/Web3.swift.git", exact: "7.7.7")
     ],
     targets: [
         .binaryTarget(name: "blake2lib", path: "Binaries/blake2lib.xcframework"),
@@ -150,7 +150,7 @@ let package = Package(
         .target(
             name: "SSFChainConnection",
             dependencies: [
-                .product(name: "Web3", package: "web3-swift"),
+                .product(name: "Web3", package: "Web3.swift"),
                 "SSFUtils"
             ]
         ),
@@ -337,7 +337,7 @@ let package = Package(
         .target(
             name: "SSFChainRegistry",
             dependencies: [
-                .product(name: "Web3", package: "web3-swift"),
+                .product(name: "Web3", package: "Web3.swift"),
                 "SSFUtils",
                 "RobinHood",
                 "SSFModels",
@@ -398,6 +398,18 @@ let package = Package(
         .target(
             name: "SSFPrices",
             dependencies: [
+                .product(name: "Web3", package: "Web3.swift"),
+                .product(name: "Web3ContractABI", package: "Web3.swift"),
+                "SSFModels",
+                "RobinHood",
+                "SSFUtils",
+                "SSFNetwork",
+                "sorawallet",
+                "SoraKeystore",
+                "SSFSingleValueCache",
+                "SSFChainRegistry",
+                "SSFIndexers",
+                "SSFAssetManagmentStorage"
             ]
         ),
 
@@ -417,8 +429,8 @@ let package = Package(
             dependencies: ["SSFSingleValueCache"]
         ),
         .target(name: "SSFTransferService", dependencies: [
-            .product(name: "Web3", package: "web3-swift"),
-            .product(name: "Web3ContractABI", package: "web3-swift"),
+            .product(name: "Web3", package: "Web3.swift"),
+            .product(name: "Web3ContractABI", package: "Web3.swift"),
             "SSFModels",
             "BigInt",
             "SSFUtils",
@@ -431,8 +443,8 @@ let package = Package(
         .testTarget(
             name: "SSFTransferServiceTests",
             dependencies: [
-                .product(name: "Web3", package: "web3-swift"),
-                .product(name: "Web3ContractABI", package: "web3-swift"),
+                .product(name: "Web3", package: "Web3.swift"),
+                .product(name: "Web3ContractABI", package: "Web3.swift"),
                 "SSFTransferService",
                 "SSFModels",
                 "BigInt",

@@ -156,7 +156,7 @@ extension BridgeProxyBurnCallTests {
         static let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("test")
             .appendingPathExtension("json")
-        
+
         static let chain = ChainModel(
             disabled: false,
             chainId: "b0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe",

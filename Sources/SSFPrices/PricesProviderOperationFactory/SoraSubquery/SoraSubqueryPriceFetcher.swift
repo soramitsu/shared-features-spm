@@ -1,7 +1,9 @@
 import Foundation
-import SSFModels
 import RobinHood
+import SSFIndexers
+import SSFModels
 import SSFNetwork
+import SSFUtils
 
 enum SubqueryPriceFetcherError: Error {
     case missingBlockExplorer
@@ -29,13 +31,13 @@ final class SoraSubqueryPriceFetcher: SoraSubqueryPriceFetcherProtocol {
             let prices = try await self.fetch(priceIds: priceIds, url: blockExplorer.url)
 
             return prices.compactMap { price in
-                let chainAsset = chainAssets.first(where: { $0.asset.currencyId == price.id })
+                let chainAsset = chainAssets
+                    .first(where: { $0.asset.tokenProperties?.currencyId == price.id })
 
-                guard
-                    let chainAsset = chainAsset,
-                    chainAsset.asset.priceProvider?.type == .sorasubquery,
-                    let priceId = chainAsset.asset.priceId
-                else {
+                guard let chainAsset = chainAsset,
+                      chainAsset.asset.priceProvider?.type == .sorasubquery,
+                      let priceId = chainAsset.asset.priceId else
+                {
                     return nil
                 }
 
@@ -55,8 +57,8 @@ final class SoraSubqueryPriceFetcher: SoraSubqueryPriceFetcherProtocol {
         url: URL
     ) async throws -> [SoraSubqueryPrice] {
         var prices: [SoraSubqueryPrice] = []
-        var cursor: String = ""
-        var allPricesFetched: Bool = false
+        var cursor = ""
+        var allPricesFetched = false
 
         while !allPricesFetched {
             let response = try await loadNewPrices(url: url, priceIds: priceIds, cursor: cursor)
@@ -78,7 +80,8 @@ final class SoraSubqueryPriceFetcher: SoraSubqueryPriceFetcherProtocol {
             query: queryString(priceIds: priceIds, cursor: cursor)
         )
         let worker = NetworkWorkerDefault()
-        let response: GraphQLResponse<SoraSubqueryPriceResponse> = try await worker.performRequest(with: request)
+        let response: GraphQLResponse<SoraSubqueryPriceResponse> = try await worker
+            .performRequest(with: request)
 
         switch response {
         case let .data(data):

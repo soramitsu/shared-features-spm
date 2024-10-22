@@ -126,7 +126,7 @@ private extension AccountManagementServiceTests {
             ),
             identityChain: nil
         )
-        
+
         static let asset = AssetModel(
             id: "2",
             name: "test",

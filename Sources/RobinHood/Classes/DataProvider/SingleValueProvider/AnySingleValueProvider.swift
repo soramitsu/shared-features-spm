@@ -1,7 +1,7 @@
 import Foundation
 
-class AnySingleValueProvider<T>: SingleValueProviderProtocol {
-    typealias Model = T
+public class AnySingleValueProvider<T>: SingleValueProviderProtocol {
+    public typealias Model = T
 
     private let fetchClosure: (((Result<T?, Error>?) -> Void)?) -> CompoundOperationWrapper<T?>
 
@@ -17,9 +17,9 @@ class AnySingleValueProvider<T>: SingleValueProviderProtocol {
 
     private let refreshClosure: () -> Void
 
-    private(set) var executionQueue: OperationQueue
+    public var executionQueue: OperationQueue
 
-    init<U: SingleValueProviderProtocol>(_ dataProvider: U) where U.Model == Model {
+    public init<U: SingleValueProviderProtocol>(_ dataProvider: U) where U.Model == Model {
         fetchClosure = dataProvider.fetch(with:)
         addObserverClosure = dataProvider.addObserver
         removeObserverClosure = dataProvider.removeObserver
@@ -27,13 +27,13 @@ class AnySingleValueProvider<T>: SingleValueProviderProtocol {
         executionQueue = dataProvider.executionQueue
     }
 
-    func fetch(with completionBlock: ((Result<T?, Error>?) -> Void)?)
+    public func fetch(with completionBlock: ((Result<T?, Error>?) -> Void)?)
         -> CompoundOperationWrapper<T?>
     {
         fetchClosure(completionBlock)
     }
 
-    func addObserver(
+    public func addObserver(
         _ observer: AnyObject,
         deliverOn queue: DispatchQueue?,
         executing updateBlock: @escaping ([DataProviderChange<Model>]) -> Void,
@@ -43,11 +43,11 @@ class AnySingleValueProvider<T>: SingleValueProviderProtocol {
         addObserverClosure(observer, queue, updateBlock, failureBlock, options)
     }
 
-    func removeObserver(_ observer: AnyObject) {
+    public func removeObserver(_ observer: AnyObject) {
         removeObserverClosure(observer)
     }
 
-    func refresh() {
+    public func refresh() {
         refreshClosure()
     }
 }

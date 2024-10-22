@@ -1,8 +1,8 @@
 import Foundation
-import SSFUtils
 import RobinHood
 import SSFModels
 import SSFNetwork
+import SSFUtils
 
 class SoraSubqueryPricesRequest: RequestConfig {
     init(
@@ -13,7 +13,7 @@ class SoraSubqueryPricesRequest: RequestConfig {
             HTTPHeader(
                 field: HttpHeaderKey.contentType.rawValue,
                 value: HttpContentType.json.rawValue
-            )
+            ),
         ]
 
         let info = JSON.dictionaryValue(["query": JSON.stringValue(query)])

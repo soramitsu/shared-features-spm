@@ -211,7 +211,7 @@ private extension XcmExtrinsicBuilderTests {
                 destWeightIsPrimitive: true,
                 availableAssets: [.init(
                     id: "0",
-                    symbol: "0", 
+                    symbol: "0",
                     minAmount: nil
                 )],
                 availableDestinations: [.init(
@@ -219,7 +219,7 @@ private extension XcmExtrinsicBuilderTests {
                     bridgeParachainId: "2",
                     assets: [.init(
                         id: "0",
-                        symbol: "0", 
+                        symbol: "0",
                         minAmount: nil
                     )]
                 )]

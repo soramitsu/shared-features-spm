@@ -1,7 +1,10 @@
 import Foundation
-import Web3
-import SSFModels
 import RobinHood
+import SSFChainRegistry
+import SSFModels
+import SSFNetwork
+import SSFUtils
+import Web3
 import Web3ContractABI
 
 protocol ChainlinkOperationFactoryProtocol {
@@ -9,9 +12,11 @@ protocol ChainlinkOperationFactoryProtocol {
 }
 
 final class ChainlinkOperationFactory: ChainlinkOperationFactoryProtocol {
-    private lazy var chainRegistry: ChainRegistryProtocol = {
-        ChainRegistryFacade.sharedRegistry
-    }()
+    private let chainRegistry: ChainRegistryProtocol
+
+    init(chainRegistry: ChainRegistryProtocol) {
+        self.chainRegistry = chainRegistry
+    }
 
     func priceCall(for chainAsset: ChainAsset, connection: Web3.Eth?) -> BaseOperation<PriceData>? {
         let operation = ManualOperation<PriceData>()
@@ -21,7 +26,9 @@ final class ChainlinkOperationFactory: ChainlinkOperationFactoryProtocol {
                 throw ConvenienceError(error: "Missing price contract address")
             }
             guard let ws = connection else {
-                throw ConvenienceError(error: "Can't get ethereum connection for chain: \(chainAsset.chain.name)")
+                throw ConvenienceError(
+                    error: "Can't get ethereum connection for chain: \(chainAsset.chain.name)"
+                )
             }
 
             let receiverAddress = try EthereumAddress(rawAddress: contract.hexToBytes())
@@ -31,7 +38,7 @@ final class ChainlinkOperationFactory: ChainlinkOperationFactoryProtocol {
                 ABI.Element.InOut(name: "answer", type: .int(bits: 256)),
                 ABI.Element.InOut(name: "startedAt", type: .int(bits: 256)),
                 ABI.Element.InOut(name: "updatedAt", type: .int(bits: 256)),
-                ABI.Element.InOut(name: "answeredInRound", type: .uint(bits: 80))
+                ABI.Element.InOut(name: "answeredInRound", type: .uint(bits: 80)),
             ]
             let method = ABI.Element.Function(
                 name: "latestRoundData",
@@ -40,20 +47,25 @@ final class ChainlinkOperationFactory: ChainlinkOperationFactoryProtocol {
                 constant: false,
                 payable: false
             )
-            let priceCall = EthereumCall(
+            let priceCall = try EthereumCall(
                 to: receiverAddress,
                 value: EthereumQuantity(quantity: .zero),
-                data: try EthereumData(ethereumValue: .string(method.methodString))
+                data: EthereumData(ethereumValue: .string(method.methodString))
             )
             ws.call(call: priceCall, block: .latest) { resp in
                 switch resp.status {
                 case let .success(result):
-                    let decoded = ABIDecoder.decode(types: outputs, data: Data(hex: result.hex()))
-                    guard
-                        let price = decoded?[safe: 1] as? BigInt,
-                        let precision = chainAsset.asset.priceProvider?.precision,
-                        let priceDecimal = Decimal.fromSubstrateAmount(BigUInt(price), precision: precision)
-                    else {
+                    let decoded = ABIDecoder.decode(
+                        types: outputs,
+                        data: Data(hex: result.hex())
+                    )
+                    guard let price: BigInt = decoded?[safe: 1] as? BigInt,
+                          let precision = chainAsset.asset.priceProvider?.precision,
+                          let priceDecimal = Decimal.fromSubstrateAmount(
+                              BigUInt(price),
+                              precision: precision
+                          ) else
+                    {
                         let error = ConvenienceError(error: "Decoding price error")
                         operation.result = .failure(error)
                         operation.finish()
@@ -78,7 +90,6 @@ final class ChainlinkOperationFactory: ChainlinkOperationFactoryProtocol {
         } catch {
             operation.result = .failure(error)
             operation.finish()
-            Logger.shared.customError(error)
             return nil
         }
 

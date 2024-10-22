@@ -3,14 +3,14 @@ import RobinHood
 import SSFModels
 import SSFUtils
 
-final class ChainRepositoryFactory {
+public final class ChainRepositoryFactory {
     let storageFacade: StorageFacadeProtocol
 
-    init(storageFacade: StorageFacadeProtocol = SubstrateDataStorageFacade.shared!) {
+    public init(storageFacade: StorageFacadeProtocol = SubstrateDataStorageFacade.shared!) {
         self.storageFacade = storageFacade
     }
 
-    func createRepository(
+    public func createRepository(
         for filter: NSPredicate? = nil,
         sortDescriptors: [NSSortDescriptor] = []
     ) -> CoreDataRepository<ChainModel, CDChain> {
@@ -22,7 +22,7 @@ final class ChainRepositoryFactory {
         )
     }
 
-    func createAsyncRepository(
+    public func createAsyncRepository(
         for filter: NSPredicate? = nil,
         sortDescriptors: [NSSortDescriptor] = []
     ) -> AsyncCoreDataRepositoryDefault<ChainModel, CDChain> {

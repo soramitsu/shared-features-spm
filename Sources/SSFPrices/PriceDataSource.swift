@@ -1,7 +1,8 @@
 import Foundation
-import sorawallet
 import RobinHood
 import SoraKeystore
+import sorawallet
+import SSFChainRegistry
 import SSFModels
 
 enum PriceDataSourceError: Swift.Error {
@@ -20,17 +21,14 @@ final class PriceDataSource: SingleValueProviderSourceProtocol {
     private let chainRegistry: ChainRegistryProtocol
     private var currencies: [Currency]?
 
-    private lazy var coingeckoOperationFactory: CoingeckoOperationFactoryProtocol = {
+    private lazy var coingeckoOperationFactory: CoingeckoOperationFactoryProtocol =
         CoingeckoOperationFactory()
-    }()
 
-    private lazy var chainlinkOperationFactory: ChainlinkOperationFactoryProtocol = {
-        ChainlinkOperationFactory()
-    }()
+    private lazy var chainlinkOperationFactory: ChainlinkOperationFactoryProtocol =
+        ChainlinkOperationFactory(chainRegistry: chainRegistry)
 
-    private lazy var soraOperationFactory: SoraSubqueryPriceFetcherProtocol = {
+    private lazy var soraOperationFactory: SoraSubqueryPriceFetcherProtocol =
         SoraSubqueryPriceFetcher()
-    }()
 
     private lazy var chainAssets: [ChainAsset] = []
 
@@ -40,10 +38,8 @@ final class PriceDataSource: SingleValueProviderSourceProtocol {
         chainRegistry: ChainRegistryProtocol = ChainRegistryAssembly.createDefaultRegistry()
     ) {
         self.currencies = currencies
-        self.chainAssets = chainAssets
         self.chainRegistry = chainRegistry
-
-        setup()
+        self.chainAssets = chainAssets
     }
 
     func fetchOperation() -> CompoundOperationWrapper<[PriceData]?> {
@@ -52,7 +48,7 @@ final class PriceDataSource: SingleValueProviderSourceProtocol {
         }
 
         let coingeckoOperation = createCoingeckoOperation()
-        let chainlinkOperations = createChainlinkOperations()
+//        let chainlinkOperations = createChainlinkOperations()
         let soraSubqueryOperation = createSoraSubqueryOperation()
 
         let targetOperation: BaseOperation<[PriceData]?> = ClosureOperation { [weak self] in
@@ -62,10 +58,14 @@ final class PriceDataSource: SingleValueProviderSourceProtocol {
 
             var prices: [PriceData] = []
             let coingeckoPrices = try coingeckoOperation.extractNoCancellableResultData()
-            let chainlinkPrices = chainlinkOperations.compactMap {
-                try? $0.extractNoCancellableResultData()
-            }
-            let soraSubqueryPrices = (try? soraSubqueryOperation.extractNoCancellableResultData()) ?? []
+            let chainlinkPrices: [PriceData] = []
+//            let chainlinkPrices = chainlinkOperations.compactMap {
+//                try? $0.extractNoCancellableResultData()
+//            }
+            let soraSubqueryPrices = (
+                try? soraSubqueryOperation.extractNoCancellableResultData()
+            ) ??
+                []
 
             prices = self.merge(coingeckoPrices: coingeckoPrices, chainlinkPrices: chainlinkPrices)
             prices = self.merge(coingeckoPrices: prices, soraSubqueryPrices: soraSubqueryPrices)
@@ -75,13 +75,14 @@ final class PriceDataSource: SingleValueProviderSourceProtocol {
 
         targetOperation.addDependency(coingeckoOperation)
         targetOperation.addDependency(soraSubqueryOperation)
-        chainlinkOperations.forEach {
-            targetOperation.addDependency($0)
-        }
+//        chainlinkOperations.forEach {
+//            targetOperation.addDependency($0)
+//        }
 
         return CompoundOperationWrapper(
             targetOperation: targetOperation,
-            dependencies: [coingeckoOperation, soraSubqueryOperation] + chainlinkOperations
+            dependencies: [coingeckoOperation, soraSubqueryOperation]
+//            + chainlinkOperations
         )
     }
 
@@ -96,7 +97,8 @@ final class PriceDataSource: SingleValueProviderSourceProtocol {
         let sqPriceIds = Set(chainlinkPrices.compactMap { $0.coingeckoPriceId })
 
         let replacedFiatDayChange: [PriceData] = chainlinkPrices.compactMap { chainlinkPrice in
-            let coingeckoPrice = coingeckoPrices.first(where: { $0.coingeckoPriceId == chainlinkPrice.coingeckoPriceId })
+            let coingeckoPrice = coingeckoPrices
+                .first(where: { $0.coingeckoPriceId == chainlinkPrice.coingeckoPriceId })
             return chainlinkPrice.replaceFiatDayChange(fiatDayChange: coingeckoPrice?.fiatDayChange)
         }
 
@@ -110,7 +112,10 @@ final class PriceDataSource: SingleValueProviderSourceProtocol {
         return filtered + replacedFiatDayChange
     }
 
-    private func merge(coingeckoPrices: [PriceData], soraSubqueryPrices: [PriceData]) -> [PriceData] {
+    private func merge(
+        coingeckoPrices: [PriceData],
+        soraSubqueryPrices: [PriceData]
+    ) -> [PriceData] {
         if soraSubqueryPrices.isEmpty {
             let prices = makePrices(from: coingeckoPrices, for: .sorasubquery)
             return coingeckoPrices + prices
@@ -119,7 +124,8 @@ final class PriceDataSource: SingleValueProviderSourceProtocol {
         let sqPriceIds = Set(soraSubqueryPrices.compactMap { $0.priceId })
 
         let filtered = coingeckoPrices.filter { coingeckoPrice in
-            let chainAsset = chainAssets.first { $0.asset.coingeckoPriceId == coingeckoPrice.priceId }
+            let chainAsset = chainAssets
+                .first { $0.asset.coingeckoPriceId == coingeckoPrice.priceId }
             guard let priceId = chainAsset?.asset.priceId else {
                 return true
             }
@@ -129,7 +135,10 @@ final class PriceDataSource: SingleValueProviderSourceProtocol {
         return filtered + soraSubqueryPrices
     }
 
-    private func makePrices(from coingeckoPrices: [PriceData], for type: PriceProviderType) -> [PriceData] {
+    private func makePrices(
+        from coingeckoPrices: [PriceData],
+        for type: PriceProviderType
+    ) -> [PriceData] {
         let typePriceChainAsset = chainAssets
             .filter { $0.asset.priceProvider?.type == type }
 
@@ -140,7 +149,9 @@ final class PriceDataSource: SingleValueProviderSourceProtocol {
         }
 
         let newPrices: [PriceData] = prices.compactMap { price in
-            guard let chainAsset = typePriceChainAsset.first(where: { $0.asset.coingeckoPriceId == price.coingeckoPriceId }) else {
+            guard let chainAsset = typePriceChainAsset
+                .first(where: { $0.asset.coingeckoPriceId == price.coingeckoPriceId }) else
+            {
                 return nil
             }
             return PriceData(
@@ -171,7 +182,9 @@ final class PriceDataSource: SingleValueProviderSourceProtocol {
     }
 
     private func createCoingeckoOperation() -> BaseOperation<[PriceData]> {
-        let currencies = self.currencies ?? [SelectedWalletSettings.shared.value?.selectedCurrency].compactMap { $0 }
+//        let currencies = self.currencies ??
+//        [SelectedWalletSettings.shared.value?.selectedCurrency]
+//            .compactMap { $0 }
         let priceIds = chainAssets
             .map { $0.asset.coingeckoPriceId }
             .compactMap { $0 }
@@ -179,23 +192,30 @@ final class PriceDataSource: SingleValueProviderSourceProtocol {
         guard priceIds.isNotEmpty else {
             return BaseOperation.createWithResult([])
         }
-        let operation = coingeckoOperationFactory.fetchPriceOperation(for: priceIds, currencies: currencies)
+        let operation = coingeckoOperationFactory.fetchPriceOperation(
+            for: priceIds,
+            currencies: []
+//                currencies
+        )
         return operation
     }
 
-    private func createChainlinkOperations() -> [BaseOperation<PriceData>] {
-        guard currencies?.count == 1, currencies?.first?.id == Currency.defaultCurrency().id else {
-            return []
-        }
-
-        let chainlinkProvider = chainAssets.map { $0.chain }.first(where: { $0.options?.contains(.chainlinkProvider) == true })
-        let connection = chainlinkProvider.flatMap { chainRegistry.getEthereumConnection(for: $0.chainId) }
-
-        let chainlinkPriceChainAsset = chainAssets
-            .filter { $0.asset.priceProvider?.type == .chainlink }
-
-        let operations = chainlinkPriceChainAsset
-            .map { chainlinkOperationFactory.priceCall(for: $0, connection: connection) }
-        return operations.compactMap { $0 }
-    }
+//    private func createChainlinkOperations() -> [BaseOperation<PriceData>] {
+//        guard currencies?.count == 1, currencies?.first?.id == Currency.defaultCurrency().id else
+//        {
+//            return []
+//        }
+//
+//        let chainlinkProvider = chainAssets.map { $0.chain }
+//            .first(where: { $0.options?.contains(.chainlinkProvider) == true })
+//        let connection = chainlinkProvider
+//            .flatMap { chainRegistry.getEthereumConnection(for: $0) }
+//
+//        let chainlinkPriceChainAsset = chainAssets
+//            .filter { $0.asset.priceProvider?.type == .chainlink }
+//
+//        let operations = chainlinkPriceChainAsset
+//            .map { chainlinkOperationFactory.priceCall(for: $0, connection: connection) }
+//        return operations.compactMap { $0 }
+//    }
 }

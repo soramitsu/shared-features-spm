@@ -256,7 +256,7 @@ extension XcmCallFactoryTests {
                 bridgeParachainId: "2",
                 assets: [.init(
                     id: "0",
-                    symbol: "0", 
+                    symbol: "0",
                     minAmount: nil
                 )]
             )]

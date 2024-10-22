@@ -2,7 +2,7 @@ import Foundation
 import RobinHood
 import SSFModels
 
-struct CoingeckoAPI {
+enum CoingeckoAPI {
     static let baseURL = URL(string: "https://api.coingecko.com/api/v3")!
     static let price = "simple/price"
 }
@@ -31,7 +31,7 @@ final class CoingeckoOperationFactory {
         components.queryItems = [
             URLQueryItem(name: "ids", value: tokenIDParam),
             URLQueryItem(name: "vs_currencies", value: currencyParam),
-            URLQueryItem(name: "include_24hr_change", value: "true")
+            URLQueryItem(name: "include_24hr_change", value: "true"),
         ]
 
         return components.url

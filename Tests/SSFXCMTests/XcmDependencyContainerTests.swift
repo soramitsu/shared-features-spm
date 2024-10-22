@@ -76,7 +76,7 @@ extension XcmDependencyContainerTests {
                 destWeightIsPrimitive: true,
                 availableAssets: [.init(
                     id: "0",
-                    symbol: "0", 
+                    symbol: "0",
                     minAmount: nil
                 )],
                 availableDestinations: [.init(

@@ -187,7 +187,7 @@ extension XcmChainsConfigFetcherTests {
                 destWeightIsPrimitive: true,
                 availableAssets: [.init(
                     id: "0",
-                    symbol: "0", 
+                    symbol: "0",
                     minAmount: nil
                 )],
                 availableDestinations: [.init(
@@ -252,7 +252,7 @@ extension XcmChainsConfigFetcherTests {
             ),
             identityChain: nil
         )
-        
+
         static let errorChain = ChainModel(
             disabled: false,
             chainId: "2",
