@@ -239,33 +239,33 @@ public final class ChainModel: Codable, Identifiable {
     public func seedTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
         switch ecosystem {
         case .substrate:
-            KeystoreTagV2.substrateSeedTagForMetaId(metaId, accountId: accountId)
+            return KeystoreTagV2.substrateSeedTagForMetaId(metaId, accountId: accountId)
         case .ethereum, .ethereumBased:
-            KeystoreTagV2.ethereumSecretKeyTagForMetaId(metaId, accountId: accountId)
+            return KeystoreTagV2.ethereumSecretKeyTagForMetaId(metaId, accountId: accountId)
         case .ton:
-            KeystoreTagV2.tonSecretKeyTagForMetaId(metaId, accountId: accountId)
+            return KeystoreTagV2.tonSecretKeyTagForMetaId(metaId, accountId: accountId)
         }
     }
 
     public func keystoreTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
         switch ecosystem {
         case .substrate:
-            KeystoreTagV2.substrateSecretKeyTagForMetaId(metaId, accountId: accountId)
+            return KeystoreTagV2.substrateSecretKeyTagForMetaId(metaId, accountId: accountId)
         case .ethereum, .ethereumBased:
-            KeystoreTagV2.ethereumSecretKeyTagForMetaId(metaId, accountId: accountId)
+            return KeystoreTagV2.ethereumSecretKeyTagForMetaId(metaId, accountId: accountId)
         case .ton:
-            KeystoreTagV2.tonSecretKeyTagForMetaId(metaId, accountId: accountId)
+            return KeystoreTagV2.tonSecretKeyTagForMetaId(metaId, accountId: accountId)
         }
     }
 
     public func derivationTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
         switch ecosystem {
         case .substrate:
-            KeystoreTagV2.substrateDerivationTagForMetaId(metaId, accountId: accountId)
+            return KeystoreTagV2.substrateDerivationTagForMetaId(metaId, accountId: accountId)
         case .ethereum, .ethereumBased:
-            KeystoreTagV2.ethereumDerivationTagForMetaId(metaId, accountId: accountId)
+            return KeystoreTagV2.ethereumDerivationTagForMetaId(metaId, accountId: accountId)
         case .ton:
-            KeystoreTagV2.tonDerivationTagForMetaId(metaId, accountId: accountId)
+            return KeystoreTagV2.tonDerivationTagForMetaId(metaId, accountId: accountId)
         }
     }
 
