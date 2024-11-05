@@ -7,14 +7,14 @@ enum CoingeckoAPI {
     static let price = "simple/price"
 }
 
-protocol CoingeckoOperationFactoryProtocol {
+public protocol CoingeckoOperationFactoryProtocol {
     func fetchPriceOperation(
         for tokenIds: [String],
         currencies: [Currency]
     ) -> BaseOperation<[PriceData]>
 }
 
-final class CoingeckoOperationFactory {
+public final class CoingeckoOperationFactory {
     private func buildURLForAssets(
         _ tokenIds: [String],
         method: String,
@@ -39,7 +39,7 @@ final class CoingeckoOperationFactory {
 }
 
 extension CoingeckoOperationFactory: CoingeckoOperationFactoryProtocol {
-    func fetchPriceOperation(
+    public func fetchPriceOperation(
         for tokenIds: [String],
         currencies: [Currency]
     ) -> BaseOperation<[PriceData]> {

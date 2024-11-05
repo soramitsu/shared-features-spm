@@ -8,6 +8,7 @@
 
 import BigInt
 import Foundation
+import SSFUtils
 
 extension BigInt {
     func toTwosComplement() -> Data {

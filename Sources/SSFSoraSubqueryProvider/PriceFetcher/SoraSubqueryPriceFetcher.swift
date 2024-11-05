@@ -9,14 +9,14 @@ enum SubqueryPriceFetcherError: Error {
     case missingBlockExplorer
 }
 
-protocol SoraSubqueryPriceFetcherProtocol {
+public protocol SoraSubqueryPriceFetcherProtocol {
     func fetchPriceOperation(
         for chainAssets: [ChainAsset]
     ) -> BaseOperation<[PriceData]>
 }
 
-final class SoraSubqueryPriceFetcher: SoraSubqueryPriceFetcherProtocol {
-    func fetchPriceOperation(
+public final class SoraSubqueryPriceFetcher: SoraSubqueryPriceFetcherProtocol {
+    public func fetchPriceOperation(
         for chainAssets: [ChainAsset]
     ) -> BaseOperation<[PriceData]> {
         AwaitOperation { [weak self] in

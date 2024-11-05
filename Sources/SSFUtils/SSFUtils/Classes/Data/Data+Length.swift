@@ -8,7 +8,7 @@
 
 import Foundation
 
-extension Data {
+public extension Data {
     mutating func setLength(_ length: Int, appendFromLeft: Bool = true, negative: Bool = false) {
         guard count < length else {
             return

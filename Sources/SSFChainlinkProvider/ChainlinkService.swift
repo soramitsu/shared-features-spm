@@ -2,12 +2,13 @@ import RobinHood
 import SSFChainRegistry
 import SSFModels
 import SSFUtils
+import SSFPrices
 
 public final class ChainlinkService: PriceProviderServiceProtocol {
     private let chainlinkOperationFactory: ChainlinkOperationFactoryProtocol
     private let chainRegistry: ChainRegistryProtocol
 
-    init(
+    public init(
         chainlinkOperationFactory: ChainlinkOperationFactory,
         chainRegistry: ChainRegistryProtocol
     ) {
@@ -15,7 +16,7 @@ public final class ChainlinkService: PriceProviderServiceProtocol {
         self.chainRegistry = chainRegistry
     }
 
-    func getPrices(for chainAssets: [ChainAsset], currencies: [Currency]) async -> [PriceData] {
+    public func getPrices(for chainAssets: [ChainAsset], currencies: [Currency]) async -> [PriceData] {
         let operations = await createChainlinkOperations(for: chainAssets, currencies: currencies)
         return operations.compactMap {
             try? $0.extractNoCancellableResultData()

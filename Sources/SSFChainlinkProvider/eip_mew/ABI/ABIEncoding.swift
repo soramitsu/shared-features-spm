@@ -6,6 +6,7 @@
 import BigInt
 import CryptoSwift
 import Foundation
+import SSFUtils
 
 // swiftlint:disable identifier_name
 

@@ -51,7 +51,10 @@ let package = Package(
         .library(name: "SSFBalancesStorage", targets: ["SSFBalancesStorage"]),
         .library(name: "SSFSubstrateBalances", targets: ["SSFSubstrateBalances"]),
         .library(name: "SSFTransactionHistory", targets: ["SSFTransactionHistory"]),
-        .library(name: "SSFPrices", targets: ["SSFPrices"])
+        .library(name: "SSFPrices", targets: ["SSFPrices"]),
+        .library(name: "SSFChainlinkProvider", targets: ["SSFChainlinkProvider"]),
+        .library(name: "SSFCoingeckoProvider", targets: ["SSFCoingeckoProvider"]),
+        .library(name: "SSFSoraSubqueryProvider", targets: ["SSFSoraSubqueryProvider"]),
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
@@ -398,18 +401,42 @@ let package = Package(
         .target(
             name: "SSFPrices",
             dependencies: [
+                "SSFModels",
+                "RobinHood",
+                "SSFAssetManagment"
+            ]
+        ),
+        .target(
+            name: "SSFChainlinkProvider",
+            dependencies: [
                 .product(name: "Web3", package: "Web3.swift"),
                 .product(name: "Web3ContractABI", package: "Web3.swift"),
+                "SSFPrices",
                 "SSFModels",
                 "RobinHood",
                 "SSFUtils",
                 "SSFNetwork",
-                "sorawallet",
-                "SoraKeystore",
-                "SSFSingleValueCache",
                 "SSFChainRegistry",
+            ]
+        ),
+        .target(
+            name: "SSFCoingeckoProvider",
+            dependencies: [
+                "SSFPrices",
+                "SSFModels",
+                "RobinHood",
+                "SSFUtils",
+            ]
+        ),
+        .target(
+            name: "SSFSoraSubqueryProvider",
+            dependencies: [
+                "SSFPrices",
+                "SSFModels",
+                "RobinHood",
+                "SSFUtils",
                 "SSFIndexers",
-                "SSFAssetManagmentStorage"
+                "SSFNetwork"
             ]
         ),
 

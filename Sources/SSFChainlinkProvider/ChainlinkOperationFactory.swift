@@ -7,18 +7,18 @@ import SSFUtils
 import Web3
 import Web3ContractABI
 
-protocol ChainlinkOperationFactoryProtocol {
+public protocol ChainlinkOperationFactoryProtocol {
     func priceCall(for chainAsset: ChainAsset, connection: Web3.Eth?) -> BaseOperation<PriceData>?
 }
 
-final class ChainlinkOperationFactory: ChainlinkOperationFactoryProtocol {
+public final class ChainlinkOperationFactory: ChainlinkOperationFactoryProtocol {
     private let chainRegistry: ChainRegistryProtocol
 
-    init(chainRegistry: ChainRegistryProtocol) {
+    public init(chainRegistry: ChainRegistryProtocol) {
         self.chainRegistry = chainRegistry
     }
 
-    func priceCall(for chainAsset: ChainAsset, connection: Web3.Eth?) -> BaseOperation<PriceData>? {
+    public func priceCall(for chainAsset: ChainAsset, connection: Web3.Eth?) -> BaseOperation<PriceData>? {
         let operation = ManualOperation<PriceData>()
 
         do {

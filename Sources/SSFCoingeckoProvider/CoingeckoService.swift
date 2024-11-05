@@ -1,15 +1,16 @@
 import RobinHood
 import SSFModels
 import SSFUtils
+import SSFPrices
 
-final class CoingeckoService: PriceProviderServiceProtocol {
+public final class CoingeckoService: PriceProviderServiceProtocol {
     let coingeckoOperationFactory: CoingeckoOperationFactoryProtocol
 
-    init(coingeckoOperationFactory: CoingeckoOperationFactoryProtocol) {
+    public init(coingeckoOperationFactory: CoingeckoOperationFactoryProtocol) {
         self.coingeckoOperationFactory = coingeckoOperationFactory
     }
 
-    func getPrices(for chainAssets: [ChainAsset], currencies: [Currency]) async -> [PriceData] {
+    public func getPrices(for chainAssets: [ChainAsset], currencies: [Currency]) async -> [PriceData] {
         let operation = createCoingeckoOperation(for: chainAssets, currencies: currencies)
         do {
             return try operation.extractNoCancellableResultData()

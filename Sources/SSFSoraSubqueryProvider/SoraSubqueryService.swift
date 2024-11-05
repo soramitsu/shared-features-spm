@@ -1,14 +1,15 @@
 import RobinHood
 import SSFModels
+import SSFPrices
 
-final class SoraSubqueryService: PriceProviderServiceProtocol {
+public final class SoraSubqueryService: PriceProviderServiceProtocol {
     let soraSubqueryFetcher: SoraSubqueryPriceFetcherProtocol
 
-    init(soraSubqueryFetcher: SoraSubqueryPriceFetcherProtocol) {
+    public init(soraSubqueryFetcher: SoraSubqueryPriceFetcherProtocol) {
         self.soraSubqueryFetcher = soraSubqueryFetcher
     }
 
-    func getPrices(for chainAssets: [ChainAsset], currencies: [Currency]) async -> [PriceData] {
+    public func getPrices(for chainAssets: [ChainAsset], currencies: [Currency]) async -> [PriceData] {
         let operation = createSoraSubqueryOperation(for: chainAssets, currencies: currencies)
         do {
             return try operation.extractNoCancellableResultData()
