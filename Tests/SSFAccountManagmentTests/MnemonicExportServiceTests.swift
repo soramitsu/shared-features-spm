@@ -78,14 +78,13 @@ extension MnemonicExportServiceTests {
         static let account = MetaAccountModel(
             metaId: "1",
             name: "test",
-            substrateAccountId: Data(),
-            substrateCryptoType: 1,
-            substratePublicKey: Data(),
-            ethereumAddress: nil,
-            ethereumPublicKey: nil,
-            tonAddress: nil,
-            tonPublicKey: nil,
-            tonContractVersion: nil,
+            ecosystem: .regular(.init(
+                substrateAccountId: Data(),
+                substrateCryptoType: 1,
+                substratePublicKey: Data(),
+                ethereumAddress: Data(),
+                ethereumPublicKey: Data())
+            ),
             chainAccounts: [TestData.chainAccount],
             assetKeysOrder: nil,
             canExportEthereumMnemonic: false,

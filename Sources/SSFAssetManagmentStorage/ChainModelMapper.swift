@@ -4,6 +4,10 @@ import RobinHood
 import SSFModels
 import SSFUtils
 
+enum ChainModelMapperError: Error {
+    case missingChainId
+}
+
 public final class ChainModelMapper {
     public var entityIdentifierFieldName: String { #keyPath(CDChain.chainId) }
 
