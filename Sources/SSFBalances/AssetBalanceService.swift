@@ -144,9 +144,26 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
         for chainAssets: [ChainAsset],
         accountId: AccountId
     ) async throws -> [AssetBalanceInfo?] {
-        try await chainAssets.asyncMap { chainAsset in
-            try await getLocalBalance(for: chainAsset, accountId: accountId)
-        }
+        let balanceIds = chainAssets.map { "\($0.chainAssetId.id):\(accountId.toHex())" }
+        return try await localService.get(by: balanceIds)
+    }
+    
+    public func getLocalBalancesPublisher(
+        on chainAssets: [ChainAsset],
+        accountId: AccountId
+    ) async throws -> AnyPublisher<[ChainAssetBalanceInfo], Never> {
+        let localBalancs = try await getLocalBalances(for: chainAssets, accountId: accountId)
+        return Just(ChainAssetBalanceInfo(chainAsset: chainAsset, balanceInfo: localBalance))
+            .eraseToAnyPublisher()
+    }
+    
+    public func getLocalBalancePublisher(
+        on chainAsset: ChainAsset,
+        accountId: AccountId
+    ) async throws -> AnyPublisher<ChainAssetBalanceInfo?, Never> {
+        let localBalance = try await getLocalBalance(for: chainAsset, accountId: accountId)
+        return Just(ChainAssetBalanceInfo(chainAsset: chainAsset, balanceInfo: localBalance))
+            .eraseToAnyPublisher()
     }
 
     public func getBalances(
