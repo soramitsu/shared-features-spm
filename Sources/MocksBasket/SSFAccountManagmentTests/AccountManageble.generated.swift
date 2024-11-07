@@ -82,6 +82,28 @@ public init() {}
         return try updateEnabilibiltyForClosure.map({ try $0(chainAssetId) }) ?? updateEnabilibiltyForReturnValue
     }
 
+    //MARK: - updateFavourite
+
+    public var updateFavouriteForThrowableError: Error?
+    public var updateFavouriteForCallsCount = 0
+    public var updateFavouriteForCalled: Bool {
+        return updateFavouriteForCallsCount > 0
+    }
+    public var updateFavouriteForReceivedChainId: String?
+    public var updateFavouriteForReceivedInvocations: [String] = []
+    public var updateFavouriteForReturnValue: MetaAccountModel!
+    public var updateFavouriteForClosure: ((String) throws -> MetaAccountModel)?
+
+    public func updateFavourite(for chainId: String) throws -> MetaAccountModel {
+        if let error = updateFavouriteForThrowableError {
+            throw error
+        }
+        updateFavouriteForCallsCount += 1
+        updateFavouriteForReceivedChainId = chainId
+        updateFavouriteForReceivedInvocations.append(chainId)
+        return try updateFavouriteForClosure.map({ try $0(chainId) }) ?? updateFavouriteForReturnValue
+    }
+
     //MARK: - update
 
     public var updateEnabledAssetIdsThrowableError: Error?
