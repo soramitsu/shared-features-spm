@@ -1,6 +1,15 @@
 {
   "pins" : [
     {
+      "identity" : "anycodable",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Flight-School/AnyCodable",
+      "state" : {
+        "revision" : "862808b2070cd908cb04f9aafe7de83d35f81b05",
+        "version" : "0.6.7"
+      }
+    },
+    {
       "identity" : "appauth-ios",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/openid/AppAuth-iOS.git",
@@ -19,12 +28,39 @@
       }
     },
     {
+      "identity" : "bip39.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tesseract-one/Bip39.swift.git",
+      "state" : {
+        "revision" : "bb2b82539d685e1457493b695cdc8e4dcff97c92",
+        "version" : "0.2.0"
+      }
+    },
+    {
+      "identity" : "blake2.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tesseract-one/Blake2.swift.git",
+      "state" : {
+        "revision" : "29c55c8fe42d6661e5a32cc5bbbad1fff64fd01e",
+        "version" : "0.2.0"
+      }
+    },
+    {
       "identity" : "cryptoswift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/krzyzanowskim/CryptoSwift.git",
       "state" : {
         "revision" : "678d442c6f7828def400a70ae15968aef67ef52d",
         "version" : "1.8.3"
+      }
+    },
+    {
+      "identity" : "ed25519swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pebble8888/ed25519swift.git",
+      "state" : {
+        "revision" : "1e821f5516049f5b83aca8cb3b982910cf8c028c",
+        "version" : "1.2.8"
       }
     },
     {
@@ -73,6 +109,15 @@
       }
     },
     {
+      "identity" : "jwtdecode.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/auth0/JWTDecode.swift",
+      "state" : {
+        "revision" : "1e153ef009969543191970c66b7c60163c0b4a65",
+        "version" : "3.2.0"
+      }
+    },
+    {
       "identity" : "promisekit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mxcl/PromiseKit.git",
@@ -86,8 +131,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ashleymills/Reachability.swift",
       "state" : {
-        "revision" : "7cbd73f46a7dfaeca079e18df7324c6de6d1834a",
-        "version" : "5.2.3"
+        "revision" : "21d1dc412cfecbe6e34f1f4c4eb88d3f912654a6",
+        "version" : "5.2.4"
       }
     },
     {
@@ -97,6 +142,14 @@
       "state" : {
         "revision" : "cd187c632fb812fd93711a9f7e644adb7e5f97f0",
         "version" : "0.1.7"
+      }
+    },
+    {
+      "identity" : "suikit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bauyrzhanabdi/SuiKit",
+      "state" : {
+        "revision" : "3a9f4cfe63a2aa8418dd5653f8b0608548d2bfee"
       }
     },
     {
@@ -194,8 +247,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/nicklockwood/SwiftFormat",
       "state" : {
-        "revision" : "d6309f7440889427426143b4a0b100b959d3f3e6",
-        "version" : "0.54.3"
+        "revision" : "86ed20990585f478c0daf309af645c2a528b59d8",
+        "version" : "0.54.6"
       }
     },
     {
@@ -205,6 +258,15 @@
       "state" : {
         "revision" : "8cba041db09596183331d123f337d0eb2e6e8e91",
         "version" : "2.1.1"
+      }
+    },
+    {
+      "identity" : "swiftyjson",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SwiftyJSON/SwiftyJSON.git",
+      "state" : {
+        "revision" : "2b6054efa051565954e1d2b9da831680026cd768",
+        "version" : "4.3.0"
       }
     },
     {
@@ -232,6 +294,24 @@
       "state" : {
         "revision" : "f8fd111642bf2336b11ef9ea828510693106e954",
         "version" : "1.1.0"
+      }
+    },
+    {
+      "identity" : "uint256",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/MarcoDotIO/UInt256.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "3dc471e8489ed2a1b16ac63c3bd243d97ac8478b"
+      }
+    },
+    {
+      "identity" : "uncommoncrypto.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tesseract-one/UncommonCrypto.swift.git",
+      "state" : {
+        "revision" : "075344faec47dadba98bef6a319e310c98be0820",
+        "version" : "0.2.1"
       }
     },
     {

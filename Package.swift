@@ -41,6 +41,7 @@ let package = Package(
         .library(name: "TonConnectAPI", targets: ["TonConnectAPI"])
     ],
     dependencies: [
+        .package(url: "https://github.com/bauyrzhanabdi/SuiKit", revision: "3a9f4cfe63a2aa8418dd5653f8b0608548d2bfee"),
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
         .package(url: "https://github.com/bitmark-inc/tweetnacl-swiftwrap", from: "1.1.0"),
         .package(url: "https://github.com/ashleymills/Reachability.swift", from: "5.0.0"),
