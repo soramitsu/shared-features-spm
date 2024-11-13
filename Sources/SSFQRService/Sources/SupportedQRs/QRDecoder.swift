@@ -11,6 +11,7 @@ public final class QRDecoderDefault: QRDecoder {
         SoraQRDecoder(),
         CexQRDecoder(),
         DesiredCryptocurrencyDecoder(),
+        TonQRDecoder()
     ]
 
     private let qrDecoders: [QRDecoder]
