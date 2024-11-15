@@ -126,6 +126,28 @@ public init() {}
         return try updateEnabledAssetIdsClosure.map({ try $0(enabledAssetIds) }) ?? updateEnabledAssetIdsReturnValue
     }
 
+    //MARK: - updateWalletName
+
+    public var updateWalletNameWithThrowableError: Error?
+    public var updateWalletNameWithCallsCount = 0
+    public var updateWalletNameWithCalled: Bool {
+        return updateWalletNameWithCallsCount > 0
+    }
+    public var updateWalletNameWithReceivedNewName: String?
+    public var updateWalletNameWithReceivedInvocations: [String] = []
+    public var updateWalletNameWithReturnValue: MetaAccountModel!
+    public var updateWalletNameWithClosure: ((String) throws -> MetaAccountModel)?
+
+    public func updateWalletName(with newName: String) throws -> MetaAccountModel {
+        if let error = updateWalletNameWithThrowableError {
+            throw error
+        }
+        updateWalletNameWithCallsCount += 1
+        updateWalletNameWithReceivedNewName = newName
+        updateWalletNameWithReceivedInvocations.append(newName)
+        return try updateWalletNameWithClosure.map({ try $0(newName) }) ?? updateWalletNameWithReturnValue
+    }
+
     //MARK: - logout
 
     public var logoutThrowableError: Error?
