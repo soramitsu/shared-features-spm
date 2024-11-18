@@ -114,16 +114,16 @@ extension AccountManagementService: AccountManageble {
             })
         }
     }
-    
+
     public func updateWalletName(with newName: String) async throws -> MetaAccountModel {
         try await withCheckedThrowingContinuation { continuation in
             guard let wallet = selectedWallet.value else {
                 continuation.resume(throwing: AccountManagerServiceError.unexpected)
                 return
             }
-            
+
             let updatedAccount = wallet.replacingName(newName)
-            
+
             selectedWallet.performSave(value: updatedAccount, completionClosure: { _ in
                 continuation.resume(with: .success(updatedAccount))
             })
