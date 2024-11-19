@@ -84,7 +84,29 @@ final class AccountManagementServiceTests: XCTestCase {
             }
         })
     }
-
+    
+    func testUpdateWalletName() throws {
+        service?.setCurrentAccount(account: TestData.account, completionClosure: { [weak self] _ in
+            
+            let expectedAccount = TestData.walletName
+            Task { [weak self] in
+                do {
+                    let updatedAccount = try await self?.service?.updateWalletName(with: expectedAccount.name)
+                    
+                    DispatchQueue.main.async { [weak self] in
+                        XCTAssertTrue(
+                            self?.accountManagementWorker?
+                                .saveAccountCompletionCalled ?? false
+                        )
+                        XCTAssertEqual(updatedAccount, expectedAccount, "Updated account name does not match the expected value")
+                    }
+                } catch {
+                    XCTFail("UpdateWalletName test failed with error - \(error)")
+                }
+            }
+        })
+    }
+    
     func testLogout() throws {
         // act
         service?.setCurrentAccount(account: TestData.account, completionClosure: { [weak self] _ in
@@ -146,6 +168,27 @@ private extension AccountManagementServiceTests {
         static let account = MetaAccountModel(
             metaId: "1",
             name: "test",
+            substrateAccountId: Data(),
+            substrateCryptoType: 1,
+            substratePublicKey: Data(),
+            ethereumAddress: nil,
+            ethereumPublicKey: nil,
+            chainAccounts: [chainAccounts],
+            assetKeysOrder: nil,
+            assetFilterOptions: [],
+            canExportEthereumMnemonic: false,
+            unusedChainIds: nil,
+            selectedCurrency: .defaultCurrency(),
+            networkManagmentFilter: nil,
+            enabledAssetIds: [],
+            zeroBalanceAssetsHidden: true,
+            hasBackup: false,
+            favouriteChainIds: []
+        )
+        
+        static let walletName = MetaAccountModel(
+            metaId: "1",
+            name: "newName",
             substrateAccountId: Data(),
             substrateCryptoType: 1,
             substratePublicKey: Data(),

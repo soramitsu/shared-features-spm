@@ -19,6 +19,7 @@ public protocol AccountManageble {
     func updateEnabilibilty(for chainAssetId: String) async throws -> MetaAccountModel
     func updateFavourite(for chainId: String) async throws -> MetaAccountModel
     func update(enabledAssetIds: Set<String>) async throws -> MetaAccountModel
+    func updateWalletName(with newName: String) async throws -> MetaAccountModel
     func logout() async throws
 }
 
@@ -107,6 +108,21 @@ extension AccountManagementService: AccountManageble {
             }
 
             let updatedAccount = wallet.replacing(newEnabledAssetIds: enabledAssetIds)
+
+            selectedWallet.performSave(value: updatedAccount, completionClosure: { _ in
+                continuation.resume(with: .success(updatedAccount))
+            })
+        }
+    }
+
+    public func updateWalletName(with newName: String) async throws -> MetaAccountModel {
+        try await withCheckedThrowingContinuation { continuation in
+            guard let wallet = selectedWallet.value else {
+                continuation.resume(throwing: AccountManagerServiceError.unexpected)
+                return
+            }
+
+            let updatedAccount = wallet.replacingName(newName)
 
             selectedWallet.performSave(value: updatedAccount, completionClosure: { _ in
                 continuation.resume(with: .success(updatedAccount))

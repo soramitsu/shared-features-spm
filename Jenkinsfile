@@ -18,7 +18,8 @@ def pipeline = new org.ios.AppPipeline(
     disableUpdatePods: true,
     disableInstallPods: true,
     jobParams: jobParams,
-    dojoProductType: "sora-mobile"
+    dojoProductType: "sora-mobile",
+    label: "mac-mcst-common-2"
 )
 
 pipeline.runPipeline('shared-features-spm')
