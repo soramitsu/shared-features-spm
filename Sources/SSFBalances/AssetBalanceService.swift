@@ -120,14 +120,20 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             accountInfo.data.sendAvailable,
             precision: Int16(chainAsset.asset.precision)
         )
-
+        
+        let lockedBalance = Decimal.fromSubstrateAmount(
+            accountInfo.data.locked,
+            precision: Int16(chainAsset.asset.precision))
+        
+        let assetBalance = AssetBalance(balance: balance, lockedBalance: lockedBalance)
+        
         return AssetBalanceInfo(
             chainId: chainAsset.chain.chainId,
             assetId: chainAsset.asset.symbol,
             accountId: accountId.toHex(),
-            balance: balance,
             price: nil,
-            deltaPrice: nil
+            deltaPrice: nil,
+            assetBalance: assetBalance
         )
     }
 
@@ -166,14 +172,20 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
                 accountInfo.data.sendAvailable,
                 precision: Int16(chainAsset.asset.precision)
             )
+            
+            let lockedBalance = Decimal.fromSubstrateAmount(
+                accountInfo.data.locked,
+                precision: Int16(chainAsset.asset.precision))
+            
+            let assetBalance = AssetBalance(balance: balance, lockedBalance: lockedBalance)
 
             return AssetBalanceInfo(
                 chainId: chain.chainId,
                 assetId: chainAsset.asset.symbol,
                 accountId: accountId.toHex(),
-                balance: balance,
                 price: nil,
-                deltaPrice: nil
+                deltaPrice: nil,
+                assetBalance: assetBalance
             )
         }
     }

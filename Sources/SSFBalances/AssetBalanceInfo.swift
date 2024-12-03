@@ -8,21 +8,21 @@ public struct AssetBalanceInfo: Codable {
         case assetId
         case accountId
         case balanceId
-        case balance
         case price
         case deltaPrice
+        case assetBalance
     }
 
     public let balanceId: String
     public let chainId: String
     public let assetId: String
     public let accountId: String
-    public let balance: Decimal?
     public let price: Decimal?
     public let deltaPrice: Decimal?
+    public let assetBalance: AssetBalance?
 
     public var totalBalance: Decimal? {
-        guard let price, let balance else { return nil }
+        guard let price, let balance = assetBalance?.balance else { return nil }
         return price * balance
     }
 
@@ -34,17 +34,17 @@ public struct AssetBalanceInfo: Codable {
         chainId: String,
         assetId: String,
         accountId: String,
-        balance: Decimal?,
         price: Decimal?,
-        deltaPrice: Decimal?
+        deltaPrice: Decimal?,
+        assetBalance: AssetBalance?
     ) {
         balanceId = "\(chainId):\(assetId):\(accountId)"
         self.chainId = chainId
         self.assetId = assetId
         self.accountId = accountId
-        self.balance = balance
         self.price = price
         self.deltaPrice = deltaPrice
+        self.assetBalance = assetBalance
     }
 }
 
@@ -57,15 +57,37 @@ extension AssetBalanceInfo: Identifiable {
 extension AssetBalanceInfo: Hashable {
     public static func == (lhs: AssetBalanceInfo, rhs: AssetBalanceInfo) -> Bool {
         lhs.balanceId == rhs.balanceId &&
-            lhs.balance == rhs.balance &&
+        lhs.assetBalance == rhs.assetBalance &&
             lhs.price == rhs.price &&
             lhs.deltaPrice == rhs.deltaPrice
     }
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(balanceId)
-        hasher.combine(balance)
+        hasher.combine(assetBalance)
         hasher.combine(price)
         hasher.combine(deltaPrice)
+    }
+}
+
+public struct AssetBalance: Codable {
+    public let balance: Decimal?
+    public let lockedBalance: Decimal?
+    
+   public init(balance: Decimal?, lockedBalance: Decimal?) {
+        self.balance = balance
+        self.lockedBalance = lockedBalance
+    }
+}
+
+extension AssetBalance: Hashable {
+    public static func == (lhs: AssetBalance, rhs: AssetBalance) -> Bool {
+        lhs.balance == rhs.balance &&
+        lhs.lockedBalance == rhs.lockedBalance
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(balance)
+        hasher.combine(lockedBalance)
     }
 }
