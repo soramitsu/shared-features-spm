@@ -120,13 +120,14 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             accountInfo.data.sendAvailable,
             precision: Int16(chainAsset.asset.precision)
         )
-        
+
         let lockedBalance = Decimal.fromSubstrateAmount(
             accountInfo.data.locked,
-            precision: Int16(chainAsset.asset.precision))
-        
+            precision: Int16(chainAsset.asset.precision)
+        )
+
         let assetBalance = AssetBalance(balance: balance, lockedBalance: lockedBalance)
-        
+
         return AssetBalanceInfo(
             chainId: chainAsset.chain.chainId,
             assetId: chainAsset.asset.symbol,
@@ -172,11 +173,12 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
                 accountInfo.data.sendAvailable,
                 precision: Int16(chainAsset.asset.precision)
             )
-            
+
             let lockedBalance = Decimal.fromSubstrateAmount(
                 accountInfo.data.locked,
-                precision: Int16(chainAsset.asset.precision))
-            
+                precision: Int16(chainAsset.asset.precision)
+            )
+
             let assetBalance = AssetBalance(balance: balance, lockedBalance: lockedBalance)
 
             return AssetBalanceInfo(
