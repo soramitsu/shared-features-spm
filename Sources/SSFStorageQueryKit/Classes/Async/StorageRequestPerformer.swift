@@ -403,7 +403,7 @@ public actor StorageRequestPerformerDefault: StorageRequestPerformer {
         )
         let keys = try keysEncoder.performEncoding()
         let localKeys = try keys.compactMap { try createKey(from: $0, key: chain.chainId) }
-        let cache = try await cacheStorage.fetch(by: localKeys, options: RepositoryFetchOptions())
+        let cache = try await cacheStorage.fetchPrefix(by: localKeys, options: RepositoryFetchOptions())
 
         let caches = cache.compactMap {
             let item: [Data: T]? = try? decode(
