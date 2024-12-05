@@ -49,20 +49,22 @@ extension CDAssetBalance: CoreDataCodable {
     }
 }
 
-extension CDBalance: CoreDataCodable {
-    public func populate(from decoder: any Decoder, using _: NSManagedObjectContext) throws {
-        let container = try decoder.container(keyedBy: AssetBalance.CodingKeys.self)
-        balance = try? container.decodeIfPresent(Decimal.self, forKey: .balance) as NSDecimalNumber?
-
-        lockedBalance = try? container.decodeIfPresent(
-            Decimal.self,
-            forKey: .lockedBalance
-        ) as NSDecimalNumber?
-    }
-
-    public func encode(to encoder: any Encoder) throws {
-        var container = encoder.container(keyedBy: AssetBalance.CodingKeys.self)
-        try container.encodeIfPresent(balance as Decimal?, forKey: .balance)
-        try container.encodeIfPresent(lockedBalance as Decimal?, forKey: .lockedBalance)
-    }
-}
+//
+// extension CDBalance: CoreDataCodable {
+//    public func populate(from decoder: any Decoder, using _: NSManagedObjectContext) throws {
+//        let container = try decoder.container(keyedBy: AssetBalance.CodingKeys.self)
+//        balance = try? container.decodeIfPresent(Decimal.self, forKey: .balance) as
+//        NSDecimalNumber?
+//
+//        lockedBalance = try? container.decodeIfPresent(
+//            Decimal.self,
+//            forKey: .lockedBalance
+//        ) as NSDecimalNumber?
+//    }
+//
+//    public func encode(to encoder: any Encoder) throws {
+//        var container = encoder.container(keyedBy: AssetBalance.CodingKeys.self)
+//        try container.encodeIfPresent(balance as Decimal?, forKey: .balance)
+//        try container.encodeIfPresent(lockedBalance as Decimal?, forKey: .lockedBalance)
+//    }
+// }
