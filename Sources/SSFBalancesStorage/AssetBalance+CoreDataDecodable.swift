@@ -40,8 +40,9 @@ extension CDAssetBalance: CoreDataCodable {
         try container.encodeIfPresent(price as Decimal?, forKey: .price)
         try container.encodeIfPresent(deltaPrice as Decimal?, forKey: .deltaPrice)
 
-        if let assetBalance = assetBalance {
+        if let assetBalance = assetBalance, let balanceId = assetBalance.assetBalanceId {
             let encodedAssetBalance = AssetBalance(
+                assetBalanceId: balanceId,
                 balance: assetBalance.balance as Decimal?,
                 lockedBalance: assetBalance.lockedBalance as Decimal?
             )

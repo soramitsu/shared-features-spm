@@ -72,26 +72,37 @@ extension AssetBalanceInfo: Hashable {
 
 public struct AssetBalance: Codable {
     public enum CodingKeys: String, CodingKey {
+        case assetBalanceId
         case balance
         case lockedBalance
     }
 
+    public let assetBalanceId: String
     public let balance: Decimal?
     public let lockedBalance: Decimal?
 
-    public init(balance: Decimal?, lockedBalance: Decimal?) {
+    public init(assetBalanceId: String, balance: Decimal?, lockedBalance: Decimal?) {
+        self.assetBalanceId = assetBalanceId
         self.balance = balance
         self.lockedBalance = lockedBalance
     }
 }
 
+extension AssetBalance: Identifiable {
+    public var identifier: String {
+        assetBalanceId
+    }
+}
+
 extension AssetBalance: Hashable {
     public static func == (lhs: AssetBalance, rhs: AssetBalance) -> Bool {
-        lhs.balance == rhs.balance &&
+        lhs.assetBalanceId == rhs.assetBalanceId &&
+            lhs.balance == rhs.balance &&
             lhs.lockedBalance == rhs.lockedBalance
     }
 
     public func hash(into hasher: inout Hasher) {
+        hasher.combine(assetBalanceId)
         hasher.combine(balance)
         hasher.combine(lockedBalance)
     }
