@@ -23,6 +23,7 @@ extension CDAssetBalance: CoreDataCodable {
             let decodedAssetBalance = try container.decode(AssetBalance.self, forKey: .assetBalance)
 
             let cdBalance = CDBalance(context: context)
+            cdBalance.assetBalanceId = balanceId
             cdBalance.balance = decodedAssetBalance.balance as NSDecimalNumber?
             cdBalance.lockedBalance = decodedAssetBalance.lockedBalance as NSDecimalNumber?
             return cdBalance
