@@ -18,5 +18,10 @@
         <attribute name="assetBalanceId" attributeType="String"/>
         <attribute name="balance" optional="YES" attributeType="Decimal" defaultValueString="0.0"/>
         <attribute name="lockedBalance" optional="YES" attributeType="Decimal" defaultValueString="0.0"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="assetBalanceId"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
     </entity>
 </model>
