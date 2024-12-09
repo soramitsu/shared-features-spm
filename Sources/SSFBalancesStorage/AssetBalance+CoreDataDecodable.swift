@@ -19,15 +19,20 @@ extension CDAssetBalance: CoreDataCodable {
             forKey: .deltaPrice
         ) as NSDecimalNumber?
 
-        assetBalance = try? {
+        do {
             let decodedAssetBalance = try container.decode(AssetBalance.self, forKey: .assetBalance)
 
             let cdBalance = CDBalance(context: context)
-            cdBalance.assetBalanceId = balanceId
+            cdBalance.assetBalanceId = decodedAssetBalance.assetBalanceId
             cdBalance.balance = decodedAssetBalance.balance as NSDecimalNumber?
             cdBalance.lockedBalance = decodedAssetBalance.lockedBalance as NSDecimalNumber?
-            return cdBalance
-        }()
+            assetBalance = cdBalance
+        } catch {
+            print(
+                "Failed to decode AssetBalance or create CDBalance: \(error.localizedDescription)"
+            )
+            assetBalance = nil
+        }
     }
 
     public func encode(to encoder: Encoder) throws {
