@@ -94,7 +94,14 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             accountInfo.data.locked,
             precision: Int16(chainAsset.asset.precision))
         
-        let assetBalance = AssetBalance(balance: balance, lockedBalance: lockedBalance)
+        let assetBalanceId =
+            "\(chainAsset.chain.chainId):\(chainAsset.asset.symbol):\(accountId.toHex())"
+
+        let assetBalance = AssetBalance(
+            assetBalanceId: assetBalanceId,
+            balance: balance,
+            lockedBalance: lockedBalance
+        )
         
         return AssetBalanceInfo(
             chainId: chainAsset.chain.chainId,
@@ -136,7 +143,14 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
                 accountInfo.data.locked,
                 precision: Int16(chainAsset.asset.precision))
             
-            let assetBalance = AssetBalance(balance: balance, lockedBalance: lockedBalance)
+            let assetBalanceId =
+                "\(chainAsset.chain.chainId):\(chainAsset.asset.symbol):\(accountId.toHex())"
+
+            let assetBalance = AssetBalance(
+                assetBalanceId: assetBalanceId,
+                balance: balance,
+                lockedBalance: lockedBalance
+            )
             
             return AssetBalanceInfo(
                 chainId: chainAsset.chain.chainId,
