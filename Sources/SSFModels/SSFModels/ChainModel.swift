@@ -287,7 +287,7 @@ public final class ChainModel: Codable, Identifiable {
             identityChain: identityChain
         )
     }
-    
+
     public func replacing(_ assets: [AssetModel]) -> ChainModel {
         ChainModel(
             rank: rank,

@@ -4,6 +4,11 @@ import Foundation
 public protocol AsyncCoreDataRepository {
     associatedtype Model: Identifiable
 
+    func fetchPrefix(
+        by modelIds: [String],
+        options: RepositoryFetchOptions
+    ) async throws -> [Model]
+    
     func fetch(
         by modelIds: [String],
         options: RepositoryFetchOptions
@@ -25,6 +30,13 @@ public protocol AsyncCoreDataRepository {
 }
 
 public extension AsyncCoreDataRepository {
+    func fetchPrefix(
+        by modelIds: [String],
+        options: RepositoryFetchOptions
+    ) async throws -> [Model] {
+        try await fetchPrefix(by: modelIds, options: RepositoryFetchOptions())
+    }
+    
     func fetch(by modelId: String) async throws -> Model? {
         try await fetch(by: modelId, options: RepositoryFetchOptions())
     }
@@ -65,6 +77,19 @@ public final class AsyncCoreDataRepositoryDefault<
         )
     }
 
+    public func fetchPrefix(
+        by modelIds: [String],
+        options: RepositoryFetchOptions
+    ) async throws -> [Model] {
+        let operation = coreDataRepository.fetchPrefixOperation(
+            by: { modelIds },
+            options: options
+        )
+        operationQueue.addOperation(operation)
+
+        let result: [Model] = try await extract(from: operation)
+        return result
+    }
     public func fetch(
         by modelIds: [String],
         options: RepositoryFetchOptions

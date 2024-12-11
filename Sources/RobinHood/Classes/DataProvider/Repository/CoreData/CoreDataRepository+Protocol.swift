@@ -6,6 +6,42 @@
 import Foundation
 
 extension CoreDataRepository: DataProviderRepositoryProtocol {
+    public func fetchPrefixOperation(
+        by modelIdsClosure: @escaping () throws -> [String],
+        options: RepositoryFetchOptions
+    ) -> BaseOperation<[Model]> {
+        ClosureOperation {
+            var models: [Model]?
+            var error: Error?
+
+            let semaphore = DispatchSemaphore(value: 0)
+
+            self.fetchPrefix(
+                by: modelIdsClosure,
+                options: options,
+                runCompletionIn: nil
+            ) { optionalModels, optionalError in
+                models = optionalModels
+                error = optionalError
+
+                semaphore.signal()
+            }
+
+            semaphore.wait()
+
+            if let existingModels = models {
+                return existingModels
+            }
+
+            if let existingError = error {
+                throw existingError
+            } else {
+                throw CoreDataRepositoryError.undefined
+            }
+        }
+    }
+
+    
     public func fetchOperation(
         by modelIdsClosure: @escaping () throws -> [String],
         options: RepositoryFetchOptions
