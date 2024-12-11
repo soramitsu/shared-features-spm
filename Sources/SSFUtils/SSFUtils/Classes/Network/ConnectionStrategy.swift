@@ -131,6 +131,7 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
         guard let nextUrl else {
             return
         }
+        currentConnection.forceDisconnect()
         updateConnection(with: nextUrl)
         currentConnection.connect()
     }
