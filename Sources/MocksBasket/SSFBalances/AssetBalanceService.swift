@@ -94,14 +94,14 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             accountInfo.data.locked,
             precision: Int16(chainAsset.asset.precision))
         
-        let assetBalanceId =
-            "\(chainAsset.chain.chainId):\(chainAsset.asset.symbol):\(accountId.toHex())"
-
-        let assetBalance = AssetBalance(
-            assetBalanceId: assetBalanceId,
-            balance: balance,
-            lockedBalance: lockedBalance
-        )
+//        let assetBalanceId =
+//            "\(chainAsset.chain.chainId):\(chainAsset.asset.symbol):\(accountId.toHex())"
+//
+//        let assetBalance = AssetBalance(
+//            assetBalanceId: assetBalanceId,
+//            balance: balance,
+//            lockedBalance: lockedBalance
+//        )
         
         return AssetBalanceInfo(
             chainId: chainAsset.chain.chainId,
@@ -109,7 +109,8 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
             accountId: accountId.toHex(),
             price: nil,
             deltaPrice: nil,
-            assetBalance: assetBalance
+            balance: balance,
+            lockedBalance: lockedBalance
         )
     }
     
@@ -143,22 +144,14 @@ extension AssetBalanceServiceDefault: AssetBalanceService {
                 accountInfo.data.locked,
                 precision: Int16(chainAsset.asset.precision))
             
-            let assetBalanceId =
-                "\(chainAsset.chain.chainId):\(chainAsset.asset.symbol):\(accountId.toHex())"
-
-            let assetBalance = AssetBalance(
-                assetBalanceId: assetBalanceId,
-                balance: balance,
-                lockedBalance: lockedBalance
-            )
-            
             return AssetBalanceInfo(
                 chainId: chainAsset.chain.chainId,
                 assetId: chainAsset.asset.symbol,
                 accountId: accountId.toHex(),
                 price: nil,
                 deltaPrice: nil,
-                assetBalance: assetBalance
+                balance: balance,
+                lockedBalance: lockedBalance
             )
         }
     }

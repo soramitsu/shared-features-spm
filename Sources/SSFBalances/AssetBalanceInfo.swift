@@ -10,7 +10,8 @@ public struct AssetBalanceInfo: Codable {
         case balanceId
         case price
         case deltaPrice
-        case assetBalance
+        case balance
+        case lockedBalance
     }
 
     public let balanceId: String
@@ -19,10 +20,11 @@ public struct AssetBalanceInfo: Codable {
     public let accountId: String
     public let price: Decimal?
     public let deltaPrice: Decimal?
-    public let assetBalance: AssetBalance?
+    public let balance: Decimal?
+    public let lockedBalance: Decimal?
 
     public var totalBalance: Decimal? {
-        guard let price, let balance = assetBalance?.balance else { return nil }
+        guard let price, let balance = balance else { return nil }
         return price * balance
     }
 
@@ -36,7 +38,8 @@ public struct AssetBalanceInfo: Codable {
         accountId: String,
         price: Decimal?,
         deltaPrice: Decimal?,
-        assetBalance: AssetBalance?
+        balance: Decimal?,
+        lockedBalance: Decimal?
     ) {
         balanceId = "\(chainId):\(assetId):\(accountId)"
         self.chainId = chainId
@@ -44,7 +47,8 @@ public struct AssetBalanceInfo: Codable {
         self.accountId = accountId
         self.price = price
         self.deltaPrice = deltaPrice
-        self.assetBalance = assetBalance
+        self.balance = balance
+        self.lockedBalance = lockedBalance
     }
 }
 
@@ -57,52 +61,16 @@ extension AssetBalanceInfo: Identifiable {
 extension AssetBalanceInfo: Hashable {
     public static func == (lhs: AssetBalanceInfo, rhs: AssetBalanceInfo) -> Bool {
         lhs.balanceId == rhs.balanceId &&
-            lhs.assetBalance == rhs.assetBalance &&
             lhs.price == rhs.price &&
-            lhs.deltaPrice == rhs.deltaPrice
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(balanceId)
-        hasher.combine(assetBalance)
-        hasher.combine(price)
-        hasher.combine(deltaPrice)
-    }
-}
-
-public struct AssetBalance: Codable {
-    public enum CodingKeys: String, CodingKey {
-        case assetBalanceId
-        case balance
-        case lockedBalance
-    }
-
-    public let assetBalanceId: String
-    public let balance: Decimal?
-    public let lockedBalance: Decimal?
-
-    public init(assetBalanceId: String, balance: Decimal?, lockedBalance: Decimal?) {
-        self.assetBalanceId = assetBalanceId
-        self.balance = balance
-        self.lockedBalance = lockedBalance
-    }
-}
-
-extension AssetBalance: Identifiable {
-    public var identifier: String {
-        assetBalanceId
-    }
-}
-
-extension AssetBalance: Hashable {
-    public static func == (lhs: AssetBalance, rhs: AssetBalance) -> Bool {
-        lhs.assetBalanceId == rhs.assetBalanceId &&
+            lhs.deltaPrice == rhs.deltaPrice &&
             lhs.balance == rhs.balance &&
             lhs.lockedBalance == rhs.lockedBalance
     }
 
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(assetBalanceId)
+        hasher.combine(balanceId)
+        hasher.combine(price)
+        hasher.combine(deltaPrice)
         hasher.combine(balance)
         hasher.combine(lockedBalance)
     }

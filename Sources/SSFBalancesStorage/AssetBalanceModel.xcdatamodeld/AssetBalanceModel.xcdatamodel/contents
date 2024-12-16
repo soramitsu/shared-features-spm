@@ -3,24 +3,15 @@
     <entity name="CDAssetBalance" representedClassName="CDAssetBalance" syncable="YES" codeGenerationType="class">
         <attribute name="accountId" optional="YES" attributeType="String"/>
         <attribute name="assetId" attributeType="String"/>
+        <attribute name="balance" optional="YES" attributeType="Decimal" defaultValueString="0.0"/>
         <attribute name="balanceId" attributeType="String"/>
         <attribute name="chainId" attributeType="String"/>
         <attribute name="deltaPrice" optional="YES" attributeType="Decimal" defaultValueString="0.0"/>
+        <attribute name="lockedBalance" optional="YES" attributeType="Decimal" defaultValueString="0.0"/>
         <attribute name="price" optional="YES" attributeType="Decimal" defaultValueString="0.0"/>
-        <relationship name="assetBalance" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDBalance"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
                 <constraint value="balanceId"/>
-            </uniquenessConstraint>
-        </uniquenessConstraints>
-    </entity>
-    <entity name="CDBalance" representedClassName="CDBalance" syncable="YES" codeGenerationType="class">
-        <attribute name="assetBalanceId" attributeType="String"/>
-        <attribute name="balance" optional="YES" attributeType="Decimal" defaultValueString="0.0"/>
-        <attribute name="lockedBalance" optional="YES" attributeType="Decimal" defaultValueString="0.0"/>
-        <uniquenessConstraints>
-            <uniquenessConstraint>
-                <constraint value="assetBalanceId"/>
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
