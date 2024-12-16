@@ -16,6 +16,7 @@ public enum BlockExplorerType: String, Codable {
     case vicscan
     case zchain
     case klaytn
+    case soraSubquery
 }
 
 public final class ChainModel: Codable, Identifiable {
