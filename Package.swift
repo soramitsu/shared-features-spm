@@ -72,10 +72,10 @@ let package = Package(
         .binaryTarget(name: "sorawallet", path: "Binaries/sorawallet.xcframework"),
         .binaryTarget(name: "MPQRCoreSDK", path: "Binaries/MPQRCoreSDK.xcframework"),
         .binaryTarget(
-            name: "XNetworking",
-            url: "https://nexus.iroha.tech/repository/maven-soramitsu/jp/co/soramitsu/xnetworking/lib-IOS/1.0.9/lib-IOS-1.0.9.zip",
-            checksum: "03b2f05a005122ecbac30d7aaa06c2515d123e964b559548d6195f742eea5c53"
-        ),
+                    name: "XNetworking",
+                    url: "https://nexus.iroha.tech/repository/maven-soramitsu/jp/co/soramitsu/xnetworking/lib-IOS/1.0.10/lib-IOS-1.0.10.zip",
+                    checksum: "651cd3955842fcd4817f22457c8bb3f93e5081959ef651894093b522117143ab"
+                ),
         .target(
             name: "scrypt",
             sources: [
