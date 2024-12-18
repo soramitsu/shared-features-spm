@@ -13,11 +13,17 @@ extension CDAssetBalance: CoreDataCodable {
         chainId = try container.decode(String.self, forKey: .chainId)
         accountId = try container.decode(String.self, forKey: .accountId)
         balanceId = try container.decode(String.self, forKey: .balanceId)
-        balance = try? container.decodeIfPresent(Decimal.self, forKey: .balance) as NSDecimalNumber?
         price = try? container.decodeIfPresent(Decimal.self, forKey: .price) as NSDecimalNumber?
         deltaPrice = try? container.decodeIfPresent(
             Decimal.self,
             forKey: .deltaPrice
+        ) as NSDecimalNumber?
+
+        balance = try? container.decodeIfPresent(Decimal.self, forKey: .balance) as NSDecimalNumber?
+
+        lockedBalance = try? container.decodeIfPresent(
+            Decimal.self,
+            forKey: .lockedBalance
         ) as NSDecimalNumber?
     }
 
@@ -28,8 +34,9 @@ extension CDAssetBalance: CoreDataCodable {
         try container.encode(chainId, forKey: .chainId)
         try container.encode(accountId, forKey: .accountId)
         try container.encode(balanceId, forKey: .balanceId)
-        try container.encodeIfPresent(balance as Decimal?, forKey: .balance)
         try container.encodeIfPresent(price as Decimal?, forKey: .price)
         try container.encodeIfPresent(deltaPrice as Decimal?, forKey: .deltaPrice)
+        try container.encodeIfPresent(balance as Decimal?, forKey: .balance)
+        try container.encodeIfPresent(lockedBalance as Decimal?, forKey: .lockedBalance)
     }
 }
