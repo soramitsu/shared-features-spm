@@ -14,7 +14,7 @@ public protocol ConnectionPoolProtocol {
     func setupWeb3EthereumConnection(for chain: ChainModel) throws -> Web3EthConnection
     func getWeb3EthereumConnection(for chainId: ChainModel.Id) throws -> Web3EthConnection
     
-    func setupTonApiAssembly(url: URL, token: String) -> TonAPIAssembly
+    func setupTonApiAssembly(url: URL, token: String, tonBridgeURL: URL) -> TonAPIAssembly
     func getTonApiAssembly() throws -> TonAPIAssembly
 }
 
@@ -98,11 +98,11 @@ public final class ConnectionPool: ConnectionPoolProtocol {
         return try autoBalance.connection()
     }
     
-    public func setupTonApiAssembly(url: URL, token: String) -> TonAPIAssembly {
+    public func setupTonApiAssembly(url: URL, token: String, tonBridgeURL: URL) -> TonAPIAssembly {
         if let tonApiAssembly {
             return tonApiAssembly
         }
-        let assembly = TonAPIAssembly(tonAPIURL: url, token: token)
+        let assembly = TonAPIAssembly(tonAPIURL: url, token: token, tonBridgeURL: tonBridgeURL)
         tonApiAssembly = assembly
         return assembly
     }

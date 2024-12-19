@@ -42,6 +42,7 @@ public final class ChainModel: Codable, Identifiable {
     public let customNodes: Set<ChainNodeModel>?
     public let iosMinAppVersion: String?
     public let identityChain: String?
+    public let tonBridgeUrl: URL?
 
     public init(
         ecosystem: Ecosystem,
@@ -62,7 +63,8 @@ public final class ChainModel: Codable, Identifiable {
         selectedNode: ChainNodeModel? = nil,
         customNodes: Set<ChainNodeModel>? = nil,
         iosMinAppVersion: String?,
-        identityChain: String?
+        identityChain: String?,
+        tonBridgeUrl: URL?
     ) {
         self.ecosystem = ecosystem
         self.rank = rank
@@ -83,6 +85,7 @@ public final class ChainModel: Codable, Identifiable {
         self.customNodes = customNodes
         self.iosMinAppVersion = iosMinAppVersion
         self.identityChain = identityChain
+        self.tonBridgeUrl = tonBridgeUrl
     }
 
     public var isRelaychain: Bool {
@@ -290,7 +293,8 @@ public final class ChainModel: Codable, Identifiable {
             selectedNode: node,
             customNodes: customNodes,
             iosMinAppVersion: iosMinAppVersion,
-            identityChain: identityChain
+            identityChain: identityChain,
+            tonBridgeUrl: tonBridgeUrl
         )
     }
 
@@ -314,7 +318,8 @@ public final class ChainModel: Codable, Identifiable {
             selectedNode: selectedNode,
             customNodes: Set(newCustomNodes),
             iosMinAppVersion: iosMinAppVersion,
-            identityChain: identityChain
+            identityChain: identityChain,
+            tonBridgeUrl: tonBridgeUrl
         )
     }
     
@@ -338,7 +343,8 @@ public final class ChainModel: Codable, Identifiable {
             selectedNode: selectedNode,
             customNodes: customNodes,
             iosMinAppVersion: iosMinAppVersion,
-            identityChain: identityChain
+            identityChain: identityChain,
+            tonBridgeUrl: tonBridgeUrl
         )
     }
 }

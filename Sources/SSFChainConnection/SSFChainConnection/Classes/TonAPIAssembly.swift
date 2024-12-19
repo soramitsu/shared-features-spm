@@ -7,14 +7,17 @@ import TonConnectAPI
 
 public final class TonAPIAssembly {
     public let tonAPIURL: URL
+    public let tonBridgeURL: URL
     private let token: String
     
     public init(
         tonAPIURL: URL,
-        token: String
+        token: String,
+        tonBridgeURL: URL
     ) {
         self.tonAPIURL = tonAPIURL
         self.token = token
+        self.tonBridgeURL = tonBridgeURL
     }
     
     private var _tonAPIClient: TonAPI.Client?
@@ -37,7 +40,7 @@ public final class TonAPIAssembly {
         return tonConnectAPIClient
       }
       let tonConnectAPIClient = TonConnectAPI.Client(
-        serverURL: (try? TonConnectAPI.Servers.server1()) ?? tonConnectURL,
+        serverURL: tonBridgeURL,
         transport: streamingTransport,
         middlewares: [])
       _tonConnectAPIClient = tonConnectAPIClient
@@ -70,10 +73,6 @@ public final class TonAPIAssembly {
       configuration.timeoutIntervalForRequest = TimeInterval(Int.max)
       configuration.timeoutIntervalForResource = TimeInterval(Int.max)
       return configuration
-    }
-    
-    var tonConnectURL: URL {
-      URL(string: "https://bridge.tonapi.io/bridge")!
     }
 }
 
