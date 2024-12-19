@@ -15,7 +15,7 @@ public protocol SeedExportDataFactoryProtocol {
 public struct SeedExportDataFactory: SeedExportDataFactoryProtocol {
     private let keystore: KeystoreProtocol
 
-    init(keystore: KeystoreProtocol) {
+    public init(keystore: KeystoreProtocol) {
         self.keystore = keystore
     }
 
