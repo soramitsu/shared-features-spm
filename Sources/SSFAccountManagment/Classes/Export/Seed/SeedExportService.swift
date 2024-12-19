@@ -23,7 +23,7 @@ public final class SeedExportService: SeedExportServiceProtocol {
     private let operationManager: OperationManagerProtocol
     private let seedFactory: SeedExportDataFactoryProtocol
 
-    init(
+    public init(
         seedFactory: SeedExportDataFactoryProtocol,
         operationManager: OperationManagerProtocol
     ) {
