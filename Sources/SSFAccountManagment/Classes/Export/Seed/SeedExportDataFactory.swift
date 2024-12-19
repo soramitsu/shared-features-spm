@@ -3,7 +3,7 @@ import SoraKeystore
 import SSFModels
 
 // sourcery: AutoMockable
-protocol SeedExportDataFactoryProtocol {
+public protocol SeedExportDataFactoryProtocol {
     func createSeedExportData(
         metaId: MetaAccountId,
         accountId: AccountId?,
@@ -12,14 +12,14 @@ protocol SeedExportDataFactoryProtocol {
     ) throws -> SeedExportData
 }
 
-struct SeedExportDataFactory: SeedExportDataFactoryProtocol {
+public struct SeedExportDataFactory: SeedExportDataFactoryProtocol {
     private let keystore: KeystoreProtocol
 
     init(keystore: KeystoreProtocol) {
         self.keystore = keystore
     }
 
-    func createSeedExportData(
+    public func createSeedExportData(
         metaId: MetaAccountId,
         accountId: AccountId?,
         cryptoType: CryptoType,
