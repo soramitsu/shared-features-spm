@@ -9,7 +9,7 @@ enum SeedExportServiceError: Error {
 }
 
 // sourcery: AutoMockable
-protocol SeedExportServiceProtocol {
+public protocol SeedExportServiceProtocol {
     func fetchExportDataFor(wallet: MetaAccountModel, accounts: [ChainAccountInfo])
         -> [SeedExportData]
     func fetchExportDataFor(
@@ -31,7 +31,7 @@ public final class SeedExportService: SeedExportServiceProtocol {
         self.operationManager = operationManager
     }
 
-    func fetchExportDataFor(
+    public func fetchExportDataFor(
         wallet: MetaAccountModel,
         accounts: [ChainAccountInfo]
     ) -> [SeedExportData] {
@@ -54,7 +54,7 @@ public final class SeedExportService: SeedExportServiceProtocol {
         return seeds
     }
 
-    func fetchExportDataFor(
+    public func fetchExportDataFor(
         address: String,
         chain: ChainModel,
         wallet: MetaAccountModel

@@ -1,7 +1,7 @@
 import Foundation
 import SSFModels
 
-struct SeedExportData {
+public struct SeedExportData {
     let seed: Data
     let derivationPath: String?
     let chain: ChainModel
