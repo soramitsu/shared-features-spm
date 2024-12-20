@@ -154,7 +154,7 @@ public final class ChainModel: Codable, Identifiable {
     }
 
     public var chainFormat: SFChainFormat {
-        if isEthereumBased {
+        if isEthereum {
             return .sfEthereum
         } else {
             return .sfSubstrate(UInt16(properties.addressPrefix) ?? 69)
