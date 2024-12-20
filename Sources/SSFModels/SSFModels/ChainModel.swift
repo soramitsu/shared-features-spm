@@ -274,9 +274,15 @@ public final class ChainModel: Codable, Identifiable {
         []
     }
 
-    public func seedTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
+    public func seedSecretTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
         isEthereum
             ? KeystoreTagV2.ethereumSecretKeyTagForMetaId(metaId, accountId: accountId)
+            : KeystoreTagV2.substrateSeedTagForMetaId(metaId, accountId: accountId)
+    }
+    
+    public func seedTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
+        isEthereum
+        ? KeystoreTagV2.ethereumSeedTagForMetaId(metaId, accountId: accountId)
             : KeystoreTagV2.substrateSeedTagForMetaId(metaId, accountId: accountId)
     }
 
