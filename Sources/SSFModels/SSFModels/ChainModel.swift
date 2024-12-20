@@ -342,7 +342,7 @@ public extension ChainModel {
         ChainAccountRequest(
             chainId: chainId,
             addressPrefix: UInt16(properties.addressPrefix) ?? 69,
-            isEthereumBased: isEthereumBased,
+            isEthereumBased: isEthereum,
             accountId: accountId
         )
     }
