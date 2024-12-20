@@ -41,7 +41,7 @@ public struct SeedExportDataFactory: SeedExportDataFactoryProtocol {
 
         //  We shouldn't show derivation path for ethereum seed. So just provide nil to hide it
         var derivationPath: String?
-        if chain.isEthereumBased {
+        if chain.isEthereum {
             let derivationTag = KeystoreTagV2.substrateDerivationTagForMetaId(
                 metaId,
                 accountId: accountId
