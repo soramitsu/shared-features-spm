@@ -247,7 +247,7 @@ public final class ChainModel: Codable, Identifiable {
     }
 
     public var accountIdLenght: Int {
-        isEthereumBased ? EthereumConstants.accountIdLength : SubstrateConstants.accountIdLength
+        isEthereum ? EthereumConstants.accountIdLength : SubstrateConstants.accountIdLength
     }
 
     public var chainAssets: [ChainAsset] {
@@ -275,19 +275,19 @@ public final class ChainModel: Codable, Identifiable {
     }
 
     public func seedTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
-        isEthereumBased
+        isEthereum
             ? KeystoreTagV2.ethereumSecretKeyTagForMetaId(metaId, accountId: accountId)
             : KeystoreTagV2.substrateSeedTagForMetaId(metaId, accountId: accountId)
     }
 
     public func keystoreTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
-        isEthereumBased
+        isEthereum
             ? KeystoreTagV2.ethereumSecretKeyTagForMetaId(metaId, accountId: accountId)
             : KeystoreTagV2.substrateSecretKeyTagForMetaId(metaId, accountId: accountId)
     }
 
     public func derivationTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
-        isEthereumBased
+        isEthereum
             ? KeystoreTagV2.ethereumDerivationTagForMetaId(metaId, accountId: accountId)
             : KeystoreTagV2.substrateDerivationTagForMetaId(metaId, accountId: accountId)
     }
