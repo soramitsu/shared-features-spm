@@ -1,9 +1,9 @@
 import Foundation
 import SSFModels
 
-struct SeedExportData {
-    let seed: Data
-    let derivationPath: String?
-    let chain: ChainModel
-    let cryptoType: CryptoType
+public struct SeedExportData {
+    public let seed: Data
+    public let derivationPath: String?
+    public let chain: ChainModel
+    public let cryptoType: CryptoType
 }

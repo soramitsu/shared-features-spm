@@ -3,7 +3,7 @@ import SoraKeystore
 import SSFModels
 
 // sourcery: AutoMockable
-protocol SeedExportDataFactoryProtocol {
+public protocol SeedExportDataFactoryProtocol {
     func createSeedExportData(
         metaId: MetaAccountId,
         accountId: AccountId?,
@@ -12,14 +12,14 @@ protocol SeedExportDataFactoryProtocol {
     ) throws -> SeedExportData
 }
 
-struct SeedExportDataFactory: SeedExportDataFactoryProtocol {
+public struct SeedExportDataFactory: SeedExportDataFactoryProtocol {
     private let keystore: KeystoreProtocol
 
-    init(keystore: KeystoreProtocol) {
+    public init(keystore: KeystoreProtocol) {
         self.keystore = keystore
     }
 
-    func createSeedExportData(
+    public func createSeedExportData(
         metaId: MetaAccountId,
         accountId: AccountId?,
         cryptoType: CryptoType,
@@ -41,7 +41,7 @@ struct SeedExportDataFactory: SeedExportDataFactoryProtocol {
 
         //  We shouldn't show derivation path for ethereum seed. So just provide nil to hide it
         var derivationPath: String?
-        if chain.isEthereumBased {
+        if chain.isEthereum {
             let derivationTag = KeystoreTagV2.substrateDerivationTagForMetaId(
                 metaId,
                 accountId: accountId

@@ -154,7 +154,7 @@ public final class ChainModel: Codable, Identifiable {
     }
 
     public var chainFormat: SFChainFormat {
-        if isEthereumBased {
+        if isEthereum {
             return .sfEthereum
         } else {
             return .sfSubstrate(UInt16(properties.addressPrefix) ?? 69)
@@ -247,7 +247,7 @@ public final class ChainModel: Codable, Identifiable {
     }
 
     public var accountIdLenght: Int {
-        isEthereumBased ? EthereumConstants.accountIdLength : SubstrateConstants.accountIdLength
+        isEthereum ? EthereumConstants.accountIdLength : SubstrateConstants.accountIdLength
     }
 
     public var chainAssets: [ChainAsset] {
@@ -274,20 +274,26 @@ public final class ChainModel: Codable, Identifiable {
         []
     }
 
-    public func seedTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
-        isEthereumBased
+    public func seedSecretTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
+        isEthereum
             ? KeystoreTagV2.ethereumSecretKeyTagForMetaId(metaId, accountId: accountId)
             : KeystoreTagV2.substrateSeedTagForMetaId(metaId, accountId: accountId)
     }
 
+    public func seedTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
+        isEthereum
+            ? KeystoreTagV2.ethereumSeedTagForMetaId(metaId, accountId: accountId)
+            : KeystoreTagV2.substrateSeedTagForMetaId(metaId, accountId: accountId)
+    }
+
     public func keystoreTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
-        isEthereumBased
+        isEthereum
             ? KeystoreTagV2.ethereumSecretKeyTagForMetaId(metaId, accountId: accountId)
             : KeystoreTagV2.substrateSecretKeyTagForMetaId(metaId, accountId: accountId)
     }
 
     public func derivationTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
-        isEthereumBased
+        isEthereum
             ? KeystoreTagV2.ethereumDerivationTagForMetaId(metaId, accountId: accountId)
             : KeystoreTagV2.substrateDerivationTagForMetaId(metaId, accountId: accountId)
     }
@@ -342,7 +348,7 @@ public extension ChainModel {
         ChainAccountRequest(
             chainId: chainId,
             addressPrefix: UInt16(properties.addressPrefix) ?? 69,
-            isEthereumBased: isEthereumBased,
+            isEthereumBased: isEthereum,
             accountId: accountId
         )
     }
