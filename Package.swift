@@ -53,7 +53,7 @@ let package = Package(
         .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.50.4"),
         .package(url: "https://github.com/bnsports/Web3.swift.git", from: "7.7.7"),
         .package(url: "https://github.com/DRadmir/ton-swift.git", branch: "main"),
-        .package(url: "https://github.com/DRadmir/ton-api-swift.git", revision: "8ddff19a40d3d00503cab7fb9d9eb77459169488"),
+        .package(url: "https://github.com/DRadmir/ton-api-swift.git", exact: "0.5.0"),
         .package(url: "https://github.com/apple/swift-openapi-runtime", .upToNextMinor(from: "0.3.0"))
     ],
     targets: [
