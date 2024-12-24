@@ -7,12 +7,18 @@ public extension TonSwift.Address {
     }
 
     func asAccountId() throws -> AccountId {
-        try JSONEncoder().encode(self)
+        guard let data = toRaw().data(using: .utf8) else {
+            throw NSError(domain: "Wrong address", code: 0)
+        }
+        return data
     }
 }
 
 public extension AccountId {
     func asTonAddress() throws -> TonSwift.Address {
-        try JSONDecoder().decode(TonSwift.Address.self, from: self)
+        guard let raw = String(data: self, encoding: .utf8) else {
+            throw NSError(domain: "Wrong raw", code: 0)
+        }
+        return try TonSwift.Address.parse(raw)
     }
 }
