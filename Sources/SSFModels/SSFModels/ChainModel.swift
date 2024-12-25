@@ -51,7 +51,7 @@ public struct ChainRemoteTokens: Codable, Hashable {
     }
 }
 
-public struct ChainProperties: Codable {
+public struct ChainProperties: Codable, Equatable {
     public let addressPrefix: String
     public let rank: String?
     public let paraId: String?
@@ -76,35 +76,28 @@ public struct ChainProperties: Codable {
 public final class ChainModel: Codable, Identifiable {
     public typealias Id = String
 
+    public var tokens: ChainRemoteTokens
+    public var identifier: String { chainId }
     public let disabled: Bool
     public let chainId: Id
-    public let externalApi: ExternalApiSet?
-    public var tokens: ChainRemoteTokens
-
-    public var identifier: String { chainId }
-    public let rank: UInt16?
-
     public let parentId: Id?
-    public let paraId: String?
     public let name: String
-
     public let xcm: XcmChain?
     public let nodes: Set<ChainNodeModel>
     public let types: TypesSettings?
     public let icon: URL?
     public let options: [ChainOptions]?
-
+    public let externalApi: ExternalApiSet?
     public var selectedNode: ChainNodeModel?
     public let customNodes: Set<ChainNodeModel>?
     public let iosMinAppVersion: String?
     public let properties: ChainProperties
+    public let identityChain: String?
 
     public init(
-        rank: UInt16?,
         disabled: Bool,
         chainId: Id,
         parentId: Id? = nil,
-        paraId: String?,
         name: String,
         tokens: ChainRemoteTokens,
         xcm: XcmChain?,
@@ -116,13 +109,12 @@ public final class ChainModel: Codable, Identifiable {
         selectedNode: ChainNodeModel? = nil,
         customNodes: Set<ChainNodeModel>? = nil,
         iosMinAppVersion: String?,
-        properties: ChainProperties
+        properties: ChainProperties,
+        identityChain: String?
     ) {
-        self.rank = rank
         self.disabled = disabled
         self.chainId = chainId
         self.parentId = parentId
-        self.paraId = paraId
         self.name = name
         self.tokens = tokens
         self.xcm = xcm
@@ -135,6 +127,7 @@ public final class ChainModel: Codable, Identifiable {
         self.customNodes = customNodes
         self.iosMinAppVersion = iosMinAppVersion
         self.properties = properties
+        self.identityChain = identityChain
     }
 
     public var isRelaychain: Bool {
@@ -271,7 +264,9 @@ public final class ChainModel: Codable, Identifiable {
     }
 
     public func utilityChainAssets() -> [ChainAsset] {
-        []
+        tokens.tokens?.filter { $0.isUtility }.map {
+            ChainAsset(chain: self, asset: $0)
+        } ?? []
     }
 
     public func seedSecretTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
@@ -300,11 +295,9 @@ public final class ChainModel: Codable, Identifiable {
 
     public func replacingSelectedNode(_ node: ChainNodeModel?) -> ChainModel {
         ChainModel(
-            rank: rank,
             disabled: disabled,
             chainId: chainId,
             parentId: parentId,
-            paraId: paraId,
             name: name,
             tokens: tokens,
             xcm: xcm,
@@ -316,17 +309,16 @@ public final class ChainModel: Codable, Identifiable {
             selectedNode: node,
             customNodes: customNodes,
             iosMinAppVersion: iosMinAppVersion,
-            properties: properties
+            properties: properties,
+            identityChain: identityChain
         )
     }
 
     public func replacingCustomNodes(_ newCustomNodes: [ChainNodeModel]) -> ChainModel {
         ChainModel(
-            rank: rank,
             disabled: disabled,
             chainId: chainId,
             parentId: parentId,
-            paraId: paraId,
             name: name,
             tokens: tokens,
             xcm: xcm,
@@ -338,7 +330,29 @@ public final class ChainModel: Codable, Identifiable {
             selectedNode: selectedNode,
             customNodes: Set(newCustomNodes),
             iosMinAppVersion: iosMinAppVersion,
-            properties: properties
+            properties: properties,
+            identityChain: identityChain
+        )
+    }
+
+    public func replacing(_ tokens: ChainRemoteTokens) -> ChainModel {
+        ChainModel(
+            disabled: disabled,
+            chainId: chainId,
+            parentId: parentId,
+            name: name,
+            tokens: tokens,
+            xcm: xcm,
+            nodes: nodes,
+            types: types,
+            icon: icon,
+            options: options,
+            externalApi: externalApi,
+            selectedNode: selectedNode,
+            customNodes: customNodes,
+            iosMinAppVersion: iosMinAppVersion,
+            properties: properties,
+            identityChain: identityChain
         )
     }
 }
@@ -356,19 +370,22 @@ public extension ChainModel {
 
 extension ChainModel: Hashable {
     public static func == (lhs: ChainModel, rhs: ChainModel) -> Bool {
-        lhs.rank == rhs.rank
+        lhs.disabled == rhs.disabled
             && lhs.chainId == rhs.chainId
-            && lhs.externalApi == rhs.externalApi
+            && lhs.parentId == rhs.parentId
+            && lhs.name == rhs.name
             && lhs.tokens == rhs.tokens
-            && lhs.options == rhs.options
+            && lhs.xcm == rhs.xcm
+            && lhs.nodes == rhs.nodes
             && lhs.types == rhs.types
             && lhs.icon == rhs.icon
-            && lhs.name == rhs.name
-            && lhs.nodes == rhs.nodes
-            && lhs.iosMinAppVersion == rhs.iosMinAppVersion
+            && lhs.options == rhs.options
+            && lhs.externalApi == rhs.externalApi
             && lhs.selectedNode == rhs.selectedNode
-            && lhs.xcm == rhs.xcm
-            && lhs.disabled == rhs.disabled
+            && lhs.customNodes == rhs.customNodes
+            && lhs.iosMinAppVersion == rhs.iosMinAppVersion
+            && lhs.properties == rhs.properties
+            && lhs.identityChain == rhs.identityChain
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -388,6 +405,7 @@ public enum ChainOptions: String, Codable {
     case nft
     case utilityFeePayment
     case chainlinkProvider
+    case checkAppId
 
     case unsupported
 
@@ -424,22 +442,27 @@ public extension ChainModel {
     }
 
     struct BlockExplorer: Codable, Hashable {
-        public let type: BlockExplorerType
-        public let url: URL
-        public let apiKey: String?
+        enum CodingKeys: String, CodingKey {
+            case type
+            case url
+        }
 
-        public init?(
-            type: String,
-            url: URL,
-            apiKey: String?
-        ) {
+        public let type: BlockExplorerType?
+        public let url: URL
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            type = try? container.decode(BlockExplorerType.self, forKey: .type)
+            url = try container.decode(URL.self, forKey: .url)
+        }
+
+        public init?(type: String, url: URL) {
             guard let externalApiType = BlockExplorerType(rawValue: type) else {
                 return nil
             }
 
             self.type = externalApiType
             self.url = url
-            self.apiKey = apiKey
         }
     }
 
@@ -464,6 +487,7 @@ public extension ChainModel {
         case polkascan
         case etherscan
         case reef
+        case oklink
         case unknown
 
         public init(from decoder: Decoder) throws {
@@ -494,24 +518,28 @@ public extension ChainModel {
         public let history: BlockExplorer?
         public let crowdloans: ExternalResource?
         public let explorers: [ExternalApiExplorer]?
+        public let pricing: BlockExplorer?
 
         public init(
             staking: ChainModel.BlockExplorer? = nil,
             history: ChainModel.BlockExplorer? = nil,
             crowdloans: ChainModel.ExternalResource? = nil,
-            explorers: [ChainModel.ExternalApiExplorer]? = nil
+            explorers: [ChainModel.ExternalApiExplorer]? = nil,
+            pricing: ChainModel.BlockExplorer? = nil
         ) {
             self.staking = staking
             self.history = history
             self.crowdloans = crowdloans
             self.explorers = explorers
+            self.pricing = pricing
         }
 
         public static func == (lhs: ExternalApiSet, rhs: ExternalApiSet) -> Bool {
             lhs.staking == rhs.staking &&
                 lhs.history == rhs.history &&
                 lhs.crowdloans == rhs.crowdloans &&
-                Set(lhs.explorers ?? []) == Set(rhs.explorers ?? [])
+                Set(lhs.explorers ?? []) == Set(rhs.explorers ?? []) &&
+                lhs.pricing == rhs.pricing
         }
     }
 
@@ -581,7 +609,7 @@ public extension ChainModel.ExternalApiExplorer {
 
     var transactionType: ChainModel.SubscanType {
         switch type {
-        case .etherscan:
+        case .etherscan, .oklink:
             return .tx
         default:
             return .extrinsic

@@ -420,11 +420,8 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
     func testFetchSortPrice() async {
         // arrange
         let chain = ChainModel(
-            rank: 1,
             disabled: true,
             chainId: "Kusama",
-            parentId: "2",
-            paraId: "test",
             name: "test",
             tokens: ChainRemoteTokens(
                 type: .config,
@@ -436,10 +433,20 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
             nodes: [],
             icon: nil,
             iosMinAppVersion: nil,
-            properties: .init(addressPrefix: "1", rank: "2", paraId: "test", ethereumBased: true)
+            properties: .init(
+                addressPrefix: "1",
+                rank: "1",
+                paraId: "test",
+                ethereumBased: true,
+                crowdloans: nil
+            ),
+            identityChain: nil
         )
 
-        let extectedAssetArray = chain.tokens.tokens?.compactMap { ChainAsset(chain: chain, asset: $0) }
+        let extectedAssetArray = chain.tokens.tokens?.compactMap { ChainAsset(
+            chain: chain,
+            asset: $0
+        ) }
 
         let chainAssetsFetcher = ChainAssetsFetchWorkerProtocolMock()
         chainAssetsFetcher.getChainAssetsModelsReturnValue = extectedAssetArray
@@ -551,7 +558,12 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
         let chain = TestData.chain
         let asset = TestData.asset
         let chainAsset = ChainAsset(chain: chain, asset: asset)
-        chain.tokens = ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: [asset])
+        chain.tokens = ChainRemoteTokens(
+            type: .config,
+            whitelist: nil,
+            utilityId: nil,
+            tokens: [asset]
+        )
 
         let chainWithStacking = TestData.chainWithStacking
         let assetWithStacking = TestData.assetWithStacking
@@ -618,11 +630,9 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
     func testFetchSortAssetId() async {
         // arrange
         let chain = ChainModel(
-            rank: 3,
             disabled: true,
             chainId: "Kusama",
             parentId: "2",
-            paraId: "test",
             name: "test",
             tokens: ChainRemoteTokens(
                 type: .config,
@@ -634,10 +644,20 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
             nodes: [],
             icon: nil,
             iosMinAppVersion: nil,
-            properties: .init(addressPrefix: "1", rank: "2", paraId: "test", ethereumBased: true)
+            properties: .init(
+                addressPrefix: "1",
+                rank: "3",
+                paraId: "test",
+                ethereumBased: true,
+                crowdloans: nil
+            ),
+            identityChain: nil
         )
 
-        let extectedAssetArray = chain.tokens.tokens?.compactMap { ChainAsset(chain: chain, asset: $0) }
+        let extectedAssetArray = chain.tokens.tokens?.compactMap { ChainAsset(
+            chain: chain,
+            asset: $0
+        ) }
 
         let chainAssetsFetcher = ChainAssetsFetchWorkerProtocolMock()
         chainAssetsFetcher.getChainAssetsModelsReturnValue = extectedAssetArray
@@ -662,10 +682,8 @@ final class ChainAssetsFetchingServiceTests: XCTestCase {
 private extension ChainAssetsFetchingServiceTests {
     enum TestData {
         static let chain = ChainModel(
-            rank: 1,
             disabled: true,
             chainId: "Kusama",
-            paraId: "test",
             name: "test",
             tokens: ChainRemoteTokens(
                 type: .config,
@@ -677,29 +695,40 @@ private extension ChainAssetsFetchingServiceTests {
             nodes: [],
             icon: nil,
             iosMinAppVersion: nil,
-            properties: .init(addressPrefix: "test", ethereumBased: true, crowdloans: true)
+            properties: .init(
+                addressPrefix: "test",
+                ethereumBased: true,
+                crowdloans: true
+            ),
+            identityChain: nil
         )
 
         static let asset = AssetModel(
             id: "2",
             name: "test",
             symbol: "XOR",
-            isUtility: true,
             precision: 1,
-            substrateType: .soraAsset,
+            icon: nil,
+            tokenProperties: TokenProperties(
+                priceId: nil,
+                currencyId: nil,
+                color: nil,
+                type: .soraAsset,
+                isNative: false,
+                staking: nil
+            ),
+            existentialDeposit: nil,
+            isUtility: true,
+            purchaseProviders: nil,
             ethereumType: nil,
-            tokenProperties: nil,
-            price: nil,
-            priceId: nil,
+            priceProvider: nil,
             coingeckoPriceId: nil,
-            priceProvider: nil
+            priceData: []
         )
-        
+
         static let chainWithStacking = ChainModel(
-            rank: 2,
             disabled: true,
             chainId: "91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3",
-            paraId: "test",
             name: "test1",
             tokens: ChainRemoteTokens(
                 type: .config,
@@ -711,22 +740,35 @@ private extension ChainAssetsFetchingServiceTests {
             nodes: [],
             icon: nil,
             iosMinAppVersion: nil,
-            properties: .init(addressPrefix: "1", crowdloans: false)
+            properties: ChainProperties(
+                addressPrefix: "1",
+                rank: "2",
+                paraId: "test"
+            ),
+            identityChain: nil
         )
 
         static let assetWithStacking = AssetModel(
             id: "3",
             name: "test",
             symbol: "XOR2",
-            isUtility: true,
             precision: 1,
-            substrateType: .soraAsset,
+            icon: nil,
+            tokenProperties: TokenProperties(
+                priceId: nil,
+                currencyId: nil,
+                color: nil,
+                type: .soraAsset,
+                isNative: false,
+                staking: .relayChain
+            ),
+            existentialDeposit: nil,
+            isUtility: true,
+            purchaseProviders: nil,
             ethereumType: nil,
-            tokenProperties: TokenProperties(stacking: "relaychain"),
-            price: nil,
-            priceId: nil,
+            priceProvider: nil,
             coingeckoPriceId: nil,
-            priceProvider: nil
+            priceData: []
         )
     }
 }

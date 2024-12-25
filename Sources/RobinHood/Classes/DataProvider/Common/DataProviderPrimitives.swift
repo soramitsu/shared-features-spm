@@ -34,7 +34,7 @@ public enum DataProviderChange<T> {
 
     /// Returns item if bounded as associated value.
 
-    var item: T? {
+    public var item: T? {
         switch self {
         case let .insert(newItem):
             return newItem
@@ -42,6 +42,41 @@ public enum DataProviderChange<T> {
             return newItem
         default:
             return nil
+        }
+    }
+}
+
+enum DataProviderDiff<T> {
+    /// New items has been added.
+    /// Item is passed as associated value.
+    case insert(newItem: T)
+
+    /// Existing item has been updated
+    /// Item is passed as associated value.
+    case update(newItem: T)
+
+    /// New remote items.
+    case remote(newItem: T)
+
+    /// Existing local item
+    case local(newItem: T)
+
+    /// Existing item has been removed.
+    /// Identifier of the item is passed as associated value.
+    case delete(deletedIdentifier: String)
+
+    var item: T? {
+        switch self {
+        case let .remote(newItem):
+            return newItem
+        case let .local(newItem):
+            return nil
+        case .delete:
+            return nil
+        case let .insert(newItem):
+            return newItem
+        case let .update(newItem):
+            return newItem
         }
     }
 }
@@ -65,6 +100,12 @@ public struct DataProviderObserverOptions {
     /// mechanism.
     public var waitsInProgressSyncOnAdd: Bool
 
+    /// Asks data provider to notify observer if no difference from remote.
+    /// If this value is `false` (default value) then observer is only notified when
+    /// there are difference from remote source.
+    /// if this value is `true` and no diff observer will notify with local source values
+    public var notifyIfNoDiff: Bool
+
     /// - parameters:
     ///    - alwaysNotifyOnRefresh: Asks data provider to notify observer in any case after
     /// synchronization completes.
@@ -80,10 +121,12 @@ public struct DataProviderObserverOptions {
 
     public init(
         alwaysNotifyOnRefresh: Bool = false,
-        waitsInProgressSyncOnAdd: Bool = true
+        waitsInProgressSyncOnAdd: Bool = true,
+        notifyIfNoDiff: Bool = false
     ) {
         self.alwaysNotifyOnRefresh = alwaysNotifyOnRefresh
         self.waitsInProgressSyncOnAdd = waitsInProgressSyncOnAdd
+        self.notifyIfNoDiff = notifyIfNoDiff
     }
 }
 
@@ -117,6 +160,10 @@ public struct StreamableProviderObserverOptions {
     /// By default ```true```.
     public var refreshWhenEmpty: Bool
 
+    /// Will notify just when local repository was updated.
+    /// By default ```false```.
+    public var notifyJustWhenUpdated: Bool
+
     /// - parameters:
     ///    - alwaysNotifyOnRefresh: Asks data provider to notify observer in any case
     ///    after synchronization completes.
@@ -143,12 +190,14 @@ public struct StreamableProviderObserverOptions {
         alwaysNotifyOnRefresh: Bool = false,
         waitsInProgressSyncOnAdd: Bool = true,
         initialSize: Int = 0,
-        refreshWhenEmpty: Bool = true
+        refreshWhenEmpty: Bool = true,
+        notifyJustWhenUpdated: Bool = false
     ) {
         self.alwaysNotifyOnRefresh = alwaysNotifyOnRefresh
         self.waitsInProgressSyncOnAdd = waitsInProgressSyncOnAdd
         self.initialSize = initialSize
         self.refreshWhenEmpty = refreshWhenEmpty
+        self.notifyJustWhenUpdated = notifyJustWhenUpdated
     }
 }
 

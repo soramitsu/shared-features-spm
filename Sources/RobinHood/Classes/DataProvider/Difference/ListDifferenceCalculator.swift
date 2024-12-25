@@ -140,6 +140,7 @@ public final class ListDifferenceCalculator<T: Identifiable>: ListDifferenceCalc
             switch change {
             case let .insert(newItem):
                 insertItems[newItem.identifier] = newItem
+
             case let .update(newItem):
                 if let oldItemIndex = allItems
                     .firstIndex(where: { $0.identifier == newItem.identifier })

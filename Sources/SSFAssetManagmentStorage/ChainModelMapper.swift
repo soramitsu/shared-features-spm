@@ -8,16 +8,28 @@ public enum ChainModelMapperError: Error {
     case missingChainId
 }
 
-public final class ChainModelMapper {
+public final class ChainModelMapper: CoreDataMapperProtocol {
     public var entityIdentifierFieldName: String { #keyPath(CDChain.chainId) }
 
     public typealias DataProviderModel = ChainModel
     public typealias CoreDataEntity = CDChain
 
-    private let apiKeyInjector: ApiKeyInjector
+    public init() {}
 
-    public init(apiKeyInjector: ApiKeyInjector) {
-        self.apiKeyInjector = apiKeyInjector
+    private func createPriceData(from entity: CDPriceData) -> PriceData? {
+        guard let currencyId = entity.currencyId,
+              let priceId = entity.priceId,
+              let price = entity.price else
+        {
+            return nil
+        }
+        return PriceData(
+            currencyId: currencyId,
+            priceId: priceId,
+            price: price,
+            fiatDayChange: Decimal(string: entity.fiatDayByChange ?? ""),
+            coingeckoPriceId: entity.coingeckoPriceId
+        )
     }
 
     private func createAsset(from entity: CDAsset) -> AssetModel? {
@@ -61,30 +73,39 @@ public final class ChainModelMapper {
             priceProvider = PriceProvider(type: type, id: id, precision: Int16(precision))
         }
 
+        let priceDatas: [PriceData] = entity.priceData.or([]).compactMap { data in
+            guard let priceData = data as? CDPriceData else {
+                return nil
+            }
+            return createPriceData(from: priceData)
+        }
+        let tokenProperties = TokenProperties(
+            type: createChainAssetModelType(from: entity.type),
+            isNative: entity.isNative,
+            staking: staking
+        )
         return AssetModel(
             id: id,
             name: name,
             symbol: symbol,
-            isUtility: entity.isUtility,
             precision: UInt16(bitPattern: entity.precision),
             icon: entity.icon,
-            substrateType: createChainAssetModelType(from: entity.type),
-            ethereumType: nil,
-            tokenProperties: TokenProperties(),
-            price: entity.price as Decimal?,
-            priceId: nil,
-            coingeckoPriceId: nil,
-            priceProvider: nil
+            tokenProperties: tokenProperties,
+            existentialDeposit: entity.existentialDeposit,
+            isUtility: entity.isUtility,
+            purchaseProviders: purchaseProviders,
+            ethereumType: createEthereumAssetType(from: entity.ethereumType),
+            priceProvider: priceProvider,
+            coingeckoPriceId: entity.priceId,
+            priceData: priceDatas
         )
     }
 
-    private func createChainNode(from entity: CDChainNode, chainId: String) -> ChainNodeModel {
+    private func createChainNode(from entity: CDChainNode, chainId _: String) -> ChainNodeModel {
         let apiKey: ChainNodeModel.ApiKey?
 
-        if let keyName = entity.apiKeyName,
-           let nodeApiKey = apiKeyInjector.getNodeApiKey(for: chainId, apiKeyName: keyName)
-        {
-            apiKey = ChainNodeModel.ApiKey(queryName: nodeApiKey, keyName: keyName)
+        if let queryName = entity.apiQueryName, let keyName = entity.apiKeyName {
+            apiKey = ChainNodeModel.ApiKey(queryName: queryName, keyName: keyName)
         } else {
             apiKey = nil
         }
@@ -101,20 +122,67 @@ public final class ChainModelMapper {
         from model: ChainModel,
         context: NSManagedObjectContext
     ) {
-        let assets = (model.tokens.tokens ?? []).map {
+        let tokens: Set<AssetModel> = model.tokens.tokens ?? []
+        let assets = tokens.compactMap { assetModel in
             let assetEntity = CDAsset(context: context)
-            assetEntity.id = $0.id ?? "0"
-            assetEntity.icon = $0.icon
-            assetEntity.precision = Int16(bitPattern: $0.precision)
-            assetEntity.price = $0.price as NSDecimalNumber?
-            assetEntity.symbol = $0.symbol
-            assetEntity.name = $0.name
-            assetEntity.type = $0.substrateType?.rawValue
+            assetEntity.id = assetModel.id
+            assetEntity.icon = assetModel.icon
+            assetEntity.precision = Int16(bitPattern: assetModel.precision)
+            assetEntity.priceId = assetModel.coingeckoPriceId
+            assetEntity.symbol = assetModel.symbol
+            assetEntity.existentialDeposit = assetModel.existentialDeposit
+            assetEntity.color = assetModel.tokenProperties?.color
+            assetEntity.name = assetModel.name
+            assetEntity.currencyId = assetModel.tokenProperties?.currencyId
+            assetEntity.type = assetModel.tokenProperties?.type?.rawValue
+            assetEntity.isUtility = assetModel.isUtility
+            assetEntity.isNative = assetModel.tokenProperties?.isNative ?? false
+            assetEntity.staking = assetModel.tokenProperties?.staking?.rawValue
+            assetEntity.ethereumType = assetModel.ethereumType?.rawValue
 
             let priceProviderContext = CDPriceProvider(context: context)
+            priceProviderContext.type = assetModel.priceProvider?.type.rawValue
+            priceProviderContext.id = assetModel.priceProvider?.id
+            if let precision = assetModel.priceProvider?.precision {
+                priceProviderContext.precision = "\(precision)"
+            }
             assetEntity.priceProvider = priceProviderContext
 
+            let purchaseProviders: [String]? = assetModel.purchaseProviders?.map(\.rawValue)
+            assetEntity.purchaseProviders = purchaseProviders
+
+            let priceData: [CDPriceData] = assetModel.priceData.map { priceData in
+                let entity = CDPriceData(context: context)
+                entity.currencyId = priceData.currencyId
+                entity.priceId = priceData.priceId
+                entity.price = priceData.price
+                entity.fiatDayByChange = String("\(priceData.fiatDayChange)")
+                entity.coingeckoPriceId = priceData.coingeckoPriceId
+                return entity
+            }
+
+            if let oldAssets = entity.assets as? Set<CDAsset>,
+               let updatedAsset = oldAssets.first(where: { cdAsset in
+                   cdAsset.id == assetModel.id
+               })
+            {
+                if let oldPrices = updatedAsset.priceData as? Set<CDPriceData> {
+                    for cdPriceData in oldPrices {
+                        if !priceData.contains(where: { $0.currencyId == cdPriceData.currencyId }) {
+                            context.delete(cdPriceData)
+                        }
+                    }
+                }
+            }
+            assetEntity.priceData = Set(priceData) as NSSet
+
             return assetEntity
+        }
+
+        if let oldAssets = entity.assets as? Set<CDAsset> {
+            for cdAsset in oldAssets {
+                context.delete(cdAsset)
+            }
         }
 
         entity.assets = Set(assets) as NSSet
@@ -139,6 +207,7 @@ public final class ChainModelMapper {
 
             nodeEntity.url = node.url
             nodeEntity.name = node.name
+            nodeEntity.apiQueryName = node.apikey?.queryName
             nodeEntity.apiKeyName = node.apikey?.keyName
 
             return nodeEntity
@@ -180,6 +249,7 @@ public final class ChainModelMapper {
 
             nodeEntity.url = node.url
             nodeEntity.name = node.name
+            nodeEntity.apiQueryName = node.apikey?.queryName
             nodeEntity.apiKeyName = node.apikey?.keyName
 
             return nodeEntity
@@ -230,6 +300,7 @@ public final class ChainModelMapper {
 
         nodeEntity.url = node.url
         nodeEntity.name = node.name
+        nodeEntity.apiQueryName = node.apikey?.queryName
         nodeEntity.apiKeyName = node.apikey?.keyName
 
         entity.selectedNode = nodeEntity
@@ -238,19 +309,22 @@ public final class ChainModelMapper {
     private func createExternalApi(from entity: CDChain) -> ChainModel.ExternalApiSet? {
         var staking: ChainModel.BlockExplorer?
         if let type = entity.stakingApiType, let url = entity.stakingApiUrl {
-            let apiKey = getBlockExplorerApiKey(for: type, chainId: entity.chainId)
-            staking = ChainModel.BlockExplorer(type: type, url: url, apiKey: apiKey)
+            staking = ChainModel.BlockExplorer(type: type, url: url)
         }
 
         var history: ChainModel.BlockExplorer?
         if let type = entity.historyApiType, let url = entity.historyApiUrl {
-            let apiKey = getBlockExplorerApiKey(for: type, chainId: entity.chainId)
-            history = ChainModel.BlockExplorer(type: type, url: url, apiKey: apiKey)
+            history = ChainModel.BlockExplorer(type: type, url: url)
         }
 
         var crowdloans: ChainModel.ExternalResource?
         if let type = entity.crowdloansApiType, let url = entity.crowdloansApiUrl {
             crowdloans = ChainModel.ExternalResource(type: type, url: url)
+        }
+
+        var pricing: ChainModel.BlockExplorer?
+        if let type = entity.pricingApiType, let url = entity.pricingApiUrl {
+            pricing = ChainModel.BlockExplorer(type: type, url: url)
         }
 
         let explorers = createExplorers(from: entity)
@@ -260,7 +334,8 @@ public final class ChainModelMapper {
                 staking: staking,
                 history: history,
                 crowdloans: crowdloans,
-                explorers: explorers
+                explorers: explorers,
+                pricing: pricing
             )
         } else {
             return nil
@@ -268,35 +343,43 @@ public final class ChainModelMapper {
     }
 
     private func createXcmConfig(from entity: CDChain) -> XcmChain? {
-        guard let versionRaw = entity.xcmConfig?.xcmVersion else {
+        guard let versionRaw = entity.xcmConfig?.xcmVersion,
+              let availableAssets = entity.xcmConfig?.availableAssets,
+              let availableDestinations = entity.xcmConfig?.availableDestinations else
+        {
             return nil
         }
 
         let version = XcmCallFactoryVersion(rawValue: versionRaw)
-        let availableXcmAssets = entity.xcmConfig?.availableAssets?
-            .allObjects as? [CDXcmAvailableAsset] ?? []
-        let assets: [XcmAvailableAsset] = availableXcmAssets.compactMap { entity in
-            guard let id = entity.id, let symbol = entity.symbol else {
+        let assets: [XcmAvailableAsset] = availableAssets.compactMap { entity in
+            guard let entity = entity as? CDXcmAvailableAsset,
+                  let id = entity.id,
+                  let symbol = entity.symbol else
+            {
                 return nil
             }
-            return XcmAvailableAsset(id: id, symbol: symbol)
+            return XcmAvailableAsset(id: id, symbol: symbol, minAmount: nil)
         }
-        let availableXcmAssetDestinations = entity.xcmConfig?.availableDestinations?
-            .allObjects as? [CDXcmAvailableDestination] ?? []
-        let destinations: [XcmAvailableDestination] = availableXcmAssetDestinations.compactMap {
-            guard let chainId = $0.chainId else {
+        let destinations: [XcmAvailableDestination] = availableDestinations.compactMap { entity in
+            guard let entity = entity as? CDXcmAvailableDestination,
+                  let chainId = entity.chainId,
+                  let assetsEntities = entity.assets else
+            {
                 return nil
             }
-            let assetsEntities = $0.assets?.allObjects as? [CDXcmAvailableAsset] ?? []
+
             let assets: [XcmAvailableAsset] = assetsEntities.compactMap { entity in
-                guard let id = entity.id, let symbol = entity.symbol else {
+                guard let entity = entity as? CDXcmAvailableAsset,
+                      let id = entity.id,
+                      let symbol = entity.symbol else
+                {
                     return nil
                 }
-                return XcmAvailableAsset(id: id, symbol: symbol)
+                return XcmAvailableAsset(id: id, symbol: symbol, minAmount: entity.minAmount)
             }
             return XcmAvailableDestination(
                 chainId: chainId,
-                bridgeParachainId: $0.bridgeParachainId,
+                bridgeParachainId: entity.bridgeParachainId,
                 assets: assets
             )
         }
@@ -353,14 +436,17 @@ public final class ChainModelMapper {
     }
 
     private func updateExternalApis(in entity: CDChain, from apis: ChainModel.ExternalApiSet?) {
-        entity.stakingApiType = apis?.staking?.type.rawValue
+        entity.stakingApiType = apis?.staking?.type?.rawValue
         entity.stakingApiUrl = apis?.staking?.url
 
-        entity.historyApiType = apis?.history?.type.rawValue
+        entity.historyApiType = apis?.history?.type?.rawValue
         entity.historyApiUrl = apis?.history?.url
 
         entity.crowdloansApiType = apis?.crowdloans?.type
         entity.crowdloansApiUrl = apis?.crowdloans?.url
+
+        entity.pricingApiType = apis?.pricing?.type?.rawValue
+        entity.pricingApiUrl = apis?.pricing?.url
     }
 
     private func createChainAssetModelType(from rawValue: String?) -> SubstrateAssetType? {
@@ -391,7 +477,9 @@ public final class ChainModelMapper {
 
         let configEntity = CDChainXcmConfig(context: context)
         configEntity.xcmVersion = xcmConfig.xcmVersion?.rawValue
-        configEntity.destWeightIsPrimitive = xcmConfig.destWeightIsPrimitive ?? false
+        if let destWeightIsPrimitive = xcmConfig.destWeightIsPrimitive {
+            configEntity.destWeightIsPrimitive = destWeightIsPrimitive
+        }
 
         let availableAssets = xcmConfig.availableAssets.map {
             let entity = CDXcmAvailableAsset(context: context)
@@ -401,7 +489,7 @@ public final class ChainModelMapper {
         }
         configEntity.availableAssets = Set(availableAssets) as NSSet
 
-        let destinationEntities = xcmConfig.availableDestinations.compactMap {
+        let destinationEntities = xcmConfig.availableDestinations.map {
             let destinationEntity = CDXcmAvailableDestination(context: context)
             destinationEntity.chainId = $0.chainId
 
@@ -409,6 +497,7 @@ public final class ChainModelMapper {
                 let entity = CDXcmAvailableAsset(context: context)
                 entity.id = $0.id
                 entity.symbol = $0.symbol
+                entity.minAmount = $0.minAmount
                 return entity
             }
             destinationEntity.assets = Set(availableAssets) as NSSet
@@ -421,17 +510,6 @@ public final class ChainModelMapper {
         entity.xcmConfig = configEntity
     }
 
-    private func getBlockExplorerApiKey(for type: String, chainId: ChainModel.Id?) -> String? {
-        guard let blockExplorerType = BlockExplorerType(rawValue: type),
-              let chainId else
-        {
-            return nil
-        }
-        return apiKeyInjector.getBlockExplorerKey(for: blockExplorerType, chainId: chainId)
-    }
-}
-
-extension ChainModelMapper: CoreDataMapperProtocol {
     public func transform(entity: CDChain) throws -> ChainModel {
         guard let chainId = entity.chainId else {
             throw ChainModelMapperError.missingChainId
@@ -478,19 +556,17 @@ extension ChainModelMapper: CoreDataMapperProtocol {
         let externalApiSet = createExternalApi(from: entity)
         let xcm = createXcmConfig(from: entity)
 
-        var rank: UInt16?
-        if let rankString = entity.rank {
-            rank = UInt16(rankString)
-        }
-
         let chainModel = ChainModel(
-            rank: rank,
             disabled: entity.disabled,
             chainId: chainId,
             parentId: entity.parentId,
-            paraId: nil,
             name: entity.name!,
-            tokens: ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: []),
+            tokens: ChainRemoteTokens(
+                type: .config,
+                whitelist: nil,
+                utilityId: nil,
+                tokens: []
+            ),
             xcm: xcm,
             nodes: Set(nodes),
             types: types,
@@ -500,7 +576,14 @@ extension ChainModelMapper: CoreDataMapperProtocol {
             selectedNode: selectedNode,
             customNodes: customNodesSet,
             iosMinAppVersion: entity.minimalAppVersion,
-            properties: ChainProperties(addressPrefix: String(entity.addressPrefix))
+            properties: ChainProperties(
+                addressPrefix: String(entity.addressPrefix),
+                rank: entity.rank,
+                paraId: entity.paraId,
+                ethereumBased: entity.isEthereumBased,
+                crowdloans: entity.hasCrowdloans
+            ),
+            identityChain: entity.identityChain
         )
 
         let assetsArray: [AssetModel] = entity.assets.or([]).compactMap { anyAsset in
@@ -527,16 +610,18 @@ extension ChainModelMapper: CoreDataMapperProtocol {
         from model: ChainModel,
         using context: NSManagedObjectContext
     ) throws {
-        if let rank = model.rank {
+        if let rank = model.properties.rank {
             entity.rank = "\(rank)"
         }
         entity.disabled = model.disabled
         entity.chainId = model.chainId
+        entity.paraId = model.properties.paraId
         entity.parentId = model.parentId
         entity.name = model.name
         entity.types = model.types?.url
         entity.typesOverrideCommon = model.types.map { NSNumber(value: $0.overridesCommon) }
 
+        entity.addressPrefix = Int16(bitPattern: UInt16(model.properties.addressPrefix) ?? 69)
         entity.icon = model.icon
         entity.isEthereumBased = model.isEthereumBased
         entity.isTestnet = model.isTestnet
@@ -544,7 +629,7 @@ extension ChainModelMapper: CoreDataMapperProtocol {
         entity.isTipRequired = model.isTipRequired
         entity.minimalAppVersion = model.iosMinAppVersion
         entity.options = model.options?.map(\.rawValue) as? NSArray
-
+        entity.identityChain = model.identityChain
         updateEntityAsset(for: entity, from: model, context: context)
         updateEntityNodes(for: entity, from: model, context: context)
         updateExternalApis(in: entity, from: model.externalApi)

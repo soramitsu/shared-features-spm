@@ -9,15 +9,15 @@ final class EtherscanHistoryRequest: RequestConfig {
         address: String
     ) {
         let action: String = chainAsset.asset.ethereumType == .normal ? "txlist" : "tokentx"
-        var queryItems = [
+        let queryItems = [
             URLQueryItem(name: "module", value: "account"),
             URLQueryItem(name: "action", value: action),
             URLQueryItem(name: "address", value: address),
         ]
 
-        if let apiKey = chainAsset.chain.externalApi?.history?.apiKey {
-            queryItems.append(URLQueryItem(name: "apikey", value: apiKey))
-        }
+//        if let apiKey = chainAsset.chain.externalApi?.history?.apiKey {
+//            queryItems.append(URLQueryItem(name: "apikey", value: apiKey))
+//        }
 
         super.init(
             baseURL: baseURL,

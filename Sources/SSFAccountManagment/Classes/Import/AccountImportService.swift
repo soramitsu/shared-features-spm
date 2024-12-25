@@ -84,6 +84,7 @@ public final class AccountImportService {
 
                 case let .failure(error):
                     continuation.resume(throwing: error)
+
                 case .none:
                     let error = BaseOperationError.parentOperationCancelled
                     continuation.resume(throwing: error)
@@ -124,6 +125,7 @@ extension AccountImportService: AccountCreatable {
 
                 case let .failure(error):
                     continuation.resume(throwing: error)
+
                 case .none:
                     let error = BaseOperationError.parentOperationCancelled
                     continuation.resume(throwing: error)
@@ -195,6 +197,7 @@ extension AccountImportService: AccountImportable {
 
                 case let .failure(error):
                     continuation.resume(throwing: error)
+
                 case .none:
                     let error = BaseOperationError.parentOperationCancelled
                     continuation.resume(throwing: error)

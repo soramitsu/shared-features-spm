@@ -68,14 +68,15 @@ final class AccountManagementServiceTests: XCTestCase {
 
             Task { [weak self] in
                 do {
-                    let updatedAccount = try await self?.service?.updateEnabilibilty(for: chainAsset.chainAssetId.id)
-                    
+                    let updatedAccount = try await self?.service?
+                        .updateEnabilibilty(for: chainAsset.chainAssetId.id)
+
                     DispatchQueue.main.async { [weak self] in
                         XCTAssertTrue(
                             self?.accountManagementWorker?
                                 .saveAccountCompletionCalled ?? false
                         )
-                        
+
                         XCTAssertTrue(updatedAccount != nil)
                     }
                 } catch {
@@ -124,10 +125,9 @@ final class AccountManagementServiceTests: XCTestCase {
 private extension AccountManagementServiceTests {
     enum TestData {
         static let chain = ChainModel(
-            rank: 1,
             disabled: true,
             chainId: "Kusama",
-            paraId: "test",
+            parentId: "2",
             name: "test",
             tokens: ChainRemoteTokens(
                 type: .config,
@@ -139,22 +139,37 @@ private extension AccountManagementServiceTests {
             nodes: [],
             icon: nil,
             iosMinAppVersion: nil,
-            properties: .init(addressPrefix: "1", rank: "2", paraId: "test", ethereumBased: true)
+            properties: .init(
+                addressPrefix: "1",
+                rank: "2",
+                paraId: "test",
+                ethereumBased: true,
+                crowdloans: nil
+            ),
+            identityChain: nil
         )
 
         static let asset = AssetModel(
             id: "2",
             name: "test",
             symbol: "XOR",
-            isUtility: true,
             precision: 1,
-            substrateType: .soraAsset,
+            icon: nil,
+            tokenProperties: TokenProperties(
+                priceId: nil,
+                currencyId: nil,
+                color: nil,
+                type: .soraAsset,
+                isNative: false,
+                staking: nil
+            ),
+            existentialDeposit: nil,
+            isUtility: true,
+            purchaseProviders: nil,
             ethereumType: nil,
-            tokenProperties: nil,
-            price: nil,
-            priceId: nil,
+            priceProvider: nil,
             coingeckoPriceId: nil,
-            priceProvider: nil
+            priceData: []
         )
 
         static let chainAccounts = ChainAccountModel(

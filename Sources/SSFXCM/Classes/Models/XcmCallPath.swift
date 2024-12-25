@@ -14,12 +14,10 @@ enum XcmCallPath: StorageCodingPathProtocol {
         switch self {
         case .parachainId:
             return (moduleName: "parachainInfo", itemName: "parachainId")
-
         case .xcmPalletLimitedTeleportAssets:
             return (moduleName: "xcmPallet", itemName: "limited_teleport_assets")
         case .xcmPalletLimitedReserveTransferAssets:
             return (moduleName: "xcmPallet", itemName: "limited_reserve_transfer_assets")
-
         case .polkadotXcmTeleportAssets:
             return (moduleName: "polkadotXcm", itemName: "teleport_assets")
         case .polkadotXcmLimitedTeleportAssets:
@@ -28,12 +26,10 @@ enum XcmCallPath: StorageCodingPathProtocol {
             return (moduleName: "polkadotXcm", itemName: "limited_reserve_transfer_assets")
         case .polkadotXcmLimitedReserveWithdrawAssets:
             return (moduleName: "polkadotXcm", itemName: "limited_reserve_withdraw_assets")
-
         case .xTokensTransfer:
             return (moduleName: "xTokens", itemName: "transfer")
         case .xTokensTransferMultiasset:
             return (moduleName: "xTokens", itemName: "transfer_multiasset")
-
         case .bridgeProxyBurn:
             return (moduleName: "bridgeProxy", itemName: "burn")
         case .bridgeProxyTransactions:

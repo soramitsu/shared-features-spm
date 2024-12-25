@@ -97,11 +97,9 @@ extension JSONExportServiceTests {
         )
 
         static let chain = ChainModel(
-            rank: 1,
             disabled: true,
             chainId: "Kusama",
             parentId: "2",
-            paraId: "test",
             name: "test",
             tokens: ChainRemoteTokens(
                 type: .config,
@@ -113,7 +111,14 @@ extension JSONExportServiceTests {
             nodes: [],
             icon: nil,
             iosMinAppVersion: nil,
-            properties: .init(addressPrefix: "1", rank: "2", paraId: "test", ethereumBased: true)
+            properties: .init(
+                addressPrefix: "1",
+                rank: "2",
+                paraId: "test",
+                ethereumBased: true,
+                crowdloans: nil
+            ),
+            identityChain: nil
         )
 
         static let response = ChainAccountResponse(

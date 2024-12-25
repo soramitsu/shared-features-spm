@@ -72,7 +72,6 @@ final class CallPathDeterminerImpl: CallPathDeterminer {
             return .xTokensTransferMultiasset
         case (.xTokens, .parachain):
             return .xTokensTransferMultiasset
-
         case (.polkadotXcm, .relaychain):
             return .polkadotXcmLimitedReserveWithdrawAssets
         case (.polkadotXcm, .nativeParachain):

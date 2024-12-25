@@ -6,7 +6,7 @@ public enum ChainModelGenerator {
         name: String? = nil,
         chainId: String? = nil,
         parentId: String? = nil,
-        paraId: String? = nil,
+        paraId _: String? = nil,
         count: Int,
         withTypes: Bool = true,
         staking: StakingType? = nil,
@@ -56,11 +56,9 @@ public enum ChainModelGenerator {
             )
 
             let chain = ChainModel(
-                rank: nil,
                 disabled: false,
                 chainId: chainId,
                 parentId: parentId,
-                paraId: paraId,
                 name: name ?? String(chainId.reversed()),
                 tokens: ChainRemoteTokens(
                     type: .config,
@@ -76,7 +74,8 @@ public enum ChainModelGenerator {
                 externalApi: externalApi,
                 customNodes: nil,
                 iosMinAppVersion: nil,
-                properties: ChainProperties(addressPrefix: String(index))
+                properties: ChainProperties(addressPrefix: String(index)),
+                identityChain: nil
             )
 
             let asset = generateAssetWithId("", symbol: "", assetPresicion: 12, chainId: chainId)
@@ -96,11 +95,9 @@ public enum ChainModelGenerator {
         availableAssets: [XcmAvailableAsset]
     ) -> ChainModel {
         ChainModel(
-            rank: nil,
             disabled: chain.disabled,
             chainId: chain.chainId,
             parentId: chain.parentId,
-            paraId: chain.paraId,
             name: chain.name,
             tokens: chain.tokens,
             xcm: XcmChain(
@@ -114,10 +111,10 @@ public enum ChainModelGenerator {
             icon: chain.icon,
             options: chain.options,
             externalApi: chain.externalApi,
-            selectedNode: chain.selectedNode,
             customNodes: chain.customNodes,
             iosMinAppVersion: chain.iosMinAppVersion,
-            properties: chain.properties
+            properties: chain.properties,
+            identityChain: chain.identityChain
         )
     }
 
@@ -164,11 +161,9 @@ public enum ChainModelGenerator {
         )
 
         let chain = ChainModel(
-            rank: nil,
             disabled: false,
             chainId: chainId,
             parentId: nil,
-            paraId: nil,
             name: UUID().uuidString,
             tokens: ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: []),
             xcm: xcm,
@@ -179,7 +174,8 @@ public enum ChainModelGenerator {
             externalApi: externalApi,
             customNodes: nil,
             iosMinAppVersion: nil,
-            properties: ChainProperties(addressPrefix: String(addressPrefix))
+            properties: ChainProperties(addressPrefix: String(addressPrefix)),
+            identityChain: nil
         )
         let chainAssetsArray: [AssetModel] = (0 ..< count).map { index in
             generateAssetWithId(
@@ -210,23 +206,15 @@ public enum ChainModelGenerator {
             id: identifier,
             name: "",
             symbol: symbol,
-            isUtility: true,
             precision: assetPresicion,
-            icon: nil,
-            substrateType: substrateAssetType,
-            ethereumType: nil,
-            tokenProperties:
-            TokenProperties(
+            tokenProperties: TokenProperties(
                 priceId: nil,
                 currencyId: currencyId,
                 color: nil,
                 type: substrateAssetType,
                 isNative: true
             ),
-            price: nil,
-            priceId: nil,
-            coingeckoPriceId: nil,
-            priceProvider: nil
+            isUtility: true
         )
     }
 
@@ -251,8 +239,7 @@ public enum ChainModelGenerator {
         if staking != nil {
             stakingApi = ChainModel.BlockExplorer(
                 type: "test",
-                url: URL(string: "https://staking.io/\(chainId)-\(UUID().uuidString).json")!,
-                apiKey: nil
+                url: URL(string: "https://staking.io/\(chainId)-\(UUID().uuidString).json")!
             )
         } else {
             stakingApi = nil

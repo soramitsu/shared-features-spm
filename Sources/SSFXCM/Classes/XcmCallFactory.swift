@@ -83,7 +83,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         weightLimit: BigUInt?,
         path: XcmCallPath
     ) -> RuntimeCall<ReserveTransferAssetsCall> {
-        let destParachainId = UInt32(destChainModel.paraId ?? "")
+        let destParachainId = UInt32(destChainModel.properties.paraId ?? "")
         let destParents: UInt8 = destChainModel.isRelaychain ? 1 : 0
         let destination = createVersionedMultiLocation(
             version: version,
@@ -138,7 +138,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         weightLimit: BigUInt,
         path: XcmCallPath
     ) -> RuntimeCall<XTokensTransferCall> {
-        let destParachainId = UInt32(destChainModel.paraId ?? "")
+        let destParachainId = UInt32(destChainModel.properties.paraId ?? "")
         let destParents: UInt8 = destChainModel.isRelaychain ? 1 : 0
         let destination = createVersionedMultiLocation(
             version: version,
@@ -191,7 +191,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             amount: amount
         )
 
-        let destParachainId = UInt32(destChainModel.paraId ?? "")
+        let destParachainId = UInt32(destChainModel.properties.paraId ?? "")
         let destination = createVersionedMultiLocation(
             version: version,
             chainModel: destChainModel,
@@ -247,7 +247,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
             amount: amount
         )
 
-        let destParachainId = UInt32(destChainModel.paraId ?? "")
+        let destParachainId = UInt32(destChainModel.properties.paraId ?? "")
         let destination = createVersionedMultiLocation(
             version: version,
             chainModel: destChainModel,
@@ -295,7 +295,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         let networkId = BridgeTypesGenericNetworkId(from: destChainModel)
         let assetId = SoraAssetId(wrappedValue: currencyId)
 
-        let destParachainId = UInt32(destChainModel.paraId ?? "")
+        let destParachainId = UInt32(destChainModel.properties.paraId ?? "")
         let destParents: UInt8 = destChainModel.isRelaychain ? 1 : 0
         let destination = createVersionedMultiLocation(
             version: .V3,

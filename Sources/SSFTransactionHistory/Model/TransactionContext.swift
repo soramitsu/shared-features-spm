@@ -189,7 +189,6 @@ struct TransactionContext {
                 )
                 return
             }
-
         case .migration:
             return nil
         }

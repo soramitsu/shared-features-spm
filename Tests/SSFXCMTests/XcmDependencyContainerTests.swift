@@ -62,25 +62,30 @@ extension XcmDependencyContainerTests {
         )
 
         static let chainModel = ChainModel(
-            rank: 0,
             disabled: false,
             chainId: "0",
-            paraId: "1001",
             name: "test1",
-            tokens: ChainRemoteTokens(type: .config, whitelist: nil, utilityId: nil, tokens: []),
+            tokens: ChainRemoteTokens(
+                type: .config,
+                whitelist: nil,
+                utilityId: nil,
+                tokens: []
+            ),
             xcm: XcmChain(
                 xcmVersion: .V3,
                 destWeightIsPrimitive: true,
                 availableAssets: [.init(
                     id: "0",
-                    symbol: "0"
+                    symbol: "0",
+                    minAmount: nil
                 )],
                 availableDestinations: [.init(
                     chainId: "0",
                     bridgeParachainId: "2",
                     assets: [.init(
                         id: "1",
-                        symbol: "1"
+                        symbol: "1",
+                        minAmount: nil
                     )]
                 )]
             ),
@@ -91,7 +96,10 @@ extension XcmDependencyContainerTests {
             )]),
             icon: nil,
             iosMinAppVersion: nil,
-            properties: ChainProperties(addressPrefix: "0")
+            properties: ChainProperties(
+                addressPrefix: "0"
+            ),
+            identityChain: nil
         )
 
         static let runtimeProvider = RuntimeProvider(

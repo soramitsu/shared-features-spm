@@ -37,7 +37,10 @@
         <attribute name="minimalAppVersion" optional="YES" attributeType="String"/>
         <attribute name="name" attributeType="String"/>
         <attribute name="options" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromDataTransformer"/>
+        <attribute name="paraId" optional="YES" attributeType="String"/>
         <attribute name="parentId" optional="YES" attributeType="String"/>
+        <attribute name="pricingApiType" optional="YES" attributeType="String"/>
+        <attribute name="pricingApiUrl" optional="YES" attributeType="URI"/>
         <attribute name="rank" optional="YES" attributeType="String"/>
         <attribute name="stakingApiType" optional="YES" attributeType="String"/>
         <attribute name="stakingApiUrl" optional="YES" attributeType="URI"/>
@@ -135,6 +138,19 @@
     <entity name="CDStashItem" representedClassName="CDStashItem" syncable="YES" codeGenerationType="class">
         <attribute name="controller" optional="YES" attributeType="String"/>
         <attribute name="stash" optional="YES" attributeType="String"/>
+    </entity>
+    <entity name="CDTransactionHistoryItem" representedClassName="CDTransactionHistoryItem" syncable="YES" codeGenerationType="class">
+        <attribute name="blockNumber" optional="YES" attributeType="Integer 64" usesScalarValueType="NO"/>
+        <attribute name="call" optional="YES" attributeType="Binary"/>
+        <attribute name="callName" attributeType="String"/>
+        <attribute name="fee" optional="YES" attributeType="String"/>
+        <attribute name="identifier" optional="YES" attributeType="String"/>
+        <attribute name="moduleName" attributeType="String"/>
+        <attribute name="receiver" optional="YES" attributeType="String"/>
+        <attribute name="sender" optional="YES" attributeType="String"/>
+        <attribute name="status" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="txIndex" optional="YES" attributeType="Integer 16" usesScalarValueType="NO"/>
     </entity>
     <entity name="CDXcmAvailableAsset" representedClassName="CDXcmAvailableAsset" syncable="YES" codeGenerationType="class">
         <attribute name="id" optional="YES" attributeType="String"/>
