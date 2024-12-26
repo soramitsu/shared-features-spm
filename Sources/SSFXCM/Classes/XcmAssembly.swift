@@ -1,5 +1,7 @@
 import Foundation
 import RobinHood
+import SSFAssetManagment
+import SSFAssetManagmentStorage
 import SSFChainConnection
 import SSFChainRegistry
 import SSFCrypto
@@ -31,10 +33,22 @@ public enum XcmAssembly {
 
         let extrinsicBuilder = XcmExtrinsicBuilder()
 
+        let mapper = ChainModelMapper()
+
+        let repository: AsyncCoreDataRepositoryDefault<ChainModel, CDChain> =
+            SubstrateDataStorageFacade()!.createAsyncRepository(
+                filter: nil,
+                sortDescriptors: [],
+                mapper: AnyCoreDataMapper(mapper)
+            )
+
+        let service = LocalChainModelServiceDefault(repository: AsyncAnyRepository(repository))
+
         let chainSyncService = ChainsDataFetcher(
             chainsUrl: sourceConfig?.chainsSourceUrl ?? XcmConfig.shared.chainsSourceUrl,
             operationQueue: OperationQueue(),
-            dataFetchFactory: NetworkOperationFactory()
+            dataFetchFactory: NetworkOperationFactory(),
+            localeChainService: service
         )
 
         let chainsTypesSyncService = ChainTypesRemoteDataFercher(

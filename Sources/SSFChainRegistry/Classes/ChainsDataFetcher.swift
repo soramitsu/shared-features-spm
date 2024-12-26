@@ -1,5 +1,6 @@
 import Foundation
 import RobinHood
+import SSFAssetManagment
 import SSFLogger
 import SSFModels
 import SSFNetwork
@@ -23,6 +24,7 @@ public final class ChainsDataFetcher {
     private let dataFetchFactory: NetworkOperationFactoryProtocol
     private let retryStrategy: ReconnectionStrategyProtocol
     private let operationQueue: OperationQueue
+    private let localeChainService: LocalChainModelService
 
     private lazy var scheduler = Scheduler(with: self, callbackQueue: DispatchQueue.global())
     private var retryAttempt: Int = 0
@@ -35,12 +37,14 @@ public final class ChainsDataFetcher {
         chainsUrl: URL,
         operationQueue: OperationQueue,
         dataFetchFactory: NetworkOperationFactoryProtocol,
-        retryStrategy: ReconnectionStrategyProtocol = ExponentialReconnection()
+        retryStrategy: ReconnectionStrategyProtocol = ExponentialReconnection(),
+        localeChainService: LocalChainModelService
     ) {
         self.chainsUrl = chainsUrl
         self.dataFetchFactory = dataFetchFactory
         self.operationQueue = operationQueue
         self.retryStrategy = retryStrategy
+        self.localeChainService = localeChainService
     }
 
     private func executeSync() async throws -> [ChainModel.Id: ChainModel] {
@@ -134,7 +138,11 @@ extension ChainsDataFetcher: ChainsDataFetcherProtocol {
     }
 
     public func syncUp() {
-        Task { try await executeSync() }
+        Task { [weak self] in
+            guard let self else { return }
+            let chains = try await executeSync()
+            try? await self.localeChainService.sync(chainModel: Array(chains.values))
+        }
     }
 }
 
