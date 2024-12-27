@@ -141,7 +141,7 @@ extension ChainsDataFetcher: ChainsDataFetcherProtocol {
         Task { [weak self] in
             guard let self else { return }
             let chains = try await executeSync()
-            try? await self.localeChainService.sync(chainModel: Array(chains.values))
+            try await self.syncChains(Array(chains.values))
         }
     }
 }
@@ -157,5 +157,27 @@ extension ChainsDataFetcher: SchedulerDelegate {
         }
 
         Task { try await executeSync() }
+    }
+}
+
+private extension ChainsDataFetcher {
+    func syncChains(_ chains: [ChainModel]) async throws {
+        let cachedChains = try await localeChainService.getAll()
+
+        let cachedChainsDict = Dictionary(
+            uniqueKeysWithValues: cachedChains
+                .map { ($0.chainId, $0) }
+        )
+
+        let chainsToSync = chains.filter { chain in
+            guard let cachedChain = cachedChainsDict[chain.chainId] else {
+                return true
+            }
+            return cachedChain != chain
+        }
+
+        if !chainsToSync.isEmpty {
+            try await localeChainService.sync(chainModel: chainsToSync)
+        }
     }
 }
