@@ -467,7 +467,7 @@ public extension ChainModel {
         case address
         case unknown
         case tonAccount
-        case tonTransaction
+        case tonTransaction = "transaction"
 
         public init(from decoder: Decoder) throws {
             self = try SubscanType(
