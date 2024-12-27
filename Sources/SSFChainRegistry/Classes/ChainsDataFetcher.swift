@@ -173,7 +173,7 @@ private extension ChainsDataFetcher {
             guard let cachedChain = cachedChainsDict[chain.chainId] else {
                 return true
             }
-            return cachedChain != chain
+            return cachedChain.chainId != chain.chainId
         }
 
         if !chainsToSync.isEmpty {
