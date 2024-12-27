@@ -170,12 +170,11 @@ private extension ChainsDataFetcher {
         var chainsToRemoveIds = Set(cachedChains.map { $0.chainId })
 
         let chainsToSync = chains.filter { chain in
-
             if let cachedChain = cachedChainsDict[chain.chainId] {
-                if cachedChain != chain {
+                chainsToRemoveIds.remove(chain.chainId)
+                if cachedChain.chainId != chain.chainId {
                     return true
                 }
-                chainsToRemoveIds.remove(chain.chainId)
                 return false
             } else {
                 return true
