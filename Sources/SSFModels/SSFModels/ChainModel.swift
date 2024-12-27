@@ -354,7 +354,7 @@ public extension ChainModel {
     }
 }
 
-extension ChainModel: Hashable {
+extension ChainModel: Hashable, Equatable {
     public static func == (lhs: ChainModel, rhs: ChainModel) -> Bool {
         lhs.rank == rhs.rank
             && lhs.chainId == rhs.chainId
