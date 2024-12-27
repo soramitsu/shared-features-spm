@@ -360,14 +360,9 @@ extension ChainModel: Hashable, Equatable {
             && lhs.chainId == rhs.chainId
             && lhs.externalApi == rhs.externalApi
             && lhs.tokens == rhs.tokens
-            && lhs.options == rhs.options
-            && lhs.types == rhs.types
             && lhs.icon == rhs.icon
             && lhs.name == rhs.name
             && lhs.nodes == rhs.nodes
-            && lhs.iosMinAppVersion == rhs.iosMinAppVersion
-            && lhs.selectedNode == rhs.selectedNode
-            && lhs.xcm == rhs.xcm
             && lhs.disabled == rhs.disabled
     }
 

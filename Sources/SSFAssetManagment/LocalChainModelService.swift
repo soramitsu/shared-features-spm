@@ -6,6 +6,7 @@ public protocol LocalChainModelService {
     func getAll() async throws -> [ChainModel]
     func getChain(by chainId: String) async throws -> ChainModel?
     func sync(chainModel: [ChainModel]) async throws
+    func sync(chainModel: [ChainModel], deleteIds: [String]) async throws
 }
 
 public actor LocalChainModelServiceDefault: LocalChainModelService {
@@ -25,5 +26,9 @@ public actor LocalChainModelServiceDefault: LocalChainModelService {
 
     public func sync(chainModel: [ChainModel]) async throws {
         try await repository.save(models: chainModel)
+    }
+
+    public func sync(chainModel: [ChainModel], deleteIds: [String]) async throws {
+        await repository.save(models: chainModel, deleteIds: deleteIds)
     }
 }
