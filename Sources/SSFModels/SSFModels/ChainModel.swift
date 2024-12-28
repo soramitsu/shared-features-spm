@@ -358,7 +358,6 @@ extension ChainModel: Hashable, Equatable {
     public static func == (lhs: ChainModel, rhs: ChainModel) -> Bool {
         lhs.rank == rhs.rank
             && lhs.chainId == rhs.chainId
-            && lhs.tokens == rhs.tokens
             && lhs.icon == rhs.icon
             && lhs.name == rhs.name
             && lhs.nodes == rhs.nodes
