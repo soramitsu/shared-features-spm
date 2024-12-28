@@ -93,7 +93,7 @@ public final class ChainModel: Codable, Identifiable {
     }
 
     public var isEthereumBased: Bool {
-        options?.contains(.ethereumBased) == true
+        options?.contains { $0 == .ethereumBased || $0 == .ethereum } == true
     }
 
     public var supportsNft: Bool {
