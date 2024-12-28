@@ -343,7 +343,9 @@ let package = Package(
                 "SSFRuntimeCodingService",
                 "SSFChainConnection",
                 "SSFNetwork",
-                "SSFLogger"
+                "SSFLogger",
+                "SSFAssetManagment",
+                "SSFAssetManagmentStorage"
             ]
         ),
         .target(name: "SSFNetwork", dependencies: [ "RobinHood" ]),
@@ -361,7 +363,9 @@ let package = Package(
                 "SSFChainConnection",
                 "SSFExtrinsicKit",
                 "SSFNetwork",
-                "SSFChainRegistry"
+                "SSFChainRegistry",
+                "SSFAssetManagment",
+                "SSFAssetManagmentStorage"
             ]
         ),
         .target(

@@ -14,9 +14,9 @@ public final class ChainModelMapper {
     public typealias DataProviderModel = ChainModel
     public typealias CoreDataEntity = CDChain
 
-    private let apiKeyInjector: ApiKeyInjector
+    private let apiKeyInjector: ApiKeyInjector?
 
-    public init(apiKeyInjector: ApiKeyInjector) {
+    public init(apiKeyInjector: ApiKeyInjector? = nil) {
         self.apiKeyInjector = apiKeyInjector
     }
 
@@ -82,7 +82,7 @@ public final class ChainModelMapper {
         let apiKey: ChainNodeModel.ApiKey?
 
         if let keyName = entity.apiKeyName,
-           let nodeApiKey = apiKeyInjector.getNodeApiKey(for: chainId, apiKeyName: keyName)
+           let nodeApiKey = apiKeyInjector?.getNodeApiKey(for: chainId, apiKeyName: keyName)
         {
             apiKey = ChainNodeModel.ApiKey(queryName: nodeApiKey, keyName: keyName)
         } else {
@@ -427,7 +427,7 @@ public final class ChainModelMapper {
         {
             return nil
         }
-        return apiKeyInjector.getBlockExplorerKey(for: blockExplorerType, chainId: chainId)
+        return apiKeyInjector?.getBlockExplorerKey(for: blockExplorerType, chainId: chainId)
     }
 }
 

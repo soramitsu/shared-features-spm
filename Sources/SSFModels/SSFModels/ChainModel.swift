@@ -354,20 +354,13 @@ public extension ChainModel {
     }
 }
 
-extension ChainModel: Hashable {
+extension ChainModel: Hashable, Equatable {
     public static func == (lhs: ChainModel, rhs: ChainModel) -> Bool {
         lhs.rank == rhs.rank
             && lhs.chainId == rhs.chainId
-            && lhs.externalApi == rhs.externalApi
-            && lhs.tokens == rhs.tokens
-            && lhs.options == rhs.options
-            && lhs.types == rhs.types
             && lhs.icon == rhs.icon
             && lhs.name == rhs.name
             && lhs.nodes == rhs.nodes
-            && lhs.iosMinAppVersion == rhs.iosMinAppVersion
-            && lhs.selectedNode == rhs.selectedNode
-            && lhs.xcm == rhs.xcm
             && lhs.disabled == rhs.disabled
     }
 
