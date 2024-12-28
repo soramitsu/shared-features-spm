@@ -2,7 +2,7 @@ import Foundation
 import RobinHood
 import SSFModels
 
-public protocol LocalChainModelService {
+public protocol LocalChainModelService: Actor {
     func getAll() async throws -> [ChainModel]
     func getChain(by chainId: String) async throws -> ChainModel?
     func sync(chainModel: [ChainModel]) async throws

@@ -164,25 +164,16 @@ private extension ChainsDataFetcher {
     func syncChains(_ chains: [ChainModel]) async throws {
         let cachedChains = try await localeChainService.getAll()
 
-        let cachedChainsDict = Dictionary(
-            uniqueKeysWithValues: cachedChains.map { ($0.chainId, $0) }
-        )
-        var chainsToRemoveIds = Set(cachedChains.map { $0.chainId })
+        let cachedChainsSet = Set(cachedChains.map { $0.chainId })
+        let remoteChainsSet = Set(chains.map { $0.chainId })
+        let chainIdsToRemove = cachedChainsSet.subtracting(remoteChainsSet)
 
         let chainsToSync = chains.filter { chain in
-            if let cachedChain = cachedChainsDict[chain.chainId] {
-                chainsToRemoveIds.remove(chain.chainId)
-                if cachedChain != chain {
-                    return true
-                }
-                return false
-            } else {
-                return true
-            }
+            Set(cachedChains).symmetricDifference([chain]).contains(chain)
         }
         try await localeChainService.sync(
             chainModel: chainsToSync,
-            deleteIds: Array(chainsToRemoveIds)
+            deleteIds: Array(chainIdsToRemove)
         )
     }
 }
