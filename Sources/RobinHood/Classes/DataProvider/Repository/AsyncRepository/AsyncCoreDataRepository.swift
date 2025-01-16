@@ -42,7 +42,7 @@ public extension AsyncCoreDataRepository {
     }
 }
 
-public final class AsyncCoreDataRepositoryDefault<
+public final actor AsyncCoreDataRepositoryDefault<
     T: Identifiable,
     U: NSManagedObject
 >: AsyncCoreDataRepository {

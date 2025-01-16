@@ -166,6 +166,7 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
         let connection = WebSocket(request: request, engine: engine)
         connection.callbackQueue = callbackQueue
         currentConnection = connection
+        currentConnection.delegate = webSocketEngine
         currentUrl = url
     }
 }
