@@ -14,7 +14,7 @@ public protocol NetworkWorker {
     ) async -> AsyncThrowingStream<CachedNetworkResponse<T>, Error>
 }
 
-public final actor NetworkWorkerImpl: NetworkWorker {
+public final class NetworkWorkerImpl: NetworkWorker {
     public init() {}
 
     private lazy var cacheStorage: AsyncSingleValueRepository =
