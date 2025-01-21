@@ -363,21 +363,22 @@ public extension ChainModel {
 extension ChainModel: Hashable {
     public static func == (lhs: ChainModel, rhs: ChainModel) -> Bool {
         lhs.rank == rhs.rank
-            && lhs.chainId == rhs.chainId
-            && lhs.externalApi == rhs.externalApi
-            && lhs.assets == rhs.assets
-            && lhs.options == rhs.options
-            && lhs.types == rhs.types
-            && lhs.icon == rhs.icon
-            && lhs.name == rhs.name
-            && lhs.addressPrefix == rhs.addressPrefix
-            && lhs.nodes == rhs.nodes
-            && lhs.iosMinAppVersion == rhs.iosMinAppVersion
-            && lhs.selectedNode == rhs.selectedNode
-            && lhs.xcm == rhs.xcm
-            && lhs.disabled == rhs.disabled
-            && lhs.identityChain == rhs.identityChain
-            && lhs.ecosystem == rhs.ecosystem
+        && lhs.chainId == rhs.chainId
+        && lhs.externalApi == rhs.externalApi
+        && lhs.assets == rhs.assets
+        && lhs.options == rhs.options
+        && lhs.types == rhs.types
+        && lhs.icon == rhs.icon
+        && lhs.name == rhs.name
+        && lhs.addressPrefix == rhs.addressPrefix
+        && lhs.nodes == rhs.nodes
+        && lhs.iosMinAppVersion == rhs.iosMinAppVersion
+        && lhs.selectedNode == rhs.selectedNode
+        && lhs.xcm == rhs.xcm
+        && lhs.disabled == rhs.disabled
+        && lhs.identityChain == rhs.identityChain
+        && lhs.ecosystem == rhs.ecosystem
+        && lhs.tonBridgeUrl == rhs.tonBridgeUrl
     }
 
     public func hash(into hasher: inout Hasher) {
