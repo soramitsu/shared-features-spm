@@ -195,6 +195,7 @@ final class XcmExtrinsicBuilderTests: XCTestCase {
 private extension XcmExtrinsicBuilderTests {
     private enum TestData {
         static let chainModel = ChainModel(
+            ecosystem: .substrate,
             rank: 0,
             disabled: false,
             chainId: "0",

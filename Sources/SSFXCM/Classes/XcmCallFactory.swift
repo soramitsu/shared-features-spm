@@ -430,7 +430,7 @@ final class XcmCallFactory: XcmCallFactoryProtocol {
         let accountIdJunction = createAccountJunction(
             version: version,
             accountId: accountId,
-            isEthereumBased: chainModel.isEthereumBased,
+            isEthereumBased: chainModel.ecosystem.isEthereum,
             chainModel: chainModel
         )
 

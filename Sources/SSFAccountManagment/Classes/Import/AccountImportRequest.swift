@@ -3,6 +3,16 @@ import IrohaCrypto
 import SSFModels
 import SSFUtils
 
+public struct MetaAccountImportTonMnemonicRequest {
+    public let mnemonic: String
+    public let username: String
+    
+    public init(mnemonic: String, username: String) {
+        self.mnemonic = mnemonic
+        self.username = username
+    }
+}
+
 public struct MetaAccountImportMnemonicRequest {
     let mnemonic: IRMnemonicProtocol
     let username: String
@@ -90,7 +100,7 @@ public struct ChainAccountImportMnemonicRequest {
     let username: String
     let derivationPath: String
     let cryptoType: CryptoType
-    let isEthereum: Bool
+    let ecosystem: Ecosystem
     let meta: MetaAccountModel
     let chainId: ChainModel.Id
 }
@@ -100,7 +110,7 @@ public struct ChainAccountImportSeedRequest {
     let username: String
     let derivationPath: String
     let cryptoType: CryptoType
-    let isEthereum: Bool
+    let ecosystem: Ecosystem
     let meta: MetaAccountModel
     let chainId: ChainModel.Id
 }
@@ -110,7 +120,7 @@ public struct ChainAccountImportKeystoreRequest {
     let password: String
     let username: String
     let cryptoType: CryptoType
-    let isEthereum: Bool
+    let ecosystem: Ecosystem
     let meta: MetaAccountModel
     let chainId: ChainModel.Id
 }

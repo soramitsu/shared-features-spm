@@ -16,3 +16,7 @@ public enum SubstrateConstants {
 public enum NetworkConstants {
     public static let websocketReconnectAttemptsLimit: Int = 2
 }
+
+public enum TonConstants {
+    public static let accountIdLength = 33
+}

@@ -374,9 +374,7 @@ final class SubstrateCallFactoryTests: XCTestCase {
     }
 
     private func generateAccountId(for chain: ChainModel) -> AccountId {
-        let chainFormate: SFChainFormat = chain
-            .isEthereumBased ? .sfEthereum : .sfSubstrate(chain.addressPrefix)
-        let accountId = AddressFactory.randomAccountId(for: chainFormate)
+        let accountId = AddressFactory.randomAccountId(for: chain.chainFormat)
         return accountId
     }
 

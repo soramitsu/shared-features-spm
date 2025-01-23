@@ -69,7 +69,7 @@ extension AccountImportService: AccountImportable {
             )
             operation = accountOperationFactory.newMetaAccountOperation(
                 mnemonicRequest: request,
-                isBackuped: true
+                isBackedUp: true
             )
         case let .seed(data):
             let request = MetaAccountImportSeedRequest(
@@ -82,7 +82,7 @@ extension AccountImportService: AccountImportable {
             )
             operation = accountOperationFactory.newMetaAccountOperation(
                 seedRequest: request,
-                isBackuped: true
+                isBackedUp: true
             )
         case let .keystore(data):
             let request = MetaAccountImportKeystoreRequest(
@@ -95,7 +95,7 @@ extension AccountImportService: AccountImportable {
             )
             operation = accountOperationFactory.newMetaAccountOperation(
                 keystoreRequest: request,
-                isBackuped: true
+                isBackedUp: true
             )
         }
         operationManager.enqueue(operations: [operation], in: .transient)

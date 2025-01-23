@@ -27,6 +27,7 @@ public final class QRServiceDefault: QRService {
         self.matchers = matchers ?? [
             QRInfoMatcher(decoder: self.decoder),
             QRUriMatcherImpl(scheme: "ws"),
+            TonConnectMatcherImpl()
         ]
     }
 

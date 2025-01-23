@@ -51,9 +51,9 @@ public enum PolkaswapLiquidityPoolServiceAssembly {
             engine: connection,
             operationManager: OperationManagerFacade.sharedManager
         )
-
-        let signer = TransactionSignerAssembly.signer(
-            for: chain.chainBaseType,
+        
+        let signer = try TransactionSignerAssembly.signer(
+            for: chain.ecosystem,
             publicKeyData: signingWrapperData.publicKeyData,
             secretKeyData: signingWrapperData.secretKeyData,
             cryptoType: account.cryptoType

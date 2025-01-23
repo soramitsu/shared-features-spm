@@ -1,11 +1,6 @@
 import Foundation
 import RobinHood
 
-public enum ChainBaseType: String {
-    case substrate
-    case ethereum
-}
-
 public enum BlockExplorerType: String, Codable {
     case subquery
     case subsquid
@@ -15,16 +10,19 @@ public enum BlockExplorerType: String, Codable {
     case etherscan
     case reef
     case oklink
+    case ton
     case blockscout
     case fire
     case vicscan
     case zchain
     case klaytn
+    case soraSubquery
 }
 
 public final class ChainModel: Codable, Identifiable {
     public typealias Id = String
 
+    public let ecosystem: Ecosystem
     public var identifier: String { chainId }
     public let rank: UInt16?
     public let disabled: Bool
@@ -44,8 +42,10 @@ public final class ChainModel: Codable, Identifiable {
     public let customNodes: Set<ChainNodeModel>?
     public let iosMinAppVersion: String?
     public let identityChain: String?
+    public let tonBridgeUrl: URL?
 
     public init(
+        ecosystem: Ecosystem,
         rank: UInt16?,
         disabled: Bool,
         chainId: Id,
@@ -63,8 +63,10 @@ public final class ChainModel: Codable, Identifiable {
         selectedNode: ChainNodeModel? = nil,
         customNodes: Set<ChainNodeModel>? = nil,
         iosMinAppVersion: String?,
-        identityChain: String?
+        identityChain: String?,
+        tonBridgeUrl: URL?
     ) {
+        self.ecosystem = ecosystem
         self.rank = rank
         self.disabled = disabled
         self.chainId = chainId
@@ -83,6 +85,7 @@ public final class ChainModel: Codable, Identifiable {
         self.customNodes = customNodes
         self.iosMinAppVersion = iosMinAppVersion
         self.identityChain = identityChain
+        self.tonBridgeUrl = tonBridgeUrl
     }
 
     public var isRelaychain: Bool {
@@ -90,22 +93,33 @@ public final class ChainModel: Codable, Identifiable {
     }
 
     public var isEthereumBased: Bool {
-        options?.contains(.ethereumBased) == true || options?.contains(.ethereum) == true
-    }
-
-    public var isEthereum: Bool {
-        options?.contains(.ethereum) == true
+        options?.contains { $0 == .ethereumBased || $0 == .ethereum } == true
     }
 
     public var supportsNft: Bool {
         options?.contains(.nft) == true
     }
 
-    public var chainFormat: SFChainFormat {
-        if isEthereumBased {
-            return .sfEthereum
-        } else {
-            return .sfSubstrate(addressPrefix)
+    public var chainFormat: ChainFormat {
+        switch ecosystem {
+        case .substrate:
+            return .substrate(addressPrefix)
+        case .ethereum, .ethereumBased:
+            return .ethereum
+        case .ton:
+            return .ton(bounceable: true)
+        }
+    }
+    
+    /// https://blog.ton.cat/ton-address-formats/
+    public func chainFormat(bounceable: Bool) -> ChainFormat {
+        switch ecosystem {
+        case .substrate:
+            return .substrate(addressPrefix)
+        case .ethereum, .ethereumBased:
+            return .ethereum
+        case .ton:
+            return .ton(bounceable: bounceable)
         }
     }
 
@@ -138,7 +152,7 @@ public final class ChainModel: Codable, Identifiable {
     }
 
     public var isSora: Bool {
-        name.lowercased() == "sora mainnet" || name.lowercased() == "sora test"
+        knownChainEquivalent == .soraMain || knownChainEquivalent == .soraTest
     }
 
     public var isEquilibrium: Bool {
@@ -169,11 +183,6 @@ public final class ChainModel: Codable, Identifiable {
         options?.contains(.polkaswap) == true
     }
 
-    public var chainBaseType: ChainBaseType {
-        if isEthereum { return .ethereum }
-        return .substrate
-    }
-
     public func utilityAssets() -> Set<AssetModel> {
         assets.filter { $0.isUtility }
     }
@@ -195,7 +204,14 @@ public final class ChainModel: Codable, Identifiable {
     }
 
     public var accountIdLenght: Int {
-        isEthereumBased ? EthereumConstants.accountIdLength : SubstrateConstants.accountIdLength
+        switch ecosystem {
+        case .substrate:
+            return SubstrateConstants.accountIdLength
+        case .ethereum, .ethereumBased:
+            return EthereumConstants.accountIdLength
+        case .ton:
+            return TonConstants.accountIdLength
+        }
     }
 
     public var chainAssets: [ChainAsset] {
@@ -225,25 +241,41 @@ public final class ChainModel: Codable, Identifiable {
     }
 
     public func seedTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
-        isEthereumBased
-            ? KeystoreTagV2.ethereumSecretKeyTagForMetaId(metaId, accountId: accountId)
-            : KeystoreTagV2.substrateSeedTagForMetaId(metaId, accountId: accountId)
+        switch ecosystem {
+        case .substrate:
+            return KeystoreTagV2.substrateSeedTagForMetaId(metaId, accountId: accountId)
+        case .ethereum, .ethereumBased:
+            return KeystoreTagV2.ethereumSecretKeyTagForMetaId(metaId, accountId: accountId)
+        case .ton:
+            return KeystoreTagV2.tonSecretKeyTagForMetaId(metaId, accountId: accountId)
+        }
     }
 
     public func keystoreTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
-        isEthereumBased
-            ? KeystoreTagV2.ethereumSecretKeyTagForMetaId(metaId, accountId: accountId)
-            : KeystoreTagV2.substrateSecretKeyTagForMetaId(metaId, accountId: accountId)
+        switch ecosystem {
+        case .substrate:
+            return KeystoreTagV2.substrateSecretKeyTagForMetaId(metaId, accountId: accountId)
+        case .ethereum, .ethereumBased:
+            return KeystoreTagV2.ethereumSecretKeyTagForMetaId(metaId, accountId: accountId)
+        case .ton:
+            return KeystoreTagV2.tonSecretKeyTagForMetaId(metaId, accountId: accountId)
+        }
     }
 
     public func derivationTag(metaId: MetaAccountId, accountId: AccountId? = nil) -> String {
-        isEthereumBased
-            ? KeystoreTagV2.ethereumDerivationTagForMetaId(metaId, accountId: accountId)
-            : KeystoreTagV2.substrateDerivationTagForMetaId(metaId, accountId: accountId)
+        switch ecosystem {
+        case .substrate:
+            return KeystoreTagV2.substrateDerivationTagForMetaId(metaId, accountId: accountId)
+        case .ethereum, .ethereumBased:
+            return KeystoreTagV2.ethereumDerivationTagForMetaId(metaId, accountId: accountId)
+        case .ton:
+            return KeystoreTagV2.tonDerivationTagForMetaId(metaId, accountId: accountId)
+        }
     }
 
     public func replacingSelectedNode(_ node: ChainNodeModel?) -> ChainModel {
         ChainModel(
+            ecosystem: ecosystem,
             rank: rank,
             disabled: disabled,
             chainId: chainId,
@@ -261,12 +293,14 @@ public final class ChainModel: Codable, Identifiable {
             selectedNode: node,
             customNodes: customNodes,
             iosMinAppVersion: iosMinAppVersion,
-            identityChain: identityChain
+            identityChain: identityChain,
+            tonBridgeUrl: tonBridgeUrl
         )
     }
 
     public func replacingCustomNodes(_ newCustomNodes: [ChainNodeModel]) -> ChainModel {
         ChainModel(
+            ecosystem: ecosystem,
             rank: rank,
             disabled: disabled,
             chainId: chainId,
@@ -284,12 +318,14 @@ public final class ChainModel: Codable, Identifiable {
             selectedNode: selectedNode,
             customNodes: Set(newCustomNodes),
             iosMinAppVersion: iosMinAppVersion,
-            identityChain: identityChain
+            identityChain: identityChain,
+            tonBridgeUrl: tonBridgeUrl
         )
     }
-
-    public func replacing(_ assets: [AssetModel]) -> ChainModel {
+    
+    public func replacingAssets(_ assets: [AssetModel]) -> ChainModel {
         ChainModel(
+            ecosystem: ecosystem,
             rank: rank,
             disabled: disabled,
             chainId: chainId,
@@ -307,7 +343,8 @@ public final class ChainModel: Codable, Identifiable {
             selectedNode: selectedNode,
             customNodes: customNodes,
             iosMinAppVersion: iosMinAppVersion,
-            identityChain: identityChain
+            identityChain: identityChain,
+            tonBridgeUrl: tonBridgeUrl
         )
     }
 }
@@ -317,7 +354,7 @@ public extension ChainModel {
         ChainAccountRequest(
             chainId: chainId,
             addressPrefix: addressPrefix,
-            isEthereumBased: isEthereumBased,
+            ecosystem: ecosystem,
             accountId: accountId
         )
     }
@@ -326,20 +363,22 @@ public extension ChainModel {
 extension ChainModel: Hashable {
     public static func == (lhs: ChainModel, rhs: ChainModel) -> Bool {
         lhs.rank == rhs.rank
-            && lhs.chainId == rhs.chainId
-            && lhs.externalApi == rhs.externalApi
-            && lhs.assets == rhs.assets
-            && lhs.options == rhs.options
-            && lhs.types == rhs.types
-            && lhs.icon == rhs.icon
-            && lhs.name == rhs.name
-            && lhs.addressPrefix == rhs.addressPrefix
-            && lhs.nodes == rhs.nodes
-            && lhs.iosMinAppVersion == rhs.iosMinAppVersion
-            && lhs.selectedNode == rhs.selectedNode
-            && lhs.xcm == rhs.xcm
-            && lhs.disabled == rhs.disabled
-            && lhs.identityChain == rhs.identityChain
+        && lhs.chainId == rhs.chainId
+        && lhs.externalApi == rhs.externalApi
+        && lhs.assets == rhs.assets
+        && lhs.options == rhs.options
+        && lhs.types == rhs.types
+        && lhs.icon == rhs.icon
+        && lhs.name == rhs.name
+        && lhs.addressPrefix == rhs.addressPrefix
+        && lhs.nodes == rhs.nodes
+        && lhs.iosMinAppVersion == rhs.iosMinAppVersion
+        && lhs.selectedNode == rhs.selectedNode
+        && lhs.xcm == rhs.xcm
+        && lhs.disabled == rhs.disabled
+        && lhs.identityChain == rhs.identityChain
+        && lhs.ecosystem == rhs.ecosystem
+        && lhs.tonBridgeUrl == rhs.tonBridgeUrl
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -360,6 +399,7 @@ public enum ChainOptions: String, Codable {
     case utilityFeePayment
     case chainlinkProvider
     case checkAppId
+    case remoteAssets
 
     case unsupported
 
@@ -427,6 +467,8 @@ public extension ChainModel {
         case tx
         case address
         case unknown
+        case tonAccount
+        case tonTransaction = "transaction"
 
         public init(from decoder: Decoder) throws {
             self = try SubscanType(
@@ -442,6 +484,7 @@ public extension ChainModel {
         case etherscan
         case reef
         case oklink
+        case tonviewer
         case unknown
 
         public init(from decoder: Decoder) throws {
@@ -556,8 +599,13 @@ public extension ChainModel {
 
 public extension ChainModel.ExternalApiExplorer {
     func explorerUrl(for value: String, type: ChainModel.SubscanType) -> URL? {
-        let replaceType = url.replacingOccurrences(of: "{type}", with: type.rawValue)
-        let replaceValue = replaceType.replacingOccurrences(of: "{value}", with: value)
+        var originUrl = url
+        if type == .tonAccount {
+            originUrl = url.replacingOccurrences(of: "/{type}", with: "")
+        } else {
+            originUrl = url.replacingOccurrences(of: "{type}", with: type.rawValue)
+        }
+        let replaceValue = originUrl.replacingOccurrences(of: "{value}", with: value)
         return URL(string: replaceValue)
     }
 
@@ -565,6 +613,8 @@ public extension ChainModel.ExternalApiExplorer {
         switch type {
         case .etherscan, .oklink:
             return .tx
+        case .tonviewer:
+            return .tonTransaction
         default:
             return .extrinsic
         }

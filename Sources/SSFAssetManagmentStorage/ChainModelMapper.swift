@@ -52,6 +52,10 @@ public final class ChainModelMapper {
             let precision = entity.priceProvider?.precision ?? ""
             priceProvider = PriceProvider(type: type, id: id, precision: Int16(precision))
         }
+        
+        guard let assetType = ChainAssetType(storageValue: entity.type) else {
+            return nil
+        }
 
         return AssetModel(
             id: id,
@@ -66,8 +70,7 @@ public final class ChainModelMapper {
             isNative: entity.isNative,
             staking: staking,
             purchaseProviders: purchaseProviders,
-            type: createChainAssetModelType(from: entity.type),
-            ethereumType: createEthereumAssetType(from: entity.ethereumType),
+            assetType: assetType,
             priceProvider: priceProvider,
             coingeckoPriceId: entity.priceId,
             priceData: (entity.priceData as? [PriceData]) ?? []
@@ -106,11 +109,10 @@ public final class ChainModelMapper {
             assetEntity.color = $0.color
             assetEntity.name = $0.name
             assetEntity.currencyId = $0.currencyId
-            assetEntity.type = $0.type?.rawValue
+            assetEntity.type = $0.assetType.rawValue
             assetEntity.isUtility = $0.isUtility
             assetEntity.isNative = $0.isNative
             assetEntity.staking = $0.staking?.rawValue
-            assetEntity.ethereumType = $0.ethereumType?.rawValue
 
             let priceProviderContext = CDPriceProvider(context: context)
             priceProviderContext.type = $0.priceProvider?.type.rawValue
@@ -454,6 +456,14 @@ public final class ChainModelMapper {
 
 extension ChainModelMapper: CoreDataMapperProtocol {
     public func transform(entity: CDChain) throws -> ChainModel {
+        guard 
+            let chainId = entity.chainId,
+            let ecosystemRaw = entity.ecosystem,
+            let ecosystem = Ecosystem(rawValue: ecosystemRaw)
+        else {
+            throw ChainModelMapperError.missingChainId
+        }
+
         let nodes: [ChainNodeModel] = entity.nodes?.compactMap { anyNode in
             guard let node = anyNode as? CDChainNode else {
                 return nil
@@ -501,6 +511,7 @@ extension ChainModelMapper: CoreDataMapperProtocol {
         }
 
         let chainModel = ChainModel(
+            ecosystem: ecosystem,
             rank: rank,
             disabled: entity.disabled,
             chainId: entity.chainId!,
@@ -542,6 +553,7 @@ extension ChainModelMapper: CoreDataMapperProtocol {
         if let rank = model.rank {
             entity.rank = "\(rank)"
         }
+        entity.ecosystem = model.ecosystem.rawValue
         entity.disabled = model.disabled
         entity.chainId = model.chainId
         entity.paraId = model.paraId

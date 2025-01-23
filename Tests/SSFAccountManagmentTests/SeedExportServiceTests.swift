@@ -67,7 +67,7 @@ extension SeedExportServiceTests {
             accountId: Data(),
             publicKey: Data(),
             cryptoType: 23,
-            ethereumBased: false
+            ecosystem: .substrate
         )
 
         static let account = MetaAccountModel(
@@ -78,20 +78,22 @@ extension SeedExportServiceTests {
             substratePublicKey: Data(),
             ethereumAddress: nil,
             ethereumPublicKey: nil,
+            tonAddress: nil,
+            tonPublicKey: nil,
+            tonContractVersion: nil,
             chainAccounts: [TestData.chainAccount],
             assetKeysOrder: nil,
-            assetFilterOptions: [],
             canExportEthereumMnemonic: false,
             unusedChainIds: nil,
             selectedCurrency: .defaultCurrency(),
             networkManagmentFilter: nil,
             assetsVisibility: [],
-            zeroBalanceAssetsHidden: true,
             hasBackup: false,
             favouriteChainIds: []
         )
 
         static let chain = ChainModel(
+            ecosystem: .substrate,
             rank: 1,
             disabled: true,
             chainId: "Kusama",
@@ -119,7 +121,7 @@ extension SeedExportServiceTests {
             name: "test",
             cryptoType: .ecdsa,
             addressPrefix: 1,
-            isEthereumBased: false,
+            ecosystem: .substrate,
             isChainAccount: true,
             walletId: ""
         )

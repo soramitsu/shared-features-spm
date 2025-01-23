@@ -101,14 +101,14 @@ extension ExtrinsicOperationFactoryProtocol {
 final class ExtrinsicOperationFactory {
     let accountId: AccountId
     let cryptoType: CryptoType
-    let chainFormat: SFChainFormat
+    let chainFormat: ChainFormat
     let runtimeRegistry: RuntimeCodingServiceProtocol
     let engine: JSONRPCEngine
     let eraOperationFactory: ExtrinsicEraOperationFactoryProtocol
 
     init(
         accountId: AccountId,
-        chainFormat: SFChainFormat,
+        chainFormat: ChainFormat,
         cryptoType: CryptoType,
         runtimeRegistry: RuntimeCodingServiceProtocol,
         engine: JSONRPCEngine,
@@ -191,7 +191,7 @@ final class ExtrinsicOperationFactory {
             let era = try eraWrapper.targetOperation.extractNoCancellableResultData().extrinsicEra
             let eraBlockHash = try eraBlockOperation.extractNoCancellableResultData()
 
-            let account: MultiAddress = codingFactory.metadata.multiAddressParameter(
+            let account: MultiAddress = try codingFactory.metadata.multiAddressParameter(
                 accountId: currentAccountId,
                 chainFormat: currentChainFormat
             )

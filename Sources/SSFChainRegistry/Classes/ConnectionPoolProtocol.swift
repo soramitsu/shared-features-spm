@@ -13,6 +13,9 @@ public protocol ConnectionPoolProtocol {
 
     func setupWeb3EthereumConnection(for chain: ChainModel) throws -> Web3EthConnection
     func getWeb3EthereumConnection(for chainId: ChainModel.Id) throws -> Web3EthConnection
+    
+    func setupTonApiAssembly(url: URL, token: String, tonBridgeURL: URL) -> TonAPIAssembly
+    func getTonApiAssembly() throws -> TonAPIAssembly
 }
 
 protocol ConnectionPoolDelegate: AnyObject {
@@ -22,6 +25,7 @@ protocol ConnectionPoolDelegate: AnyObject {
 public final class ConnectionPool: ConnectionPoolProtocol {
     private var autoBalancesByChainIds: [ChainModel.Id: any ChainConnectionProtocol] = [:]
     private let lock = ReaderWriterLock()
+    private var tonApiAssembly: TonAPIAssembly?
 
     public init() {}
 
@@ -92,6 +96,22 @@ public final class ConnectionPool: ConnectionPoolProtocol {
         }
 
         return try autoBalance.connection()
+    }
+    
+    public func setupTonApiAssembly(url: URL, token: String, tonBridgeURL: URL) -> TonAPIAssembly {
+        if let tonApiAssembly {
+            return tonApiAssembly
+        }
+        let assembly = TonAPIAssembly(tonAPIURL: url, token: token, tonBridgeURL: tonBridgeURL)
+        tonApiAssembly = assembly
+        return assembly
+    }
+    
+    public func getTonApiAssembly() throws -> TonAPIAssembly {
+        guard let tonApiAssembly else {
+            throw ConnectionPoolError.missingConnection
+        }
+        return tonApiAssembly
     }
 
     // MARK: - Private methods

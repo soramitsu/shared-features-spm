@@ -1,6 +1,7 @@
 import IrohaCrypto
 import SSFModels
 import UIKit
+import TonSwift
 
 private struct Scheme {
     let colors: [UInt]
@@ -91,15 +92,17 @@ public class UniversalIconGenerator: IconGenerating {
 
     private func deriveAccountIdFromAddress(_ address: String) throws -> Data {
         let zero: [UInt8] = try (Data(repeating: 0, count: 32) as NSData).blake2b(64).map { $0 }
-
-        let addressFactory = SS58AddressFactory()
-
-        let typeValue = (try? addressFactory.type(fromAddress: address)) ?? 0
-
-        let isEthereum = address.contains("0x")
-        let chainFormat: SFChainFormat = isEthereum ? .sfEthereum :
-            .sfSubstrate(typeValue.uint16Value)
-        let accountId = try AddressFactory.accountId(from: address, chainFormat: chainFormat)
+        
+        let accountId: AccountId
+        if let tonAddress = try? TonSwift.Address.parse(address), let tonAccountId = try? tonAddress.asAccountId() {
+            accountId = tonAccountId
+        } else {
+            let addressFactory = SS58AddressFactory()
+            let typeValue = (try? addressFactory.type(fromAddress: address)) ?? 0
+            let isEthereum = address.contains("0x")
+            let chainFormat: ChainFormat = isEthereum ? .ethereum : .substrate(typeValue.uint16Value)
+            accountId = try AddressFactory.accountId(from: address, chainFormat: chainFormat)
+        }
 
         var bytes: [UInt8] = try (accountId as NSData).blake2b(64).map { $0 }
 

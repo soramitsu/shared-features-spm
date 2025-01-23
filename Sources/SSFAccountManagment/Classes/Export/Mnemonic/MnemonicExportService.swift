@@ -40,10 +40,8 @@ extension MnemonicExportService: MnemonicExportServiceProtocol {
         var models: [MnemonicExportData] = []
 
         for chainAccount in accounts {
-            let accountId = chainAccount.account.isChainAccount ? chainAccount.account
-                .accountId : nil
-            let cryptoType = chainAccount.account.isEthereumBased ? nil : chainAccount.account
-                .cryptoType
+            let accountId = chainAccount.account.isChainAccount ? chainAccount.account.accountId : nil
+            let cryptoType = chainAccount.account.ecosystem.isEthereum ? nil : chainAccount.account.cryptoType
 
             if let data = try? factory.createMnemonicExportData(
                 metaId: wallet.metaId,

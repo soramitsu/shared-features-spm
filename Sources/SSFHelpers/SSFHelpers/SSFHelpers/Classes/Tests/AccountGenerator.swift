@@ -12,21 +12,21 @@ public enum AccountGenerator {
     {
         MetaAccountModel(
             metaId: UUID().uuidString,
-            name: UUID().uuidString,
-            substrateAccountId: Data.random(of: 32)!,
-            substrateCryptoType: 0,
-            substratePublicKey: Data.random(of: 32)!,
-            ethereumAddress: Data.random(of: 20)!,
-            ethereumPublicKey: Data.random(of: 20)!,
+            name: UUID().uuidString, 
+            ecosystem: .regular(.init(
+                substrateAccountId: Data.random(of: 32)!,
+                substrateCryptoType: 0,
+                substratePublicKey: Data.random(of: 32)!,
+                ethereumAddress: Data.random(of: 20)!,
+                ethereumPublicKey: Data.random(of: 20)!)
+            ),
             chainAccounts: chainAccounts,
             assetKeysOrder: nil,
-            assetFilterOptions: [],
             canExportEthereumMnemonic: true,
             unusedChainIds: nil,
             selectedCurrency: Currency.defaultCurrency(),
             networkManagmentFilter: nil,
             assetsVisibility: [],
-            zeroBalanceAssetsHidden: true,
             hasBackup: false,
             favouriteChainIds: []
         )
@@ -38,7 +38,7 @@ public enum AccountGenerator {
             accountId: Data.random(of: 32)!,
             publicKey: Data.random(of: 32)!,
             cryptoType: 0,
-            ethereumBased: Bool.random()
+            ecosystem: .substrate
         )
     }
 }

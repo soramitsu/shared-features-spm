@@ -3,9 +3,9 @@ import XCTest
 @testable import SSFXCM
 
 final class XcmAssemblyTests: XCTestCase {
-    func testCreateExtrincisServices() {
+    func testCreateExtrincisServices() throws {
         // act
-        let service = XcmAssembly.createExtrincisServices(
+        let service = try XcmAssembly.createExtrincisServices(
             fromChainData: TestData.fromChainData,
             sourceConfig: XcmConfig.shared,
             chainRegistry: nil
@@ -26,8 +26,7 @@ extension XcmAssemblyTests {
             signingWrapperData: .init(
                 publicKeyData: Data(),
                 secretKeyData: Data()
-            ),
-            chainType: .substrate
+            )
         )
     }
 }

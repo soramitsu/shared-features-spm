@@ -37,7 +37,8 @@ let package = Package(
         .library(name: "SSFPolkaswap", targets: ["SSFPolkaswap"]),
         .library(name: "SSFPools", targets: ["SSFPools"]),
         .library(name: "SSFPoolsStorage", targets: ["SSFPoolsStorage"]),
-        .library(name: "MPQRCoreSDK", targets: ["MPQRCoreSDK"])
+        .library(name: "MPQRCoreSDK", targets: ["MPQRCoreSDK"]),
+        .library(name: "TonConnectAPI", targets: ["TonConnectAPI"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
@@ -50,7 +51,10 @@ let package = Package(
         .package(url: "https://github.com/daisuke-t-jp/xxHash-Swift", from: "1.1.1"),
         .package(url: "https://github.com/SwiftyBeaver/SwiftyBeaver.git", .upToNextMajor(from: "2.0.0")),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.50.4"),
-        .package(url: "https://github.com/bnsports/Web3.swift.git", from: "7.7.7")
+        .package(url: "https://github.com/bnsports/Web3.swift.git", from: "7.7.7"),
+        .package(url: "https://github.com/DRadmir/ton-swift.git", branch: "main"),
+        .package(url: "https://github.com/DRadmir/ton-api-swift.git", exact: "0.5.0"),
+        .package(url: "https://github.com/apple/swift-openapi-runtime", .upToNextMinor(from: "0.3.0"))
     ],
     targets: [
         .binaryTarget(name: "blake2lib", path: "Binaries/blake2lib.xcframework"),
@@ -94,7 +98,11 @@ let package = Package(
         ),
         .target(
             name: "SSFModels",
-            dependencies: [ "IrohaCrypto" ]
+            dependencies: [
+                .product(name: "TonSwift", package: "ton-swift"),
+                .product(name: "TonAPI", package: "ton-api-swift"),
+                "IrohaCrypto"
+            ]
         ),
         .target(
             name: "SSFCrypto",
@@ -109,6 +117,9 @@ let package = Package(
             name: "SSFChainConnection",
             dependencies: [
                 .product(name: "Web3", package: "Web3.swift"),
+                .product(name: "TonAPI", package: "ton-api-swift"),
+                .product(name: "StreamURLSessionTransport", package: "ton-api-swift"),
+                "TonConnectAPI",
                 "SSFUtils"
             ]
         ),
@@ -173,6 +184,7 @@ let package = Package(
         .target(
             name: "SSFAccountManagment",
             dependencies: [
+                .product(name: "TonSwift", package: "ton-swift"),
                 "RobinHood",
                 "IrohaCrypto",
                 "SSFCrypto",
@@ -390,7 +402,8 @@ let package = Package(
             "SSFExtrinsicKit",
             "SSFChainRegistry",
             "SSFChainConnection",
-            "SSFNetwork"
+            "SSFNetwork",
+            "SSFAccountManagment"
         ]),
         .testTarget(
             name: "SSFTransferServiceTests",
@@ -412,7 +425,17 @@ let package = Package(
                 .process("Resources")
             ]
         ),
-        
+        .target(
+            name: "TonConnectAPI",
+            dependencies: [
+                .product(
+                    name: "OpenAPIRuntime",
+                    package: "swift-openapi-runtime"
+                ),
+            ],
+            path: "Sources/TonConnectAPI",
+            sources: ["Sources"]
+        ),
     ],
     cLanguageStandard: .gnu11,
     cxxLanguageStandard: .gnucxx14

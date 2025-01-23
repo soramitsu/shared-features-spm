@@ -181,8 +181,16 @@ extension CoreDataRepository {
                     fetchRequest.includesSubentities = options.includesSubentities
 
                     let entities = try context.fetch(fetchRequest)
-                    let models = try entities
-                        .map { try strongSelf.dataMapper.transform(entity: $0) }
+                    let models = entities
+                        .compactMap {
+                            do {
+                                return try strongSelf.dataMapper.transform(entity: $0)
+                            } catch {
+                                print("CoreDataRepository:fetchAll:error: \(error)")
+                                return nil
+                            }
+                            
+                        }
 
                     strongSelf.call(block: block, model: models, error: nil, queue: queue)
 

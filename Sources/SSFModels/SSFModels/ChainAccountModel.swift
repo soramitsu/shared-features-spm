@@ -5,19 +5,19 @@ public struct ChainAccountModel: Equatable, Hashable, Codable {
     public let accountId: AccountId
     public let publicKey: Data
     public let cryptoType: UInt8
-    public let ethereumBased: Bool
+    public let ecosystem: Ecosystem
 
     public init(
         chainId: String,
         accountId: AccountId,
         publicKey: Data,
         cryptoType: UInt8,
-        ethereumBased: Bool
+        ecosystem: Ecosystem
     ) {
         self.chainId = chainId
         self.accountId = accountId
         self.publicKey = publicKey
         self.cryptoType = cryptoType
-        self.ethereumBased = ethereumBased
+        self.ecosystem = ecosystem
     }
 }

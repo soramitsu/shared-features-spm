@@ -13,7 +13,7 @@ public protocol ConnectionStrategy {
     func changeState(_ newState: WebSocketEngine.State)
 
     func disconnect()
-    func cancelReconectionShedule()
+    func cancelReconnectionSchedule()
 
     func canReconnect() -> Bool
     func shouldRunInNextLoop() -> Bool
@@ -90,7 +90,7 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
         currentConnection.disconnect()
     }
 
-    public func cancelReconectionShedule() {
+    public func cancelReconnectionSchedule() {
         reconnectionScheduler.cancel()
     }
 
@@ -131,6 +131,7 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
         guard let nextUrl else {
             return
         }
+        currentConnection.forceDisconnect()
         updateConnection(with: nextUrl)
         currentConnection.connect()
     }
@@ -141,29 +142,31 @@ public final class ConnectionStrategyImpl: ConnectionStrategy {
             currentLoop = 0
         }
 
-        sheduleReconnection()
+        scheduleReconnection()
     }
 
-    private func sheduleReconnection() {
+    private func scheduleReconnection() {
         guard let reconnectionStrategy,
               let nextDelay = reconnectionStrategy.reconnectAfter(attempt: currentLoop) else
         {
             return
         }
+        reconnectionScheduler.cancel()
         reconnectionScheduler.notifyAfter(nextDelay)
     }
 
     private func updateConnection(
         with url: URL
     ) {
-        guard currentUrl != url,
-              let currentWebScoketConnection = currentConnection as? WebSocket else
-        {
+        guard currentUrl != url else {
             return
         }
         let request = URLRequest(url: url, timeoutInterval: timeout)
-        currentWebScoketConnection.request = request
-        currentConnection = currentWebScoketConnection
+        let engine = WSEngine(transport: TCPTransport(), certPinner: FoundationSecurity())
+        let connection = WebSocket(request: request, engine: engine)
+        connection.callbackQueue = callbackQueue
+        currentConnection = connection
+        currentConnection.delegate = webSocketEngine
         currentUrl = url
     }
 }

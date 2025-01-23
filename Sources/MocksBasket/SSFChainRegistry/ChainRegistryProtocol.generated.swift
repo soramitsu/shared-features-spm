@@ -162,4 +162,22 @@ public init() {}
         return try getReadySnapshotChainIdUsedRuntimePathsRuntimeItemClosure.map({ try $0(chainId, usedRuntimePaths, runtimeItem) }) ?? getReadySnapshotChainIdUsedRuntimePathsRuntimeItemReturnValue
     }
 
+    //MARK: - getTonApiAssembly
+
+    public var getTonApiAssemblyThrowableError: Error?
+    public var getTonApiAssemblyCallsCount = 0
+    public var getTonApiAssemblyCalled: Bool {
+        return getTonApiAssemblyCallsCount > 0
+    }
+    public var getTonApiAssemblyReturnValue: TonAPIAssembly!
+    public var getTonApiAssemblyClosure: (() throws -> TonAPIAssembly)?
+
+    public func getTonApiAssembly() throws -> TonAPIAssembly {
+        if let error = getTonApiAssemblyThrowableError {
+            throw error
+        }
+        getTonApiAssemblyCallsCount += 1
+        return try getTonApiAssemblyClosure.map({ try $0() }) ?? getTonApiAssemblyReturnValue
+    }
+
 }

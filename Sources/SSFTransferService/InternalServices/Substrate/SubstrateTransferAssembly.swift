@@ -12,14 +12,14 @@ final class SubstrateTransferAssembly {
     func createSubstrateService(
         wallet: MetaAccountModel,
         chain: ChainModel,
-        secretKeyData: Data
+        secretKeyData: Data,
+        chainRegistry: ChainRegistryProtocol
     ) async throws -> SubstrateTransferService {
         guard let accountResponse = wallet.fetch(for: chain.accountRequest()) else {
             throw TransferServiceError.accountNotExists
         }
 
-        let chainRegistry = ChainRegistryAssembly.createDefaultRegistry()
-        let connection = try await chainRegistry.getSubstrateConnection(for: chain)
+        let connection = try chainRegistry.getSubstrateConnection(for: chain)
 
         let runtimeService = try await chainRegistry.getRuntimeProvider(
             chainId: chain.chainId,

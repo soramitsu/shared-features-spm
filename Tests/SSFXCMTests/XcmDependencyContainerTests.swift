@@ -57,11 +57,11 @@ extension XcmDependencyContainerTests {
             signingWrapperData: .init(
                 publicKeyData: Data(),
                 secretKeyData: Data()
-            ),
-            chainType: .substrate
+            )
         )
 
         static let chainModel = ChainModel(
+            ecosystem: .substrate,
             rank: 0,
             disabled: false,
             chainId: "0",

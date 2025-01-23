@@ -10,6 +10,7 @@ import SSFUtils
 enum JSONExportServiceError: Error {
     case missingAccount
     case missingJson
+    case missingChainFormat
 }
 
 // To regenerate mock object
@@ -23,7 +24,7 @@ protocol JSONExportServiceProtocol: Actor {
         wallet: MetaAccountModel,
         accounts: [ChainAccountInfo],
         password: String
-    ) -> [JSONExportData]
+    ) throws -> [JSONExportData]
 
     func exportAccount(
         address: String,

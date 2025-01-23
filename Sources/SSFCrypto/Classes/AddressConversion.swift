@@ -2,6 +2,7 @@ import Foundation
 import IrohaCrypto
 import SSFModels
 import SSFUtils
+import TonSwift
 
 public enum AddressFactory {
     public enum Constants {
@@ -10,21 +11,24 @@ public enum AddressFactory {
     }
 
     private static let substrateFactory = SS58AddressFactory()
-
-    private static func chainFormat(of chain: ChainModel) -> SFChainFormat {
-        chain.isEthereumBased ? .sfEthereum : .sfSubstrate(chain.addressPrefix)
+    
+    public static func address(
+        for accountId: AccountId,
+        chain: ChainModel
+    ) throws -> AccountAddress {
+        try accountId.toAddress(using: chain.chainFormat)
     }
 
     public static func address(
         for accountId: AccountId,
-        chainFormat: SFChainFormat
+        chainFormat: ChainFormat
     ) throws -> AccountAddress {
         try accountId.toAddress(using: chainFormat)
     }
 
     public static func accountId(
         from address: AccountAddress,
-        chainFormat: SFChainFormat
+        chainFormat: ChainFormat
     ) throws -> AccountId {
         try address.toAccountId(using: chainFormat)
     }
@@ -33,29 +37,39 @@ public enum AddressFactory {
         from address: AccountAddress,
         chain: ChainModel
     ) throws -> AccountId {
-        try address.toAccountId(using: chainFormat(of: chain))
+        try address.toAccountId(using: chain.chainFormat)
     }
 
-    public static func randomAccountId(for chainFormat: SFChainFormat) -> AccountId {
+    public static func randomAccountId(for chainFormat: ChainFormat) -> AccountId {
         switch chainFormat {
-        case .sfEthereum:
+        case .ethereum:
             return Data(count: EthereumConstants.accountIdLength)
-        case .sfSubstrate:
+        case .substrate:
             return Data(count: SubstrateConstants.accountIdLength)
+        case .ton:
+            do {
+                return try TonSwift.Address.random().asAccountId()
+            } catch {
+                return TonSwift.Address.random().hash
+            }
         }
     }
 }
 
 public extension AccountAddress {
-    func toAccountId(using conversion: SFChainFormat) throws -> AccountId {
+    func toAccountId(using conversion: ChainFormat) throws -> AccountId {
         switch conversion {
-        case .sfEthereum:
+        case .ethereum:
             return try AccountId(hexStringSSF: self)
-        case let .sfSubstrate(prefix):
+        case let .substrate(prefix):
             return try SS58AddressFactory().accountId(fromAddress: self, type: prefix)
+        case .ton:
+            return try TonSwift.Address.parse(self).asAccountId()
         }
     }
 
+    /// Just for substrate and ethereum ecosystem
+    /// Don't use for TON
     func toAccountIdWithTryExtractPrefix() throws -> AccountId {
         if hasPrefix("0x") {
             return try AccountId(hexStringSSF: self)
@@ -67,18 +81,20 @@ public extension AccountAddress {
 }
 
 public extension AccountId {
-    func toAddress(using conversion: SFChainFormat) throws -> AccountAddress {
+    func toAddress(using conversion: ChainFormat) throws -> AccountAddress {
         switch conversion {
-        case .sfEthereum:
+        case .ethereum:
             return toHex(includePrefix: true)
-        case let .sfSubstrate(prefix):
+        case let .substrate(prefix):
             return try SS58AddressFactory().address(fromAccountId: self, type: prefix)
+        case let .ton(bounceable):
+            return try asTonAddress().toFriendly(bounceable: bounceable).toString()
         }
     }
 }
 
 extension ChainAccountModel {
     func toAddress(addressPrefix: UInt16) -> AccountAddress? {
-        try? accountId.toAddress(using: .sfSubstrate(addressPrefix))
+        try? accountId.toAddress(using: .substrate(addressPrefix))
     }
 }

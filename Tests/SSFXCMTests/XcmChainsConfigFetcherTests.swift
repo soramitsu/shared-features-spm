@@ -173,6 +173,7 @@ final class XcmChainsConfigFetcherTests: XCTestCase {
 extension XcmChainsConfigFetcherTests {
     enum TestData {
         static let firstChain = ChainModel(
+            ecosystem: .substrate,
             rank: 0,
             disabled: false,
             chainId: "0",
@@ -208,6 +209,7 @@ extension XcmChainsConfigFetcherTests {
         )
 
         static let secondChain = ChainModel(
+            ecosystem: .substrate,
             rank: 1,
             disabled: false,
             chainId: "1",
@@ -239,6 +241,7 @@ extension XcmChainsConfigFetcherTests {
         )
 
         static let errorChain = ChainModel(
+            ecosystem: .substrate,
             rank: 2,
             disabled: false,
             chainId: "2",

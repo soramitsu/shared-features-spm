@@ -34,6 +34,7 @@ extension XcmDestinationTests {
             .appendingPathExtension("json")
 
         static let chain = ChainModel(
+            ecosystem: .substrate,
             rank: 1,
             disabled: false,
             chainId: "1",
@@ -48,6 +49,7 @@ extension XcmDestinationTests {
         )
 
         static let errorChain = ChainModel(
+            ecosystem: .substrate,
             rank: 1,
             disabled: false,
             chainId: "1",

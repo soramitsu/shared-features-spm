@@ -12,6 +12,10 @@ import UIKit
 @testable import SSFXCM
 
 class ChainRegistryProtocolMock: ChainRegistryProtocol {
+    func getTonApiAssembly() throws -> SSFChainConnection.TonAPIAssembly {
+        TonAPIAssembly(tonAPIURL: URL(string: "")!, token: "")
+    }
+    
     // MARK: - getRuntimeProvider
 
     var getRuntimeProviderChainIdUsedRuntimePathsRuntimeItemThrowableError: Error?

@@ -89,7 +89,7 @@ public final class WebSocketEngine {
         case .notConnected:
             startConnecting()
         case .waitingNewLoop:
-            connectionStrategy.cancelReconectionShedule()
+            connectionStrategy.cancelReconnectionSchedule()
 
             startConnecting()
 
@@ -131,7 +131,7 @@ public final class WebSocketEngine {
 
         case .waitingNewLoop:
             logger?.debug("Cancel reconnection scheduler due to disconnection")
-            connectionStrategy.cancelReconectionShedule()
+            connectionStrategy.cancelReconnectionSchedule()
         default:
             logger?.debug("Already disconnected from socket")
         }
@@ -185,7 +185,7 @@ extension WebSocketEngine {
 
             pendingRequests.append(request)
 
-            connectionStrategy.cancelReconectionShedule()
+            connectionStrategy.cancelReconnectionSchedule()
 
             startConnecting()
         case .notReachable:
@@ -553,7 +553,7 @@ extension WebSocketEngine {
     }
 
     func cancelReconectionShedule() {
-        connectionStrategy.cancelReconectionShedule()
+        connectionStrategy.cancelReconnectionSchedule()
     }
 
     private func processUnsubscription(_ identifier: UInt16) throws {

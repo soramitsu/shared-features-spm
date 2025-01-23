@@ -15,13 +15,15 @@ enum BridgeTypesGenericNetworkId: Codable {
     case sub(BridgeTypesSubNetworkId)
 
     init(from chain: ChainModel) throws {
-        switch chain.chainBaseType {
+        switch chain.ecosystem {
         case .substrate:
             let networkId = try BridgeTypesSubNetworkId(from: chain)
             self = .sub(networkId)
-        case .ethereum:
+        case .ethereum, .ethereumBased:
             let evmChainId = BigUInt(stringLiteral: chain.chainId)
             self = .evm(evmChainId)
+        case .ton:
+            throw XcmError.ecosystemNotSupported
         }
     }
 

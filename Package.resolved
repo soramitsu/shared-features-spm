@@ -172,6 +172,15 @@
       }
     },
     {
+      "identity" : "swift-openapi-runtime",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-openapi-runtime",
+      "state" : {
+        "revision" : "a51b3bd6f2151e9a6f792ca6937a7242c4758768",
+        "version" : "0.3.6"
+      }
+    },
+    {
       "identity" : "swift-system",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-system.git",
@@ -196,6 +205,24 @@
       "state" : {
         "revision" : "8cba041db09596183331d123f337d0eb2e6e8e91",
         "version" : "2.1.1"
+      }
+    },
+    {
+      "identity" : "ton-api-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/DRadmir/ton-api-swift.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "1988939fe0ce6db6bc587cfe7c9d15dc3bca1d69"
+      }
+    },
+    {
+      "identity" : "ton-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/DRadmir/ton-swift.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "73c9894e2be8d6d16b87853342eb2755d2e4be8a"
       }
     },
     {

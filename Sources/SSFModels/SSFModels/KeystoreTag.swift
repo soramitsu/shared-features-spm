@@ -20,6 +20,21 @@ public enum KeystoreTag: String, CaseIterable {
 
 public enum KeystoreTagV2: String, CaseIterable {
     case pincode
+    
+    public static func secretKeyTag(
+        for ecosystem: Ecosystem,
+        metaId: String,
+        accountId: AccountId? = nil
+    ) -> String {
+        switch ecosystem {
+        case .substrate:
+            return Self.substrateSecretKeyTagForMetaId(metaId, accountId: accountId)
+        case .ethereum, .ethereumBased:
+            return Self.ethereumSecretKeyTagForMetaId(metaId, accountId: accountId)
+        case .ton:
+            return Self.tonSecretKeyTagForMetaId(metaId, accountId: accountId)
+        }
+    }
 
     public static func substrateSecretKeyTagForMetaId(
         _ metaId: String,
@@ -33,6 +48,13 @@ public enum KeystoreTagV2: String, CaseIterable {
         accountId: AccountId? = nil
     ) -> String {
         createTagForMetaId(metaId, accountId: accountId, suffix: "-ethereumSecretKey")
+    }
+
+    public static func tonSecretKeyTagForMetaId(
+        _ metaId: String,
+        accountId: AccountId? = nil
+    ) -> String {
+        createTagForMetaId(metaId, accountId: accountId, suffix: "-tonSecretKey")
     }
 
     public static func entropyTagForMetaId(
@@ -55,6 +77,13 @@ public enum KeystoreTagV2: String, CaseIterable {
     ) -> String {
         createTagForMetaId(metaId, accountId: accountId, suffix: "-ethereumDeriv")
     }
+    
+    public static func tonDerivationTagForMetaId(
+        _ metaId: String,
+        accountId: AccountId? = nil
+    ) -> String {
+        createTagForMetaId(metaId, accountId: accountId, suffix: "-tonDeriv")
+    }
 
     public static func substrateSeedTagForMetaId(
         _ metaId: String,
@@ -68,6 +97,13 @@ public enum KeystoreTagV2: String, CaseIterable {
         accountId: AccountId? = nil
     ) -> String {
         createTagForMetaId(metaId, accountId: accountId, suffix: "-ethereumSeed")
+    }
+
+    public static func tonSeedTagForMetaId(
+        _ metaId: String,
+        accountId: AccountId? = nil
+    ) -> String {
+        createTagForMetaId(metaId, accountId: accountId, suffix: "-tonSeed")
     }
 
     private static func createTagForMetaId(
