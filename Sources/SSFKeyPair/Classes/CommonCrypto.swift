@@ -31,6 +31,8 @@ public protocol CommonCrypto {
 }
 
 public final class CommonCryptoImpl: CommonCrypto {
+    public init() {}
+
     public func getQuery(
         seed: Data,
         derivationPath: String,
