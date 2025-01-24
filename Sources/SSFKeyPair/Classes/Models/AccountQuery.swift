@@ -1,7 +1,7 @@
 import Foundation
 
 public struct AccountQuery {
-    let publicKey: Data
-    let privateKey: Data
-    let address: Data
+    public let publicKey: Data
+    public let privateKey: Data
+    public let address: Data
 }
