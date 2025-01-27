@@ -4,7 +4,7 @@ import SSFModels
 import SSFUtils
 
 // sourcery: AutoMockable
-protocol CommonCrypto {
+public protocol CommonCrypto {
     func getQuery(
         seed: Data,
         derivationPath: String,
@@ -30,8 +30,10 @@ protocol CommonCrypto {
     ) -> KeypairFactoryProtocol
 }
 
-final class CommonCryptoImpl: CommonCrypto {
-    func getQuery(
+public final class CommonCryptoImpl: CommonCrypto {
+    public init() {}
+
+    public func getQuery(
         seed: Data,
         derivationPath: String,
         cryptoType: CryptoType,
@@ -61,7 +63,7 @@ final class CommonCryptoImpl: CommonCrypto {
         )
     }
 
-    func getJunctionResult(
+    public func getJunctionResult(
         from derivationPath: String,
         ethereumBased: Bool
     ) throws -> JunctionResult? {
@@ -74,7 +76,7 @@ final class CommonCryptoImpl: CommonCrypto {
         return try junctionFactory.parse(path: derivationPath)
     }
 
-    func generateKeypair(
+    public func generateKeypair(
         from seed: Data,
         chaincodes: [Chaincode],
         cryptoType: CryptoType,
@@ -108,7 +110,7 @@ final class CommonCryptoImpl: CommonCrypto {
         }
     }
 
-    func createKeypairFactory(
+    public func createKeypairFactory(
         _ cryptoType: CryptoType,
         isEthereumBased: Bool
     ) -> KeypairFactoryProtocol {
