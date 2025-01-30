@@ -28,7 +28,7 @@ final class BackupFileFactoryTests: XCTestCase {
         let account = try JSONDecoder().decode(EcryptedBackupAccount.self, from: data)
 
         // assert
-        XCTAssertEqual(data.count, 1260)
+        XCTAssertEqual(data.count, 1341)
         XCTAssertEqual(account.name, TestData.account.name)
     }
 
