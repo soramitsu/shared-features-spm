@@ -1,6 +1,7 @@
 public enum PurchaseProvider: String, Codable, Hashable {
     case moonpay
     case ramp
+    case coinbase
 }
 
 public enum RawStakingType: String, Codable {
