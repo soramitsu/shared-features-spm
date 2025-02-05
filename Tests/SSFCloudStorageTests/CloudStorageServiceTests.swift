@@ -244,6 +244,7 @@ extension CloudStorageServiceTests {
         static let encryptedAccount = EcryptedBackupAccount(
             name: "chop",
             address: "cnSNFyYFzPPJWm1yKjZCKZnGhhrZWWx1Mme1gw64YvjJhNGoJ",
+            keyVerifier: "6b07b1cb82cb6f35db50385a3326f85554487de6cedcb4476cd0eca3b14cb04d00800000010000000800000061e9dee22479b55961bba585d2db532b7d5726dd5d6a4c9abab356fd20820eef884ead766256a06e1506a92503fb01a0ee4b889b6a77eafbf6bef710168b467797d69b44135f37ea8716339e5af9ef70b88933b24da89c7a81",
             encryptedMnemonicPhrase: nil,
             encryptedSubstrateDerivationPath: "5944fbdce78478ef92858817b176fe0b5b884e9c8652de8e10061f0680f83c3100800000010000000800000012e34d41a1843fe84e627672c688150b2ab19c12e7d6b77dab91457f3e8f06a1ca66218604f14691",
             encryptedEthDerivationPath: nil,

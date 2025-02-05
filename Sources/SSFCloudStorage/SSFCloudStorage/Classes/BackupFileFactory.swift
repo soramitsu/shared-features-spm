@@ -16,6 +16,11 @@ public class BackupFileFactory: NSObject, BackupFileFactoryProtocol {
             .appendingPathComponent("\(account.address)")
             .appendingPathExtension("json")
 
+        let keyVerifier = try service.createEncryptedData(
+            with: password,
+            message: account.address
+        )
+
         let encodedPassphrase = try service.createEncryptedData(
             with: password,
             message: account.passphrase
@@ -45,6 +50,7 @@ public class BackupFileFactory: NSObject, BackupFileFactoryProtocol {
         let ecryptedBackupAccount = EcryptedBackupAccount(
             name: account.name ?? "",
             address: account.address,
+            keyVerifier: keyVerifier?.toHex(),
             encryptedMnemonicPhrase: encodedPassphrase?.toHex(),
             encryptedSubstrateDerivationPath: encodedSubstrateDerivationPath?.toHex(),
             encryptedEthDerivationPath: encodedEthDerivationPath?.toHex(),

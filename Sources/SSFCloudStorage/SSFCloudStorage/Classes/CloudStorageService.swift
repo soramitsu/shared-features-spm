@@ -306,6 +306,13 @@ extension CloudStorageService {
             throw CloudStorageServiceError.incorectJson
         }
 
+        guard let _ = try? encryptionService.getDecrypted(
+            from: account.keyVerifier,
+            password: password
+        ) else {
+            throw CloudStorageServiceError.incorectPassword
+        }
+
         let passphrase = try? encryptionService.getDecrypted(
             from: account.encryptedMnemonicPhrase,
             password: password
