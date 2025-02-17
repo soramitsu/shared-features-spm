@@ -92,8 +92,8 @@ public enum ChainAssetType: Codable, Equatable {
     
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        var allKeys = ArraySlice(container.allKeys)
-        guard let onlyKey = allKeys.popFirst(), allKeys.isEmpty else {
+        let allKeys = ArraySlice(container.allKeys)
+        guard let onlyKey = allKeys.first, allKeys.count == 1 else {
             throw DecodingError.typeMismatch(
                 ChainAssetType.self,
                 DecodingError.Context.init(
