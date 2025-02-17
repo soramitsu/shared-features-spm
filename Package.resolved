@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/attaswift/BigInt.git",
       "state" : {
-        "revision" : "793a7fac0bfc318e85994bf6900652e827aef33e",
-        "version" : "5.4.1"
+        "revision" : "0ed110f7555c34ff468e72e1686e59721f2b0da6",
+        "version" : "5.3.0"
       }
     },
     {
@@ -212,8 +212,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/DRadmir/ton-api-swift.git",
       "state" : {
-        "branch" : "main",
-        "revision" : "1988939fe0ce6db6bc587cfe7c9d15dc3bca1d69"
+        "revision" : "8ddff19a40d3d00503cab7fb9d9eb77459169488",
+        "version" : "0.5.0"
       }
     },
     {
@@ -239,8 +239,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/bnsports/Web3.swift.git",
       "state" : {
-        "revision" : "980689749b7a49e5cd0180aa089c64a5f950025a",
-        "version" : "7.7.8"
+        "revision" : "a526779488e5fe2fa993d9614f11f57b00cc1858",
+        "version" : "7.7.7"
       }
     },
     {
