@@ -134,7 +134,8 @@ public struct AssetModel: Equatable, Codable, Hashable, Identifiable {
             assetType: assetType,
             priceProvider: priceProvider,
             coingeckoPriceId: coingeckoPriceId,
-            priceData: priceData
+            priceData: priceData,
+            coinbaseUrl: coinbaseUrl
         )
     }
 
