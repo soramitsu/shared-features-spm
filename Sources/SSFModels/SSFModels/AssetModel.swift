@@ -21,6 +21,7 @@ public struct AssetModel: Equatable, Codable, Hashable, Identifiable {
     public let purchaseProviders: [PurchaseProvider]?
     public let assetType: ChainAssetType
     public let priceProvider: PriceProvider?
+    public let coinbaseUrl: String?
 
     public let coingeckoPriceId: PriceId?
     public var priceId: PriceId? {
@@ -53,7 +54,8 @@ public struct AssetModel: Equatable, Codable, Hashable, Identifiable {
         assetType: ChainAssetType,
         priceProvider: PriceProvider? = nil,
         coingeckoPriceId: PriceId? = nil,
-        priceData: [PriceData] = []
+        priceData: [PriceData] = [],
+        coinbaseUrl: String? = nil
     ) {
         self.id = id
         self.symbol = symbol
@@ -71,6 +73,7 @@ public struct AssetModel: Equatable, Codable, Hashable, Identifiable {
         self.priceProvider = priceProvider
         self.coingeckoPriceId = coingeckoPriceId
         self.priceData = priceData
+        self.coinbaseUrl = coinbaseUrl
     }
 
     public init(from decoder: Decoder) throws {
@@ -91,6 +94,7 @@ public struct AssetModel: Equatable, Codable, Hashable, Identifiable {
             [PurchaseProvider]?.self,
             forKey: .purchaseProviders
         )
+        coinbaseUrl = try? container.decode(String.self, forKey: .coinbaseUrl)
 
         let assetType: ChainAssetType? = try ChainAssetType(from: decoder)
         guard let assetType else {
@@ -180,5 +184,6 @@ extension AssetModel {
         case priceProvider
         case precision
         case tonType
+        case coinbaseUrl
     }
 }
