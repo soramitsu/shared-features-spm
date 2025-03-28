@@ -22,6 +22,7 @@ public struct AssetModel: Equatable, Codable, Hashable, Identifiable {
     public let assetType: ChainAssetType
     public let priceProvider: PriceProvider?
     public let coinbaseUrl: String?
+    public let isCustom: Bool
 
     public let coingeckoPriceId: PriceId?
     public var priceId: PriceId? {
@@ -55,7 +56,8 @@ public struct AssetModel: Equatable, Codable, Hashable, Identifiable {
         priceProvider: PriceProvider? = nil,
         coingeckoPriceId: PriceId? = nil,
         priceData: [PriceData] = [],
-        coinbaseUrl: String? = nil
+        coinbaseUrl: String? = nil,
+        isCustom: Bool
     ) {
         self.id = id
         self.symbol = symbol
@@ -74,6 +76,7 @@ public struct AssetModel: Equatable, Codable, Hashable, Identifiable {
         self.coingeckoPriceId = coingeckoPriceId
         self.priceData = priceData
         self.coinbaseUrl = coinbaseUrl
+        self.isCustom = isCustom
     }
 
     public init(from decoder: Decoder) throws {
@@ -111,7 +114,7 @@ public struct AssetModel: Equatable, Codable, Hashable, Identifiable {
 
         coingeckoPriceId = try? container.decode(String?.self, forKey: .priceId)
         priceProvider = try container.decodeIfPresent(PriceProvider.self, forKey: .priceProvider)
-
+        isCustom = false
         priceData = []
     }
 
@@ -135,7 +138,8 @@ public struct AssetModel: Equatable, Codable, Hashable, Identifiable {
             priceProvider: priceProvider,
             coingeckoPriceId: coingeckoPriceId,
             priceData: priceData,
-            coinbaseUrl: coinbaseUrl
+            coinbaseUrl: coinbaseUrl,
+            isCustom: isCustom
         )
     }
 
@@ -158,7 +162,8 @@ public struct AssetModel: Equatable, Codable, Hashable, Identifiable {
             lhs.purchaseProviders == rhs.purchaseProviders &&
             lhs.assetType == rhs.assetType &&
             lhs.priceProvider == rhs.priceProvider &&
-            lhs.priceData == rhs.priceData
+            lhs.priceData == rhs.priceData &&
+            lhs.isCustom == rhs.isCustom
     }
 
     public func hash(into hasher: inout Hasher) {

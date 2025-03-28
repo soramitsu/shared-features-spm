@@ -216,7 +216,8 @@ public enum ChainModelGenerator {
             assetType: .substrate(substrateType: substrateAssetType),
             priceProvider: nil,
             coingeckoPriceId: nil,
-            priceData: []
+            priceData: [],
+            isCustom: false
         )
     }
 
