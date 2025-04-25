@@ -6,7 +6,7 @@
 	<dict>
 		<key>.DS_Store</key>
 		<data>
-		EfEOPAikgBV7PhleU6QIpt6Pwto=
+		b/lQFcKX7bV6CnSwteNW0PpN7q8=
 		</data>
 		<key>ios-arm64/.DS_Store</key>
 		<data>
@@ -14,7 +14,7 @@
 		</data>
 		<key>ios-arm64/libed25519.framework/.DS_Store</key>
 		<data>
-		r3JIzBBFgtyapRO2HIWozpefY50=
+		QR0WS9tbUyZYKLbYA8VoXZFqDyw=
 		</data>
 		<key>ios-arm64/libed25519.framework/Headers/ed25519.h</key>
 		<data>
@@ -40,26 +40,6 @@
 		<data>
 		XojxhZ0CUj5K/Z1hEU4LSERax1s=
 		</data>
-		<key>ios-arm64/libed25519.framework/_CodeSignature/CodeDirectory</key>
-		<data>
-		rWxGC3pHMdxa+2IrL2LUAYQYywY=
-		</data>
-		<key>ios-arm64/libed25519.framework/_CodeSignature/CodeRequirements</key>
-		<data>
-		l3a6Z4MOQuLVwj/FYCmha2mebKA=
-		</data>
-		<key>ios-arm64/libed25519.framework/_CodeSignature/CodeRequirements-1</key>
-		<data>
-		ZqHp9UgWYzELEj5K18eqrLws25o=
-		</data>
-		<key>ios-arm64/libed25519.framework/_CodeSignature/CodeResources</key>
-		<data>
-		eoGWD3PksrBhyvmOcUkIr/usP8c=
-		</data>
-		<key>ios-arm64/libed25519.framework/_CodeSignature/CodeSignature</key>
-		<data>
-		axqvkVET/3Ahmqs4K36olYbE9n0=
-		</data>
 		<key>ios-arm64/libed25519.framework/libed25519</key>
 		<data>
 		6Qu2Ce3b+XZtAtw/g5cQS7v5YOo=
@@ -78,7 +58,7 @@
 		</data>
 		<key>ios-arm64_x86_64-simulator/libed25519.framework/.DS_Store</key>
 		<data>
-		r3JIzBBFgtyapRO2HIWozpefY50=
+		/TwGNxtgHDDo7GwS4d7+JRiqXqs=
 		</data>
 		<key>ios-arm64_x86_64-simulator/libed25519.framework/Headers/ed25519.h</key>
 		<data>
@@ -103,26 +83,6 @@
 		<key>ios-arm64_x86_64-simulator/libed25519.framework/Modules/module.modulemap</key>
 		<data>
 		XojxhZ0CUj5K/Z1hEU4LSERax1s=
-		</data>
-		<key>ios-arm64_x86_64-simulator/libed25519.framework/_CodeSignature/CodeDirectory</key>
-		<data>
-		sQWxETI8zKtfQJRoWCQWswWHPjE=
-		</data>
-		<key>ios-arm64_x86_64-simulator/libed25519.framework/_CodeSignature/CodeRequirements</key>
-		<data>
-		OnX22wWFKRSOFN1+obRynMCeyXM=
-		</data>
-		<key>ios-arm64_x86_64-simulator/libed25519.framework/_CodeSignature/CodeRequirements-1</key>
-		<data>
-		IoEkaTL818nb8OsfBKXyYKrKV6s=
-		</data>
-		<key>ios-arm64_x86_64-simulator/libed25519.framework/_CodeSignature/CodeResources</key>
-		<data>
-		zGh3aHYW0QA0FoApfg/5UDxjFu4=
-		</data>
-		<key>ios-arm64_x86_64-simulator/libed25519.framework/_CodeSignature/CodeSignature</key>
-		<data>
-		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
 		</data>
 		<key>ios-arm64_x86_64-simulator/libed25519.framework/libed25519</key>
 		<data>
@@ -203,61 +163,6 @@
 			<key>hash2</key>
 			<data>
 			YtJf4nbON+cgHWuyrWTUimx+4kEoRMl0wfynLL1hSkc=
-			</data>
-		</dict>
-		<key>ios-arm64/libed25519.framework/_CodeSignature/CodeDirectory</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			rWxGC3pHMdxa+2IrL2LUAYQYywY=
-			</data>
-			<key>hash2</key>
-			<data>
-			HIw0X/fcrn9m+CS5qvlK7P8Vqap3mhNRGiDeCRd4uo8=
-			</data>
-		</dict>
-		<key>ios-arm64/libed25519.framework/_CodeSignature/CodeRequirements</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			l3a6Z4MOQuLVwj/FYCmha2mebKA=
-			</data>
-			<key>hash2</key>
-			<data>
-			vydNKDdad2SQnjPnijqz9XeJ25S9VtUwk4iBkg0mqhk=
-			</data>
-		</dict>
-		<key>ios-arm64/libed25519.framework/_CodeSignature/CodeRequirements-1</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			ZqHp9UgWYzELEj5K18eqrLws25o=
-			</data>
-			<key>hash2</key>
-			<data>
-			qqiFtWUy/npYlvd+/Tbxv3k1sa9qTFBp/g+td6bhnTM=
-			</data>
-		</dict>
-		<key>ios-arm64/libed25519.framework/_CodeSignature/CodeResources</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			eoGWD3PksrBhyvmOcUkIr/usP8c=
-			</data>
-			<key>hash2</key>
-			<data>
-			8cfbdCJoeSEmZ0VP+Z8aVhTcmBR9jJTMrGQlJt2qN+E=
-			</data>
-		</dict>
-		<key>ios-arm64/libed25519.framework/_CodeSignature/CodeSignature</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			axqvkVET/3Ahmqs4K36olYbE9n0=
-			</data>
-			<key>hash2</key>
-			<data>
-			k9jLa55VzBnXhSo+h3ZJz8/y4JJKUxEDJl0Y174kfCI=
 			</data>
 		</dict>
 		<key>ios-arm64/libed25519.framework/libed25519</key>
@@ -357,61 +262,6 @@
 			<key>hash2</key>
 			<data>
 			YtJf4nbON+cgHWuyrWTUimx+4kEoRMl0wfynLL1hSkc=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/libed25519.framework/_CodeSignature/CodeDirectory</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			sQWxETI8zKtfQJRoWCQWswWHPjE=
-			</data>
-			<key>hash2</key>
-			<data>
-			y35dVPp1DmCENySqQy0CzDQQirO15iZZ1wY0lN4ThNs=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/libed25519.framework/_CodeSignature/CodeRequirements</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			OnX22wWFKRSOFN1+obRynMCeyXM=
-			</data>
-			<key>hash2</key>
-			<data>
-			mHkgkE6rZQ51eIwFSqCwUk5qgL/HGqMt+NI3phdD+YY=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/libed25519.framework/_CodeSignature/CodeRequirements-1</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			IoEkaTL818nb8OsfBKXyYKrKV6s=
-			</data>
-			<key>hash2</key>
-			<data>
-			p1sBSv8k0KqWcZjZqkAmj+mURYlfbnYtSIYIuWSc8qM=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/libed25519.framework/_CodeSignature/CodeResources</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			zGh3aHYW0QA0FoApfg/5UDxjFu4=
-			</data>
-			<key>hash2</key>
-			<data>
-			3nNS1sXo33f0HuIUTA6FcnABwT9UHopKOz/MSw+HCF0=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/libed25519.framework/_CodeSignature/CodeSignature</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			2jmj7l5rSw0yVb/vlWAYkK/YBwk=
-			</data>
-			<key>hash2</key>
-			<data>
-			47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/libed25519.framework/libed25519</key>

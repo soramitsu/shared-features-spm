@@ -6,15 +6,15 @@
 	<dict>
 		<key>.DS_Store</key>
 		<data>
-		LYf2TZJllVwmLR9mLEyDL7XKdaw=
+		NI1amHku2CnKt79CUjhaCN2WESc=
 		</data>
 		<key>ios-arm64/.DS_Store</key>
 		<data>
-		Xdo3X9IgOmztpa+ilCjqf8RExYA=
+		yA3Zsjg1OoN8NeerWFz97ksm2C4=
 		</data>
 		<key>ios-arm64/blake2lib.framework/.DS_Store</key>
 		<data>
-		NEy1h/mQ1O9pb1z5CZdB2SCuySQ=
+		WlAb1I7mVFXDTe15C6iFMmHGuHk=
 		</data>
 		<key>ios-arm64/blake2lib.framework/Headers/blake2b.h</key>
 		<data>
@@ -36,26 +36,6 @@
 		<data>
 		90RaBVGDN3Y2jelHq4FdkC7eF7Y=
 		</data>
-		<key>ios-arm64/blake2lib.framework/_CodeSignature/CodeDirectory</key>
-		<data>
-		Z9kOa5dDTfrEAJw94l0oX6uuXJA=
-		</data>
-		<key>ios-arm64/blake2lib.framework/_CodeSignature/CodeRequirements</key>
-		<data>
-		7+4qlQP9C8Jgx/KfJvcAVJHX76A=
-		</data>
-		<key>ios-arm64/blake2lib.framework/_CodeSignature/CodeRequirements-1</key>
-		<data>
-		VNDsC3cWWQhe/7sifkGY3OVitTY=
-		</data>
-		<key>ios-arm64/blake2lib.framework/_CodeSignature/CodeResources</key>
-		<data>
-		lnKocFpqz3w4rge3iyN/yWx5euo=
-		</data>
-		<key>ios-arm64/blake2lib.framework/_CodeSignature/CodeSignature</key>
-		<data>
-		8pN7KxVZ43GDuRvq75E6fAeDWC4=
-		</data>
 		<key>ios-arm64/blake2lib.framework/blake2lib</key>
 		<data>
 		ysENSI6h5c/sHPLimhBBqvSxLy8=
@@ -63,6 +43,14 @@
 		<key>ios-arm64/blake2lib.framework/blake2lib-arm64.a</key>
 		<data>
 		ZmVUuWwxu9HduUhegXTajrfG/SY=
+		</data>
+		<key>ios-arm64_x86_64-simulator/.DS_Store</key>
+		<data>
+		ZLdxuc9K8Rtgv/ZrsmaRS8WlNUc=
+		</data>
+		<key>ios-arm64_x86_64-simulator/blake2lib.framework/.DS_Store</key>
+		<data>
+		hcJmu0D/L3BliyzSCnZezrDylE4=
 		</data>
 		<key>ios-arm64_x86_64-simulator/blake2lib.framework/Headers/blake2b.h</key>
 		<data>
@@ -83,26 +71,6 @@
 		<key>ios-arm64_x86_64-simulator/blake2lib.framework/Modules/module.modulemap</key>
 		<data>
 		90RaBVGDN3Y2jelHq4FdkC7eF7Y=
-		</data>
-		<key>ios-arm64_x86_64-simulator/blake2lib.framework/_CodeSignature/CodeDirectory</key>
-		<data>
-		JGhECItovVHNSITrw5IgoEXBUpI=
-		</data>
-		<key>ios-arm64_x86_64-simulator/blake2lib.framework/_CodeSignature/CodeRequirements</key>
-		<data>
-		OnX22wWFKRSOFN1+obRynMCeyXM=
-		</data>
-		<key>ios-arm64_x86_64-simulator/blake2lib.framework/_CodeSignature/CodeRequirements-1</key>
-		<data>
-		JzVZ7QUu4ucr9rVzLZjLvYgKy0k=
-		</data>
-		<key>ios-arm64_x86_64-simulator/blake2lib.framework/_CodeSignature/CodeResources</key>
-		<data>
-		PvrCASOO8iHgSJDxHF/LlmTa1Cg=
-		</data>
-		<key>ios-arm64_x86_64-simulator/blake2lib.framework/_CodeSignature/CodeSignature</key>
-		<data>
-		2jmj7l5rSw0yVb/vlWAYkK/YBwk=
 		</data>
 		<key>ios-arm64_x86_64-simulator/blake2lib.framework/blake2lib</key>
 		<data>
@@ -168,61 +136,6 @@
 			<key>hash2</key>
 			<data>
 			zwW+2WyTDdB1dX9XRJGYqPZ0q1ymH48ZFvJ2E9LShCk=
-			</data>
-		</dict>
-		<key>ios-arm64/blake2lib.framework/_CodeSignature/CodeDirectory</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			Z9kOa5dDTfrEAJw94l0oX6uuXJA=
-			</data>
-			<key>hash2</key>
-			<data>
-			2UrBWzKFnl5rjjzJ4XOL7SPbNUChzsGeFzYpXbTmf+w=
-			</data>
-		</dict>
-		<key>ios-arm64/blake2lib.framework/_CodeSignature/CodeRequirements</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			7+4qlQP9C8Jgx/KfJvcAVJHX76A=
-			</data>
-			<key>hash2</key>
-			<data>
-			49rxvmcmp1xoL8D645s/Xr10OBfeTdb/rmVtiER5HmI=
-			</data>
-		</dict>
-		<key>ios-arm64/blake2lib.framework/_CodeSignature/CodeRequirements-1</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			VNDsC3cWWQhe/7sifkGY3OVitTY=
-			</data>
-			<key>hash2</key>
-			<data>
-			n7HURmC52YzETIqRYP9wWju/BHk+kMch/8jB66Mb8dc=
-			</data>
-		</dict>
-		<key>ios-arm64/blake2lib.framework/_CodeSignature/CodeResources</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			lnKocFpqz3w4rge3iyN/yWx5euo=
-			</data>
-			<key>hash2</key>
-			<data>
-			Sb9ELMSbDildcp40/rwv2+PwVf1hmdZ2O1VgHReG7B4=
-			</data>
-		</dict>
-		<key>ios-arm64/blake2lib.framework/_CodeSignature/CodeSignature</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			8pN7KxVZ43GDuRvq75E6fAeDWC4=
-			</data>
-			<key>hash2</key>
-			<data>
-			zC9UNta0u4ixGhGpnXVPyqo/TlSl2a6sNdqWd2r8O9U=
 			</data>
 		</dict>
 		<key>ios-arm64/blake2lib.framework/blake2lib</key>
@@ -300,61 +213,6 @@
 			<key>hash2</key>
 			<data>
 			zwW+2WyTDdB1dX9XRJGYqPZ0q1ymH48ZFvJ2E9LShCk=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/blake2lib.framework/_CodeSignature/CodeDirectory</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			JGhECItovVHNSITrw5IgoEXBUpI=
-			</data>
-			<key>hash2</key>
-			<data>
-			j6EBXzQMbITZiLUc4wyXrB/1HnMMeZKe3ClJK2vQbEA=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/blake2lib.framework/_CodeSignature/CodeRequirements</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			OnX22wWFKRSOFN1+obRynMCeyXM=
-			</data>
-			<key>hash2</key>
-			<data>
-			mHkgkE6rZQ51eIwFSqCwUk5qgL/HGqMt+NI3phdD+YY=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/blake2lib.framework/_CodeSignature/CodeRequirements-1</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			JzVZ7QUu4ucr9rVzLZjLvYgKy0k=
-			</data>
-			<key>hash2</key>
-			<data>
-			a0rhLZUAy2qgAHWDMZbVTw1Uv6zHz3+OG6vUJlCb9GE=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/blake2lib.framework/_CodeSignature/CodeResources</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			PvrCASOO8iHgSJDxHF/LlmTa1Cg=
-			</data>
-			<key>hash2</key>
-			<data>
-			H+JXrM3tjFmm1PCgtN5ka2USjCsC60bR3LACaVZaPL4=
-			</data>
-		</dict>
-		<key>ios-arm64_x86_64-simulator/blake2lib.framework/_CodeSignature/CodeSignature</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			2jmj7l5rSw0yVb/vlWAYkK/YBwk=
-			</data>
-			<key>hash2</key>
-			<data>
-			47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/blake2lib.framework/blake2lib</key>
