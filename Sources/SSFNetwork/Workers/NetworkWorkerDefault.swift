@@ -6,7 +6,7 @@ public protocol NetworkWorker {
     ) async throws -> T
 }
 
-public final class NetworkWorkerDefault: NetworkWorker {
+public final actor NetworkWorkerDefault: NetworkWorker {
     private let requestSignerFactory: RequestSignerFactory
     private let networkClientFactory: NetworkClientFactory
     private let responseDecoderFactory: ResponseDecodersFactory

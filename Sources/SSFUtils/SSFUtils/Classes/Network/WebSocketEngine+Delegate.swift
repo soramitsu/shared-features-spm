@@ -4,6 +4,9 @@ import Starscream
 extension WebSocketEngine: WebSocketDelegate {
     public func didReceive(event: WebSocketEvent, client _: WebSocketClient) {
         mutex.lock()
+        defer {
+            mutex.unlock()
+        }
 
         switch event {
         case let .binary(data):
@@ -21,8 +24,6 @@ extension WebSocketEngine: WebSocketDelegate {
         default:
             logger?.warning("Unhandled event \(event)")
         }
-
-        mutex.unlock()
     }
 
     private func handleCancelled() {
@@ -130,29 +131,31 @@ extension WebSocketEngine: WebSocketDelegate {
 extension WebSocketEngine: ReachabilityListenerDelegate {
     public func didChangeReachability(by manager: ReachabilityManagerProtocol) {
         mutex.lock()
+        defer {
+            mutex.unlock()
+        }
 
-        if manager.isReachable, case .notReachable = state {
+
+        if manager.isReachable, !state.isConnected {
             logger?.debug("Network became reachable, retrying connection")
-
             reconnectionScheduler.cancel()
             startConnecting(0)
         }
-
-        mutex.unlock()
     }
 }
 
 extension WebSocketEngine: SchedulerDelegate {
     public func didTrigger(scheduler: SchedulerProtocol) {
         mutex.lock()
+        defer {
+            mutex.unlock()
+        }
 
         if scheduler === pingScheduler {
             handlePing(scheduler: scheduler)
         } else {
             handleReconnection(scheduler: scheduler)
         }
-
-        mutex.unlock()
     }
 
     private func handleReconnection(scheduler _: SchedulerProtocol) {

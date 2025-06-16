@@ -29,6 +29,14 @@ public final class WebSocketEngine {
         case waitingReconnection(attempt: Int)
         case connected
         case notReachable
+
+        var isConnected: Bool {
+            guard case .connected = self else {
+                return false
+            }
+
+            return true
+        }
     }
 
     public var connection: WebSocketConnectionProtocol
