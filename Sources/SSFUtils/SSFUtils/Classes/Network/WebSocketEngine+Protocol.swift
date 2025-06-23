@@ -79,7 +79,7 @@ extension WebSocketEngine: JSONRPCEngine {
 
         self.url = url
         let request = URLRequest(url: url, timeoutInterval: 10)
-        let engine = self.connection.engine
+
 
         let connection = WebSocket(request: request, engine: engine)
         self.connection = connection

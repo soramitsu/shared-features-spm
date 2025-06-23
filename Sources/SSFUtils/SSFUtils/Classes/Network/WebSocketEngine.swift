@@ -80,6 +80,7 @@ public final class WebSocketEngine {
     public weak var delegate: WebSocketEngineDelegate?
     public var url: URL?
     public var connectionName: String?
+    private(set) var engine: WSEngine
 
     public init(
         connectionName: String?,
@@ -104,7 +105,7 @@ public final class WebSocketEngine {
 
         let request = URLRequest(url: url, timeoutInterval: connectionTimeout)
 
-        let engine = WSEngine(transport: TCPTransport(), certPinner: FoundationSecurity())
+        self.engine = WSEngine(transport: TCPTransport(), certPinner: FoundationSecurity())
 
         let connection = WebSocket(request: request, engine: engine)
         self.connection = connection

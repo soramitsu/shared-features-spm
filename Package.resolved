@@ -28,15 +28,6 @@
       }
     },
     {
-      "identity" : "fearless-starscream",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/soramitsu/fearless-starscream",
-      "state" : {
-        "revision" : "9b26310bfaee979e785fecbf3dbefd2385f0e461",
-        "version" : "4.0.8"
-      }
-    },
-    {
       "identity" : "google-api-objectivec-client-for-rest",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/google/google-api-objectivec-client-for-rest.git",
@@ -97,6 +88,15 @@
       "state" : {
         "revision" : "cd187c632fb812fd93711a9f7e644adb7e5f97f0",
         "version" : "0.1.7"
+      }
+    },
+    {
+      "identity" : "starscream",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/daltoniam/Starscream",
+      "state" : {
+        "revision" : "c6bfd1af48efcc9a9ad203665db12375ba6b145a",
+        "version" : "4.0.8"
       }
     },
     {
