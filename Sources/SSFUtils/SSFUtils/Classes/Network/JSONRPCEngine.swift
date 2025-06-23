@@ -6,6 +6,7 @@ public enum JSONRPCEngineError: Error {
     case clientCancelled
     case unknownError
     case networkNotReachable
+    case connectionFailed
 }
 
 public protocol JSONRPCResponseHandling {

@@ -231,16 +231,28 @@ public final class WebSocketEngine {
         connection.connect()
     }
 
+    private let maxReconnectionAttempts = 5
+
     private func attemptReconnection(_ attempt: Int, error: Error? = nil) {
+        if attempt > maxReconnectionAttempts {
+            logger?.error("Max reconnection attempts reached")
+            state = .notConnected
+            let requests = pendingRequests
+            pendingRequests = []
+            let requestError = error ?? JSONRPCEngineError.connectionFailed
+            requests.forEach { $0.responseHandler?.handle(error: requestError) }
+            return
+        }
+
         if let reconnectionStrategy = reconnectionStrategy,
            let nextDelay = reconnectionStrategy.reconnectAfter(attempt: attempt - 1) {
-            logger?.debug("Schedule reconnection with attempt \(attempt) and delay \(nextDelay)")
+            logger?.debug("Will attempt reconnect #\(attempt) after \(nextDelay) seconds")
             reconnectionScheduler.notifyAfter(nextDelay)
         } else {
             state = .notConnected
             let requests = pendingRequests
             pendingRequests = []
-            let requestError = error ?? JSONRPCEngineError.unknownError
+            let requestError = error ?? JSONRPCEngineError.connectionFailed
             requests.forEach { $0.responseHandler?.handle(error: requestError) }
         }
     }
@@ -647,29 +659,53 @@ extension WebSocketEngine: WebSocketDelegate {
         logger?.error("WebSocket error: \(errorDesc)")
 
         let isTimeout = (error as? NWError) == .posix(.ETIMEDOUT)
+        let isSocketNotConnected = (error as? WSError)?.code == 1 // Starscream's "socket not connected" error
+
+        mutex.lock()
+        defer { mutex.unlock() }
 
         switch state {
         case .connected:
+            logger?.debug("Handling error in connected state")
             let cancelledRequests = resetInProgress()
             pingScheduler.cancel()
-            connection.forceDisconnect()
-            startConnecting(1)
-            notify(requests: cancelledRequests, error: JSONRPCEngineError.clientCancelled)
 
-        case .connecting(let attempt) where isTimeout:
-            let cancelledRequests = resetInProgress()
-            pingScheduler.cancel()
+            recreateConnection()
+            startConnecting(1)
+
+            notify(requests: cancelledRequests, error: JSONRPCEngineError.remoteCancelled)
+
+        case .connecting(let attempt) where isTimeout || isSocketNotConnected:
+            logger?.debug("Handling timeout/socket error during connection attempt \(attempt)")
             connection.forceDisconnect()
-            startConnecting(attempt + 1)
-            notify(requests: cancelledRequests, error: JSONRPCEngineError.clientCancelled)
+            recreateConnection()
+            attemptReconnection(attempt + 1, error: error)
 
         case .connecting(let attempt):
+            logger?.debug("Handling other error during connection attempt \(attempt)")
             connection.forceDisconnect()
             attemptReconnection(attempt + 1, error: error)
 
         default:
             break
         }
+    }
+
+    private func recreateConnection() {
+        guard let url = url else { return }
+
+        let request = URLRequest(url: url, timeoutInterval: 10)
+        let newEngine = WSEngine(transport: TCPTransport(), certPinner: FoundationSecurity())
+        let newConnection = WebSocket(request: request, engine: newEngine)
+
+        newConnection.callbackQueue = connection.callbackQueue
+        newConnection.delegate = self
+
+        connection.delegate = nil
+        connection = newConnection
+        engine = newEngine
+
+        logger?.debug("Created new WebSocket connection instance")
     }
 
     private func handleCancelled() {
