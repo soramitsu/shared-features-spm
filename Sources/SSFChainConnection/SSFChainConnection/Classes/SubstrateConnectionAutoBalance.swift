@@ -88,13 +88,12 @@ extension SubstrateConnectionAutoBalance: WebSocketEngineDelegate {
         to newState: WebSocketEngine.State
     ) {
         guard selecteUrl == nil,
-              let previousUrl = engine.url else
-        {
+              let previousUrl = engine.url else {
             return
         }
 
         switch newState {
-        case let .waitingReconnection(attempt: attempt):
+        case .connecting(let attempt):
             isActive = true
             if attempt > NetworkConstants.websocketReconnectAttemptsLimit {
                 _ = try? setupConnection(ignoredUrl: previousUrl)

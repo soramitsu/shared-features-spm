@@ -1,6 +1,7 @@
 import Foundation
 import Starscream
 
+/*
 extension WebSocketEngine: JSONRPCEngine {
     public var pendingEngineRequests: [JSONRPCRequest] {
         pendingRequests
@@ -88,3 +89,4 @@ extension WebSocketEngine: JSONRPCEngine {
         connection.delegate = self
     }
 }
+*/
