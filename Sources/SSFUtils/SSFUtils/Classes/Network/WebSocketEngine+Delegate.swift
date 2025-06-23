@@ -57,8 +57,10 @@ extension WebSocketEngine: WebSocketDelegate {
             logger?.error("Did receive unknown error")
         }
 
-        switch state {
-        case .connected:
+        let isTimeout = ((error as? POSIXError)?.code == .ETIMEDOUT)
+
+        switch (state, isTimeout) {
+        case (.connected, _), (_, true):
             let cancelledRequests = resetInProgress()
 
             pingScheduler.cancel()
@@ -70,7 +72,7 @@ extension WebSocketEngine: WebSocketDelegate {
                 requests: cancelledRequests,
                 error: JSONRPCEngineError.clientCancelled
             )
-        case let .connecting(attempt):
+        case (.connecting(let attempt), _):
             connection.disconnect()
 
             scheduleReconnectionOrDisconnect(attempt + 1)
