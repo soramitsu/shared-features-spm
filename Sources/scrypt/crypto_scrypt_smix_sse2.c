@@ -27,14 +27,24 @@
  * online backup system.
  */
 
+#if defined(__x86_64__) || defined(__i386__) || defined(_M_X64) || defined(_M_IX86)
+    #include <emmintrin.h>  // SSE2
+    #include <tmmintrin.h>  // SSSE3
+    #define USE_SSE2 1
+#else
+    #define USE_SSE2 0
+#endif
 
-#if defined(__SSSE3__)
-#include <emmintrin.h>
 #include <stdint.h>
-
 #include "sysendian.h"
-
 #include "crypto_scrypt_smix_sse2.h"
+
+#if !USE_SSE2
+void crypto_scrypt_smix_sse2(uint8_t *B, size_t r, uint64_t N, void *V, void *XY) {
+    extern void crypto_scrypt_smix(uint8_t *, size_t, uint64_t, void *, void *);
+    crypto_scrypt_smix(B, r, N, V, XY);
+}
+#else
 
 static void blkcpy(void *, const void *, size_t);
 static void blkxor(void *, const void *, size_t);
@@ -42,28 +52,18 @@ static void salsa20_8(__m128i *);
 static void blockmix_salsa8(const __m128i *, __m128i *, __m128i *, size_t);
 static uint64_t integerify(const void *, size_t);
 
-static void
-blkcpy(void * dest, const void * src, size_t len)
-{
-    __m128i * D = dest;
-    const __m128i * S = src;
+static void blkcpy(void *dest, const void *src, size_t len) {
+    __m128i *D = dest;
+    const __m128i *S = src;
     size_t L = len / 16;
-    size_t i;
-
-    for (i = 0; i < L; i++)
-        D[i] = S[i];
+    for (size_t i = 0; i < L; i++) D[i] = S[i];
 }
 
-static void
-blkxor(void * dest, const void * src, size_t len)
-{
-    __m128i * D = dest;
-    const __m128i * S = src;
+static void blkxor(void *dest, const void *src, size_t len) {
+    __m128i *D = dest;
+    const __m128i *S = src;
     size_t L = len / 16;
-    size_t i;
-
-    for (i = 0; i < L; i++)
-        D[i] = _mm_xor_si128(D[i], S[i]);
+    for (size_t i = 0; i < L; i++) D[i] = _mm_xor_si128(D[i], S[i]);
 }
 
 /**
