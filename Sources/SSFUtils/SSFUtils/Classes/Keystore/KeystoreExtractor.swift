@@ -66,6 +66,19 @@ public class KeystoreExtractor: KeystoreExtracting {
 
     private func decodePkcs8(data: Data, definition: KeystoreDefinition) throws -> KeystoreData {
         let info = try KeystoreInfoFactory().createInfo(from: definition)
+        
+        if definition.encoding.content == [KeystoreEncodingContent.pkcs8.rawValue, "sr25519"] && definition.encoding.type == ["scrypt", KeystoreEncodingType.xsalsa.rawValue] && definition.encoding.version == "\(KeystoreConstants.version)" {
+
+            let (expandedPrivateKey, publicKey) = try Pkcs8ChecksumCoder.decode(data: data)
+            
+            return KeystoreData(
+                address: definition.address,
+                secretKeyData: expandedPrivateKey,
+                publicKeyData: publicKey,
+                cryptoType: info.cryptoType
+            )
+            
+        }
 
         let contentType = definition.encoding.content.count > 0 ? definition.encoding
             .content[0] : nil
