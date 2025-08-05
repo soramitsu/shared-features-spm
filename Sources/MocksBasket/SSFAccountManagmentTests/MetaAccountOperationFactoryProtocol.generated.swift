@@ -13,56 +13,74 @@ public init() {}
 
     //MARK: - newMetaAccountOperation
 
-    public var newMetaAccountOperationMnemonicRequestIsBackupedCallsCount = 0
-    public var newMetaAccountOperationMnemonicRequestIsBackupedCalled: Bool {
-        return newMetaAccountOperationMnemonicRequestIsBackupedCallsCount > 0
+    public var newMetaAccountOperationMnemonicRequestIsBackedUpCallsCount = 0
+    public var newMetaAccountOperationMnemonicRequestIsBackedUpCalled: Bool {
+        return newMetaAccountOperationMnemonicRequestIsBackedUpCallsCount > 0
     }
-    public var newMetaAccountOperationMnemonicRequestIsBackupedReceivedArguments: (mnemonicRequest: MetaAccountImportMnemonicRequest, isBackuped: Bool)?
-    public var newMetaAccountOperationMnemonicRequestIsBackupedReceivedInvocations: [(mnemonicRequest: MetaAccountImportMnemonicRequest, isBackuped: Bool)] = []
-    public var newMetaAccountOperationMnemonicRequestIsBackupedReturnValue: BaseOperation<MetaAccountModel>!
-    public var newMetaAccountOperationMnemonicRequestIsBackupedClosure: ((MetaAccountImportMnemonicRequest, Bool) -> BaseOperation<MetaAccountModel>)?
+    public var newMetaAccountOperationMnemonicRequestIsBackedUpReceivedArguments: (mnemonicRequest: MetaAccountImportMnemonicRequest, isBackedUp: Bool)?
+    public var newMetaAccountOperationMnemonicRequestIsBackedUpReceivedInvocations: [(mnemonicRequest: MetaAccountImportMnemonicRequest, isBackedUp: Bool)] = []
+    public var newMetaAccountOperationMnemonicRequestIsBackedUpReturnValue: BaseOperation<MetaAccountModel>!
+    public var newMetaAccountOperationMnemonicRequestIsBackedUpClosure: ((MetaAccountImportMnemonicRequest, Bool) -> BaseOperation<MetaAccountModel>)?
 
-    public func newMetaAccountOperation(mnemonicRequest: MetaAccountImportMnemonicRequest,         isBackedUp: Bool) -> BaseOperation<MetaAccountModel> {
-        newMetaAccountOperationMnemonicRequestIsBackupedCallsCount += 1
-        newMetaAccountOperationMnemonicRequestIsBackupedReceivedArguments = (mnemonicRequest: mnemonicRequest, isBackuped:         isBackedUp)
-        newMetaAccountOperationMnemonicRequestIsBackupedReceivedInvocations.append((mnemonicRequest: mnemonicRequest, isBackuped:         isBackedUp))
-        return newMetaAccountOperationMnemonicRequestIsBackupedClosure.map({ $0(mnemonicRequest,         isBackedUp) }) ?? newMetaAccountOperationMnemonicRequestIsBackupedReturnValue
+    public func newMetaAccountOperation(mnemonicRequest: MetaAccountImportMnemonicRequest, isBackedUp: Bool) -> BaseOperation<MetaAccountModel> {
+        newMetaAccountOperationMnemonicRequestIsBackedUpCallsCount += 1
+        newMetaAccountOperationMnemonicRequestIsBackedUpReceivedArguments = (mnemonicRequest: mnemonicRequest, isBackedUp: isBackedUp)
+        newMetaAccountOperationMnemonicRequestIsBackedUpReceivedInvocations.append((mnemonicRequest: mnemonicRequest, isBackedUp: isBackedUp))
+        return newMetaAccountOperationMnemonicRequestIsBackedUpClosure.map({ $0(mnemonicRequest, isBackedUp) }) ?? newMetaAccountOperationMnemonicRequestIsBackedUpReturnValue
+    }
+
+    //MARK: - newTonMetaAccountOperation
+
+    public var newTonMetaAccountOperationMnemonicRequestIsBackedUpCallsCount = 0
+    public var newTonMetaAccountOperationMnemonicRequestIsBackedUpCalled: Bool {
+        return newTonMetaAccountOperationMnemonicRequestIsBackedUpCallsCount > 0
+    }
+    public var newTonMetaAccountOperationMnemonicRequestIsBackedUpReceivedArguments: (mnemonicRequest: MetaAccountImportTonMnemonicRequest, isBackedUp: Bool)?
+    public var newTonMetaAccountOperationMnemonicRequestIsBackedUpReceivedInvocations: [(mnemonicRequest: MetaAccountImportTonMnemonicRequest, isBackedUp: Bool)] = []
+    public var newTonMetaAccountOperationMnemonicRequestIsBackedUpReturnValue: BaseOperation<MetaAccountModel>!
+    public var newTonMetaAccountOperationMnemonicRequestIsBackedUpClosure: ((MetaAccountImportTonMnemonicRequest, Bool) -> BaseOperation<MetaAccountModel>)?
+
+    public func newTonMetaAccountOperation(mnemonicRequest: MetaAccountImportTonMnemonicRequest, isBackedUp: Bool) -> BaseOperation<MetaAccountModel> {
+        newTonMetaAccountOperationMnemonicRequestIsBackedUpCallsCount += 1
+        newTonMetaAccountOperationMnemonicRequestIsBackedUpReceivedArguments = (mnemonicRequest: mnemonicRequest, isBackedUp: isBackedUp)
+        newTonMetaAccountOperationMnemonicRequestIsBackedUpReceivedInvocations.append((mnemonicRequest: mnemonicRequest, isBackedUp: isBackedUp))
+        return newTonMetaAccountOperationMnemonicRequestIsBackedUpClosure.map({ $0(mnemonicRequest, isBackedUp) }) ?? newTonMetaAccountOperationMnemonicRequestIsBackedUpReturnValue
     }
 
     //MARK: - newMetaAccountOperation
 
-    public var newMetaAccountOperationSeedRequestIsBackupedCallsCount = 0
-    public var newMetaAccountOperationSeedRequestIsBackupedCalled: Bool {
-        return newMetaAccountOperationSeedRequestIsBackupedCallsCount > 0
+    public var newMetaAccountOperationSeedRequestIsBackedUpCallsCount = 0
+    public var newMetaAccountOperationSeedRequestIsBackedUpCalled: Bool {
+        return newMetaAccountOperationSeedRequestIsBackedUpCallsCount > 0
     }
-    public var newMetaAccountOperationSeedRequestIsBackupedReceivedArguments: (seedRequest: MetaAccountImportSeedRequest, isBackuped: Bool)?
-    public var newMetaAccountOperationSeedRequestIsBackupedReceivedInvocations: [(seedRequest: MetaAccountImportSeedRequest, isBackuped: Bool)] = []
-    public var newMetaAccountOperationSeedRequestIsBackupedReturnValue: BaseOperation<MetaAccountModel>!
-    public var newMetaAccountOperationSeedRequestIsBackupedClosure: ((MetaAccountImportSeedRequest, Bool) -> BaseOperation<MetaAccountModel>)?
+    public var newMetaAccountOperationSeedRequestIsBackedUpReceivedArguments: (seedRequest: MetaAccountImportSeedRequest, isBackedUp: Bool)?
+    public var newMetaAccountOperationSeedRequestIsBackedUpReceivedInvocations: [(seedRequest: MetaAccountImportSeedRequest, isBackedUp: Bool)] = []
+    public var newMetaAccountOperationSeedRequestIsBackedUpReturnValue: BaseOperation<MetaAccountModel>!
+    public var newMetaAccountOperationSeedRequestIsBackedUpClosure: ((MetaAccountImportSeedRequest, Bool) -> BaseOperation<MetaAccountModel>)?
 
-    public func newMetaAccountOperation(seedRequest: MetaAccountImportSeedRequest, isBackuped: Bool) -> BaseOperation<MetaAccountModel> {
-        newMetaAccountOperationSeedRequestIsBackupedCallsCount += 1
-        newMetaAccountOperationSeedRequestIsBackupedReceivedArguments = (seedRequest: seedRequest, isBackuped: isBackuped)
-        newMetaAccountOperationSeedRequestIsBackupedReceivedInvocations.append((seedRequest: seedRequest, isBackuped: isBackuped))
-        return newMetaAccountOperationSeedRequestIsBackupedClosure.map({ $0(seedRequest, isBackuped) }) ?? newMetaAccountOperationSeedRequestIsBackupedReturnValue
+    public func newMetaAccountOperation(seedRequest: MetaAccountImportSeedRequest, isBackedUp: Bool) -> BaseOperation<MetaAccountModel> {
+        newMetaAccountOperationSeedRequestIsBackedUpCallsCount += 1
+        newMetaAccountOperationSeedRequestIsBackedUpReceivedArguments = (seedRequest: seedRequest, isBackedUp: isBackedUp)
+        newMetaAccountOperationSeedRequestIsBackedUpReceivedInvocations.append((seedRequest: seedRequest, isBackedUp: isBackedUp))
+        return newMetaAccountOperationSeedRequestIsBackedUpClosure.map({ $0(seedRequest, isBackedUp) }) ?? newMetaAccountOperationSeedRequestIsBackedUpReturnValue
     }
 
     //MARK: - newMetaAccountOperation
 
-    public var newMetaAccountOperationKeystoreRequestIsBackupedCallsCount = 0
-    public var newMetaAccountOperationKeystoreRequestIsBackupedCalled: Bool {
-        return newMetaAccountOperationKeystoreRequestIsBackupedCallsCount > 0
+    public var newMetaAccountOperationKeystoreRequestIsBackedUpCallsCount = 0
+    public var newMetaAccountOperationKeystoreRequestIsBackedUpCalled: Bool {
+        return newMetaAccountOperationKeystoreRequestIsBackedUpCallsCount > 0
     }
-    public var newMetaAccountOperationKeystoreRequestIsBackupedReceivedArguments: (keystoreRequest: MetaAccountImportKeystoreRequest, isBackuped: Bool)?
-    public var newMetaAccountOperationKeystoreRequestIsBackupedReceivedInvocations: [(keystoreRequest: MetaAccountImportKeystoreRequest, isBackuped: Bool)] = []
-    public var newMetaAccountOperationKeystoreRequestIsBackupedReturnValue: BaseOperation<MetaAccountModel>!
-    public var newMetaAccountOperationKeystoreRequestIsBackupedClosure: ((MetaAccountImportKeystoreRequest, Bool) -> BaseOperation<MetaAccountModel>)?
+    public var newMetaAccountOperationKeystoreRequestIsBackedUpReceivedArguments: (keystoreRequest: MetaAccountImportKeystoreRequest, isBackedUp: Bool)?
+    public var newMetaAccountOperationKeystoreRequestIsBackedUpReceivedInvocations: [(keystoreRequest: MetaAccountImportKeystoreRequest, isBackedUp: Bool)] = []
+    public var newMetaAccountOperationKeystoreRequestIsBackedUpReturnValue: BaseOperation<MetaAccountModel>!
+    public var newMetaAccountOperationKeystoreRequestIsBackedUpClosure: ((MetaAccountImportKeystoreRequest, Bool) -> BaseOperation<MetaAccountModel>)?
 
-    public func newMetaAccountOperation(keystoreRequest: MetaAccountImportKeystoreRequest, isBackuped: Bool) -> BaseOperation<MetaAccountModel> {
-        newMetaAccountOperationKeystoreRequestIsBackupedCallsCount += 1
-        newMetaAccountOperationKeystoreRequestIsBackupedReceivedArguments = (keystoreRequest: keystoreRequest, isBackuped: isBackuped)
-        newMetaAccountOperationKeystoreRequestIsBackupedReceivedInvocations.append((keystoreRequest: keystoreRequest, isBackuped: isBackuped))
-        return newMetaAccountOperationKeystoreRequestIsBackupedClosure.map({ $0(keystoreRequest, isBackuped) }) ?? newMetaAccountOperationKeystoreRequestIsBackupedReturnValue
+    public func newMetaAccountOperation(keystoreRequest: MetaAccountImportKeystoreRequest, isBackedUp: Bool) -> BaseOperation<MetaAccountModel> {
+        newMetaAccountOperationKeystoreRequestIsBackedUpCallsCount += 1
+        newMetaAccountOperationKeystoreRequestIsBackedUpReceivedArguments = (keystoreRequest: keystoreRequest, isBackedUp: isBackedUp)
+        newMetaAccountOperationKeystoreRequestIsBackedUpReceivedInvocations.append((keystoreRequest: keystoreRequest, isBackedUp: isBackedUp))
+        return newMetaAccountOperationKeystoreRequestIsBackedUpClosure.map({ $0(keystoreRequest, isBackedUp) }) ?? newMetaAccountOperationKeystoreRequestIsBackedUpReturnValue
     }
 
     //MARK: - importChainAccountOperation
