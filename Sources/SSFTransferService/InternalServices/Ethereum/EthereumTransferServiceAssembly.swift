@@ -4,6 +4,12 @@ import SSFCrypto
 import SSFModels
 import Web3
 
+extension Data {
+    var bytes: Array<UInt8> {
+        return Array(self)
+    }
+}
+
 final class EthereumTransferServiceAssembly {
     func createEthereumTransferService(
         wallet: MetaAccountModel,

@@ -45,8 +45,9 @@ public final class WebSocketEngine {
     public let reachabilityManager: ReachabilityManagerProtocol?
     public let completionQueue: DispatchQueue
     public let pingInterval: TimeInterval
+    private let connectionTimeoutInterval: TimeInterval
 
-    public private(set) var state: State = .notConnected {
+    public private(set) var state: State = .notConnected/* {
         didSet {
             if let delegate = delegate {
                 let oldState = oldValue
@@ -54,7 +55,7 @@ public final class WebSocketEngine {
                 delegate.webSocketDidChangeState(engine: self, from: oldState, to: newState)
             }
         }
-    }
+    }*/
 
     let mutex = NSLock()
 
@@ -101,6 +102,7 @@ public final class WebSocketEngine {
         self.reachabilityManager = reachabilityManager
         completionQueue = processingQueue ?? Self.sharedProcessingQueue
         self.pingInterval = pingInterval
+        self.connectionTimeoutInterval = connectionTimeout
 
         let request = URLRequest(url: url, timeoutInterval: connectionTimeout)
 
@@ -189,6 +191,26 @@ public final class WebSocketEngine {
         try processUnsubscription(identifier)
 
         mutex.unlock()
+    }
+
+    // Recreate underlying Starscream connection to recover from protocol-level failures
+    func recreateConnection() {
+        guard let url = url else { return }
+
+        // Detach delegate to avoid callbacks from closing connection
+        connection.delegate = nil
+        connection.forceDisconnect()
+
+        let request = URLRequest(url: url, timeoutInterval: connectionTimeoutInterval)
+        let engine = WSEngine(transport: TCPTransport(), certPinner: FoundationSecurity())
+        let newConnection = WebSocket(request: request, engine: engine)
+        newConnection.delegate = self
+        newConnection.callbackQueue = completionQueue
+
+        // Swap connection and rebind schedulers to its queue
+        connection = newConnection
+        reconnectionScheduler = Scheduler(with: self, callbackQueue: newConnection.callbackQueue)
+        pingScheduler = Scheduler(with: self, callbackQueue: newConnection.callbackQueue)
     }
 }
 

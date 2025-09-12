@@ -3,6 +3,8 @@ import Starscream
 
 extension WebSocketEngine: WebSocketDelegate {
     public func didReceive(event: WebSocketEvent, client _: WebSocketClient) {
+        debugPrint(event)
+        
         mutex.lock()
         defer {
             mutex.unlock()
@@ -21,6 +23,18 @@ extension WebSocketEngine: WebSocketDelegate {
             handleErrorEvent(error)
         case .cancelled:
             handleCancelled()
+        case .viabilityChanged(_):
+            // Ignore viability here; reachability + errors drive reconnection
+            logger?.debug("viabilityChanged event received")
+        case .reconnectSuggested(let suggested):
+            //guard suggested else { return }
+            //recreateConnection()
+            //startConnecting(0)
+            
+            logger?.debug("reconnectSuggested event received")
+        case .ping(_):
+            // Ignore ping event; health is tracked separately
+            logger?.debug("Ping event received")
         default:
             logger?.warning("Unhandled event \(event)")
         }
@@ -51,6 +65,7 @@ extension WebSocketEngine: WebSocketDelegate {
     }
 
     private func handleErrorEvent(_ error: Error?) {
+        debugPrint(error)
         if let error = error {
             logger?.error("Did receive error: \(error)")
         } else {
@@ -63,16 +78,24 @@ extension WebSocketEngine: WebSocketDelegate {
 
             pingScheduler.cancel()
 
-            connection.disconnect()
-            startConnecting(0)
+            if shouldRecreateConnection(after: error) {
+                recreateConnection()
+                startConnecting(0)
+            } else {
+                connection.disconnect()
+                startConnecting(0)
+            }
 
             notify(
                 requests: cancelledRequests,
                 error: JSONRPCEngineError.clientCancelled
             )
         case let .connecting(attempt):
-            connection.disconnect()
-
+            if shouldRecreateConnection(after: error) {
+                recreateConnection()
+            } else {
+                connection.disconnect()
+            }
             scheduleReconnectionOrDisconnect(attempt + 1)
         default:
             break
@@ -126,21 +149,28 @@ extension WebSocketEngine: WebSocketDelegate {
             break
         }
     }
+
+    // Removed active handling for viabilityChanged/reconnectSuggested to avoid races.
 }
 
 extension WebSocketEngine: ReachabilityListenerDelegate {
     public func didChangeReachability(by manager: ReachabilityManagerProtocol) {
         mutex.lock()
-        defer {
-            mutex.unlock()
-        }
 
+        let isReachable = manager.isReachable
+        let currentState = state
 
-        if manager.isReachable, !state.isConnected {
+        if isReachable {
             logger?.debug("Network became reachable, retrying connection")
-            reconnectionScheduler.cancel()
-            startConnecting(0)
+            if case .waitingReconnection = currentState {
+                reconnectionScheduler.cancel()
+                startConnecting(0)
+            } else if case .notConnected = currentState {
+                startConnecting(0)
+            }
         }
+
+        mutex.unlock()
     }
 }
 
@@ -172,5 +202,26 @@ extension WebSocketEngine: SchedulerDelegate {
         connection.callbackQueue.async {
             self.sendPing()
         }
+    }
+}
+
+// MARK: - Error classification
+extension WebSocketEngine {
+    fileprivate func shouldRecreateConnection(after error: Error?) -> Bool {
+        guard let error = error else { return false }
+        if let wsError = error as? WSError {
+            if wsError.code == 1002 || wsError.type == .protocolError {
+                return true
+            }
+        }
+        if let posix = error as? POSIXError {
+            switch posix.code {
+            case .ECONNRESET, .ENOTCONN, .ETIMEDOUT:
+                return true
+            default:
+                break
+            }
+        }
+        return false
     }
 }

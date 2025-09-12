@@ -32,6 +32,7 @@ let package = Package(
         .library(name: "keccak", targets: ["keccak"]), //TODO: generate xcframework
         .library(name: "RobinHood", targets: ["RobinHood"]), //TODO: get from github
         .library(name: "SoraKeystore", targets: ["SoraKeystore"]), //TODO: get from github
+        .library(name: "SoraFoundation", targets: ["SoraFoundation"]), //TODO: get from github
         .library(name: "SSFQRService", targets: ["SSFQRService"]),
         .library(name: "SSFTransferService", targets: ["SSFTransferService"]),
         .library(name: "SSFSingleValueCache", targets: ["SSFSingleValueCache"]),
@@ -81,7 +82,16 @@ let package = Package(
         ),
         .target(name: "RobinHood"),
         .target(name: "keccak"),
-        .target(name: "SoraKeystore"),
+        .target(
+            name: "SoraKeystore"
+        ),
+        .target(
+            name: "SoraFoundation",
+            dependencies: ["SoraKeystore"],
+            linkerSettings: [
+                .linkedFramework("UIKit")
+            ]
+        ),
         .target(
             name: "SSFBalances",
             dependencies: ["SSFUtils", "SSFStorageQueryKit", "SSFModels", "SSFAccountManagment"]
