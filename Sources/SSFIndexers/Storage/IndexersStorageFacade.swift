@@ -2,6 +2,7 @@ import CoreData
 import Foundation
 import RobinHood
 
+/*
 public enum IndexersStorageFacadeError: Error {
     case coreDataUrlMissed
 }
@@ -55,3 +56,4 @@ public final class IndexersStorageFacade: StorageFacade {
         )
     }
 }
+*/

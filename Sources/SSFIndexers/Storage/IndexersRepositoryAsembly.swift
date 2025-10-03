@@ -1,6 +1,7 @@
 import Foundation
 import RobinHood
 
+/*
 public typealias IndexersRepository = AsyncCoreDataRepositoryDefault<
     TransactionHistoryItem,
     CDTransactionHistoryItem
@@ -17,3 +18,4 @@ public final class IndexersRepositoryAssemblyDefault: IndexersRepositoryAssembly
         try IndexersStorageFacade().createRepository()
     }
 }
+*/

@@ -2,6 +2,7 @@ import CoreData
 import Foundation
 import RobinHood
 
+/*
 extension CDTransactionHistoryItem: CoreDataCodable {
     public func populate(from decoder: Decoder, using _: NSManagedObjectContext) throws {
         let container = try decoder.container(keyedBy: TransactionHistoryItem.CodingKeys.self)
@@ -43,3 +44,4 @@ extension CDTransactionHistoryItem: CoreDataCodable {
         try container.encodeIfPresent(moduleName, forKey: .moduleName)
     }
 }
+*/
