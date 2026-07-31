@@ -2,7 +2,6 @@ import SSFHelpers
 import SSFModels
 import Web3
 import XCTest
-
 @testable import SSFTransferService
 
 final class EthereumCallFactoryTests: XCTestCase {
@@ -49,8 +48,7 @@ final class EthereumCallFactoryTests: XCTestCase {
             assetPresicion: 18,
             chainId: "1"
         )
-        let chainAsset = ChainAsset(chain: chain, asset: asset)
-        return chainAsset
+        return ChainAsset(chain: chain, asset: asset)
     }
 
     private func setupEthereumService() -> EthereumService {
@@ -66,7 +64,7 @@ final class EthereumCallFactoryTests: XCTestCase {
 
     private func setupCallFactory() throws {
         let secret = Data(hex: "0x85dedefd3fa46b486db7460be303aa3baa44ce1249c6e42e2731ffdf68a33068")
-        let secretKey = try EthereumPrivateKey(privateKey: secret.bytes)
+        let secretKey = try EthereumPrivateKey(privateKey: Array(secret))
         let ethereumService = setupEthereumService()
 
         let callFactory: EthereumTransferCallFactory = EthereumTransferCallFactoryDefault(

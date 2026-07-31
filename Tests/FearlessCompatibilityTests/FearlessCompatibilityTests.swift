@@ -46,8 +46,8 @@ final class FearlessCompatibilityTests: XCTestCase {
     }
 
     func testPoolValueTypesExposeStablePublicInitializers() {
-        let base = PooledAssetInfo(id: "XOR", precision: 18)
-        let target = PooledAssetInfo(id: "VAL", precision: 18)
+        let base = SSFPools.PooledAssetInfo(id: "XOR", precision: 18)
+        let target = SSFPools.PooledAssetInfo(id: "VAL", precision: 18)
         let supply = SupplyLiquidityInfo(
             dexId: "0",
             baseAsset: base,
@@ -108,6 +108,7 @@ private extension FearlessCompatibilityTests {
         length: Int
     ) -> (status: Int32, bytes: [UInt8]) {
         var output = [UInt8](repeating: 0, count: length)
+        let outputCount = output.count
         let status = password.withUnsafeBytes { passwordBytes in
             salt.withUnsafeBytes { saltBytes in
                 output.withUnsafeMutableBytes { outputBytes in
@@ -120,7 +121,7 @@ private extension FearlessCompatibilityTests {
                         blockSize,
                         parallelization,
                         outputBytes.bindMemory(to: UInt8.self).baseAddress,
-                        output.count
+                        outputCount
                     )
                 }
             }
