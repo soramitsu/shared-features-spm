@@ -5,10 +5,11 @@
 
 import Foundation
 
-public class SettingsManager: SettingsManagerProtocol {
+@objc(SSFSoraKeystoreSettingsManager)
+public class SettingsManager: NSObject, SettingsManagerProtocol {
     public static let shared: SettingsManager = .init()
 
-    private init() {}
+    override private init() {}
 
     public func set(value: Bool, for key: String) {
         UserDefaults.standard.set(value, forKey: key)

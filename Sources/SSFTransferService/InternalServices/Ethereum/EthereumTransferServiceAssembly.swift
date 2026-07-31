@@ -16,7 +16,7 @@ final class EthereumTransferServiceAssembly {
 
         let chainRegistry = try ChainRegistryAssembly.createDefaultRegistry()
         let connection = try await chainRegistry.getEthereumConnection(for: chain)
-        let privateKey = try EthereumPrivateKey(privateKey: secretKeyData.bytes)
+        let privateKey = try EthereumPrivateKey(privateKey: Array(secretKeyData))
         let address = try accountResponse.accountId.toAddress(using: .sfEthereum)
 
         let ethereumService = EthereumServiceDefault(connection: connection)

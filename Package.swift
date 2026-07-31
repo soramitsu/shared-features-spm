@@ -135,7 +135,11 @@ let package = Package(
         ),
         .target(
             name: "SSFModels",
-            dependencies: [ "IrohaCrypto" ]
+            dependencies: [
+                "IrohaCrypto",
+                "RobinHood",
+                .product(name: "BigInt", package: "BigInt")
+            ]
         ),
         .target(
             name: "SSFCrypto",
@@ -183,7 +187,10 @@ let package = Package(
                 "scrypt"
             ],
             publicHeadersPath: "include",
-            cSettings: [ .headerSearchPath(".") ]
+            cSettings: [ .headerSearchPath(".") ],
+            linkerSettings: [
+                .linkedFramework("sorawallet")
+            ]
         ),
         .target(
             name: "SSFCloudStorage",
@@ -371,15 +378,24 @@ let package = Package(
         .target(
             name: "SSFPolkaswap",
             dependencies: [
+                .product(name: "BigInt", package: "BigInt"),
+                "IrohaCrypto",
                 "SSFUtils",
+                "SSFChainConnection",
                 "SSFChainRegistry",
+                "SSFCrypto",
                 "RobinHood",
                 "SSFModels",
                 "SSFStorageQueryKit",
                 "SSFPools",
                 "sorawallet",
                 "SSFPoolsStorage",
-                "SSFExtrinsicKit"
+                "SSFExtrinsicKit",
+                "SSFSigner",
+                "SSFEraKit",
+                "SoraKeystore",
+                "SwiftyBeaver",
+                .product(name: "Reachability", package: "Reachability.swift")
             ]
         ),
         .target(
@@ -444,6 +460,16 @@ let package = Package(
             ],
             resources: [
                 .process("Resources")
+            ]
+        ),
+        .testTarget(
+            name: "FearlessCompatibilityTests",
+            dependencies: [
+                "scrypt",
+                "SSFCrypto",
+                "SSFPools",
+                "SSFPolkaswap",
+                "SoraKeystore"
             ]
         ),
         .target(
