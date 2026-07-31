@@ -13,6 +13,13 @@
   },
   "testTargets" : [
     {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "FearlessCompatibilityTests",
+        "name" : "FearlessCompatibilityTests"
+      }
+    },
+    {
       "skippedTests" : [
         "AccountManagementWorkerTests",
         "JSONExportServiceTests",
