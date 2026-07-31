@@ -6,8 +6,9 @@
 import Foundation
 import Security
 
-public class Keychain: KeystoreProtocol {
-    public init() {}
+@objc(SSFSoraKeystoreKeychain)
+public class Keychain: NSObject, KeystoreProtocol {
+    override public init() {}
 
     public func addKey(_ key: Data, with identifier: String) throws {
         guard let applicationTag = identifier.data(using: String.Encoding.utf8) else {

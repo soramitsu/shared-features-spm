@@ -25,14 +25,14 @@ protocol RemotePolkaswapPoolsService {
 actor RemotePolkaswapPoolsServiceDefault {
     private let worker: PolkaswapWorker
     private let apyService: PolkaswapAPYService
-    private let addressFactory: AddressFactory
+    private let addressFactory: AddressFactory.Type
     private let chain: ChainModel
 
     init(
         chain: ChainModel,
         worker: PolkaswapWorker,
         apyService: PolkaswapAPYService,
-        addressFactory: AddressFactory
+        addressFactory: AddressFactory.Type = AddressFactory.self
     ) {
         self.chain = chain
         self.worker = worker

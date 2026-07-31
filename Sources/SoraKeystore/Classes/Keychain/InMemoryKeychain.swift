@@ -5,10 +5,11 @@
 
 import Foundation
 
-public final class InMemoryKeychain: KeystoreProtocol {
+@objc(SSFSoraKeystoreInMemoryKeychain)
+public final class InMemoryKeychain: NSObject, KeystoreProtocol {
     private var keystore: [String: Data] = [:]
 
-    public init() {}
+    override public init() {}
 
     public func addKey(_ key: Data, with identifier: String) throws {
         keystore[identifier] = key

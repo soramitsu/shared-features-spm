@@ -36,13 +36,13 @@ final class PolkaswapOperationFactoryDefault {
     private let chainRegistry: ChainRegistryProtocol
     private let chain: ChainModel
     private let engine: SubstrateConnection
-    private let addressFactory: AddressFactory
+    private let addressFactory: AddressFactory.Type
     private let keyFactory: StorageKeyFactoryProtocol
 
     init(
         storageRequestFactory: StorageRequestFactoryProtocol,
         chainRegistry: ChainRegistryProtocol,
-        addressFactory: AddressFactory,
+        addressFactory: AddressFactory.Type = AddressFactory.self,
         engine: SubstrateConnection,
         chain: ChainModel,
         keyFactory: StorageKeyFactoryProtocol

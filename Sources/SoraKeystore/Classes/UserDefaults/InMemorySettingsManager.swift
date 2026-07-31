@@ -5,10 +5,11 @@
 
 import Foundation
 
-public final class InMemorySettingsManager: SettingsManagerProtocol {
+@objc(SSFSoraKeystoreInMemorySettingsManager)
+public final class InMemorySettingsManager: NSObject, SettingsManagerProtocol {
     private var settings: [String: Any] = [:]
 
-    public init() {}
+    override public init() {}
 
     public func set(value: Bool, for key: String) {
         settings[key] = value
