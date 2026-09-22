@@ -34,7 +34,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include "stdio.h"
 
 #include "sha256.h"
 #include "warnp.h"
@@ -64,6 +63,10 @@ private_crypto_scrypt(const uint8_t * passwd, size_t passwdlen,
 	uint32_t i;
 
 	/* Sanity-check parameters. */
+	if (r == 0 || p == 0) {
+		errno = EINVAL;
+		goto err0;
+	}
 #if SIZE_MAX > UINT32_MAX
 	if (buflen > (((uint64_t)(1) << 32) - 1) * 32) {
 		errno = EFBIG;
@@ -134,7 +137,6 @@ private_crypto_scrypt(const uint8_t * passwd, size_t passwdlen,
 		(smix)(&B[i * 128 * r], r, N, V, XY);
 	}
     
-    printf("%s", B);
 
 	/* 5: DK <-- PBKDF2(P, B, 1, dkLen) */
 	PBKDF2_SHA256(passwd, passwdlen, B, p * 128 * r, 1, buf, buflen);
@@ -207,7 +209,7 @@ static void
 selectsmix(void)
 {
 
-    #if TARGET_IPHONE_SIMULATOR
+    #if defined(__SSSE3__)
     if (!testsmix(crypto_scrypt_smix_sse2)) {
         smix_func = crypto_scrypt_smix_sse2;
         return;
