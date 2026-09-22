@@ -10,7 +10,7 @@ final class XcmReadOnlyServicesTests: XCTestCase {
         let service = ReadOnlyXcmServiceSpy()
         let estimator = XcmReadOnlyFeeEstimator(service: service)
         let account = Data(repeating: 23, count: 32)
-        let amount = BigUInt("18446744073709551617")!
+        let amount = BigUInt("18446744073709551617")
         let result = await estimator.estimateOriginalFee(
             fromChainId: "origin", assetSymbol: "XOR", destChainId: "destination",
             destAccountId: account, amount: amount

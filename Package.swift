@@ -43,7 +43,7 @@ let package = Package(
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
         .package(url: "https://github.com/bitmark-inc/tweetnacl-swiftwrap", from: "1.1.0"),
         .package(url: "https://github.com/ashleymills/Reachability.swift", from: "5.0.0"),
-        .package(url: "https://github.com/soramitsu/fearless-starscream", .revision("b6ef58590241babdb4fe52e916a02c9e2b749e3d")),
+        .package(url: "https://github.com/soramitsu/fearless-starscream", .revision("c26d9665fc44fd55aa1170427b1aef007a944fd7")),
         .package(url: "https://github.com/google/GoogleSignIn-iOS", from: "7.0.0"),
         .package(url: "https://github.com/google/google-api-objectivec-client-for-rest.git", from: "3.3.0"),
         .package(url: "https://github.com/attaswift/BigInt.git", from: "5.3.0"),

@@ -3,7 +3,7 @@ name: iOS production dependency source
 on:
   pull_request:
   push:
-    branches: ['codex/ios-production-dependency-source', 'codex/ios-authorized-rpc-transport', 'feature/neon-fix-fearless']
+    branches: ['codex/ios-production-dependency-source', 'codex/ios-authorized-rpc-transport', 'codex/ios-xcm-read-only', 'feature/neon-fix-fearless']
 
 permissions:
   contents: read
