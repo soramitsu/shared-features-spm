@@ -2,8 +2,12 @@ import Foundation
 import Starscream
 
 extension WebSocketEngine: WebSocketDelegate {
-    public func didReceive(event: WebSocketEvent, client _: WebSocketClient) {
+    public func didReceive(event: WebSocketEvent, client: WebSocketClient) {
         mutex.lock()
+        defer { mutex.unlock() }
+        // A late callback from a replaced endpoint cannot settle or cancel a
+        // request on the current connection, even if a UInt16 ID is reused.
+        guard client === connection else { return }
 
         switch event {
         case let .binary(data):
@@ -26,7 +30,6 @@ extension WebSocketEngine: WebSocketDelegate {
             logger?.warning("Unhandled event \(event)")
         }
 
-        mutex.unlock()
     }
     
     private func handleTimeout() {

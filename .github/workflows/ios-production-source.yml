@@ -3,7 +3,7 @@ name: iOS production dependency source
 on:
   pull_request:
   push:
-    branches: ['codex/ios-production-dependency-source', 'feature/neon-fix-fearless']
+    branches: ['codex/ios-production-dependency-source', 'codex/ios-authorized-rpc-transport', 'feature/neon-fix-fearless']
 
 permissions:
   contents: read
@@ -20,5 +20,17 @@ jobs:
         run: swift package dump-package > /tmp/shared-features-package.json
       - name: Check scrypt vectors and device/simulator linkage
         run: python3 scripts/test-scrypt-architectures.py
+      - name: Reject tracked source mutations during validation
+        run: git diff --exit-code
+
+  authorized-rpc:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Test production RPC sources against the pinned transport
+        run: python3 scripts/test-authorized-rpc.py
       - name: Reject tracked source mutations during validation
         run: git diff --exit-code

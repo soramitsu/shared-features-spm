@@ -6,6 +6,8 @@ public enum JSONRPCEngineError: Error {
     case clientCancelled
     case unknownError
     case timeout
+    case requestNotSent
+    case submissionOutcomeUnknown
 }
 
 public protocol JSONRPCResponseHandling {
@@ -42,11 +44,26 @@ struct JSONRPCResponseHandler<T: Decodable>: JSONRPCResponseHandling {
     }
 }
 
+/// Application-owned final authorization. Called after SDK framing and blocking
+/// writer lock waits. Synchronously invoke handoff once while holding fresh
+/// authority; never reenter this engine, await, or retain the nonescaping action.
+public protocol JSONRPCWriteAuthorizing: AnyObject {
+    func authorize(_ handoff: () throws -> Void) throws
+}
+
 public struct JSONRPCOptions {
     public let resendOnReconnect: Bool
+    public let writeAuthorization: JSONRPCWriteAuthorizing?
 
     public init(resendOnReconnect: Bool = true) {
         self.resendOnReconnect = resendOnReconnect
+        writeAuthorization = nil
+    }
+
+    /// Guarded mutations can never opt into reconnection replay.
+    public init(writeAuthorization: JSONRPCWriteAuthorizing) {
+        resendOnReconnect = false
+        self.writeAuthorization = writeAuthorization
     }
 }
 
@@ -117,6 +134,11 @@ public protocol JSONRPCEngine: AnyObject {
 
     func cancelForIdentifier(_ identifier: UInt16)
 
+    /// Cancel only this authorization's request, even if a UInt16 ID has been
+    /// reused. Engines without identity-aware removal still cannot send after
+    /// the operation-owned final authorizer has been cancelled.
+    func cancelForIdentifier(_ identifier: UInt16, writeAuthorization: JSONRPCWriteAuthorizing)
+
     func generateRequestId() -> UInt16
     func addSubscription(_ subscription: JSONRPCSubscribing)
     func reconnect(url: URL)
@@ -127,6 +149,8 @@ public protocol JSONRPCEngine: AnyObject {
 }
 
 public extension JSONRPCEngine {
+    func cancelForIdentifier(_ identifier: UInt16, writeAuthorization: JSONRPCWriteAuthorizing) {}
+
     func callMethod<P: Codable, T: Decodable>(
         _ method: String,
         params: P?,
