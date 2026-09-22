@@ -35,7 +35,7 @@ final class PolkaswapOperationFactoryDefault {
     private let chainRegistry: ChainRegistryProtocol
     private let chain: ChainModel
     private let engine: SubstrateConnection
-    private let addressFactory: AddressFactory
+    private let addressFactory: AddressFactory.Type
     private let keyFactory: StorageKeyFactoryProtocol
 
     init(
@@ -48,7 +48,7 @@ final class PolkaswapOperationFactoryDefault {
     ) {
         self.storageRequestFactory = storageRequestFactory
         self.chainRegistry = chainRegistry
-        self.addressFactory = addressFactory
+        self.addressFactory = type(of: addressFactory)
         self.engine = engine
         self.chain = chain
         self.keyFactory = keyFactory

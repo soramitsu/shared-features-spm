@@ -5,7 +5,8 @@
 
 import Foundation
 
-public class KeychainManager {
+@objc(SSFSoraKeystoreKeychainManager)
+public class KeychainManager: NSObject {
     fileprivate static let queueLabel = "keychain.concurrent"
 
     public static let shared: KeychainManager = .init(qos: .default)

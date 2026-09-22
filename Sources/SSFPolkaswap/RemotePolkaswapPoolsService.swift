@@ -26,7 +26,7 @@ protocol RemotePolkaswapPoolsService {
 actor RemotePolkaswapPoolsServiceDefault {
     private let worker: PolkaswapWorker
     private let apyService: PolkaswapAPYService
-    private let addressFactory: AddressFactory
+    private let addressFactory: AddressFactory.Type
     private let chain: ChainModel
     private let storageRequestPerformer: StorageRequestPerformer
 
@@ -40,7 +40,7 @@ actor RemotePolkaswapPoolsServiceDefault {
         self.chain = chain
         self.worker = worker
         self.apyService = apyService
-        self.addressFactory = addressFactory
+        self.addressFactory = type(of: addressFactory)
         self.storageRequestPerformer = storageRequestPerformer
     }
 }
