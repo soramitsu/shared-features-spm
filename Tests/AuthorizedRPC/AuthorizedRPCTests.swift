@@ -124,6 +124,12 @@ final class AuthorizedRPCTests: XCTestCase {
         XCTAssertTrue(h.rpc.connection.callbackQueue === h.queue)
         XCTAssertFalse({ if case .connected = h.rpc.state { return true }; return false }(),
                        "replacement endpoint must complete its own handshake")
+        // The old writer is stopped after replacement; a legacy write is no
+        // longer a valid queue barrier on that closed writer. Reuse only this
+        // detached fixture to prove the cancelled old frame also stays denied
+        // if its engine becomes writable again before frame preparation ends.
+        h.writer.start(request: h.socket.request)
+        h.writer.didReceiveHTTP(event: .success([:]))
         release.signal(); h.drain()
         XCTAssertTrue(h.transport.sent.isEmpty)
     }
