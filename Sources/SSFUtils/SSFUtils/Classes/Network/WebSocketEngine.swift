@@ -32,18 +32,39 @@ public final class WebSocketEngine {
     }
 
     public var connection: WebSocketConnectionProtocol
+    // Internal fixture seam for source/app integration tests. Shipping callers
+    // cannot override transport qualification; nil always creates fresh TCP.
+    var replacementConnectionFactory: ((URLRequest) -> WebSocket)?
     public let version: String
     public let logger: SDKLoggerProtocol?
     public let reachabilityManager: ReachabilityManagerProtocol?
     public let completionQueue: DispatchQueue
+    private let stateCallbackQueue: DispatchQueue
+    private var stateRevision: UInt64 = 0
     public let pingInterval: TimeInterval
 
     public private(set) var state: State = .notConnected {
         didSet {
+            stateRevision &+= 1
             if let delegate = delegate {
                 let oldState = oldValue
                 let newState = state
-                delegate.webSocketDidChangeState(engine: self, from: oldState, to: newState)
+                let revision = stateRevision
+                // State changes normally occur under the request mutex. A
+                // failover delegate can replace the URL or enqueue another
+                // request; deliver it on the ordered callback queue after the
+                // current transition has released that nonrecursive mutex.
+                stateCallbackQueue.async { [weak self, weak delegate] in
+                    guard let self = self, let delegate = delegate else { return }
+                    self.mutex.lock()
+                    let current = self.stateRevision == revision && self.delegate === delegate
+                    self.mutex.unlock()
+                    // Suppress already-superseded queued transitions. State
+                    // can still change after this check; the delegate is never
+                    // invoked while holding the request mutex.
+                    guard current else { return }
+                    delegate.webSocketDidChangeState(engine: self, from: oldState, to: newState)
+                }
             }
         }
     }
@@ -72,6 +93,7 @@ public final class WebSocketEngine {
     }
     private var guardedRequests: [UInt16: GuardedRequest] = [:]
     private(set) var subscriptions: [UInt16: JSONRPCSubscribing] = [:]
+    private var reservedRequestIds = Set<UInt16>()
     private(set) var unknownResponsesByRemoteId: [String: [Data]] = [:]
 
     public weak var delegate: WebSocketEngineDelegate?
@@ -96,7 +118,9 @@ public final class WebSocketEngine {
         self.logger = logger
         self.reconnectionStrategy = reconnectionStrategy
         self.reachabilityManager = reachabilityManager
-        completionQueue = processingQueue ?? Self.sharedProcessingQueue
+        let callbackQueue = processingQueue ?? Self.sharedProcessingQueue
+        completionQueue = callbackQueue
+        stateCallbackQueue = DispatchQueue(label: "jp.co.soramitsu.fearless.ws.state", target: callbackQueue)
         self.pingInterval = pingInterval
 
         let request = URLRequest(url: url, timeoutInterval: connectionTimeout)
@@ -172,8 +196,13 @@ public final class WebSocketEngine {
             logger?.debug("Cancel socket connection")
 
         case .waitingReconnection:
+            state = .notConnected
             logger?.debug("Cancel reconnection scheduler due to disconnection")
             reconnectionScheduler.cancel()
+        case .notReachable:
+            state = .notConnected
+            reconnectionScheduler.cancel()
+            connection.disconnect()
         default:
             logger?.debug("Already disconnected from socket")
         }
@@ -367,7 +396,28 @@ extension WebSocketEngine {
     }
 
     public func addSubscription(_ subscription: JSONRPCSubscribing) {
-        subscriptions[subscription.requestId] = subscription
+        mutex.lock()
+        let accepted = addSubscriptionLocked(subscription)
+        mutex.unlock()
+        if !accepted {
+            completionQueue.async {
+                subscription.handle(error: JSONRPCEngineError.unknownError, unsubscribed: true)
+            }
+        }
+    }
+
+    // subscribe() already owns mutex while preparing and registering its RPC.
+    // Public manual watchers reserve an ID before constructing a subscription.
+    @discardableResult
+    func addSubscriptionLocked(_ subscription: JSONRPCSubscribing) -> Bool {
+        let identifier = subscription.requestId
+        guard identifier != 0 else { return false }
+        if let existing = subscriptions[identifier] { return existing === subscription }
+        guard inProgressRequests[identifier] == nil,
+              !pendingRequests.contains(where: { $0.requestId == identifier }) else { return false }
+        reservedRequestIds.remove(identifier)
+        subscriptions[identifier] = subscription
+        return true
     }
 
     func prepareRequest<P: Codable, T: Decodable>(
@@ -380,7 +430,10 @@ extension WebSocketEngine {
     {
         let data: Data
 
-        let requestId = generateRequestId()
+        let requestId = generateRequestIdLocked()
+        // Zero is reserved for exhaustion; never encode an identifier that
+        // could settle or cancel another active request/subscription.
+        guard requestId != 0 else { throw JSONRPCEngineError.unknownError }
 
         if let params = params {
             let info = JSONRPCInfo(
@@ -421,16 +474,26 @@ extension WebSocketEngine {
     }
 
     public func generateRequestId() -> UInt16 {
-        let items = pendingRequests.map(\.requestId) + inProgressRequests.map(\.key)
-        let existingIds: Set<UInt16> = Set(items)
+        mutex.lock()
+        defer { mutex.unlock() }
+        let identifier = generateRequestIdLocked()
+        if identifier != 0 { reservedRequestIds.insert(identifier) }
+        return identifier
+    }
 
-        let targetId = (1 ... UInt16.max).randomElement() ?? 1
-
-        if existingIds.contains(targetId) {
-            return generateRequestId()
+    // Internal request preparation already owns mutex; public callers use the
+    // synchronized wrapper above without recursively acquiring NSLock.
+    private func generateRequestIdLocked() -> UInt16 {
+        let items = pendingRequests.map(\.requestId) + inProgressRequests.map(\.key) + subscriptions.map(\.key)
+        let existingIds = Set(items).union(reservedRequestIds)
+        let start = Int((1 ... UInt16.max).randomElement() ?? 1)
+        // Bound the search even if an endpoint retains the whole ID space.
+        // Recursive random retries could exhaust the stack for a dense pool.
+        for offset in 0 ..< Int(UInt16.max) {
+            let candidate = UInt16((start - 1 + offset) % Int(UInt16.max) + 1)
+            if !existingIds.contains(candidate) { return candidate }
         }
-
-        return targetId
+        return 0
     }
 
     func cancelRequestForLocalId(_ identifier: UInt16) {

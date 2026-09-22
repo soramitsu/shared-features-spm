@@ -115,21 +115,22 @@ final class AuthorizedRPCTests: XCTestCase {
             XCTAssertEqual(result.error as? JSONRPCEngineError, .requestNotSent); cancelled.fulfill()
         }
         XCTAssertEqual(entered.wait(timeout: .now() + 3), .success)
-        let nextURL = URL(string: "wss://replacement.invalid")!
+        let nextURL = URL(string: "ws://127.0.0.1:9")!
         h.rpc.reconnect(url: nextURL)
         wait(for: [cancelled], timeout: 3)
         let replacementWriter = try XCTUnwrap(h.rpc.connection.engine as? WSEngine)
         XCTAssertFalse(replacementWriter === h.writer)
         XCTAssertEqual((h.rpc.connection as? WebSocket)?.request.url, nextURL)
         XCTAssertTrue(h.rpc.connection.callbackQueue === h.queue)
-        guard case .notConnected = h.rpc.state else { return XCTFail("new endpoint must handshake") }
+        XCTAssertFalse({ if case .connected = h.rpc.state { return true }; return false }(),
+                       "replacement endpoint must complete its own handshake")
         release.signal(); h.drain()
         XCTAssertTrue(h.transport.sent.isEmpty)
     }
 
     func testLatePreviousSocketEventCannotSettleCurrentRequest() {
         let h = NetworkHarness()
-        h.rpc.reconnect(url: URL(string: "wss://replacement.invalid")!)
+        h.rpc.reconnect(url: URL(string: "ws://127.0.0.1:9")!)
         let failed = expectation(description: "only explicit cancellation settles current request")
         let current = JSONRPCRequest(requestId: 42, data: Data(), options: JSONRPCOptions(),
             responseHandler: Handler(data: { _ in XCTFail("old socket completed new request") }, error: { _ in failed.fulfill() }))
@@ -139,7 +140,8 @@ final class AuthorizedRPCTests: XCTestCase {
         h.respond(42, value: "old-socket-response")
         XCTAssertNotNil(h.rpc.inProgressRequests[42])
         h.rpc.didReceive(event: .connected([:]), client: h.socket)
-        guard case .notConnected = h.rpc.state else { return XCTFail("old socket activated new endpoint") }
+        XCTAssertFalse({ if case .connected = h.rpc.state { return true }; return false }(),
+                       "old socket activated new endpoint")
         h.rpc.cancelForIdentifier(42)
         wait(for: [failed], timeout: 3)
     }
@@ -251,7 +253,7 @@ private enum ContractError: Error { case denied }
 private extension Result where Success == String, Failure == Error {
     var error: Error? { if case .failure(let error) = self { return error }; return nil }
 }
-private final class RPCGuard: JSONRPCWriteAuthorizing {
+final class RPCGuard: JSONRPCWriteAuthorizing {
     let action: (() throws -> Void) throws -> Void
     init(_ action: @escaping (() throws -> Void) throws -> Void = { try $0() }) { self.action = action }
     func authorize(_ handoff: () throws -> Void) throws { try action(handoff) }
@@ -268,7 +270,7 @@ private final class Reachable: ReachabilityManagerProtocol {
     func add(listener: ReachabilityListenerDelegate) throws {}
     func remove(listener: ReachabilityListenerDelegate) {}
 }
-private final class Ready: WebSocketEngineDelegate {
+final class Ready: WebSocketEngineDelegate {
     let signal = DispatchSemaphore(value: 0)
     func webSocketDidChangeState(engine: WebSocketEngine, from oldState: WebSocketEngine.State, to newState: WebSocketEngine.State) {
         if case .connected = newState { signal.signal() }
@@ -277,7 +279,7 @@ private final class Ready: WebSocketEngineDelegate {
 private final class HeaderChecker: HeaderValidator {
     func validate(headers: [String: String], key: String) -> Error? { nil }
 }
-private final class ContractFramer: Framer {
+final class ContractFramer: Framer {
     var beforeFrame: (() -> Void)?
     func add(data: Data) {}
     func register(delegate: FramerEventClient) {}
@@ -285,7 +287,7 @@ private final class ContractFramer: Framer {
     func updateCompression(supports: Bool) {}
     func supportsCompression() -> Bool { false }
 }
-private final class ContractTransport: AuthorizedTransport {
+final class ContractTransport: AuthorizedTransport {
     let context = NSObject()
     private let lock = NSLock()
     private var frames = [Data]()
@@ -306,7 +308,7 @@ private final class ContractTransport: AuthorizedTransport {
         if didSend { onSend?() }
     }
 }
-private final class NetworkHarness {
+final class NetworkHarness {
     let queue = DispatchQueue(label: "test.fearless.rpc.callbacks")
     let transport = ContractTransport()
     let framer = ContractFramer()

@@ -5,6 +5,42 @@ enum JSONRPCOperationError: Error {
     case timeout
 }
 
+/// Cancellation is independent of request-ID publication. The final check is
+/// inside the application's fresh-authority scope and never waits for a lock.
+private final class OperationWriteAuthorization: JSONRPCWriteAuthorizing {
+    private let lock = NSLock()
+    private let applicationAuthorization: JSONRPCWriteAuthorizing
+    private var cancelled = false
+    private var handoffAttempted = false
+
+    init(_ applicationAuthorization: JSONRPCWriteAuthorizing) {
+        self.applicationAuthorization = applicationAuthorization
+    }
+
+    func authorize(_ handoff: () throws -> Void) throws {
+        lock.lock()
+        let denied = cancelled || handoffAttempted
+        lock.unlock()
+        guard !denied else { throw JSONRPCEngineError.requestNotSent }
+        try applicationAuthorization.authorize {
+            guard lock.try() else { throw JSONRPCEngineError.requestNotSent }
+            defer { lock.unlock() }
+            guard !cancelled, !handoffAttempted else { throw JSONRPCEngineError.requestNotSent }
+            // Once entered, an error can no longer prove non-submission. Keep
+            // the uncertainty even when cancellation precedes ID publication.
+            handoffAttempted = true
+            try handoff()
+        }
+    }
+
+    func cancel() -> JSONRPCEngineError {
+        lock.lock()
+        defer { lock.unlock() }
+        cancelled = true
+        return handoffAttempted ? .submissionOutcomeUnknown : .requestNotSent
+    }
+}
+
 public class JSONRPCOperation<P: Codable, T: Decodable>: BaseOperation<T> {
     public let engine: JSONRPCEngine
     private let requestLock = NSLock()
@@ -14,6 +50,14 @@ public class JSONRPCOperation<P: Codable, T: Decodable>: BaseOperation<T> {
         set { requestLock.lock(); currentRequestId = newValue; requestLock.unlock() }
     }
     public let requestOptions: JSONRPCOptions
+    private let writeAuthorization: OperationWriteAuthorization?
+    private let completionSignal = DispatchSemaphore(value: 0)
+    private let resultLock = NSLock()
+    private var storedResult: Result<T, Error>?
+    override public var result: Result<T, Error>? {
+        get { resultLock.lock(); defer { resultLock.unlock() }; return storedResult }
+        set { resultLock.lock(); storedResult = newValue; resultLock.unlock() }
+    }
     public let method: String
     public var parameters: P?
     public let timeout: Int
@@ -24,12 +68,15 @@ public class JSONRPCOperation<P: Codable, T: Decodable>: BaseOperation<T> {
         self.method = method
         self.parameters = parameters
         self.timeout = timeout
-        self.requestOptions = requestOptions
+        let authorization = requestOptions.writeAuthorization.map(OperationWriteAuthorization.init)
+        writeAuthorization = authorization
+        self.requestOptions = authorization.map { JSONRPCOptions(writeAuthorization: $0) } ?? requestOptions
 
         super.init()
     }
 
     override public func main() {
+        defer { requestId = nil }
         super.main()
 
         if isCancelled {
@@ -41,69 +88,69 @@ public class JSONRPCOperation<P: Codable, T: Decodable>: BaseOperation<T> {
         }
 
         do {
-            let semaphore = DispatchSemaphore(value: 0)
-
-            var optionalCallResult: Result<T, Error>?
-
-            requestId = try engine.callMethod(method, params: parameters, options: requestOptions) { (result: Result<
-                T,
-                Error
-            >) in
-                optionalCallResult = result
-
-                semaphore.signal()
+            requestId = try engine.callMethod(method, params: parameters, options: requestOptions) { [weak self] (result: Result<T, Error>) in
+                guard let self = self else { return }
+                if self.writeAuthorization == nil, self.isCancelled {
+                    self.completionSignal.signal()
+                    return
+                }
+                if case .failure(let error) = result, error as? JSONRPCEngineError == .clientCancelled {
+                    if let authorization = self.writeAuthorization {
+                        self.finish(.failure(authorization.cancel()))
+                    }
+                } else {
+                    self.finish(result)
+                }
+                self.completionSignal.signal()
             }
 
             // Cancellation may race with the synchronous request enqueue.
             // Publish the ID first, then cancel again if that race occurred.
             if isCancelled, let identifier = requestId {
-                engine.cancelForIdentifier(identifier)
+                cancelRequest(identifier)
                 return
             }
 
-            let status = semaphore.wait(timeout: .now() + .seconds(timeout))
+            let status = completionSignal.wait(timeout: .now() + .seconds(timeout))
 
             if status == .timedOut {
-                if requestOptions.writeAuthorization != nil {
-                    if let identifier = requestId { engine.cancelForIdentifier(identifier) }
-                    // The protocol's cancellation API cannot prove whether the
-                    // transport accepted bytes. Require reconciliation, never retry.
-                    result = .failure(JSONRPCEngineError.submissionOutcomeUnknown)
+                if let authorization = writeAuthorization {
+                    finish(.failure(authorization.cancel()))
+                    if let identifier = requestId { cancelRequest(identifier) }
                 } else {
-                    result = .failure(JSONRPCOperationError.timeout)
+                    finish(.failure(JSONRPCOperationError.timeout))
                 }
                 return
             }
 
-            guard let callResult = optionalCallResult else {
-                return
-            }
-
-            if case let .failure(error) = callResult,
-               let jsonRPCEngineError = error as? JSONRPCEngineError,
-               jsonRPCEngineError == .clientCancelled
-            {
-                return
-            }
-
-            switch callResult {
-            case let .success(response):
-                result = .success(response)
-            case let .failure(error):
-                result = .failure(error)
-            }
-
         } catch {
-            result = .failure(error)
+            finish(.failure(error))
         }
     }
 
     override public func cancel() {
+        if let authorization = writeAuthorization {
+            finish(.failure(authorization.cancel()))
+            completionSignal.signal()
+        }
         super.cancel()
         if let requestId = requestId {
-            engine.cancelForIdentifier(requestId)
+            cancelRequest(requestId)
         }
+    }
 
+    private func cancelRequest(_ identifier: UInt16) {
+        if let authorization = writeAuthorization {
+            engine.cancelForIdentifier(identifier, writeAuthorization: authorization)
+        } else {
+            engine.cancelForIdentifier(identifier)
+        }
+    }
+
+    private func finish(_ value: Result<T, Error>) {
+        resultLock.lock()
+        if storedResult == nil { storedResult = value }
+        resultLock.unlock()
     }
 }
 

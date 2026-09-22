@@ -67,7 +67,7 @@ for source, digest in hashes.items():
 if result.returncode:
     sys.exit(result.returncode)
 passed = re.findall(r"^Test Case (.+) passed \(", result.stdout, re.MULTILINE)
-if len(passed) != 21 or len(set(passed)) != 21 or re.search(r"^Test Case .+ (?:failed|skipped) \(", result.stdout, re.MULTILINE):
-    sys.exit('Expected exactly 21 distinct passing XCTest cases, no skips')
-print('PASS: 21 distinct cases; production source and dependency revision bound')
+if len(passed) != 37 or len(set(passed)) != 37 or re.search(r"^Test Case .+ (?:failed|skipped) \(", result.stdout, re.MULTILINE):
+    sys.exit('Expected exactly 37 distinct passing XCTest cases, no skips')
+print('PASS: 37 distinct cases; production source and dependency revision bound')
 print('Contract evidence:', out)

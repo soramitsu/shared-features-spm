@@ -134,6 +134,11 @@ public protocol JSONRPCEngine: AnyObject {
 
     func cancelForIdentifier(_ identifier: UInt16)
 
+    /// Cancel only this authorization's request, even if a UInt16 ID has been
+    /// reused. Engines without identity-aware removal still cannot send after
+    /// the operation-owned final authorizer has been cancelled.
+    func cancelForIdentifier(_ identifier: UInt16, writeAuthorization: JSONRPCWriteAuthorizing)
+
     func generateRequestId() -> UInt16
     func addSubscription(_ subscription: JSONRPCSubscribing)
     func reconnect(url: URL)
@@ -144,6 +149,8 @@ public protocol JSONRPCEngine: AnyObject {
 }
 
 public extension JSONRPCEngine {
+    func cancelForIdentifier(_ identifier: UInt16, writeAuthorization: JSONRPCWriteAuthorizing) {}
+
     func callMethod<P: Codable, T: Decodable>(
         _ method: String,
         params: P?,

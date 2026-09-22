@@ -59,7 +59,7 @@ extension WebSocketEngine: JSONRPCEngine {
             failureClosure: failureClosure
         )
 
-        addSubscription(subscription)
+        guard addSubscriptionLocked(subscription) else { throw JSONRPCEngineError.unknownError }
 
         updateConnectionForRequest(request)
 
@@ -74,8 +74,25 @@ extension WebSocketEngine: JSONRPCEngine {
         mutex.unlock()
     }
 
+    public func cancelForIdentifier(_ identifier: UInt16, writeAuthorization: JSONRPCWriteAuthorizing) {
+        mutex.lock()
+        defer { mutex.unlock() }
+        let request = pendingRequests.first { $0.requestId == identifier } ?? inProgressRequests[identifier]
+        if request?.options.writeAuthorization === writeAuthorization {
+            cancelRequestForLocalId(identifier)
+        } else if request == nil,
+                  subscriptions[identifier]?.requestOptions.writeAuthorization === writeAuthorization {
+            processSubscriptionError(identifier, error: JSONRPCEngineError.submissionOutcomeUnknown, shouldUnsubscribe: true)
+        }
+    }
+
     public func reconnect(url: URL) {
         mutex.lock()
+        let shouldResume: Bool
+        switch state {
+        case .notConnected: shouldResume = false
+        case .connecting, .connected, .waitingReconnection, .notReachable: shouldResume = true
+        }
         cancelPendingGuardedRequests()
         let cancelled = resetInProgress()
         notify(requests: cancelled, error: JSONRPCEngineError.remoteCancelled)
@@ -87,8 +104,9 @@ extension WebSocketEngine: JSONRPCEngine {
         let request = URLRequest(url: url, timeoutInterval: 10)
         // Reusing an already-connected engine would send a new URL's requests
         // to the previous socket. A new endpoint requires a new handshake.
-        let engine = WSEngine(transport: TCPTransport(), certPinner: FoundationSecurity())
-        let next = WebSocket(request: request, engine: engine)
+        let next = replacementConnectionFactory?(request) ?? WebSocket(
+            request: request, engine: WSEngine(transport: TCPTransport(), certPinner: FoundationSecurity())
+        )
         next.callbackQueue = completionQueue
         next.delegate = self
         connection = next
@@ -96,5 +114,9 @@ extension WebSocketEngine: JSONRPCEngine {
         mutex.unlock()
         // No library writer wait occurs while holding the RPC request mutex.
         previous.forceDisconnect()
+        // The previous retry timer belongs to the retired endpoint and was
+        // cancelled above. Resume explicitly so pending reads/subscriptions do
+        // not depend on an unrelated future request to connect the new URL.
+        if shouldResume { connectIfNeeded() }
     }
 }
