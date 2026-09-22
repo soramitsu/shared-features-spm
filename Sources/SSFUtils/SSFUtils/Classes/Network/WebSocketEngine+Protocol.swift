@@ -75,16 +75,26 @@ extension WebSocketEngine: JSONRPCEngine {
     }
 
     public func reconnect(url: URL) {
-        self.connection.delegate = nil
-
+        mutex.lock()
+        cancelPendingGuardedRequests()
+        let cancelled = resetInProgress()
+        notify(requests: cancelled, error: JSONRPCEngineError.remoteCancelled)
+        let previous = connection
+        previous.delegate = nil
+        reconnectionScheduler.cancel()
+        pingScheduler.cancel()
         self.url = url
         let request = URLRequest(url: url, timeoutInterval: 10)
-        let engine = self.connection.engine
-
-        let connection = WebSocket(request: request, engine: engine)
-        self.connection = connection
-
-        connection.callbackQueue = Self.sharedProcessingQueue
-        connection.delegate = self
+        // Reusing an already-connected engine would send a new URL's requests
+        // to the previous socket. A new endpoint requires a new handshake.
+        let engine = WSEngine(transport: TCPTransport(), certPinner: FoundationSecurity())
+        let next = WebSocket(request: request, engine: engine)
+        next.callbackQueue = completionQueue
+        next.delegate = self
+        connection = next
+        changeState(.notConnected)
+        mutex.unlock()
+        // No library writer wait occurs while holding the RPC request mutex.
+        previous.forceDisconnect()
     }
 }

@@ -66,6 +66,11 @@ public final class WebSocketEngine {
 
     private(set) var pendingRequests: [JSONRPCRequest] = []
     private(set) var inProgressRequests: [UInt16: JSONRPCRequest] = [:]
+    private struct GuardedRequest {
+        let generation: UUID
+        let write: AuthorizedWrite
+    }
+    private var guardedRequests: [UInt16: GuardedRequest] = [:]
     private(set) var subscriptions: [UInt16: JSONRPCSubscribing] = [:]
     private(set) var unknownResponsesByRemoteId: [String: [Data]] = [:]
 
@@ -141,6 +146,7 @@ public final class WebSocketEngine {
 
     public func disconnectIfNeeded() {
         mutex.lock()
+        cancelPendingGuardedRequests()
 
         switch state {
         case .connected:
@@ -176,11 +182,7 @@ public final class WebSocketEngine {
     }
 
     public func unsubsribe(_ identifier: UInt16) throws {
-        mutex.lock()
-
         try processUnsubscription(identifier)
-
-        mutex.unlock()
     }
 }
 
@@ -228,8 +230,46 @@ extension WebSocketEngine {
 
     func send(request: JSONRPCRequest) {
         inProgressRequests[request.requestId] = request
+        guard let authorization = request.options.writeAuthorization else {
+            connection.write(stringData: request.data, completion: nil)
+            return
+        }
+        let generation = UUID()
+        let write = connection.write(stringData: request.data,
+                                     authorization: RPCWriteAuthorization(authorization),
+                                     callbackQueue: completionQueue) { [weak self] result in
+            guard let self = self else { return }
+            self.mutex.lock()
+            defer { self.mutex.unlock() }
+            // A delayed old transport callback cannot cancel a reused UInt16 ID.
+            guard self.guardedRequests[request.requestId]?.generation == generation else { return }
+            if case .failure(let error) = result {
+                self.guardedRequests.removeValue(forKey: request.requestId)
+                if let request = self.inProgressRequests.removeValue(forKey: request.requestId) {
+                    let resolved: Error = (error as? AuthorizedWriteError) == .outcomeUnknown
+                        ? JSONRPCEngineError.submissionOutcomeUnknown : error
+                    self.notify(requests: [request], error: resolved)
+                    self.processSubscriptionError(request.requestId, error: resolved, shouldUnsubscribe: true)
+                }
+            }
+            // Keep successful transport handles until the RPC result. Accepted
+            // bytes without a terminal response remain an unknown transaction.
+        }
+        guardedRequests[request.requestId] = GuardedRequest(generation: generation, write: write)
+    }
 
-        connection.write(stringData: request.data, completion: nil)
+    private func cancelGuardedRequest(_ identifier: UInt16) -> JSONRPCEngineError? {
+        guard let guarded = guardedRequests.removeValue(forKey: identifier) else { return nil }
+        return guarded.write.cancel() == .notHandedOff ? .requestNotSent : .submissionOutcomeUnknown
+    }
+
+    func cancelPendingGuardedRequests() {
+        let cancelled = pendingRequests.filter { $0.options.writeAuthorization != nil }
+        pendingRequests.removeAll { $0.options.writeAuthorization != nil }
+        notify(requests: cancelled, error: JSONRPCEngineError.requestNotSent)
+        for request in cancelled {
+            processSubscriptionError(request.requestId, error: JSONRPCEngineError.requestNotSent, shouldUnsubscribe: true)
+        }
     }
 
     func sendAllPendingRequests() {
@@ -238,12 +278,21 @@ extension WebSocketEngine {
 
         for pending in currentPendings {
             logger?.debug("Sending request with id: \(pending.requestId)")
-            logger?.debug("\(String(data: pending.data, encoding: .utf8)!)")
+            if pending.options.writeAuthorization == nil {
+                logger?.debug("\(String(data: pending.data, encoding: .utf8)!)")
+            }
             send(request: pending)
         }
     }
 
     func resetInProgress() -> [JSONRPCRequest] {
+        let guarded = inProgressRequests.values.filter { $0.options.writeAuthorization != nil }
+        for request in guarded {
+            let error = cancelGuardedRequest(request.requestId) ?? .submissionOutcomeUnknown
+            inProgressRequests.removeValue(forKey: request.requestId)
+            notify(requests: [request], error: error)
+            processSubscriptionError(request.requestId, error: error, shouldUnsubscribe: true)
+        }
         let idempotentRequests: [JSONRPCRequest] = inProgressRequests.compactMap {
             $1.options.resendOnReconnect ? $1 : nil
         }
@@ -265,6 +314,10 @@ extension WebSocketEngine {
     }
 
     func rescheduleActiveSubscriptions() {
+        let guarded = subscriptions.values.filter { $0.requestOptions.writeAuthorization != nil }
+        for subscription in guarded {
+            processSubscriptionError(subscription.requestId, error: JSONRPCEngineError.submissionOutcomeUnknown, shouldUnsubscribe: true)
+        }
         let activeSubscriptions = subscriptions.compactMap {
             $1.remoteId != nil ? $1 : nil
         }
@@ -386,17 +439,28 @@ extension WebSocketEngine {
 
             notify(
                 requests: [request],
-                error: JSONRPCEngineError.clientCancelled
+                error: request.options.writeAuthorization == nil ? JSONRPCEngineError.clientCancelled : JSONRPCEngineError.requestNotSent
             )
+            if request.options.writeAuthorization != nil {
+                processSubscriptionError(identifier, error: JSONRPCEngineError.requestNotSent, shouldUnsubscribe: true)
+            }
         } else if let request = inProgressRequests.removeValue(forKey: identifier) {
-            notify(
-                requests: [request],
-                error: JSONRPCEngineError.clientCancelled
-            )
+            let error = cancelGuardedRequest(identifier) ?? JSONRPCEngineError.clientCancelled
+            notify(requests: [request], error: error)
+            if request.options.writeAuthorization != nil {
+                processSubscriptionError(identifier, error: error, shouldUnsubscribe: true)
+            }
         }
     }
 
     func completeRequestForRemoteId(_ identifier: UInt16, data: Data) {
+        if cancelGuardedRequest(identifier) == .requestNotSent {
+            if let request = inProgressRequests.removeValue(forKey: identifier) {
+                notify(requests: [request], error: JSONRPCEngineError.requestNotSent)
+            }
+            processSubscriptionError(identifier, error: JSONRPCEngineError.requestNotSent, shouldUnsubscribe: true)
+            return
+        }
         if let request = inProgressRequests.removeValue(forKey: identifier) {
             notify(request: request, data: data)
         }
@@ -457,6 +521,13 @@ extension WebSocketEngine {
     }
 
     func completeRequestForRemoteId(_ identifier: UInt16, error: Error) {
+        if cancelGuardedRequest(identifier) == .requestNotSent {
+            if let request = inProgressRequests.removeValue(forKey: identifier) {
+                notify(requests: [request], error: JSONRPCEngineError.requestNotSent)
+            }
+            processSubscriptionError(identifier, error: JSONRPCEngineError.requestNotSent, shouldUnsubscribe: true)
+            return
+        }
         if let request = inProgressRequests.removeValue(forKey: identifier) {
             notify(requests: [request], error: error)
         }
@@ -497,6 +568,7 @@ extension WebSocketEngine {
     }
 
     func scheduleReconnectionOrDisconnect(_ attempt: Int, after error: Error? = nil) {
+        cancelPendingGuardedRequests()
         if reachabilityManager?.isReachable == false {
             state = .notReachable
         } else if let reconnectionStrategy = reconnectionStrategy,
@@ -516,7 +588,7 @@ extension WebSocketEngine {
             pendingRequests = []
 
             let requestError = error ?? JSONRPCEngineError.unknownError
-            requests.forEach { $0.responseHandler?.handle(error: requestError) }
+            notify(requests: requests, error: requestError)
         }
     }
 
@@ -581,7 +653,10 @@ extension WebSocketEngine {
     }
 
     private func processUnsubscription(_ identifier: UInt16) throws {
-        guard let subscription = subscriptions[identifier] else { return }
+        mutex.lock()
+        let current = subscriptions[identifier]
+        mutex.unlock()
+        guard let subscription = current else { return }
 
         let requestInfo = try jsonDecoder.decode(
             JSONRPCInfo<[[Data]]>.self,
@@ -593,8 +668,19 @@ extension WebSocketEngine {
             params: requestInfo.params,
             options: JSONRPCOptions(resendOnReconnect: false)
         ) { [weak self] (result: Result<Data, Error>) in
-            guard case .success = result else { return }
-            self?.subscriptions.removeValue(forKey: identifier)
+            guard case .success = result, let self = self else { return }
+            self.mutex.lock()
+            defer { self.mutex.unlock() }
+            if self.subscriptions[identifier] === subscription {
+                self.subscriptions.removeValue(forKey: identifier)
+            }
         }
     }
+}
+
+
+private final class RPCWriteAuthorization: WebSocketWriteAuthorizing {
+    private let application: JSONRPCWriteAuthorizing
+    init(_ application: JSONRPCWriteAuthorizing) { self.application = application }
+    func authorize(_ handoff: () throws -> Void) throws { try application.authorize(handoff) }
 }
