@@ -9,7 +9,7 @@ import SSFRuntimeCodingService
 import SSFSigner
 import SSFUtils
 
-public protocol XcmExtrinsicServiceProtocol {
+public protocol XcmExtrinsicServiceProtocol: XcmFeeEstimating {
     func transfer(
         fromChainId: String,
         assetSymbol: String,
@@ -17,14 +17,6 @@ public protocol XcmExtrinsicServiceProtocol {
         destAccountId: AccountId,
         amount: BigUInt
     ) async -> SubmitExtrinsicResult
-
-    func estimateOriginalFee(
-        fromChainId: String,
-        assetSymbol: String,
-        destChainId: String,
-        destAccountId: AccountId,
-        amount: BigUInt
-    ) async -> FeeExtrinsicResult
 }
 
 final class XcmExtrinsicService: XcmExtrinsicServiceProtocol {

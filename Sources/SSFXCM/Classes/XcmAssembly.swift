@@ -29,7 +29,47 @@ public enum XcmAssembly {
             secretKeyData: fromChainData.signingWrapperData.secretKeyData,
             cryptoType: fromChainData.cryptoType
         )
+        return makeServices(fromChainData: fromChainData, signingWrapper: signingWrapper,
+                            sourceConfig: sourceConfig, chainRegistry: chainRegistry)
+    }
 
+    /// Discovery and fee quotation need public account identity, never a wallet
+    /// secret. Fee operations retain their existing dummy-signature path.
+    public static func createReadOnlyServices(
+        chainId: String,
+        cryptoType: CryptoType,
+        chainMetadata: RuntimeMetadataItemProtocol?,
+        accountId: AccountId,
+        chainType: ChainBaseType,
+        sourceConfig: XcmConfigProtocol?,
+        chainRegistry: ChainRegistryProtocol?
+    ) -> XcmReadOnlyServices {
+        // The legacy dependency container uses this value only for chain,
+        // runtime, account and crypto-type selection. No signing material is
+        // supplied, and TransactionSignerAssembly is never called on this path.
+        let context = FromChainData(
+            chainId: chainId, cryptoType: cryptoType, chainMetadata: chainMetadata,
+            accountId: accountId,
+            signingWrapperData: SigningWrapperData(publicKeyData: Data(), secretKeyData: Data()),
+            chainType: chainType
+        )
+        let services = makeServices(
+            fromChainData: context, signingWrapper: XcmReadOnlySigner(),
+            sourceConfig: sourceConfig, chainRegistry: chainRegistry
+        )
+        return XcmReadOnlyServices(
+            extrinsic: XcmReadOnlyFeeEstimator(service: services.extrinsic),
+            destinationFeeFetcher: services.destinationFeeFetcher,
+            availableDestionationFetching: services.availableDestionationFetching
+        )
+    }
+
+    private static func makeServices(
+        fromChainData: FromChainData,
+        signingWrapper: TransactionSignerProtocol,
+        sourceConfig: XcmConfigProtocol?,
+        chainRegistry: ChainRegistryProtocol?
+    ) -> XcmExtrinsicServices {
         let extrinsicBuilder = XcmExtrinsicBuilder()
         let chainRegistry = chainRegistry ?? Self.createInternalChainRegistry(sourceConfig: sourceConfig)
 

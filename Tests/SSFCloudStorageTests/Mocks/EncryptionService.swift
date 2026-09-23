@@ -13,11 +13,15 @@ final class EncryptionServiceMock: EncryptionServiceProtocol {
     var getDecryptedReceivedArguments: (message: String?, password: String)?
     var getDecryptedReceivedInvocations: [(message: String?, password: String)] = []
     var getDecryptedReturnValue: String?
+    var getDecryptedError: Error?
 
     func getDecrypted(from message: String?, password: String) throws -> String? {
         getDecryptedCallsCount += 1
         getDecryptedReceivedArguments = (message: message, password: password)
         getDecryptedReceivedInvocations.append((message: message, password: password))
+        if let getDecryptedError {
+            throw getDecryptedError
+        }
         return getDecryptedReturnValue ?? message
     }
 

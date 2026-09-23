@@ -5,6 +5,7 @@ public enum CloudStorageServiceError: Error {
     case incorectPassword
     case incorectJson
     case notAuthorized
+    case readbackMismatch
 }
 
 extension CloudStorageServiceError: LocalizedError {
@@ -18,6 +19,8 @@ extension CloudStorageServiceError: LocalizedError {
             return "Incorect json"
         case .notAuthorized:
             return "Not authorized"
+        case .readbackMismatch:
+            return "Uploaded backup does not match Drive readback"
         }
     }
 }

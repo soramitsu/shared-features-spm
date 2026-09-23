@@ -16,5 +16,3 @@ FOUNDATION_EXPORT double libsr25519VersionNumber;
 FOUNDATION_EXPORT const unsigned char libsr25519VersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <libsr25519/PublicHeader.h>
-
-

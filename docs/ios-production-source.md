@@ -16,8 +16,9 @@ The wallet's carried fixes now belong in this repository's source:
   instance compatibility extensions.
 - Matching SSSE3 compilation and selection guards for scrypt. The public scrypt
   header has no architecture-specific types and needs no NEON include.
-- Removal of four redundant `.a` sidecars inside device framework bundles. The
-  framework executable archives, all simulator slices, and dynamic frameworks
+- Removal of four redundant `.a` sidecars inside device framework bundles.
+  The subsequent SR25519 signing-boundary rebuild is documented in
+  [sr25519-native-signing.md](sr25519-native-signing.md); other binary targets
   retain their original bytes.
 - Public initializers for the three existing pool parameter models.
 - The IrohaCrypto umbrella/module-map contract and explicit dynamic sorawallet
