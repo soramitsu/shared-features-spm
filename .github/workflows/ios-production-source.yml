@@ -20,6 +20,10 @@ jobs:
         run: swift package dump-package > /tmp/shared-features-package.json
       - name: Check scrypt vectors and device/simulator linkage
         run: python3 scripts/test-scrypt-architectures.py
+      - name: Check SR25519 Rust signing boundary
+        run: cargo test --locked --manifest-path native/sr25519crust/Cargo.toml --lib
+      - name: Check SR25519 legacy vectors and iOS linkage
+        run: python3 scripts/test-sr25519-native.py
       - name: Reject tracked source mutations during validation
         run: git diff --exit-code
 

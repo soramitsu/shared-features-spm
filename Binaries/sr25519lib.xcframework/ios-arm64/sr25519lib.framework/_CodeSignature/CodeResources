@@ -6,69 +6,42 @@
 	<dict>
 		<key>Headers/sr25519.h</key>
 		<data>
-		ovh68tAsfa3dmqvr2x0T9nhs+5I=
+		SO2Y/fIr0wK4ZfTwmQ2HNCuUMK4=
 		</data>
 		<key>Headers/sr25519lib.h</key>
 		<data>
-		St48su63EHE/njFM8nePh9WtYxo=
+		Qhvfq12/2dPF6DFowtsVtHvf7BY=
 		</data>
 		<key>Info.plist</key>
 		<data>
-		Pi6RYt35EsZl54IrSVYBLVlt8+U=
+		F9d+B7UaAM1eoli0sqLtgchrlIc=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
 		o3j9OX67NIV2YHIq/Ou0twriAs4=
-		</data>
-		<key>libsr25519crust.a</key>
-		<data>
-		krrADljaJQExWuYjdJaE5aZn8Is=
 		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
 		<key>Headers/sr25519.h</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			ovh68tAsfa3dmqvr2x0T9nhs+5I=
-			</data>
 			<key>hash2</key>
 			<data>
-			7G8O6oVQep5iSIvy0yTBP6ru6Wm7Mzre5WWqqQ76aYM=
+			f+DGqJJnMbSb/3xo3f7Zo8t7z/DCm+KQus9SFNn1uWE=
 			</data>
 		</dict>
 		<key>Headers/sr25519lib.h</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			St48su63EHE/njFM8nePh9WtYxo=
-			</data>
 			<key>hash2</key>
 			<data>
-			cXAy2/oq9du7Bcx7/WzFquggYrq8Ap0yuPBNeC9KH/w=
+			SSTnV6bRZnH9RMfJq1ihOr947Ee5DnDAGE4h8DEBjQs=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			o3j9OX67NIV2YHIq/Ou0twriAs4=
-			</data>
 			<key>hash2</key>
 			<data>
 			HexboO7YnZf3zo1zIc7Tnv8XScT4jEQs0wSYmofiDSE=
-			</data>
-		</dict>
-		<key>libsr25519crust.a</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			krrADljaJQExWuYjdJaE5aZn8Is=
-			</data>
-			<key>hash2</key>
-			<data>
-			lS1tYjkDI3E6JWCIFvbB0LeN6DQulCAZa7Rth5lmlYI=
 			</data>
 		</dict>
 	</dict>

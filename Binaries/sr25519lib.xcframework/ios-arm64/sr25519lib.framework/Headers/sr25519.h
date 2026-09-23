@@ -1,7 +1,7 @@
 #ifndef __SR25519_INCLUDE_GUARD_H__
 #define __SR25519_INCLUDE_GUARD_H__
 
-/* Generated with cbindgen:0.14.3 */
+/* Generated with cbindgen:0.20.0 */
 
 /* THIS FILE WAS AUTOMATICALLY GENERATED. DO NOT EDIT. Ref: https://github.com/Warchant/sr25519-crust */
 
@@ -11,14 +11,14 @@
 #include <stdlib.h>
 
 /**
+ * Size of input SEED for derivation, bytes
+ */
+#define SR25519_SEED_SIZE 32
+
+/**
  * Size of CHAINCODE, bytes
  */
 #define SR25519_CHAINCODE_SIZE 32
-
-/**
- * Size of SR25519 KEYPAIR. [32 bytes key | 32 bytes nonce | 32 bytes public]
- */
-#define SR25519_KEYPAIR_SIZE 96
 
 /**
  * Size of SR25519 PUBLIC KEY, bytes
@@ -31,14 +31,14 @@
 #define SR25519_SECRET_SIZE 64
 
 /**
- * Size of input SEED for derivation, bytes
- */
-#define SR25519_SEED_SIZE 32
-
-/**
  * Size of SR25519 SIGNATURE, bytes
  */
 #define SR25519_SIGNATURE_SIZE 64
+
+/**
+ * Size of SR25519 KEYPAIR. [32 bytes key | 32 bytes nonce | 32 bytes public]
+ */
+#define SR25519_KEYPAIR_SIZE 96
 
 /**
  * Size of VRF output, bytes
@@ -60,6 +60,18 @@
  */
 #define SR25519_VRF_THRESHOLD_SIZE 16
 
+/**
+ * Checked signing result. The existing `sr25519_sign` ABI remains unchanged.
+ */
+typedef enum Sr25519SignResult {
+  Sr25519SignOk = 0,
+  Sr25519SignInvalidArgument = 1,
+  Sr25519SignInvalidSecret = 2,
+  Sr25519SignInvalidPublic = 3,
+  Sr25519SignMismatchedKeypair = 4,
+  Sr25519SignInternalError = 5,
+} Sr25519SignResult;
+
 typedef enum Sr25519SignatureResult {
   Ok,
   EquationFalse,
@@ -72,9 +84,23 @@ typedef enum Sr25519SignatureResult {
 } Sr25519SignatureResult;
 
 typedef struct VrfResult {
-  Sr25519SignatureResult result;
+  enum Sr25519SignatureResult result;
   bool is_less;
 } VrfResult;
+
+/**
+ * Convert an expanded Ed25519 secret into the SR25519 secret representation.
+ * This legacy export is present in the original wallet binary.
+ */
+void sr25519_from_ed25519_bytes(uint8_t *secret_out,
+                                const uint8_t *secret_ptr);
+
+/**
+ * Convert an SR25519 secret into the expanded Ed25519 representation.
+ * This legacy export is present in the original wallet binary.
+ */
+void sr25519_to_ed25519_bytes(uint8_t *secret_out,
+                              const uint8_t *secret_ptr);
 
 /**
  * Perform a derivation on a secret
@@ -113,16 +139,6 @@ void sr25519_derive_public_soft(uint8_t *pubkey_out,
                                 const uint8_t *cc_ptr);
 
 /**
- * Retrives secret key from ed25519 representation.
- *
- * * secret_out: 64 bytes, pre-allocated output buffer of SR25519_SECRET_SIZE bytes
- * * secret_ptr: generation seed - input buffer of SR25519_SECRET_SIZE bytes
- *
- */
-void sr25519_from_ed25519_bytes(uint8_t *secret_out,
-                                const uint8_t *secret_ptr);
-
-/**
  * Generate a key pair.
  *
  * * keypair_out: keypair [32b key | 32b nonce | 32b public], pre-allocated output buffer of SR25519_KEYPAIR_SIZE bytes
@@ -152,14 +168,18 @@ void sr25519_sign(uint8_t *signature_out,
                   unsigned long message_length);
 
 /**
- * Converts secret key to ed25519 representation.
- *
- * * secret_out: 64 bytes, pre-allocated output buffer of SR25519_SECRET_SIZE bytes
- * * secret_ptr: generation seed - input buffer of SR25519_SECRET_SIZE bytes
- *
+ * Sign without unwinding through the C ABI. Every buffer size is explicit.
+ * `message_ptr` may be null only when `message_length` is zero. On failure,
+ * the first SR25519_SIGNATURE_SIZE bytes of a valid output buffer are zeroed.
  */
-void sr25519_to_ed25519_bytes(uint8_t *secret_out,
-                              const uint8_t *secret_ptr);
+enum Sr25519SignResult sr25519_sign_checked(uint8_t *signature_out,
+                                            uintptr_t signature_out_length,
+                                            const uint8_t *public_ptr,
+                                            uintptr_t public_length,
+                                            const uint8_t *secret_ptr,
+                                            uintptr_t secret_length,
+                                            const uint8_t *message_ptr,
+                                            uintptr_t message_length);
 
 /**
  * Verify a message and its corresponding against a public key;
@@ -185,11 +205,11 @@ bool sr25519_verify(const uint8_t *signature_ptr,
  * @param limit_ptr byte array, must be 16 bytes long
  *
  */
-VrfResult sr25519_vrf_sign_if_less(uint8_t *out_and_proof_ptr,
-                                   const uint8_t *keypair_ptr,
-                                   const uint8_t *message_ptr,
-                                   unsigned long message_length,
-                                   const uint8_t *limit_ptr);
+struct VrfResult sr25519_vrf_sign_if_less(uint8_t *out_and_proof_ptr,
+                                          const uint8_t *keypair_ptr,
+                                          const uint8_t *message_ptr,
+                                          unsigned long message_length,
+                                          const uint8_t *limit_ptr);
 
 /**
  * Verify a signature produced by a VRF with its original input and the corresponding proof and
@@ -201,11 +221,11 @@ VrfResult sr25519_vrf_sign_if_less(uint8_t *out_and_proof_ptr,
  * @param proof_ptr the proof of the signature
  * @param threshold_ptr the threshold to be compared against
  */
-VrfResult sr25519_vrf_verify(const uint8_t *public_key_ptr,
-                             const uint8_t *message_ptr,
-                             unsigned long message_length,
-                             const uint8_t *output_ptr,
-                             const uint8_t *proof_ptr,
-                             const uint8_t *threshold_ptr);
+struct VrfResult sr25519_vrf_verify(const uint8_t *public_key_ptr,
+                                    const uint8_t *message_ptr,
+                                    unsigned long message_length,
+                                    const uint8_t *output_ptr,
+                                    const uint8_t *proof_ptr,
+                                    const uint8_t *threshold_ptr);
 
 #endif /* __SR25519_INCLUDE_GUARD_H__ */
