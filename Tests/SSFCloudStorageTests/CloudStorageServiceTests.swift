@@ -120,19 +120,182 @@ final class CloudStorageServiceTests: XCTestCase {
     func testSaveBackupAccount() async throws {
         // arrange
         signInProvider?._currentUser = TestData.user
-        googleService?.executeQueryReturnValue = (ticket: GoogleServiceTicketMock(), file: nil)
         factory?.createFileReturnValue = try getURL()
         // act
         try await service?.saveBackup(account: TestData.account, password: "1")
 
         // assert
         XCTAssertEqual(googleService?.setAuthorizerCallsCount, 1)
-        XCTAssertEqual(googleService?.executeQueryCallsCount, 3)
+        XCTAssertEqual(googleService?.executeQueryCallsCount, 2)
         XCTAssertEqual(factory?.createFileCallsCount, 1)
 
         XCTAssertTrue(googleService?.setAuthorizerCalled ?? false)
         XCTAssertTrue(googleService?.executeQueryCalled ?? false)
         XCTAssertTrue(factory?.createFileCalled ?? false)
+    }
+
+    func testSaveBackupAndImportReadsExactCreatedFileDespiteOlderDuplicate() async throws {
+        signInProvider?._currentUser = TestData.user
+        let fileURL = try getURL()
+        factory?.createFileReturnValue = fileURL
+        let uploaded = try Data(contentsOf: fileURL)
+        googleService?.executeQueryHandler = { query in
+            if query is GTLRDriveQuery_FilesCreate {
+                let file = GTLRDrive_File()
+                file.identifier = "new-file"
+                return (GoogleServiceTicketMock(), file)
+            }
+            if let get = query as? GTLRDriveQuery_FilesGet {
+                XCTAssertEqual(get.fileId, "new-file")
+                let media = GTLRDataObject()
+                media.data = uploaded
+                return (GoogleServiceTicketMock(), media)
+            }
+            return nil
+        }
+
+        let account = try await service?.saveBackupAndImport(account: TestData.account, password: "1")
+
+        XCTAssertEqual(account?.address, TestData.account.address)
+        XCTAssertEqual(account?.name, TestData.account.name)
+        XCTAssertEqual(googleService?.executeQueryCallsCount, 3)
+    }
+
+    func testSaveBackupAndImportRejectsDifferentCreatedFileReadback() async throws {
+        signInProvider?._currentUser = TestData.user
+        factory?.createFileReturnValue = try getURL()
+        googleService?.executeQueryHandler = { query in
+            if query is GTLRDriveQuery_FilesCreate {
+                let file = GTLRDrive_File()
+                file.identifier = "new-file"
+                return (GoogleServiceTicketMock(), file)
+            }
+            if query is GTLRDriveQuery_FilesGet {
+                let media = GTLRDataObject()
+                media.data = Data("different backup".utf8)
+                return (GoogleServiceTicketMock(), media)
+            }
+            return nil
+        }
+
+        do {
+            _ = try await service?.saveBackupAndImport(account: TestData.account, password: "1")
+            XCTFail("A different Drive object must not verify the upload")
+        } catch CloudStorageServiceError.readbackMismatch {
+            // The old backup is retained; the new backup is not marked complete.
+        }
+    }
+
+    func testSaveBackupAndImportRequiresCreatedFileId() async throws {
+        signInProvider?._currentUser = TestData.user
+        factory?.createFileReturnValue = try getURL()
+        googleService?.executeQueryHandler = { query in
+            if query is GTLRDriveQuery_FilesCreate {
+                return (GoogleServiceTicketMock(), GTLRDrive_File())
+            }
+            if query is GTLRDriveQuery_FilesGet {
+                XCTFail("Readback must not use an unbound Drive file")
+            }
+            return nil
+        }
+
+        do {
+            _ = try await service?.saveBackupAndImport(account: TestData.account, password: "1")
+            XCTFail("Upload without an exact file ID must fail closed")
+        } catch CloudStorageServiceError.notFound {
+            // A missing Drive ID cannot establish which file was uploaded.
+        }
+    }
+
+    func testImportSelectsNewestExactNameAcrossPages() async throws {
+        signInProvider?._currentUser = TestData.user
+        let encrypted = try JSONEncoder().encode(TestData.encryptedAccount)
+        let expectedName = "\(TestData.account.address).json"
+        googleService?.executeQueryHandler = { query in
+            if let list = query as? GTLRDriveQuery_FilesList {
+                if list.q?.contains("name = 'backupFolder'") == true {
+                    return (GoogleServiceTicketMock(), self.driveList([("folder", "backupFolder")]))
+                }
+                XCTAssertEqual(list.orderBy, "createdTime desc")
+                if list.pageToken == nil {
+                    let page = self.driveList([
+                        ("collision", "other-\(expectedName)"),
+                        ("new-file", expectedName),
+                    ])
+                    page.nextPageToken = "next-page"
+                    return (GoogleServiceTicketMock(), page)
+                }
+                XCTAssertEqual(list.pageToken, "next-page")
+                return (GoogleServiceTicketMock(), self.driveList([("old-file", expectedName)]))
+            }
+            if let get = query as? GTLRDriveQuery_FilesGet {
+                XCTAssertEqual(get.fileId, "new-file")
+                let media = GTLRDataObject()
+                media.data = encrypted
+                return (GoogleServiceTicketMock(), media)
+            }
+            return nil
+        }
+
+        let account = try await service?.importBackup(account: TestData.account, password: "1")
+
+        XCTAssertEqual(account?.address, TestData.account.address)
+        XCTAssertEqual(googleService?.executeQueryCallsCount, 4)
+    }
+
+    func testImportFallsBackToOlderDecryptableFile() async throws {
+        signInProvider?._currentUser = TestData.user
+        let encrypted = try JSONEncoder().encode(TestData.encryptedAccount)
+        let expectedName = "\(TestData.account.address).json"
+        googleService?.executeQueryHandler = { query in
+            if let list = query as? GTLRDriveQuery_FilesList {
+                let files = list.q?.contains("name = 'backupFolder'") == true ?
+                    [("folder", "backupFolder")] :
+                    [("new-file", expectedName), ("old-file", expectedName)]
+                return (GoogleServiceTicketMock(), self.driveList(files))
+            }
+            if let get = query as? GTLRDriveQuery_FilesGet {
+                let media = GTLRDataObject()
+                media.data = get.fileId == "new-file" ? Data("corrupt".utf8) : encrypted
+                return (GoogleServiceTicketMock(), media)
+            }
+            return nil
+        }
+
+        let account = try await service?.importBackup(account: TestData.account, password: "1")
+
+        XCTAssertEqual(account?.address, TestData.account.address)
+        XCTAssertEqual(googleService?.executeQueryCallsCount, 4)
+    }
+
+    func testImportRejectsWrongPasswordForEncryptedMaterial() async throws {
+        signInProvider?._currentUser = TestData.user
+        googleService?.account = TestData.encryptedAccount
+        encryptionService?.getDecryptedError = CloudStorageServiceError.incorectPassword
+
+        do {
+            _ = try await service?.importBackup(account: TestData.account, password: "wrong")
+            XCTFail("Encrypted material must be decrypted before restore succeeds")
+        } catch CloudStorageServiceError.incorectPassword {
+            // JSON keystore contents require an additional wallet-owned verification.
+        }
+    }
+
+    func testImportRejectsUndecryptableJsonKeystore() async throws {
+        signInProvider?._currentUser = TestData.user
+        var jsonOnly = TestData.encryptedAccount
+        jsonOnly.backupAccountType = ["json"]
+        jsonOnly.encryptedSubstrateDerivationPath = nil
+        jsonOnly.encryptedSeed = nil
+        jsonOnly.json = OpenBackupAccount.Json(substrateJson: TestData.substrateJson)
+        googleService?.account = jsonOnly
+
+        do {
+            _ = try await service?.importBackup(account: TestData.account, password: "wrong-password")
+            XCTFail("A JSON keystore must decrypt before restore succeeds")
+        } catch CloudStorageServiceError.incorectPassword {
+            // Drive byte fidelity alone does not prove a usable JSON keystore.
+        }
     }
 
     func testImportBackupAccount() async throws {
@@ -231,14 +394,12 @@ extension CloudStorageServiceTests {
         static let account = OpenBackupAccount(
             name: "chop",
             address: "cnSNFyYFzPPJWm1yKjZCKZnGhhrZWWx1Mme1gw64YvjJhNGoJ",
-            passphrase: "carpet shiver bacon dirt sadness hammer isolate window hope lounge humble kitten",
             cryptoType: "SR25519",
             substrateDerivationPath: nil,
             ethDerivationPath: nil,
-            backupAccountType: [.passphrase, .json, .seed],
-            json: OpenBackupAccount
-                .Json(substrateJson: substrateJson),
-            encryptedSeed: OpenBackupAccount.Seed()
+            backupAccountType: [.seed],
+            json: OpenBackupAccount.Json(),
+            encryptedSeed: OpenBackupAccount.Seed(substrateSeed: substrateSeed)
         )
 
         static let encryptedAccount = EcryptedBackupAccount(
@@ -248,13 +409,8 @@ extension CloudStorageServiceTests {
             encryptedSubstrateDerivationPath: "5944fbdce78478ef92858817b176fe0b5b884e9c8652de8e10061f0680f83c3100800000010000000800000012e34d41a1843fe84e627672c688150b2ab19c12e7d6b77dab91457f3e8f06a1ca66218604f14691",
             encryptedEthDerivationPath: nil,
             cryptoType: "SR25519",
-            backupAccountType: [
-                "passphrase",
-                "json",
-                "seed",
-            ],
-            json: OpenBackupAccount
-                .Json(substrateJson: substrateJson),
+            backupAccountType: ["seed"],
+            json: OpenBackupAccount.Json(),
             encryptedSeed: OpenBackupAccount
                 .Seed(substrateSeed: substrateSeed)
         )
@@ -269,5 +425,16 @@ extension CloudStorageServiceTests {
         let data = try JSONEncoder().encode(TestData.encryptedAccount)
         try data.write(to: url)
         return url
+    }
+
+    private func driveList(_ entries: [(String, String)]) -> GTLRDrive_FileList {
+        let list = GTLRDrive_FileList()
+        list.files = entries.map { identifier, name in
+            let file = GTLRDrive_File()
+            file.identifier = identifier
+            file.name = name
+            return file
+        }
+        return list
     }
 }

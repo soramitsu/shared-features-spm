@@ -15,6 +15,7 @@ final class GoogleServiceMock: GoogleService {
     var executeQueryReceivedArguments: GTLRQueryProtocol?
     var executeQueryReceivedInvocations: [GTLRQueryProtocol] = []
     var executeQueryReturnValue: (ticket: GoogleServiceTicket, file: Any?)?
+    var executeQueryHandler: ((GTLRQueryProtocol) throws -> (GoogleServiceTicket, Any?)?)?
 
     func executeQuery(_ queryObj: GTLRQueryProtocol) async throws
         -> (ticket: GoogleServiceTicket, file: Any?)
@@ -22,6 +23,9 @@ final class GoogleServiceMock: GoogleService {
         executeQueryCallsCount += 1
         executeQueryReceivedArguments = queryObj
         executeQueryReceivedInvocations.append(queryObj)
+        if let result = try executeQueryHandler?(queryObj) {
+            return result
+        }
         return try executeQueryReturnValue ?? createQueryValue(from: queryObj)
     }
 
@@ -52,7 +56,11 @@ extension GoogleServiceMock {
     }
 
     private func getFile(from query: GTLRQueryProtocol) throws -> GTLRObject {
-        if let query = query as? GTLRDriveQuery_FilesList {
+        if query is GTLRDriveQuery_FilesCreate {
+            let file = GTLRDrive_File()
+            file.identifier = "created-file"
+            return file
+        } else if query is GTLRDriveQuery_FilesList {
             let fileList = GTLRDrive_FileList()
             let file = GTLRDrive_File()
             file.name = "cnSNFyYFzPPJWm1yKjZCKZnGhhrZWWx1Mme1gw64YvjJhNGoJ.json"

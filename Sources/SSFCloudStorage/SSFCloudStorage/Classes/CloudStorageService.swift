@@ -22,6 +22,9 @@ public protocol CloudStorageServiceProtocol: AnyObject {
     func signInIfNeeded() async throws -> CloudStorageAccountState
     func getBackupAccounts() async throws -> [OpenBackupAccount]
     func saveBackup(account: OpenBackupAccount, password: String) async throws
+    /// Read and decrypt the exact Drive file created by this upload.
+    func saveBackupAndImport(account: OpenBackupAccount, password: String) async throws
+        -> OpenBackupAccount
     func importBackup(account: OpenBackupAccount, password: String) async throws
         -> OpenBackupAccount
     func deleteBackup(account: OpenBackupAccount) async throws
@@ -61,20 +64,43 @@ public class CloudStorageService: NSObject, GoogleDriveServiceProtocol {
 
     private func getAppFolderFiles(
         from q: String? = nil,
-        withField: Bool = false
+        withField: Bool = false,
+        orderBy: String? = nil
     ) async throws -> [GTLRDrive_File] {
-        let query = GTLRDriveQuery_FilesList.query()
-        query.spaces = "appDataFolder"
-        query.fields = withField ? "files(id, name, description)" : nil
-        query.q = q
+        var files: [GTLRDrive_File] = []
+        var pageToken: String?
+        var seenTokens = Set<String>()
+        // A truncated list must not silently hide a newer backup generation.
+        for _ in 0 ..< 20 {
+            let query = GTLRDriveQuery_FilesList.query()
+            query.spaces = "appDataFolder"
+            query.fields = withField ? "nextPageToken,incompleteSearch,files(id,name,description,createdTime)" :
+                "nextPageToken,incompleteSearch,files(id,name,description)"
+            query.q = q
+            query.orderBy = orderBy
+            query.pageSize = 1000
+            query.pageToken = pageToken
 
-        let results = try await googleDriveService.executeQuery(query)
-        let files = (results.file as? GTLRDrive_FileList)?.files ?? []
-        return files
+            let result = try await googleDriveService.executeQuery(query)
+            guard let list = result.file as? GTLRDrive_FileList else {
+                throw CloudStorageServiceError.notFound
+            }
+            guard list.incompleteSearch?.boolValue != true else {
+                throw CloudStorageServiceError.notFound
+            }
+            files.append(contentsOf: list.files ?? [])
+            guard let next = list.nextPageToken, !next.isEmpty else { return files }
+            guard seenTokens.insert(next).inserted else {
+                throw CloudStorageServiceError.notFound
+            }
+            pageToken = next
+        }
+        throw CloudStorageServiceError.notFound
     }
 
     private func getParentFolder() async throws -> String {
-        let q = "name = 'backupFolder'"
+        let q = "name = 'backupFolder' and mimeType = 'application/vnd.google-apps.folder' " +
+            "and 'appDataFolder' in parents and trashed = false"
         let files = try await getAppFolderFiles(from: q)
 
         if files.isEmpty {
@@ -141,7 +167,9 @@ extension CloudStorageService: CloudStorageServiceProtocol {
         return accounts
     }
 
-    public func saveBackup(account: OpenBackupAccount, password: String) async throws {
+    private func uploadBackup(account: OpenBackupAccount, password: String) async throws
+        -> (fileId: String, bytes: Data)
+    {
         let fileUrl = try fileFactory.createFile(from: account, password: password)
         let data = try Data(contentsOf: fileUrl)
 
@@ -164,7 +192,28 @@ extension CloudStorageService: CloudStorageServiceProtocol {
         let query = GTLRDriveQuery_FilesCreate.query(withObject: file, uploadParameters: params)
         query.fields = "id"
 
-        try await googleDriveService.executeQuery(query)
+        let result = try await googleDriveService.executeQuery(query)
+        guard let fileId = (result.file as? GTLRDrive_File)?.identifier,
+              !fileId.isEmpty else {
+            throw CloudStorageServiceError.notFound
+        }
+        return (fileId, data)
+    }
+
+    public func saveBackup(account: OpenBackupAccount, password: String) async throws {
+        _ = try await uploadBackup(account: account, password: password)
+    }
+
+    public func saveBackupAndImport(
+        account: OpenBackupAccount,
+        password: String
+    ) async throws -> OpenBackupAccount {
+        let uploaded = try await uploadBackup(account: account, password: password)
+        let downloaded = try await executeQueryForMedia(withFileId: uploaded.fileId)
+        guard downloaded == uploaded.bytes else {
+            throw CloudStorageServiceError.readbackMismatch
+        }
+        return try decodeMobileBackup(downloaded, password: password)
     }
 
     public func importBackup(
@@ -183,7 +232,7 @@ extension CloudStorageService: CloudStorageServiceProtocol {
                         password: password
                     )
                     return extensionAccount
-                case .incorectPassword, .incorectJson, .notAuthorized:
+                case .incorectPassword, .incorectJson, .notAuthorized, .readbackMismatch:
                     throw error
                 }
             }
@@ -292,16 +341,43 @@ extension CloudStorageService {
             throw CloudStorageServiceError.notAuthorized
         }
 
-        let files = try await getAppFolderFiles()
-
-        guard let fileId = files.first(where: { $0.name?.contains(account.address) ?? false })?
-            .identifier else
-        {
+        let folderId = try await getParentFolder()
+        let files = try await getAppFolderFiles(
+            from: "'\(folderId)' in parents and trashed = false",
+            withField: true,
+            orderBy: "createdTime desc"
+        )
+        let candidates = files.filter { $0.name == "\(account.address).json" }
+        guard !candidates.isEmpty else {
             throw CloudStorageServiceError.notFound
         }
+        var decodeError: CloudStorageServiceError = .incorectJson
+        for candidate in candidates {
+            guard let fileId = candidate.identifier, !fileId.isEmpty else {
+                continue
+            }
+            // A transport failure is not evidence that an older backup is the
+            // current one. Only malformed or undecryptable bytes allow fallback.
+            let data = try await executeQueryForMedia(withFileId: fileId)
+            do {
+                let decoded = try decodeMobileBackup(data, password: password)
+                guard decoded.address == account.address else {
+                    throw CloudStorageServiceError.incorectJson
+                }
+                return decoded
+            } catch let error as CloudStorageServiceError {
+                switch error {
+                case .incorectPassword, .incorectJson:
+                    decodeError = error
+                case .notFound, .notAuthorized, .readbackMismatch:
+                    throw error
+                }
+            }
+        }
+        throw decodeError
+    }
 
-        let data = try await executeQueryForMedia(withFileId: fileId)
-
+    private func decodeMobileBackup(_ data: Data, password: String) throws -> OpenBackupAccount {
         guard let account = try? JSONDecoder().decode(EcryptedBackupAccount.self, from: data) else {
             throw CloudStorageServiceError.incorectJson
         }
@@ -333,6 +409,35 @@ extension CloudStorageService {
             from: encryptedSeed?.ethSeed,
             password: password
         )
+        if account.encryptedMnemonicPhrase != nil && passphrase == nil ||
+            account.encryptedSubstrateDerivationPath != nil && substrateDerivationPath == nil ||
+            encryptedSeed?.substrateSeed != nil && substrateSeed == nil ||
+            encryptedSeed?.ethSeed != nil && ethereumSeed == nil {
+            throw CloudStorageServiceError.incorectPassword
+        }
+        if account.backupAccountType?.contains("passphrase") == true && passphrase?.isEmpty != false ||
+            account.backupAccountType?.contains("seed") == true &&
+            substrateSeed?.isEmpty != false && ethereumSeed?.isEmpty != false ||
+            account.backupAccountType?.contains("json") == true &&
+            account.json?.substrateJson?.isEmpty != false && account.json?.ethJson?.isEmpty != false {
+            throw CloudStorageServiceError.incorectJson
+        }
+        if passphrase?.isEmpty != false && substrateSeed?.isEmpty != false &&
+            ethereumSeed?.isEmpty != false && account.json?.substrateJson?.isEmpty != false &&
+            account.json?.ethJson?.isEmpty != false {
+            throw CloudStorageServiceError.incorectJson
+        }
+        for json in [account.json?.substrateJson, account.json?.ethJson].compactMap({ $0 }) {
+            guard let bytes = json.data(using: .utf8),
+                  let definition = try? JSONDecoder().decode(KeystoreDefinition.self, from: bytes) else {
+                throw CloudStorageServiceError.incorectJson
+            }
+            guard let restored = try? KeystoreExtractor().extractFromDefinition(
+                definition, password: password
+            ), !restored.secretKeyData.isEmpty, !restored.publicKeyData.isEmpty else {
+                throw CloudStorageServiceError.incorectPassword
+            }
+        }
 
         let decodedAccount = OpenBackupAccount(
             name: account.name,
