@@ -117,6 +117,31 @@ final class CloudStorageServiceTests: XCTestCase {
         XCTAssertTrue(googleService?.executeQueryCalled ?? false)
     }
 
+    func testGetBackupAccountsAcrossDuplicateFoldersDeduplicatesAddress() async throws {
+        signInProvider?._currentUser = TestData.user
+        let accountName = "\(TestData.account.address).json"
+        googleService?.executeQueryHandler = { query in
+            guard let list = query as? GTLRDriveQuery_FilesList else { return nil }
+            if list.q?.contains("name = 'backupFolder'") == true {
+                return (GoogleServiceTicketMock(), self.driveList([
+                    ("folder-a", "backupFolder"), ("folder-b", "backupFolder"),
+                ]))
+            }
+            if list.q?.contains("'folder-a' in parents") == true {
+                return (GoogleServiceTicketMock(), self.driveList([("old-file", accountName)]))
+            }
+            if list.q?.contains("'folder-b' in parents") == true {
+                return (GoogleServiceTicketMock(), self.driveList([("new-file", accountName)]))
+            }
+            return (GoogleServiceTicketMock(), self.driveList([]))
+        }
+
+        let accounts = try await service?.getBackupAccounts()
+
+        XCTAssertEqual(accounts?.count, 1)
+        XCTAssertEqual(accounts?.first?.address, TestData.account.address)
+    }
+
     func testSaveBackupAccount() async throws {
         // arrange
         signInProvider?._currentUser = TestData.user
@@ -221,12 +246,15 @@ final class CloudStorageServiceTests: XCTestCase {
                     let page = self.driveList([
                         ("collision", "other-\(expectedName)"),
                         ("new-file", expectedName),
-                    ])
+                    ], createdTimes: ["new-file": "2026-09-24T10:00:00Z"])
                     page.nextPageToken = "next-page"
                     return (GoogleServiceTicketMock(), page)
                 }
                 XCTAssertEqual(list.pageToken, "next-page")
-                return (GoogleServiceTicketMock(), self.driveList([("old-file", expectedName)]))
+                return (GoogleServiceTicketMock(), self.driveList(
+                    [("old-file", expectedName)],
+                    createdTimes: ["old-file": "2026-09-23T10:00:00Z"]
+                ))
             }
             if let get = query as? GTLRDriveQuery_FilesGet {
                 XCTAssertEqual(get.fileId, "new-file")
@@ -252,7 +280,13 @@ final class CloudStorageServiceTests: XCTestCase {
                 let files = list.q?.contains("name = 'backupFolder'") == true ?
                     [("folder", "backupFolder")] :
                     [("new-file", expectedName), ("old-file", expectedName)]
-                return (GoogleServiceTicketMock(), self.driveList(files))
+                return (GoogleServiceTicketMock(), self.driveList(
+                    files,
+                    createdTimes: [
+                        "new-file": "2026-09-24T10:00:00Z",
+                        "old-file": "2026-09-23T10:00:00Z",
+                    ]
+                ))
             }
             if let get = query as? GTLRDriveQuery_FilesGet {
                 let media = GTLRDataObject()
@@ -266,6 +300,147 @@ final class CloudStorageServiceTests: XCTestCase {
 
         XCTAssertEqual(account?.address, TestData.account.address)
         XCTAssertEqual(googleService?.executeQueryCallsCount, 4)
+    }
+
+    func testImportSelectsNewestAcrossDuplicateFolders() async throws {
+        signInProvider?._currentUser = TestData.user
+        let encrypted = try JSONEncoder().encode(TestData.encryptedAccount)
+        let expectedName = "\(TestData.account.address).json"
+        googleService?.executeQueryHandler = { query in
+            if let list = query as? GTLRDriveQuery_FilesList {
+                if list.q?.contains("name = 'backupFolder'") == true {
+                    return (GoogleServiceTicketMock(), self.driveList([
+                        ("folder-a", "backupFolder"), ("folder-b", "backupFolder"),
+                    ]))
+                }
+                if list.q?.contains("'folder-a' in parents") == true {
+                    return (GoogleServiceTicketMock(), self.driveList(
+                        [("old-file", expectedName)],
+                        createdTimes: ["old-file": "2026-09-23T10:00:00Z"]
+                    ))
+                }
+                XCTAssertTrue(list.q?.contains("'folder-b' in parents") == true)
+                return (GoogleServiceTicketMock(), self.driveList(
+                    [("new-file", expectedName)],
+                    createdTimes: ["new-file": "2026-09-24T10:00:00Z"]
+                ))
+            }
+            if let get = query as? GTLRDriveQuery_FilesGet {
+                XCTAssertEqual(get.fileId, "new-file")
+                let media = GTLRDataObject()
+                media.data = encrypted
+                return (GoogleServiceTicketMock(), media)
+            }
+            return nil
+        }
+
+        let account = try await service?.importBackup(account: TestData.account, password: "1")
+
+        XCTAssertEqual(account?.address, TestData.account.address)
+        XCTAssertEqual(googleService?.executeQueryCallsCount, 4)
+    }
+
+    func testImportRejectsAmbiguousCreationTimeAcrossFolders() async throws {
+        signInProvider?._currentUser = TestData.user
+        let expectedName = "\(TestData.account.address).json"
+        googleService?.executeQueryHandler = { query in
+            if let list = query as? GTLRDriveQuery_FilesList {
+                if list.q?.contains("name = 'backupFolder'") == true {
+                    return (GoogleServiceTicketMock(), self.driveList([
+                        ("folder-a", "backupFolder"), ("folder-b", "backupFolder"),
+                    ]))
+                }
+                let id = list.q?.contains("'folder-a' in parents") == true ? "old-file" : "new-file"
+                let times = id == "new-file" ? [id: "2026-09-24T10:00:00Z"] : [:]
+                return (GoogleServiceTicketMock(), self.driveList(
+                    [(id, expectedName)], createdTimes: times
+                ))
+            }
+            if query is GTLRDriveQuery_FilesGet {
+                XCTFail("Ambiguous generations must fail before downloading media")
+            }
+            return nil
+        }
+
+        do {
+            _ = try await service?.importBackup(account: TestData.account, password: "1")
+            XCTFail("Missing creation time must not choose a backup arbitrarily")
+        } catch CloudStorageServiceError.incorectJson {
+            XCTAssertEqual(googleService?.executeQueryCallsCount, 3)
+        }
+    }
+
+    func testImportWrongPasswordDoesNotFallBackToOlderGeneration() async throws {
+        signInProvider?._currentUser = TestData.user
+        encryptionService?.getDecryptedError = CloudStorageServiceError.incorectPassword
+        let expectedName = "\(TestData.account.address).json"
+        let encrypted = try JSONEncoder().encode(TestData.encryptedAccount)
+        var fetchedFileIds: [String] = []
+        googleService?.executeQueryHandler = { query in
+            if let list = query as? GTLRDriveQuery_FilesList {
+                let files = list.q?.contains("name = 'backupFolder'") == true ?
+                    [("folder", "backupFolder")] :
+                    [("new-file", expectedName), ("old-file", expectedName)]
+                return (GoogleServiceTicketMock(), self.driveList(
+                    files,
+                    createdTimes: [
+                        "new-file": "2026-09-24T10:00:00Z",
+                        "old-file": "2026-09-23T10:00:00Z",
+                    ]
+                ))
+            }
+            if let get = query as? GTLRDriveQuery_FilesGet {
+                fetchedFileIds.append(get.fileId ?? "")
+                let media = GTLRDataObject()
+                media.data = encrypted
+                return (GoogleServiceTicketMock(), media)
+            }
+            return nil
+        }
+
+        do {
+            _ = try await service?.importBackup(account: TestData.account, password: "old-password")
+            XCTFail("Wrong password for newest backup must not restore an older generation")
+        } catch CloudStorageServiceError.incorectPassword {
+            XCTAssertEqual(fetchedFileIds, ["new-file"])
+        }
+    }
+
+    func testImportAddressMismatchDoesNotFallBackToOlderGeneration() async throws {
+        signInProvider?._currentUser = TestData.user
+        let expectedName = "\(TestData.account.address).json"
+        var mismatched = TestData.encryptedAccount
+        mismatched.address = "different-wallet-address"
+        let encrypted = try JSONEncoder().encode(mismatched)
+        var fetchedFileIds: [String] = []
+        googleService?.executeQueryHandler = { query in
+            if let list = query as? GTLRDriveQuery_FilesList {
+                let files = list.q?.contains("name = 'backupFolder'") == true ?
+                    [("folder", "backupFolder")] :
+                    [("new-file", expectedName), ("old-file", expectedName)]
+                return (GoogleServiceTicketMock(), self.driveList(
+                    files,
+                    createdTimes: [
+                        "new-file": "2026-09-24T10:00:00Z",
+                        "old-file": "2026-09-23T10:00:00Z",
+                    ]
+                ))
+            }
+            if let get = query as? GTLRDriveQuery_FilesGet {
+                fetchedFileIds.append(get.fileId ?? "")
+                let media = GTLRDataObject()
+                media.data = encrypted
+                return (GoogleServiceTicketMock(), media)
+            }
+            return nil
+        }
+
+        do {
+            _ = try await service?.importBackup(account: TestData.account, password: "1")
+            XCTFail("Newest backup identity mismatch must not restore an older generation")
+        } catch CloudStorageServiceError.readbackMismatch {
+            XCTAssertEqual(fetchedFileIds, ["new-file"])
+        }
     }
 
     func testImportRejectsWrongPasswordForEncryptedMaterial() async throws {
@@ -343,11 +518,112 @@ final class CloudStorageServiceTests: XCTestCase {
         try await service?.deleteBackup(account: TestData.account)
 
         // assert
-        XCTAssertEqual(googleService?.setAuthorizerCallsCount, 3)
+        XCTAssertEqual(googleService?.setAuthorizerCallsCount, 2)
         XCTAssertEqual(googleService?.executeQueryCallsCount, 5)
 
         XCTAssertTrue(googleService?.setAuthorizerCalled ?? false)
         XCTAssertTrue(googleService?.executeQueryCalled ?? false)
+    }
+
+    func testDeleteRemovesAllMobileGenerationsAcrossFoldersButNotExtensionFile() async throws {
+        signInProvider?._currentUser = TestData.user
+        let expectedName = "\(TestData.account.address).json"
+        var deletedFileIds: [String] = []
+        googleService?.executeQueryHandler = { query in
+            if let list = query as? GTLRDriveQuery_FilesList {
+                if list.q?.contains("name = 'backupFolder'") == true {
+                    return (GoogleServiceTicketMock(), self.driveList([
+                        ("folder-a", "backupFolder"), ("folder-b", "backupFolder"),
+                    ]))
+                }
+                XCTAssertTrue(list.q?.contains("'folder-a' in parents") == true ||
+                    list.q?.contains("'folder-b' in parents") == true)
+                if list.q?.contains("'folder-a' in parents") == true {
+                    return (GoogleServiceTicketMock(), self.driveList([
+                        ("old-file", expectedName),
+                        ("unrelated-file", "prefix-\(expectedName)"),
+                    ], createdTimes: ["old-file": "2026-09-23T10:00:00Z"]))
+                }
+                return (GoogleServiceTicketMock(), self.driveList([
+                    ("new-file", expectedName),
+                ], createdTimes: ["new-file": "2026-09-24T10:00:00Z"]))
+            }
+            if let deletion = query as? GTLRDriveQuery_FilesDelete {
+                deletedFileIds.append(deletion.fileId ?? "")
+                return (GoogleServiceTicketMock(), nil)
+            }
+            return nil
+        }
+
+        try await service?.deleteBackup(account: TestData.account)
+
+        XCTAssertEqual(deletedFileIds, ["old-file", "new-file"])
+    }
+
+    func testDeleteRejectsTiedCreationTimesBeforeRemovingAnyFile() async throws {
+        signInProvider?._currentUser = TestData.user
+        let expectedName = "\(TestData.account.address).json"
+        var deletedFileIds: [String] = []
+        googleService?.executeQueryHandler = { query in
+            if let list = query as? GTLRDriveQuery_FilesList {
+                if list.q?.contains("name = 'backupFolder'") == true {
+                    return (GoogleServiceTicketMock(), self.driveList([
+                        ("folder-a", "backupFolder"), ("folder-b", "backupFolder"),
+                    ]))
+                }
+                let id = list.q?.contains("'folder-a' in parents") == true ? "file-a" : "file-b"
+                return (GoogleServiceTicketMock(), self.driveList(
+                    [(id, expectedName)],
+                    createdTimes: [id: "2026-09-24T10:00:00Z"]
+                ))
+            }
+            if let deletion = query as? GTLRDriveQuery_FilesDelete {
+                deletedFileIds.append(deletion.fileId ?? "")
+            }
+            return nil
+        }
+
+        do {
+            try await service?.deleteBackup(account: TestData.account)
+            XCTFail("Tied creation times cannot establish a safe deletion order")
+        } catch CloudStorageServiceError.incorectJson {
+            XCTAssertTrue(deletedFileIds.isEmpty)
+        }
+    }
+
+    func testDeleteFailureKeepsNewestGeneration() async throws {
+        signInProvider?._currentUser = TestData.user
+        let expectedName = "\(TestData.account.address).json"
+        var deletedFileIds: [String] = []
+        googleService?.executeQueryHandler = { query in
+            if let list = query as? GTLRDriveQuery_FilesList {
+                if list.q?.contains("name = 'backupFolder'") == true {
+                    return (GoogleServiceTicketMock(), self.driveList([("folder", "backupFolder")]))
+                }
+                return (GoogleServiceTicketMock(), self.driveList(
+                    [("new-file", expectedName), ("old-file", expectedName)],
+                    createdTimes: [
+                        "new-file": "2026-09-24T10:00:00Z",
+                        "old-file": "2026-09-23T10:00:00Z",
+                    ]
+                ))
+            }
+            if let deletion = query as? GTLRDriveQuery_FilesDelete {
+                deletedFileIds.append(deletion.fileId ?? "")
+                if deletion.fileId == "new-file" {
+                    throw CloudStorageServiceError.notAuthorized
+                }
+                return (GoogleServiceTicketMock(), nil)
+            }
+            return nil
+        }
+
+        do {
+            try await service?.deleteBackup(account: TestData.account)
+            XCTFail("A partial deletion must surface the failure")
+        } catch CloudStorageServiceError.notAuthorized {
+            XCTAssertEqual(deletedFileIds, ["old-file", "new-file"])
+        }
     }
 
     func testDeleteBackupAccountWithError() async throws {
@@ -427,12 +703,18 @@ extension CloudStorageServiceTests {
         return url
     }
 
-    private func driveList(_ entries: [(String, String)]) -> GTLRDrive_FileList {
+    private func driveList(
+        _ entries: [(String, String)],
+        createdTimes: [String: String] = [:]
+    ) -> GTLRDrive_FileList {
         let list = GTLRDrive_FileList()
         list.files = entries.map { identifier, name in
             let file = GTLRDrive_File()
             file.identifier = identifier
             file.name = name
+            if let timestamp = createdTimes[identifier] {
+                file.createdTime = GTLRDateTime(rfc3339String: timestamp)
+            }
             return file
         }
         return list

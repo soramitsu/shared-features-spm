@@ -98,18 +98,70 @@ public class CloudStorageService: NSObject, GoogleDriveServiceProtocol {
         throw CloudStorageServiceError.notFound
     }
 
-    private func getParentFolder() async throws -> String {
+    private func getBackupFolderIds(createIfMissing: Bool = false) async throws -> [String] {
         let q = "name = 'backupFolder' and mimeType = 'application/vnd.google-apps.folder' " +
             "and 'appDataFolder' in parents and trashed = false"
         let files = try await getAppFolderFiles(from: q)
-
-        if files.isEmpty {
-            let fileId = try await createBackupFolder()
-            return fileId
+        if files.isEmpty, createIfMissing {
+            return [try await createBackupFolder()]
         }
+        let ids = try files.map { file -> String in
+            guard let id = file.identifier, !id.isEmpty else {
+                throw CloudStorageServiceError.notFound
+            }
+            return id
+        }
+        return Array(Set(ids)).sorted()
+    }
 
-        let folderId = files.first?.identifier ?? ""
+    private func getParentFolder() async throws -> String {
+        guard let folderId = try await getBackupFolderIds(createIfMissing: true).first else {
+            throw CloudStorageServiceError.notFound
+        }
         return folderId
+    }
+
+    private func getMobileBackupFiles(in folderIds: [String]) async throws -> [GTLRDrive_File] {
+        var files: [GTLRDrive_File] = []
+        for folderId in folderIds {
+            let q = "'\(folderId)' in parents and trashed = false " +
+                "and mimeType != 'application/vnd.google-apps.folder'"
+            files.append(contentsOf: try await getAppFolderFiles(
+                from: q,
+                withField: true,
+                orderBy: "createdTime desc"
+            ))
+        }
+        return files
+    }
+
+    private func orderedBackupFileIds(
+        named name: String,
+        in files: [GTLRDrive_File]
+    ) throws -> [String] {
+        var seenIds = Set<String>()
+        var candidates: [(id: String, createdAt: Date?)] = []
+        for file in files where file.name == name {
+            guard let id = file.identifier, !id.isEmpty else {
+                throw CloudStorageServiceError.incorectJson
+            }
+            if seenIds.insert(id).inserted {
+                candidates.append((id, file.createdTime?.date))
+            }
+        }
+        // A single historical backup does not need a timestamp. Across folders,
+        // list order is not a safe substitute for creation time.
+        guard candidates.count > 1 else { return candidates.map(\.id) }
+        let dated = try candidates.map { candidate -> (id: String, createdAt: Date) in
+            guard let createdAt = candidate.createdAt else {
+                throw CloudStorageServiceError.incorectJson
+            }
+            return (candidate.id, createdAt)
+        }.sorted { $0.createdAt > $1.createdAt }
+        for index in 1 ..< dated.count where dated[index - 1].createdAt == dated[index].createdAt {
+            throw CloudStorageServiceError.incorectJson
+        }
+        return dated.map(\.id)
     }
 
     private func createBackupFolder() async throws -> String {
@@ -122,7 +174,10 @@ public class CloudStorageService: NSObject, GoogleDriveServiceProtocol {
         query.fields = "id"
 
         let results = try await googleDriveService.executeQuery(query)
-        let fileId = (results.file as? GTLRDrive_File)?.identifier ?? ""
+        guard let fileId = (results.file as? GTLRDrive_File)?.identifier,
+              !fileId.isEmpty else {
+            throw CloudStorageServiceError.notFound
+        }
         return fileId
     }
 
@@ -242,12 +297,13 @@ extension CloudStorageService: CloudStorageServiceProtocol {
 
     public func deleteBackup(account: OpenBackupAccount) async throws {
         let mobileAccounts = try await getBackupAccountsForMobileExtension()
-        let extensionAccounts = try await getBackupAccountsForFearlessExtension()
 
         if mobileAccounts.contains(where: { $0.address == account.address }) {
             try await delete(backupAccount: account)
             return
-        } else if extensionAccounts.contains(where: { $0.address == account.address }) {
+        }
+        let extensionAccounts = try await getBackupAccountsForFearlessExtension()
+        if extensionAccounts.contains(where: { $0.address == account.address }) {
             throw FearlessExtensionError.cantRemoveExtensionBackup
         }
 
@@ -287,16 +343,14 @@ extension CloudStorageService {
             throw CloudStorageServiceError.notAuthorized
         }
 
-        let folderId = try await getParentFolder()
-
-        let q = "'\(folderId)' in parents"
-        let files = try await getAppFolderFiles(from: q, withField: true)
-
-        let accounts = files.map {
-            OpenBackupAccount(
-                name: $0.descriptionProperty,
-                address: String($0.name?.split(separator: ".").first ?? "")
-            )
+        let folderIds = try await getBackupFolderIds()
+        let files = try await getMobileBackupFiles(in: folderIds)
+        var seenAddresses = Set<String>()
+        let accounts = files.compactMap { file -> OpenBackupAccount? in
+            guard let name = file.name, name.hasSuffix(".json") else { return nil }
+            let address = String(name.dropLast(".json".count))
+            guard !address.isEmpty, seenAddresses.insert(address).inserted else { return nil }
+            return OpenBackupAccount(name: file.descriptionProperty, address: address)
         }
 
         return accounts
@@ -341,35 +395,28 @@ extension CloudStorageService {
             throw CloudStorageServiceError.notAuthorized
         }
 
-        let folderId = try await getParentFolder()
-        let files = try await getAppFolderFiles(
-            from: "'\(folderId)' in parents and trashed = false",
-            withField: true,
-            orderBy: "createdTime desc"
-        )
-        let candidates = files.filter { $0.name == "\(account.address).json" }
-        guard !candidates.isEmpty else {
+        let folderIds = try await getBackupFolderIds()
+        let files = try await getMobileBackupFiles(in: folderIds)
+        let fileIds = try orderedBackupFileIds(named: "\(account.address).json", in: files)
+        guard !fileIds.isEmpty else {
             throw CloudStorageServiceError.notFound
         }
         var decodeError: CloudStorageServiceError = .incorectJson
-        for candidate in candidates {
-            guard let fileId = candidate.identifier, !fileId.isEmpty else {
-                continue
-            }
-            // A transport failure is not evidence that an older backup is the
-            // current one. Only malformed or undecryptable bytes allow fallback.
+        for fileId in fileIds {
+            // A transport or authentication failure is not evidence that an
+            // older backup is current. Only structurally malformed bytes allow fallback.
             let data = try await executeQueryForMedia(withFileId: fileId)
             do {
                 let decoded = try decodeMobileBackup(data, password: password)
                 guard decoded.address == account.address else {
-                    throw CloudStorageServiceError.incorectJson
+                    throw CloudStorageServiceError.readbackMismatch
                 }
                 return decoded
             } catch let error as CloudStorageServiceError {
                 switch error {
-                case .incorectPassword, .incorectJson:
+                case .incorectJson:
                     decodeError = error
-                case .notFound, .notAuthorized, .readbackMismatch:
+                case .incorectPassword, .notFound, .notAuthorized, .readbackMismatch:
                     throw error
                 }
             }
@@ -504,15 +551,17 @@ extension CloudStorageService {
             throw CloudStorageServiceError.notAuthorized
         }
 
-        let files = try await getAppFolderFiles()
-
-        guard let fileId = files.first(where: { file in
-            file.name == "\(backupAccount.address).json"
-        })?.identifier else {
+        let folderIds = try await getBackupFolderIds()
+        let files = try await getMobileBackupFiles(in: folderIds)
+        let fileIds = try orderedBackupFileIds(named: "\(backupAccount.address).json", in: files)
+        guard !fileIds.isEmpty else {
             throw CloudStorageServiceError.notFound
         }
-
-        try await googleDriveService
-            .executeQuery(GTLRDriveQuery_FilesDelete.query(withFileId: fileId))
+        // If a deletion fails partway through, keep the latest generation available.
+        for id in fileIds.reversed() {
+            _ = try await googleDriveService.executeQuery(
+                GTLRDriveQuery_FilesDelete.query(withFileId: id)
+            )
+        }
     }
 }
