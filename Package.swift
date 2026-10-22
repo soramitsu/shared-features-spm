@@ -36,8 +36,7 @@ let package = Package(
         .library(name: "SSFSingleValueCache", targets: ["SSFSingleValueCache"]),
         .library(name: "SSFPolkaswap", targets: ["SSFPolkaswap"]),
         .library(name: "SSFPools", targets: ["SSFPools"]),
-        .library(name: "SSFPoolsStorage", targets: ["SSFPoolsStorage"]),
-        .library(name: "MPQRCoreSDK", targets: ["MPQRCoreSDK"])
+        .library(name: "SSFPoolsStorage", targets: ["SSFPoolsStorage"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
@@ -57,7 +56,6 @@ let package = Package(
         .binaryTarget(name: "libed25519", path: "Binaries/libed25519.xcframework"),
         .binaryTarget(name: "sr25519lib", path: "Binaries/sr25519lib.xcframework"),
         .binaryTarget(name: "sorawallet", path: "Binaries/sorawallet.xcframework"),
-        .binaryTarget(name: "MPQRCoreSDK", path: "Binaries/MPQRCoreSDK.xcframework"),
         .target(
             name: "scrypt",
             sources: [
@@ -125,7 +123,6 @@ let package = Package(
         .target(
             name: "SSFQRService",
             dependencies: [
-                .byName(name: "MPQRCoreSDK"),
                 "SSFCrypto",
                 "SSFModels"
             ]),

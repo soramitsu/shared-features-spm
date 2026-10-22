@@ -3,38 +3,30 @@ import XCTest
 @testable import SSFQRService
 
 final class QRMatcherTests: XCTestCase {
-    func testQRUriMatcherBokoloCash() async throws {
+    func testQRUriMatcherMatchesConfiguredScheme() async throws {
         // arrange
-        let address = ""
-        let bokoloQRCodeString =
-            "https://bokolodemo.page.link/data?qr=00020101021129180014ivan_ivan@auki5204599953030905802LA5909Ivan%20Ivan6010Phnom%20Penh6304DCAF"
+        let code = "https://example.com/data?qr=000201010211"
         let matcher = QRUriMatcherImpl(scheme: "https")
 
         // act
-        let qrType = matcher.match(code: bokoloQRCodeString)
+        let qrType = matcher.match(code: code)
 
         // assert
         XCTAssertNotNil(qrType)
         XCTAssertNil(qrType?.address)
         XCTAssertNil(qrType?.qrInfo)
-        XCTAssertEqual(qrType?.uri, bokoloQRCodeString)
+        XCTAssertEqual(qrType?.uri, code)
     }
 
-    func testQRUriMatcherBokoloCashWithAmount() async throws {
+    func testQRUriMatcherRejectsOtherScheme() async throws {
         // arrange
-        let address = ""
-        let bokoloQRCodeString =
-            "https://bokolodemo.page.link/data?qr=00020101021229180014ivan_ivan@auki52045999530309054031.55802LA5909Ivan%20Ivan6010Phnom%20Penh6304A2CA"
-        let matcher = QRUriMatcherImpl(scheme: "https")
+        let matcher = QRUriMatcherImpl(scheme: "wc")
 
         // act
-        let qrType = matcher.match(code: bokoloQRCodeString)
+        let qrType = matcher.match(code: "https://example.com/data?qr=000201010211")
 
         // assert
-        XCTAssertNotNil(qrType)
-        XCTAssertNil(qrType?.address)
-        XCTAssertNil(qrType?.qrInfo)
-        XCTAssertEqual(qrType?.uri, bokoloQRCodeString)
+        XCTAssertNil(qrType)
     }
 
     func testQRUriMatcherEmpty() async throws {
