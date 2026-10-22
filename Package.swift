@@ -52,8 +52,30 @@ let package = Package(
         .package(url: "https://github.com/soramitsu/web3-swift", from: "7.7.7")
     ],
     targets: [
-        .binaryTarget(name: "blake2lib", path: "Binaries/blake2lib.xcframework"),
-        .binaryTarget(name: "libed25519", path: "Binaries/libed25519.xcframework"),
+        // Pinned upstream C sources; see docs/ed25519-blake2-native-provenance.md.
+        .target(
+            name: "blake2lib",
+            exclude: [
+                "blake2_mjosref/LICENSE"
+            ],
+            cSettings: [
+                .headerSearchPath("blake2_mjosref/include")
+            ]
+        ),
+        .target(
+            name: "libed25519",
+            exclude: [
+                "iroha-ed25519/LICENSE",
+                "iroha-ed25519/lib/ed25519/ref10/README",
+                "ed25519-sha2/license.txt"
+            ],
+            cSettings: [
+                .headerSearchPath("iroha-ed25519-build"),
+                .headerSearchPath("iroha-ed25519/include"),
+                .headerSearchPath("ed25519-sha2/include"),
+                .headerSearchPath("ed25519-sha2/src")
+            ]
+        ),
         .binaryTarget(name: "sr25519lib", path: "Binaries/sr25519lib.xcframework"),
         .binaryTarget(name: "sorawallet", path: "Binaries/sorawallet.xcframework"),
         .target(
