@@ -1,7 +1,7 @@
 #ifndef __SR25519_INCLUDE_GUARD_H__
 #define __SR25519_INCLUDE_GUARD_H__
 
-/* Generated with cbindgen:0.20.0 */
+/* Generated with cbindgen:0.29.4 */
 
 /* THIS FILE WAS AUTOMATICALLY GENERATED. DO NOT EDIT. Ref: https://github.com/Warchant/sr25519-crust */
 
@@ -228,4 +228,4 @@ struct VrfResult sr25519_vrf_verify(const uint8_t *public_key_ptr,
                                     const uint8_t *proof_ptr,
                                     const uint8_t *threshold_ptr);
 
-#endif /* __SR25519_INCLUDE_GUARD_H__ */
+#endif  /* __SR25519_INCLUDE_GUARD_H__ */

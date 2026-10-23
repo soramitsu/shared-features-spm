@@ -21,7 +21,7 @@ use std::slice;
 use schnorrkel::{
     context::signing_context,
     derive::{CHAIN_CODE_LENGTH, ChainCode, Derivation}, ExpansionMode, Keypair, MiniSecretKey, PublicKey,
-    SecretKey, Signature, SignatureError, vrf::{VRFOutput, VRFProof}};
+    SecretKey, Signature, SignatureError, vrf::{VRFPreOut, VRFProof}};
 use std::fmt::{Formatter, Error};
 
 // cbindgen has an issue with macros, so define it outside,
@@ -44,6 +44,8 @@ pub enum Sr25519SignatureResult {
 fn convert_error(err: &SignatureError) -> Sr25519SignatureResult {
     match err {
         SignatureError::EquationFalse => Sr25519SignatureResult::EquationFalse,
+        // Preserve the legacy C enum layout while rejecting invalid public keys.
+        SignatureError::InvalidKey => Sr25519SignatureResult::EquationFalse,
         SignatureError::PointDecompressionError => Sr25519SignatureResult::PointDecompressionError,
         SignatureError::ScalarFormatError => Sr25519SignatureResult::ScalarFormatError,
         SignatureError::BytesLengthError { name: _, description: _, length: _ }
@@ -426,7 +428,7 @@ pub unsafe extern "C" fn sr25519_vrf_sign_if_less(
     let raw_out_bytes = io.make_bytes::<[u8; SR25519_VRF_RAW_OUTPUT_SIZE as usize]>(BABE_VRF_PREFIX);
     let check = u128::from_le_bytes(raw_out_bytes) < limit_int;
 
-    ptr::copy(io.to_output().as_bytes().as_ptr(), out_and_proof_ptr, SR25519_VRF_OUTPUT_SIZE as usize);
+    ptr::copy(io.to_preout().as_bytes().as_ptr(), out_and_proof_ptr, SR25519_VRF_OUTPUT_SIZE as usize);
     ptr::copy(proof.to_bytes().as_ptr(), out_and_proof_ptr.add(SR25519_VRF_OUTPUT_SIZE as usize), SR25519_VRF_PROOF_SIZE as usize);
     if check {
         VrfResult::create_val(true)
@@ -456,7 +458,7 @@ pub unsafe extern "C" fn sr25519_vrf_verify(
     let public_key = create_public(slice::from_raw_parts(public_key_ptr, SR25519_PUBLIC_SIZE as usize));
     let message = slice::from_raw_parts(message_ptr, message_length as usize);
     let ctx = signing_context(SIGNING_CTX).bytes(message);
-    let given_out = match VRFOutput::from_bytes(
+    let given_out = match VRFPreOut::from_bytes(
         slice::from_raw_parts(output_ptr, SR25519_VRF_OUTPUT_SIZE as usize)) {
         Ok(val) => val,
         Err(err) => return VrfResult::create_err(&err)
@@ -481,11 +483,11 @@ pub unsafe extern "C" fn sr25519_vrf_verify(
     let check = u128::from_le_bytes(raw_output) < threshold_int;
 
     let decomp_proof = match
-        proof.shorten_vrf(&public_key, ctx.clone(), &in_out.to_output()) {
+        proof.shorten_vrf(&public_key, ctx.clone(), &in_out.to_preout()) {
         Ok(val) => val,
         Err(e) => return VrfResult::create_err(&e)
     };
-    if in_out.to_output() == given_out &&
+    if in_out.to_preout() == given_out &&
         decomp_proof == given_proof {
         VrfResult::create_val(check)
     } else {
@@ -505,6 +507,11 @@ pub mod tests {
 
     fn generate_random_seed() -> Vec<u8> {
         (0..32).map(|_| rand::random::<u8>()).collect()
+    }
+
+    #[test]
+    fn invalid_key_error_preserves_legacy_c_failure_code() {
+        assert_eq!(convert_error(&SignatureError::InvalidKey), Sr25519SignatureResult::EquationFalse);
     }
 
     #[test]
@@ -664,10 +671,10 @@ pub mod tests {
         let keypair = Keypair::from_bytes(&keypair_bytes).expect("Keypair creation error");
         let ctx = signing_context(SIGNING_CTX).bytes(message);
         let (io, proof, _) = keypair.vrf_sign(ctx.clone());
-        let (io_, proof_) = keypair.public.vrf_verify(ctx.clone(), &io.to_output(), &proof).expect("Verification error");
+        let (io_, proof_) = keypair.public.vrf_verify(ctx.clone(), &io.to_preout(), &proof).expect("Verification error");
         assert_eq!(io_, io);
         let decomp_proof = proof_.shorten_vrf(
-            &keypair.public, ctx.clone(), &io.to_output()).expect("Shorten VRF");
+            &keypair.public, ctx.clone(), &io.to_preout()).expect("Shorten VRF");
         assert_eq!(proof, decomp_proof);
         unsafe {
             let threshold_bytes = [0u8; SR25519_VRF_THRESHOLD_SIZE as usize];
