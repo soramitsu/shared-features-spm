@@ -6,7 +6,7 @@
 	<dict>
 		<key>Headers/sr25519.h</key>
 		<data>
-		SO2Y/fIr0wK4ZfTwmQ2HNCuUMK4=
+		31BlHtxYYUJJiIXicOFf62lKMCI=
 		</data>
 		<key>Headers/sr25519lib.h</key>
 		<data>
@@ -22,7 +22,7 @@
 		</data>
 		<key>libsr25519crust.a</key>
 		<data>
-		FiXpiwhlWt5ip/h6/x98+I/b9Ak=
+		hPwCmDgGU8S4tsAy0aB8tv1qN/8=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -31,7 +31,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			f+DGqJJnMbSb/3xo3f7Zo8t7z/DCm+KQus9SFNn1uWE=
+			GirA/wovYLxCgEHpYm5MXBMeMcgP84n0T600BayB2Kk=
 			</data>
 		</dict>
 		<key>Headers/sr25519lib.h</key>
@@ -52,7 +52,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			xVDj5x2GryTuAYJbY9iq4AdznJgC01c9CEHKRYbYh60=
+			fPFuCVHyXzX3Szs4i7IZrVo1uP+al6vVRzpUSDluPLo=
 			</data>
 		</dict>
 	</dict>

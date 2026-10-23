@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Link all iOS slices and run native/Objective-C SR25519 checks in a simulator."""
 
+import argparse
 import json
 import subprocess
 import tempfile
@@ -46,6 +47,10 @@ def simulator_id():
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--compare-baseline", type=Path,
+                        help="Previous sr25519lib.xcframework for cross-signature checks")
+    args = parser.parse_args()
     vectors = json.loads((TESTS / "legacy-vectors.json").read_text())
     with tempfile.TemporaryDirectory(prefix="sr25519-native-test-") as directory:
         stage = Path(directory)
@@ -71,6 +76,21 @@ def main():
         assert actual["soft"][:64] == vectors["soft_scalar"]
         assert actual["soft"][-64:] == vectors["public_soft"]
         assert actual["checked"] == "00" * 64
+
+        if args.compare_baseline:
+            baseline = (args.compare_baseline.resolve() /
+                        "ios-arm64_x86_64-simulator" / "sr25519lib.framework")
+            baseline_binary = stage / "parity-baseline-arm64"
+            compile_harness("iphonesimulator", "arm64", baseline,
+                            baseline_binary, TESTS / "sr25519_parity.c")
+            # Each harness exits unsuccessfully if its supplied signature fails
+            # verification; signatures themselves are randomized.
+            previous_output = run("xcrun", "simctl", "spawn", "-s", device,
+                                  str(baseline_binary), actual["signature"]).stdout
+            previous = dict(line.split("=", 1) for line in previous_output.strip().splitlines())
+            run("xcrun", "simctl", "spawn", "-s", device,
+                str(stage / "parity-iphonesimulator-arm64"), previous["signature"])
+            print("Previous and current libraries verified one another's signatures")
 
         result = run("xcrun", "simctl", "spawn", "-s", device,
                      str(stage / "signer-iphonesimulator-arm64"))
