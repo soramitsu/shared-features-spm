@@ -89,33 +89,6 @@ final class QRServiceTests: XCTestCase {
         XCTAssertTrue(qrService.generateWithQrSizeCalled)
     }
 
-    func testExtractBokoloCash() async throws {
-        // arrange
-        let qrService = QRServiceMock()
-        let qrInfo = BokoloCashQRInfo(
-            address: "cnVkoGs3rEMqLqY27c2nfVXJRGdzNJk2ns78DcqtppaSRe8qm",
-            assetId: "0x0200000000000000000000000000000000000000000000000000000000000000",
-            transactionAmount: "123"
-        )
-        qrService.extractQrCodeFromReturnValue = .qrInfo(.bokoloCash(qrInfo))
-
-        // act
-        let qrMatcher = try qrService.extractQrCode(from: .init())
-
-        // assert
-        XCTAssertEqual(qrService.extractQrCodeFromCallsCount, 1)
-        XCTAssertTrue(qrService.extractQrCodeFromCalled)
-        XCTAssertNotNil(qrMatcher)
-        XCTAssertEqual(qrMatcher.address, qrInfo.address)
-
-        switch qrMatcher.qrInfo {
-        case let .bokoloCash(qrInfoResult):
-            XCTAssertEqual(qrInfoResult, qrInfo)
-        case .none, .some:
-            XCTExpectFailure()
-        }
-    }
-
     func testExtractCex() async throws {
         // arrange
         let qrService = QRServiceMock()

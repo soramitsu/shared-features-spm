@@ -36,8 +36,7 @@ let package = Package(
         .library(name: "SSFSingleValueCache", targets: ["SSFSingleValueCache"]),
         .library(name: "SSFPolkaswap", targets: ["SSFPolkaswap"]),
         .library(name: "SSFPools", targets: ["SSFPools"]),
-        .library(name: "SSFPoolsStorage", targets: ["SSFPoolsStorage"]),
-        .library(name: "MPQRCoreSDK", targets: ["MPQRCoreSDK"])
+        .library(name: "SSFPoolsStorage", targets: ["SSFPoolsStorage"])
     ],
     dependencies: [
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
@@ -53,11 +52,32 @@ let package = Package(
         .package(url: "https://github.com/soramitsu/web3-swift", from: "7.7.7")
     ],
     targets: [
-        .binaryTarget(name: "blake2lib", path: "Binaries/blake2lib.xcframework"),
-        .binaryTarget(name: "libed25519", path: "Binaries/libed25519.xcframework"),
+        // Pinned upstream C sources; see docs/ed25519-blake2-native-provenance.md.
+        .target(
+            name: "blake2lib",
+            exclude: [
+                "blake2_mjosref/LICENSE"
+            ],
+            cSettings: [
+                .headerSearchPath("blake2_mjosref/include")
+            ]
+        ),
+        .target(
+            name: "libed25519",
+            exclude: [
+                "iroha-ed25519/LICENSE",
+                "iroha-ed25519/lib/ed25519/ref10/README",
+                "ed25519-sha2/license.txt"
+            ],
+            cSettings: [
+                .headerSearchPath("iroha-ed25519-build"),
+                .headerSearchPath("iroha-ed25519/include"),
+                .headerSearchPath("ed25519-sha2/include"),
+                .headerSearchPath("ed25519-sha2/src")
+            ]
+        ),
         .binaryTarget(name: "sr25519lib", path: "Binaries/sr25519lib.xcframework"),
         .binaryTarget(name: "sorawallet", path: "Binaries/sorawallet.xcframework"),
-        .binaryTarget(name: "MPQRCoreSDK", path: "Binaries/MPQRCoreSDK.xcframework"),
         .target(
             name: "scrypt",
             sources: [
@@ -125,7 +145,6 @@ let package = Package(
         .target(
             name: "SSFQRService",
             dependencies: [
-                .byName(name: "MPQRCoreSDK"),
                 "SSFCrypto",
                 "SSFModels"
             ]),

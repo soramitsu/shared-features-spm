@@ -18,8 +18,11 @@ The wallet's carried fixes now belong in this repository's source:
   header has no architecture-specific types and needs no NEON include.
 - Removal of four redundant `.a` sidecars inside device framework bundles.
   The subsequent SR25519 signing-boundary rebuild is documented in
-  [sr25519-native-signing.md](sr25519-native-signing.md); other binary targets
-  retain their original bytes.
+  [sr25519-native-signing.md](sr25519-native-signing.md). The Ed25519 and
+  BLAKE2 binaries were later replaced by pinned C sources
+  ([ed25519-blake2-native-provenance.md](ed25519-blake2-native-provenance.md)).
+  `sorawallet` retains its original bytes
+  ([prebuilt-binary-provenance.md](prebuilt-binary-provenance.md)).
 - Public initializers for the three existing pool parameter models.
 - The IrohaCrypto umbrella/module-map contract and explicit dynamic sorawallet
   link directive.

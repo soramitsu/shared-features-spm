@@ -11,7 +11,7 @@ permissions:
 jobs:
   native-compatibility:
     runs-on: macos-15
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -24,6 +24,12 @@ jobs:
         run: cargo test --locked --manifest-path native/sr25519crust/Cargo.toml --lib
       - name: Check SR25519 legacy vectors and iOS linkage
         run: python3 scripts/test-sr25519-native.py
+      - name: Check Ed25519 and BLAKE2 sources against their pinned upstreams
+        run: python3 scripts/vendor-ed25519-blake2-sources.py
+      - name: Check Ed25519 and BLAKE2 vectors and parity with the replaced binaries
+        run: python3 scripts/test-ed25519-blake2-native.py
+      - name: Trace the replaced Ed25519 and BLAKE2 binaries to published build outputs
+        run: python3 scripts/trace-ed25519-blake2-binaries.py
       - name: Reject tracked source mutations during validation
         run: git diff --exit-code
 

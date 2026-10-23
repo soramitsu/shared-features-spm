@@ -12,8 +12,6 @@ public enum QRMatcherType {
                 return soraQRInfo.address
             case let .cex(cexQRInfo):
                 return cexQRInfo.address
-            case let .bokoloCash(qrInfo):
-                return qrInfo.address
             }
         case .walletConnect:
             return nil

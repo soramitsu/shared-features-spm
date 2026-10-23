@@ -7,7 +7,6 @@ public protocol QRDecoder {
 
 final class QRDecoderDefault: QRDecoder {
     static let defaultDecoders: [QRDecoder] = [
-        BokoloCashDecoder(),
         SoraQRDecoder(),
         CexQRDecoder(),
     ]
